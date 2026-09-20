@@ -155,11 +155,21 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
+# localhost, not 127.0.0.1. Browsers treat them as DIFFERENT ORIGINS, so a session cookie
+# set on one is invisible to the other — OAuth appears to succeed and lands you signed out.
+# `next dev` serves on localhost, so this must match it.
+site_url = "http://localhost:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+# Exact-matched allow-list. Our OAuth callback route and the password-reset landing must
+# both be listed, or Supabase refuses the redirect after a successful sign-in.
+additional_redirect_urls = [
+  "http://localhost:3000",
+  "http://localhost:3000/auth/callback",
+  "http://localhost:3000/auth/confirm",
+  "http://localhost:3000/reset-password/confirm",
+]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -413,3 +423,26 @@ enabled = true
 # formatted with uppercase keywords, indent 2, max width 180, trailing commas,
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
+
+# ── OAuth providers (ADR-007 D1 / PROJECT.md §3) ──────────────────────────────
+# Secrets come from the environment, never from this file — config.toml IS committed.
+# Set them in .env (gitignored):
+#   SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID / _SECRET
+#   SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID / _SECRET
+#
+# The callback registered with Google and GitHub is SUPABASE's endpoint, not the app's:
+#   http://127.0.0.1:54321/auth/v1/callback
+# Production needs a SECOND pair of OAuth apps pointing at the hosted project's callback —
+# providers exact-match the URL, so one app cannot serve both environments.
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+# Required for Google sign-in to work against a local instance.
+skip_nonce_check = true
+
+[auth.external.github]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"
