@@ -32,12 +32,23 @@ export const conversations = pgTable(
   'conversations',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    clientId: uuid('client_id')
-      .notNull()
-      .references(() => clientProfiles.id, { onDelete: 'cascade' }),
-    talentId: uuid('talent_id')
-      .notNull()
-      .references(() => talentProfiles.id, { onDelete: 'cascade' }),
+    /**
+     * Both participants are NULLABLE with ON DELETE SET NULL, not CASCADE.
+     *
+     * A conversation has two owners. `docs/constraints.md` §5 commits to the counterparty
+     * keeping their record when one party deletes their account — if Alice leaves, Bob does
+     * not lose the thread he may need for a dispute. CASCADE contradicted that commitment
+     * outright: it destroyed the whole thread.
+     *
+     * It also broke deletion mechanically. The BEFORE DELETE redaction trigger on
+     * `auth.users` UPDATEs `messages`, which queues an RI check that fires at END of
+     * statement — by which point the cascade had already removed the conversation, so the
+     * check failed with a foreign-key violation and no account could be deleted at all.
+     *
+     * SET NULL fixes both: the thread survives with one side tombstoned.
+     */
+    clientId: uuid('client_id').references(() => clientProfiles.id, { onDelete: 'set null' }),
+    talentId: uuid('talent_id').references(() => talentProfiles.id, { onDelete: 'set null' }),
     /** Optional anchor: "about this job". Null for a general enquiry. */
     jobId: uuid('job_id'),
     lastMessageAt: timestamp('last_message_at', { withTimezone: true }).notNull().defaultNow(),
@@ -50,6 +61,8 @@ export const conversations = pgTable(
     index('conversations_client_idx').on(t.clientId, t.lastMessageAt),
     index('conversations_talent_idx').on(t.talentId, t.lastMessageAt),
 
+    // A NULL side is a deleted account. `exists` is simply false for it, so the surviving
+    // participant still sees the thread and nobody inherits it.
     pgPolicy('conversations_select_participants', {
       for: 'select',
       to: authenticatedRole,
@@ -68,10 +81,7 @@ export const conversations = pgTable(
         and exists (
           select 1 from talent_profiles p
           where p.id = ${t.talentId} and p.is_published = true and p.accepts_messages = true
-        )
-        and not exists (
-          select 1 from blocks b join talent_profiles p on p.id = ${t.talentId}
-          where b.blocker_id = p.user_id and b.blocked_id = (select auth.uid())
+          and not public.is_blocked(p.user_id, (select auth.uid()))
         )`,
     }),
     pgPolicy('conversations_update_participants', {
@@ -116,8 +126,16 @@ export const messages = pgTable(
           and (c.user_id = (select auth.uid()) or p.user_id = (select auth.uid()))
       )`,
     }),
-    // Send only as yourself, only into a thread you are in, and only if not blocked by the
-    // other party. The block check is re-evaluated per message, not just at thread creation.
+    /**
+     * Send only as yourself, only into a thread you are in, and only if not blocked by the
+     * other party. The block check is re-evaluated per message, not just at thread creation.
+     *
+     * The block lookup goes through `public.is_blocked`, a SECURITY DEFINER function, and
+     * MUST NOT be inlined back into a subquery over `blocks`. A subquery inside a policy runs
+     * as the current user and is therefore filtered by `blocks`' own RLS, so a blocked sender
+     * saw zero blocks against themselves and the check passed. That shipped as a working-
+     * looking policy and was caught only by lib/db/rls.test.ts — see migration 0003.
+     */
     pgPolicy('messages_insert_participants', {
       for: 'insert',
       to: authenticatedRole,
@@ -128,11 +146,8 @@ export const messages = pgTable(
           left join talent_profiles p on p.id = v.talent_id
           where v.id = ${t.conversationId}
             and (c.user_id = (select auth.uid()) or p.user_id = (select auth.uid()))
-            and not exists (
-              select 1 from blocks b
-              where b.blocked_id = (select auth.uid())
-                and b.blocker_id in (c.user_id, p.user_id)
-            )
+            and not public.is_blocked(c.user_id, (select auth.uid()))
+            and not public.is_blocked(p.user_id, (select auth.uid()))
         )`,
     }),
     // Update exists only to stamp read_at on messages you received.

@@ -20,7 +20,7 @@
  * Run: npm run db:seed    (idempotent — truncates the public tables it owns, then reinserts)
  */
 
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 import { createDbClient } from './client';
 import {
@@ -287,11 +287,14 @@ async function main() {
 
   /** Creates a synthetic auth user and its user_profiles row, returning the id. */
   async function makeUser(displayName: string, handle: string): Promise<string> {
+    // Only base-schema columns. GoTrue adds columns (email_confirmed_at, etc.) through its
+    // own migrations, and this script must not care how far those have run — it seeds data
+    // for browse and matching, not logins.
     const [row] = await db.execute<{ id: string }>(sql`
       insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
-                              email_confirmed_at, created_at, updated_at, raw_app_meta_data)
+                              created_at, updated_at, raw_app_meta_data)
       values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated',
-              'authenticated', ${`${handle}@example.test`}, 'seed-not-a-real-password', now(),
+              'authenticated', ${`${handle}@example.test`}, 'seed-not-a-real-password',
               now(), now(), '{"seed":"niche-job-board"}'::jsonb)
       returning id`);
     const id = row!.id;
@@ -362,7 +365,12 @@ async function main() {
         githubUrl: rand() > 0.35 ? `https://github.test/${handle}` : null,
         linkedinUrl: rand() > 0.6 ? `https://linkedin.test/in/${handle}` : null,
         acceptsMessages: rand() > 0.12, // a few opt out — ADR-007 D1
-        isPublished: published,
+        // Always inserted as a DRAFT, then published at the end once its evidence exists.
+        // The publish gate is a CHECK evaluated on every write, so a profile whose evidence
+        // is in-app items cannot be created already-published — portfolio_item_count is still
+        // 0 at that moment. That is the real onboarding order (flows §2: add items, then
+        // publish), and the database refusing the shortcut is the constraint working.
+        isPublished: false,
       })
       .returning({ id: talentProfiles.id });
 
@@ -395,6 +403,14 @@ async function main() {
         });
         itemCount++;
       }
+    }
+
+    // Now that evidence exists, publish. This is the same two-step the UI performs.
+    if (published) {
+      await db
+        .update(talentProfiles)
+        .set({ isPublished: true })
+        .where(eq(talentProfiles.id, profile!.id));
     }
     talentCount++;
   }

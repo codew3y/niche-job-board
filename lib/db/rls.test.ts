@@ -23,8 +23,29 @@ import postgres from 'postgres';
 const DB_URL =
   process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
 
-let sql: postgres.Sql;
-let reachable = false;
+/**
+ * The reachability probe runs at MODULE SCOPE, not in `beforeAll`.
+ *
+ * Vitest decides `describe` vs `describe.skip` while COLLECTING the file, which happens
+ * before any hook runs. Setting a `reachable` flag inside `beforeAll` is therefore always too
+ * late — every suite silently skipped even with the database up. Top-level await is the fix.
+ */
+const sql: postgres.Sql = postgres(DB_URL, {
+  max: 2,
+  idle_timeout: 5,
+  connect_timeout: 5,
+  onnotice: () => {},
+});
+
+const reachable = await sql`select 1`.then(
+  () => true,
+  (e: Error) => {
+    // Never swallow the reason: a silent skip hides a broken database as effectively as a
+    // broken test, and this suite is a Phase 1 exit criterion.
+    console.warn(`[rls.test] skipping — cannot reach ${DB_URL}: ${e.message}`);
+    return false;
+  },
+);
 
 /** Two unrelated tenants, plus a third party who should see nothing private at all. */
 const ALICE = '11111111-1111-1111-1111-111111111111'; // talent
@@ -40,13 +61,28 @@ const ids = {
   message: '' as string,
 };
 
-/** Run a query as a signed-in user, exactly as PostgREST would. */
+/**
+ * Run a query as a signed-in user, exactly as PostgREST would.
+ *
+ * BOTH claim GUCs are set on purpose. There are two generations of `auth.uid()` in the wild:
+ *
+ *   old:  select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
+ *   new:  coalesce(request.jwt.claim.sub, request.jwt.claims::jsonb ->> 'sub')
+ *
+ * The base `supabase/postgres` image ships the OLD one, which reads the dotted
+ * `request.jwt.claim.sub`; hosted Supabase ships the new one, which also reads the
+ * `request.jwt.claims` JSON blob. Setting only `claims` made `auth.uid()` return NULL
+ * locally, so every policy denied everything and the negative assertions passed for entirely
+ * the wrong reason — the most dangerous shape a security test can take.
+ *
+ * Setting both makes this suite correct against either generation.
+ */
 async function asUser<T>(userId: string, fn: (tx: postgres.TransactionSql) => Promise<T>): Promise<T> {
   return sql.begin(async (tx) => {
     await tx.unsafe(`SET LOCAL ROLE authenticated`);
-    await tx.unsafe(
-      `SELECT set_config('request.jwt.claims', '${JSON.stringify({ sub: userId, role: 'authenticated' })}', true)`,
-    );
+    await tx`select set_config('request.jwt.claim.sub', ${userId}, true)`;
+    await tx`select set_config('request.jwt.claims',
+                               ${JSON.stringify({ sub: userId, role: 'authenticated' })}, true)`;
     return fn(tx);
   }) as Promise<T>;
 }
@@ -55,20 +91,14 @@ async function asUser<T>(userId: string, fn: (tx: postgres.TransactionSql) => Pr
 async function asAnon<T>(fn: (tx: postgres.TransactionSql) => Promise<T>): Promise<T> {
   return sql.begin(async (tx) => {
     await tx.unsafe(`SET LOCAL ROLE anon`);
-    await tx.unsafe(`SELECT set_config('request.jwt.claims', '{"role":"anon"}', true)`);
+    await tx`select set_config('request.jwt.claim.sub', '', true)`;
+    await tx`select set_config('request.jwt.claims', '{"role":"anon"}', true)`;
     return fn(tx);
   }) as Promise<T>;
 }
 
 beforeAll(async () => {
-  try {
-    sql = postgres(DB_URL, { max: 2, idle_timeout: 5, connect_timeout: 5, onnotice: () => {} });
-    await sql`select 1`;
-    reachable = true;
-  } catch {
-    reachable = false;
-    return;
-  }
+  if (!reachable) return;
 
   // Seed as the owner role, which bypasses RLS — this is fixture setup, not the thing
   // under test.
@@ -78,11 +108,13 @@ beforeAll(async () => {
     [BOB, 'bob@example.test'],
     [MALLORY, 'mallory@example.test'],
   ] as const) {
+    // Base-schema columns only — see lib/db/seed.ts. These fixtures never sign in; the tests
+    // set request.jwt.claims directly, which is what auth.uid() actually reads.
     await sql`
       insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
-                              email_confirmed_at, created_at, updated_at)
+                              created_at, updated_at)
       values (${id}, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
-              ${email}, 'x', now(), now(), now())`;
+              ${email}, 'x', now(), now())`;
     await sql`insert into user_profiles (user_id, display_name) values (${id}, ${email})`;
   }
 
@@ -129,6 +161,7 @@ afterAll(async () => {
 });
 
 const maybe = () => (reachable ? describe : describe.skip);
+
 
 maybe()('RLS: messaging is participant-only', () => {
   // ADR-007 D1 made this the highest-consequence surface in the product: a leak here exposes
