@@ -249,7 +249,30 @@ export function ndcgAt(ranked: string[], grades: Record<string, Grade>, k: numbe
 
 /** 1 if the top-ranked candidate is a grade-2 match, else 0. The metric users actually feel. */
 export function precisionAt1(ranked: string[], grades: Record<string, Grade>): 0 | 1 {
-  return grades[ranked[0]] === 2 ? 1 : 0;
+  const top = ranked[0];
+  return top !== undefined && grades[top] === 2 ? 1 : 0;
+}
+
+/**
+ * Grades for one job, as a total record. Throws on an unknown id rather than returning
+ * undefined — a missing row in the eval set is a broken fixture, not a zero score, and
+ * silently scoring it as 0 would make a broken set look like a merely mediocre ranker.
+ */
+export function gradesForJob(jobId: string): Record<string, Grade> {
+  const row = evalGrades[jobId];
+  if (!row) throw new Error(`No eval grades for job "${jobId}"`);
+  return row;
+}
+
+/** Grades for one profile across every job, for the talent direction. */
+export function gradesForProfile(profileId: string): Record<string, Grade> {
+  const out: Record<string, Grade> = {};
+  for (const [jobId, row] of Object.entries(evalGrades)) {
+    const g = row[profileId];
+    if (g === undefined) throw new Error(`No eval grade for ${jobId}×${profileId}`);
+    out[jobId] = g;
+  }
+  return out;
 }
 
 /**
