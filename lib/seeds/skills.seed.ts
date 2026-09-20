@@ -1,5 +1,5 @@
 // Skill taxonomy seed — Phase 0 deliverable per PROJECT.md §4.6.3
-// 122 skills across 10 categories. Feeds the Phase 1 seed script directly.
+// 126 skills across 10 categories. Feeds the Phase 1 seed script directly.
 //
 // Fields: name (canonical) · slug (unique) · category · aliases[] · sources[] · evidence
 //   - `sources` is machine-checkable: every row carries >= 2 source codes, OR exactly one
@@ -26,6 +26,9 @@
 //   NICHE Deliberate corner coverage per PROJECT.md §4.6.1 (iPaaS, CRM scripting, RPA,
 //         integration mechanics, AI capabilities) — under-represented by surveys by design
 //   STACK This project's own stack. Never sufficient alone; always paired.
+//   JOBS  Real freelance job posts mined 2026-09-20 (~74 posts across freelancer.com's n8n,
+//         Zapier, API and AI categories, plus the RemoteOK feed). The §4.6.1 buyer-side
+//         mining that the first pass proxied and never actually did.
 //
 // Review cadence: annually; prune zero-use after 12mo; promote >=3 "request a skill" repeats.
 // See docs/taxonomy.md for the granularity rule, the alias policy and every exclusion.
@@ -52,7 +55,8 @@ export type SkillSource =
   | 'RM'
   | 'COMP'
   | 'NICHE'
-  | 'STACK';
+  | 'STACK'
+  | 'JOBS';
 
 export type SkillSeed = {
   name: string;
@@ -678,7 +682,7 @@ export const skillsSeed: SkillSeed[] = [
       '("know when it breaks") is what clients buy, not the individual vendor.',
   },
 
-  // ─────────────────── Automation & integration (17) ────────────────────────────
+  // ─────────────────── Automation & integration (20) ────────────────────────────
   {
     name: 'Zapier',
     slug: 'zapier',
@@ -807,7 +811,7 @@ export const skillsSeed: SkillSeed[] = [
     name: 'Web scraping',
     slug: 'web-scraping',
     category: 'Automation & integration',
-    aliases: ['Puppeteer', 'crawler', 'data harvesting'],
+    aliases: ['Puppeteer', 'Selenium', 'crawler', 'data harvesting'],
     sources: ['UP26', 'COMP'],
     evidence:
       'UP26 data-extraction demand · COMP: dedicated hire pages. "Playwright" is deliberately ' +
@@ -825,6 +829,42 @@ export const skillsSeed: SkillSeed[] = [
       'so the canonical name is vendor-neutral and UiPath resolves as an alias.',
   },
   {
+    name: 'WhatsApp Business API',
+    slug: 'whatsapp-api',
+    category: 'Automation & integration',
+    aliases: ['WhatsApp Cloud API', 'WABA', 'WhatsApp chatbot', 'WhatsApp automation'],
+    sources: ['JOBS', 'COMP'],
+    evidence:
+      'JOBS: the single most frequent named platform in the 2026-09-20 job-post mining — 5 of ' +
+      '74 posts, appearing across the n8n, Zapier and API categories (appointment booking, ' +
+      'lead funnels, dynamic replies) · COMP: dedicated hire pages on Upwork and Flexiple. ' +
+      'The work is integration plumbing — Meta app setup, webhooks, template approval — not ' +
+      'the AI layer, so it belongs here rather than under chatbots.',
+  },
+  {
+    name: 'Twilio (SMS & voice)',
+    slug: 'twilio',
+    category: 'Automation & integration',
+    aliases: ['SMS integration', 'IVR', 'programmable voice', 'TwiML', 'A2P 10DLC'],
+    sources: ['JOBS', 'COMP'],
+    evidence:
+      'JOBS: 2 of 74 posts named Twilio specifically (SMS opt-in, Trust Hub verification) · ' +
+      'COMP: dedicated hire pages on Upwork, Fiverr, Freelancer, Guru AND Toptal. ' +
+      'Added 2026-09-20 — the previous seed excluded Twilio as "folds into REST API ' +
+      'integration", which the mining disproved: buyers hire for it by name.',
+  },
+  {
+    name: 'Chat platform bots',
+    slug: 'chat-platform-bots',
+    category: 'Automation & integration',
+    aliases: ['Telegram bot', 'Discord bot', 'Slack app', 'Slack bot'],
+    sources: ['JOBS', 'NICHE'],
+    evidence:
+      'JOBS: 3 of 74 posts (Telegram booking assistant, Telegram monitoring, bot development) · ' +
+      'NICHE messaging-automation corner. Weaker than the two rows above — on the prune ' +
+      'watchlist if request traffic does not confirm it.',
+  },
+  {
     name: 'Payment integration',
     slug: 'payment-integration',
     category: 'Automation & integration',
@@ -836,7 +876,7 @@ export const skillsSeed: SkillSeed[] = [
       'bug that would have shipped a misleading URL and filter key. Fixed 2026-09-20.',
   },
 
-  // ───────────────────────── Platforms & CMS (13) ───────────────────────────────
+  // ───────────────────────── Platforms & CMS (14) ───────────────────────────────
   {
     name: 'WordPress',
     slug: 'wordpress',
@@ -855,6 +895,17 @@ export const skillsSeed: SkillSeed[] = [
       'UP26 e-commerce demand · COMP: dedicated hire pages. Split out from the WordPress ' +
       'alias list 2026-09-20 — "build me a WooCommerce store" is a distinct buying intent ' +
       'with a distinct skill set, and Shopify already had its own row.',
+  },
+  {
+    name: 'Magento',
+    slug: 'magento',
+    category: 'Platforms & CMS',
+    aliases: ['Adobe Commerce'],
+    sources: ['JOBS', 'COMP'],
+    evidence:
+      'JOBS: named alongside Shopify and WooCommerce in an e-commerce automation brief · ' +
+      'COMP: long-standing dedicated hire category. Completes the big three of e-commerce ' +
+      'platforms — the seed already had the other two.',
   },
   {
     name: 'Shopify',
