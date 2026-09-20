@@ -1,0 +1,206 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
+import { siteUrl } from '../env';
+import { loginInput, signupInput, selectRoleInput } from '../schemas/auth';
+import { createClient } from '../supabase/server';
+
+/**
+ * Auth server actions (Phase 2 §6).
+ *
+ * Every one follows the order fixed in docs/api.md §1:
+ *   auth check → authz check → validate → act → revalidate
+ *
+ * Errors come back as a value rather than a thrown exception, because these render inline on
+ * a form. A thrown error would lose the user's typed input.
+ */
+
+export type ActionResult =
+  | { ok: true }
+  | { ok: false; message: string; fields?: Record<string, string[]> };
+
+/** Zod's field errors, flattened into the shape the forms render. */
+function fieldErrors(error: { issues: { path: PropertyKey[]; message: string }[] }) {
+  const out: Record<string, string[]> = {};
+  for (const issue of error.issues) {
+    const key = String(issue.path[0] ?? '_');
+    (out[key] ??= []).push(issue.message);
+  }
+  return out;
+}
+
+/** Only ever redirect to a path on this site. An absolute URL here is an open redirect. */
+function safeNext(next: FormDataEntryValue | null): string | null {
+  const value = typeof next === 'string' ? next : null;
+  if (!value) return null;
+  return value.startsWith('/') && !value.startsWith('//') ? value : null;
+}
+
+export async function signUp(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  const parsed = signupInput.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+    displayName: formData.get('displayName'),
+  });
+  if (!parsed.success) {
+    return { ok: false, message: 'Check the fields below.', fields: fieldErrors(parsed.error) };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: {
+      data: { display_name: parsed.data.displayName },
+      emailRedirectTo: `${siteUrl()}/auth/confirm`,
+    },
+  });
+
+  if (error) {
+    // Supabase does not disclose whether an address is already registered, and neither do we:
+    // a distinct "already in use" message turns the signup form into an account-enumeration
+    // oracle. The generic path plus the confirmation email is the correct behaviour.
+    return { ok: false, message: error.message };
+  }
+
+  redirect('/verify');
+}
+
+export async function signIn(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  const parsed = loginInput.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+  if (!parsed.success) {
+    return { ok: false, message: 'Check the fields below.', fields: fieldErrors(parsed.error) };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+
+  if (error) {
+    // Deliberately identical for a wrong password and a non-existent account.
+    return { ok: false, message: 'That email and password do not match an account.' };
+  }
+
+  revalidatePath('/', 'layout');
+  redirect(safeNext(formData.get('next')) ?? '/select-role');
+}
+
+/**
+ * OAuth start for Google and GitHub (§3, §6).
+ *
+ * `user:email` is the only GitHub scope requested. This is a sign-in path, not repo access —
+ * reading someone's repositories is the v2 scraping question in ADR-004.
+ */
+export async function signInWithProvider(formData: FormData): Promise<void> {
+  const provider = formData.get('provider');
+  if (provider !== 'google' && provider !== 'github') {
+    redirect(`/login?error=${encodeURIComponent('Unknown sign-in provider.')}`);
+  }
+
+  const supabase = await createClient();
+  const next = safeNext(formData.get('next'));
+  const callback = new URL('/auth/callback', siteUrl());
+  if (next) callback.searchParams.set('next', next);
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: callback.toString(),
+      scopes: provider === 'github' ? 'user:email' : undefined,
+    },
+  });
+
+  if (error || !data.url) {
+    redirect(`/login?error=${encodeURIComponent(`Could not start ${provider} sign-in. Try again.`)}`);
+  }
+  redirect(data.url);
+}
+
+export async function signOut(): Promise<never> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  revalidatePath('/', 'layout');
+  redirect('/');
+}
+
+export async function requestPasswordReset(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const email = String(formData.get('email') ?? '').trim();
+  if (!email) return { ok: false, message: 'Enter your email address.' };
+
+  const supabase = await createClient();
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${siteUrl()}/reset-password/confirm`,
+  });
+
+  // Always the same answer, whether or not the address exists — otherwise this endpoint
+  // confirms which emails have accounts.
+  return { ok: true };
+}
+
+/**
+ * Role selection (Phase 2 §6).
+ *
+ * Creates the `user_profiles` row if missing, then the role-specific profile. The
+ * `has_talent` / `has_client` flags are maintained by trigger, not written here — see
+ * migration 0001. Writing them from the app would let the two sources of truth drift.
+ */
+export async function selectRole(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const parsed = selectRoleInput.safeParse({ role: formData.get('role') });
+  if (!parsed.success) return { ok: false, message: 'Pick one to continue.' };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const displayName =
+    (user.user_metadata?.display_name as string | undefined) ??
+    (user.user_metadata?.full_name as string | undefined) ??
+    (user.user_metadata?.name as string | undefined) ??
+    user.email?.split('@')[0] ??
+    'there';
+
+  const { error: profileError } = await supabase
+    .from('user_profiles')
+    .upsert(
+      { user_id: user.id, display_name: displayName, active_role: parsed.data.role },
+      { onConflict: 'user_id' },
+    );
+  if (profileError) return { ok: false, message: 'Could not save your choice. Try again.' };
+
+  revalidatePath('/', 'layout');
+  redirect(parsed.data.role === 'client' ? '/onboarding/client/company' : '/onboarding/talent/basics');
+}
+
+/** Switch between roles the user already has. Does not create anything. */
+export async function switchRole(formData: FormData): Promise<void> {
+  const parsed = selectRoleInput.safeParse({ role: formData.get('role') });
+  if (!parsed.success) redirect('/');
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  // RLS restricts this to the caller's own row; the filter is belt-and-braces.
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({ active_role: parsed.data.role })
+    .eq('user_id', user.id);
+  if (error) redirect(`/?error=${encodeURIComponent('Could not switch role.')}`);
+
+  revalidatePath('/', 'layout');
+  redirect(parsed.data.role === 'client' ? '/client' : '/talent');
+}
