@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:unit": "vitest run lib/seeds lib/eval lib/db/migrations.test.ts",
     "test:rls": "vitest run lib/db/rls.test.ts",
-    "db:erd": "tsx lib/db/generate-erd.ts"
+    "db:erd": "tsx lib/db/generate-erd.ts",
+    "db:seed": "tsx lib/db/seed.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
