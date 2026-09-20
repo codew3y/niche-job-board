@@ -13,7 +13,7 @@ import {
 import { authUsers, authenticatedRole } from 'drizzle-orm/supabase';
 
 import { reportSubject } from './enums';
-import { clientProfiles } from './jobs';
+import { clientProfiles, jobs } from './jobs';
 import { talentProfiles } from './talent';
 
 /**
@@ -49,8 +49,12 @@ export const conversations = pgTable(
      */
     clientId: uuid('client_id').references(() => clientProfiles.id, { onDelete: 'set null' }),
     talentId: uuid('talent_id').references(() => talentProfiles.id, { onDelete: 'set null' }),
-    /** Optional anchor: "about this job". Null for a general enquiry. */
-    jobId: uuid('job_id'),
+    /**
+     * Optional anchor: "about this job". Null for a general enquiry.
+     * SET NULL rather than CASCADE — a closed or deleted job must not take the conversation
+     * about it with it, for the same reason a departing participant does not.
+     */
+    jobId: uuid('job_id').references(() => jobs.id, { onDelete: 'set null' }),
     lastMessageAt: timestamp('last_message_at', { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -107,7 +111,12 @@ export const messages = pgTable(
      */
     senderId: uuid('sender_id').references(() => authUsers.id, { onDelete: 'set null' }),
     body: text('body').notNull(),
-    isRedacted: text('is_redacted'),
+    /**
+     * Why the body was replaced, or null if it is the original text. Named for what it holds:
+     * the column was `is_redacted` while storing the string 'account_deleted', which reads
+     * as a boolean and is not one.
+     */
+    redactedReason: text('redacted_reason'),
     readAt: timestamp('read_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

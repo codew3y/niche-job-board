@@ -1,0 +1,1 @@
+ALTER TABLE "messages" ADD COLUMN "redacted_reason" text;

@@ -43,6 +43,27 @@
       "when": 1789887664886,
       "tag": "0005_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789888217223,
+      "tag": "0006_drop_is_redacted_add_job_fk",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789888217625,
+      "tag": "0007_add_redacted_reason",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789888217626,
+      "tag": "0008_redaction_trigger_and_orphan_sweep",
+      "breakpoints": true
     }
   ]
 }
