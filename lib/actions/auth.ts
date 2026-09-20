@@ -204,3 +204,82 @@ export async function switchRole(formData: FormData): Promise<void> {
   revalidatePath('/', 'layout');
   redirect(parsed.data.role === 'client' ? '/client' : '/talent');
 }
+
+/**
+ * Set or change the password for the signed-in user.
+ *
+ * Used by the recovery flow and by settings. Called "set" rather than "change" deliberately:
+ * an account created through Google or GitHub has NO password, so the same screen has to
+ * serve both cases (ADR-007 D1). Failing here, or pretending to send a reset email that can
+ * never arrive, is the trap that decision flagged.
+ */
+export async function updatePassword(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const password = String(formData.get('password') ?? '');
+  const confirm = String(formData.get('confirmPassword') ?? '');
+
+  if (password.length < 12) {
+    return {
+      ok: false,
+      message: 'Check the field below.',
+      fields: { password: ['Use at least 12 characters. Length beats punctuation.'] },
+    };
+  }
+  if (password !== confirm) {
+    return {
+      ok: false,
+      message: 'Check the field below.',
+      fields: { confirmPassword: ['These do not match.'] },
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  // A recovery link creates a session. No session means the link expired or was never valid.
+  if (!user) {
+    return {
+      ok: false,
+      message: 'That reset link has expired. Request a new one.',
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { ok: false, message: error.message };
+
+  revalidatePath('/', 'layout');
+  return { ok: true };
+}
+
+/**
+ * Add the second role to an existing account (§6).
+ *
+ * Only creates the `user_profiles` side and switches `active_role`; the role-specific profile
+ * is created by its onboarding wizard, which is where the required fields live. The
+ * `has_talent` / `has_client` flags are trigger-maintained — writing them here would give
+ * two sources of truth for the same fact.
+ */
+export async function addRole(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  const parsed = selectRoleInput.safeParse({ role: formData.get('role') });
+  if (!parsed.success) return { ok: false, message: 'Unknown role.' };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({ active_role: parsed.data.role })
+    .eq('user_id', user.id);
+  if (error) return { ok: false, message: 'Could not add that role. Try again.' };
+
+  revalidatePath('/', 'layout');
+  redirect(
+    parsed.data.role === 'client' ? '/onboarding/client/company' : '/onboarding/talent/basics',
+  );
+}
