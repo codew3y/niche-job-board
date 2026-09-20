@@ -6,9 +6,16 @@
   "scripts": {
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset --no-seed && npm run db:migrate",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:unit": "vitest run lib/seeds lib/eval lib/db/migrations.test.ts",
+    "test:rls": "vitest run lib/db/rls.test.ts",
+    "db:erd": "tsx lib/db/generate-erd.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
@@ -17,6 +24,7 @@
   "devDependencies": {
     "@types/node": "^26.6.2",
     "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.14",
     "typescript": "^7.0.2",
     "vitest": "^5.0.1"
   }

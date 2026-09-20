@@ -46,3 +46,7 @@ next-env.d.ts
 *.sln
 *.sw?
 .cursor/
+
+# supabase local stack
+/supabase/.branches
+/supabase/.temp
