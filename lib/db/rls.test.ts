@@ -37,8 +37,13 @@ const sql: postgres.Sql = postgres(DB_URL, {
   onnotice: () => {},
 });
 
-const reachable = await sql`select 1`.then(
-  () => true,
+const reachable = await sql`select current_database()`.then(
+  () => {
+    // Announce the target. Reporting 'green' without saying WHICH database was
+    // measured is how a hosted verification silently becomes a local one.
+    console.info(`[rls.test] connected to ${DB_URL.replace(/:[^:@]+@/, ':****@')}`);
+    return true;
+  },
   (e: Error) => {
     // Never swallow the reason: a silent skip hides a broken database as effectively as a
     // broken test, and this suite is a Phase 1 exit criterion.

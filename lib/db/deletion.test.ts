@@ -27,8 +27,13 @@ const sql: postgres.Sql = postgres(DB_URL, {
   onnotice: () => {},
 });
 
-const reachable = await sql`select 1`.then(
-  () => true,
+const reachable = await sql`select current_database()`.then(
+  () => {
+    // Announce the target. Reporting 'green' without saying WHICH database was
+    // measured is how a hosted verification silently becomes a local one.
+    console.info(`[deletion.test] connected to ${DB_URL.replace(/:[^:@]+@/, ':****@')}`);
+    return true;
+  },
   (e: Error) => {
     console.warn(`[deletion.test] skipping — cannot reach ${DB_URL}: ${e.message}`);
     return false;
