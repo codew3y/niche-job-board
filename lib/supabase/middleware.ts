@@ -16,8 +16,17 @@ const PUBLIC_PREFIXES = [
   '/auth/confirm',
 ];
 
-/** Routes a signed-in user may reach before choosing a role. */
-const PRE_ROLE_PREFIXES = ['/select-role', '/auth', '/logout'];
+/**
+ * Routes a signed-in user may reach before they have a completed role profile.
+ *
+ * `/onboarding` MUST be here. `has_talent` / `has_client` are set by trigger when the
+ * talent_profiles or client_profiles row is created — and that row is created BY onboarding.
+ * Gating onboarding on the flags it exists to produce is a redirect loop: choose a role,
+ * get sent to onboarding, get bounced back to choose a role.
+ */
+const PRE_ROLE_PREFIXES = [
+  '/select-role', '/onboarding', '/auth', '/logout', '/dashboard/settings/roles',
+];
 
 const isPublic = (path: string) =>
   PUBLIC_PREFIXES.some((p) => path === p || (p !== '/' && path.startsWith(`${p}/`)));
@@ -89,18 +98,50 @@ export async function updateSession(request: NextRequest) {
     .maybeSingle();
 
   const hasRole = Boolean(profile?.has_talent || profile?.has_client);
+  // A user_profiles row means they picked a role and onboarding is under way, even though
+  // the role profile it creates does not exist yet.
+  const hasChosen = Boolean(profile);
 
-  if (!hasRole && !matches(path, PRE_ROLE_PREFIXES)) {
-    const select = request.nextUrl.clone();
-    select.pathname = '/select-role';
-    select.search = '';
-    return NextResponse.redirect(select);
+  if (matches(path, PRE_ROLE_PREFIXES)) {
+    // Nothing chosen yet, but deep-linked into onboarding — send them to choose first.
+    if (!hasChosen && path.startsWith('/onboarding')) {
+      const select = request.nextUrl.clone();
+      select.pathname = '/select-role';
+      select.search = '';
+      return NextResponse.redirect(select);
+    }
+    // Already finished — no reason to sit on /select-role.
+    if (hasRole && path === '/select-role') {
+      const dashboard = request.nextUrl.clone();
+      dashboard.pathname =
+        profile?.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
+      dashboard.search = '';
+      return NextResponse.redirect(dashboard);
+    }
+    return response;
+  }
+
+  // Everything else is dashboard territory and needs a completed role profile.
+  if (!hasRole) {
+    const target = request.nextUrl.clone();
+    target.search = '';
+    if (hasChosen) {
+      // Mid-onboarding: resume where they left off rather than restarting the choice.
+      target.pathname =
+        profile?.active_role === 'client'
+          ? '/onboarding/client/company'
+          : '/onboarding/talent/basics';
+    } else {
+      target.pathname = '/select-role';
+    }
+    return NextResponse.redirect(target);
   }
 
   // Someone with a role has no reason to sit on the auth screens.
-  if (hasRole && (path === '/login' || path === '/signup' || path === '/select-role')) {
+  if (path === '/login' || path === '/signup') {
     const dashboard = request.nextUrl.clone();
-    dashboard.pathname = profile?.active_role === 'client' ? '/client' : '/talent';
+    dashboard.pathname =
+        profile?.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
     dashboard.search = '';
     return NextResponse.redirect(dashboard);
   }

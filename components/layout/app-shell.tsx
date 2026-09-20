@@ -13,15 +13,15 @@ export type ShellUser = {
 
 const NAV = {
   talent: [
-    ['/talent', 'Dashboard'],
-    ['/talent/matches', 'Matches'],
-    ['/talent/applications', 'Applications'],
-    ['/talent/profile', 'Profile'],
+    ['/dashboard/talent', 'Dashboard'],
+    ['/dashboard/talent/matches', 'Matches'],
+    ['/dashboard/talent/applications', 'Applications'],
+    ['/dashboard/talent/profile', 'Profile'],
   ],
   client: [
-    ['/client', 'Dashboard'],
-    ['/client/jobs', 'Jobs'],
-    ['/client/saved', 'Saved'],
+    ['/dashboard/client', 'Dashboard'],
+    ['/dashboard/client/jobs', 'Jobs'],
+    ['/dashboard/client/saved', 'Saved'],
   ],
 } as const;
 

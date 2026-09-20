@@ -24,7 +24,7 @@ export function RoleSwitcher({
   if (!hasBoth) {
     return (
       <Link
-        href="/settings/roles"
+        href="/dashboard/settings/roles"
         className="rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken hover:text-text"
       >
         Add {other} profile

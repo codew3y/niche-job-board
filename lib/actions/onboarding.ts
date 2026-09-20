@@ -233,7 +233,7 @@ export async function publishTalent(
   if (error) return { ok: false, message: 'Could not publish. Try again.' };
 
   revalidatePath('/', 'layout');
-  redirect('/talent?welcome=1');
+  redirect('/dashboard/talent?welcome=1');
 }
 
 // ─────────────────────────────── client ───────────────────────────────
@@ -358,5 +358,5 @@ export async function publishFirstJob(
   if (error) return { ok: false, message: 'Could not publish the brief.' };
 
   revalidatePath('/', 'layout');
-  redirect('/client?welcome=1');
+  redirect('/dashboard/client?welcome=1');
 }

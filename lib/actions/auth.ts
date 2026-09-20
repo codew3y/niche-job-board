@@ -202,7 +202,7 @@ export async function switchRole(formData: FormData): Promise<void> {
   if (error) redirect(`/?error=${encodeURIComponent('Could not switch role.')}`);
 
   revalidatePath('/', 'layout');
-  redirect(parsed.data.role === 'client' ? '/client' : '/talent');
+  redirect(parsed.data.role === 'client' ? '/dashboard/client' : '/dashboard/talent');
 }
 
 /**
