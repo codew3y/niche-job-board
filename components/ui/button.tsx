@@ -27,5 +27,7 @@ export function Button({
   className = '',
   ...props
 }: ComponentProps<'button'> & { variant?: Variant; size?: keyof typeof sizes }) {
-  return <button className={`${base} ${variants[variant]} ${sizes[size]} ${className}`} {...props} />;
+  return (
+    <button className={`${base} ${variants[variant]} ${sizes[size]} ${className}`} {...props} />
+  );
 }

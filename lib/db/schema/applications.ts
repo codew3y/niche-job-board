@@ -44,7 +44,10 @@ export const applications = pgTable(
   },
   (t) => [
     unique('applications_job_talent_unique').on(t.jobId, t.talentId),
-    check('application_score_range', sql`${t.matchScore} is null or (${t.matchScore} between 0 and 100)`),
+    check(
+      'application_score_range',
+      sql`${t.matchScore} is null or (${t.matchScore} between 0 and 100)`,
+    ),
     index('applications_job_idx').on(t.jobId),
     index('applications_talent_idx').on(t.talentId),
 

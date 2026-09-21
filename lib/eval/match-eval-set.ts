@@ -73,7 +73,15 @@ export const evalJobs: EvalJob[] = [
     brief:
       'Inherited Laravel 9 app on a bare VPS. Move it to Docker, add CI, and fix the slow ' +
       'queries that time out on the reporting page.',
-    skills: ['laravel', 'php', 'mysql', 'docker', 'github-actions', 'linux-admin', 'database-design'],
+    skills: [
+      'laravel',
+      'php',
+      'mysql',
+      'docker',
+      'github-actions',
+      'linux-admin',
+      'database-design',
+    ],
     budget: '$50–80/hr',
     engagement: 'hourly',
   },
@@ -117,7 +125,14 @@ export const evalProfiles: EvalProfile[] = [
     bio:
       'RAG chatbots end to end: pgvector on Supabase, LLM APIs, retrieval tuning, and an eval ' +
       'harness so we can prove the answers got better rather than guess.',
-    skills: ['rag', 'vector-search', 'supabase', 'llm-integration', 'prompt-engineering', 'llm-evals'],
+    skills: [
+      'rag',
+      'vector-search',
+      'supabase',
+      'llm-integration',
+      'prompt-engineering',
+      'llm-evals',
+    ],
     items: ['Docs chatbot with published eval scores', 'Support bot with refusal guardrails'],
     websiteUrl: null,
   },

@@ -16,8 +16,12 @@ describe('signed out', () => {
   });
 
   it('sends private pages to login, preserving where they were headed', () => {
-    expect(decideRoute('/dashboard/talent/matches', anon)).toBe('/login?next=%2Fdashboard%2Ftalent%2Fmatches');
-    expect(decideRoute('/dashboard/settings/roles', anon)).toBe('/login?next=%2Fdashboard%2Fsettings%2Froles');
+    expect(decideRoute('/dashboard/talent/matches', anon)).toBe(
+      '/login?next=%2Fdashboard%2Ftalent%2Fmatches',
+    );
+    expect(decideRoute('/dashboard/settings/roles', anon)).toBe(
+      '/login?next=%2Fdashboard%2Fsettings%2Froles',
+    );
   });
 });
 
@@ -46,9 +50,16 @@ describe('mid-onboarding — the redirect loop this file exists to prevent', () 
 
   it('never returns a target that would itself redirect — no loop is possible', () => {
     const paths = [
-      '/select-role', '/onboarding/talent/basics', '/onboarding/talent/skills',
-      '/onboarding/client/company', '/dashboard/talent', '/dashboard/client',
-      '/dashboard/settings/roles', '/login', '/talent', '/jobs',
+      '/select-role',
+      '/onboarding/talent/basics',
+      '/onboarding/talent/skills',
+      '/onboarding/client/company',
+      '/dashboard/talent',
+      '/dashboard/client',
+      '/dashboard/settings/roles',
+      '/login',
+      '/talent',
+      '/jobs',
     ];
     for (const session of [anon, fresh, chosen, chosenClient, done]) {
       for (const path of paths) {

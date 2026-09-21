@@ -8,13 +8,13 @@ export const metadata: Metadata = { title: 'Set a new password' };
 
 export default async function ConfirmResetPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // An account created through Google or GitHub has no password. The same screen sets a
   // first one rather than "changing" a password that never existed (ADR-007 D1).
-  const hasPassword = Boolean(
-    (user?.identities ?? []).some((i) => i.provider === 'email'),
-  );
+  const hasPassword = Boolean((user?.identities ?? []).some((i) => i.provider === 'email'));
 
   if (!user) {
     return (

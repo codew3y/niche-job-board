@@ -35,8 +35,7 @@ export function SkillPicker({
       .filter(
         (o) =>
           !selected.includes(o.id) &&
-          (o.name.toLowerCase().includes(q) ||
-            o.aliases.some((a) => a.toLowerCase().includes(q))),
+          (o.name.toLowerCase().includes(q) || o.aliases.some((a) => a.toLowerCase().includes(q))),
       )
       .slice(0, 8);
   }, [query, options, selected]);
@@ -87,7 +86,11 @@ export function SkillPicker({
         autoComplete="off"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder={selected.length >= max ? `That's the maximum of ${max}` : 'Search — try "n8n", "Golang", "WhatsApp"'}
+        placeholder={
+          selected.length >= max
+            ? `That's the maximum of ${max}`
+            : 'Search — try "n8n", "Golang", "WhatsApp"'
+        }
         disabled={selected.length >= max}
         className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3 placeholder:text-text-subtle"
       />

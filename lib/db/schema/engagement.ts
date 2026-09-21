@@ -71,7 +71,9 @@ export const notifications = pgTable(
       .notNull()
       .references(() => authUsers.id, { onDelete: 'cascade' }),
     type: notificationType('type').notNull(),
-    payload: jsonb('payload').notNull().default(sql`'{}'::jsonb`),
+    payload: jsonb('payload')
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     /**
      * Idempotency key for the "fires exactly once per event, idempotent under retry"
      * criterion (story M9). A retry that recomputes the same key is a no-op, not a duplicate.

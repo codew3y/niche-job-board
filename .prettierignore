@@ -1,0 +1,6 @@
+.next
+node_modules
+package-lock.json
+# Generated — regenerate rather than reformat.
+lib/db/migrations
+docs/schema.md

@@ -46,7 +46,8 @@ export function TalentBasicsForm({ profile }: { profile: Profile }) {
         {/* Said plainly because it is true and it changes behaviour: this text is what the
             embedding reads. Users write more when they know why. */}
         <p id="bio-hint" className={`text-sm ${fields?.bio ? 'text-danger' : 'text-text-muted'}`}>
-          {fields?.bio?.[0] ?? 'At least 120 characters — this is the text matching actually reads.'}
+          {fields?.bio?.[0] ??
+            'At least 120 characters — this is the text matching actually reads.'}
         </p>
       </div>
 
@@ -68,7 +69,9 @@ export function TalentBasicsForm({ profile }: { profile: Profile }) {
       </div>
 
       {state?.ok === false && !state.fields && (
-        <p role="alert" className="text-sm text-danger">{state.message}</p>
+        <p role="alert" className="text-sm text-danger">
+          {state.message}
+        </p>
       )}
       <Submit label="Continue" />
     </form>
@@ -115,14 +118,20 @@ export function TalentSkillsForm({
           errors={fields?.hourlyRateMax}
         />
         <div className="space-y-1.5">
-          <label htmlFor="currency" className="block text-sm font-medium">Currency</label>
+          <label htmlFor="currency" className="block text-sm font-medium">
+            Currency
+          </label>
           <select
             id="currency"
             name="currency"
             defaultValue={str(profile, 'currency') || 'USD'}
             className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3"
           >
-            {CURRENCIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            {CURRENCIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -148,7 +157,9 @@ export function TalentSkillsForm({
       </fieldset>
 
       {state?.ok === false && !state.fields && (
-        <p role="alert" className="text-sm text-danger">{state.message}</p>
+        <p role="alert" className="text-sm text-danger">
+          {state.message}
+        </p>
       )}
       <Submit label="Continue" />
     </form>

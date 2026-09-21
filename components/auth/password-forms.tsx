@@ -17,8 +17,8 @@ export function ResetRequestForm() {
         {/* Deliberately says "if there's an account" — confirming whether an address is
             registered would turn this form into an account-enumeration oracle. */}
         <p className="text-sm text-text-muted text-pretty">
-          If there&rsquo;s an account for that address, a reset link is on its way. It expires
-          in an hour and can only be used once.
+          If there&rsquo;s an account for that address, a reset link is on its way. It expires in an
+          hour and can only be used once.
         </p>
       </div>
     );
@@ -26,9 +26,18 @@ export function ResetRequestForm() {
 
   return (
     <form action={action} className="space-y-4" noValidate>
-      <Field label="Email" name="email" type="email" inputMode="email" autoComplete="email" required />
+      <Field
+        label="Email"
+        name="email"
+        type="email"
+        inputMode="email"
+        autoComplete="email"
+        required
+      />
       {state?.ok === false && (
-        <p role="alert" className="text-sm text-danger">{state.message}</p>
+        <p role="alert" className="text-sm text-danger">
+          {state.message}
+        </p>
       )}
       <SubmitButton idle="Send reset link" busy="Sending…" />
     </form>
@@ -70,7 +79,9 @@ export function SetPasswordForm() {
         errors={fields?.confirmPassword}
       />
       {state?.ok === false && !state.fields && (
-        <p role="alert" className="text-sm text-danger">{state.message}</p>
+        <p role="alert" className="text-sm text-danger">
+          {state.message}
+        </p>
       )}
       <SubmitButton idle="Save password" busy="Saving…" />
     </form>

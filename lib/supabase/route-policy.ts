@@ -22,13 +22,24 @@ export type Session = {
 };
 
 const PUBLIC_PREFIXES = [
-  '/', '/jobs', '/talent', '/login', '/signup', '/verify',
-  '/reset-password', '/auth/callback', '/auth/confirm',
+  '/',
+  '/jobs',
+  '/talent',
+  '/login',
+  '/signup',
+  '/verify',
+  '/reset-password',
+  '/auth/callback',
+  '/auth/confirm',
 ];
 
 /** Reachable before the role profile exists — onboarding must be here, see above. */
 const PRE_ROLE_PREFIXES = [
-  '/select-role', '/onboarding', '/auth', '/logout', '/dashboard/settings/roles',
+  '/select-role',
+  '/onboarding',
+  '/auth',
+  '/logout',
+  '/dashboard/settings/roles',
 ];
 
 const matches = (path: string, prefixes: string[]) =>

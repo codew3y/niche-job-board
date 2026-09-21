@@ -35,7 +35,9 @@ describe('talent onboarding progress', () => {
   it('advances only as each step is actually saved', () => {
     expect(nextTalentStep(p({ hasBasics: true }))).toBe('skills');
     expect(nextTalentStep(p({ hasBasics: true, hasSkills: true }))).toBe('portfolio');
-    expect(nextTalentStep(p({ hasBasics: true, hasSkills: true, hasEvidence: true }))).toBe('review');
+    expect(nextTalentStep(p({ hasBasics: true, hasSkills: true, hasEvidence: true }))).toBe(
+      'review',
+    );
   });
 
   it('does not skip a gap — evidence saved but basics missing still resumes at basics', () => {
@@ -59,9 +61,15 @@ describe('talent onboarding progress', () => {
 
 describe('client onboarding progress', () => {
   it('walks company → job → review', () => {
-    expect(nextClientStep({ hasCompany: false, hasJobDraft: false, hasPublishedJob: false })).toBe('company');
-    expect(nextClientStep({ hasCompany: true, hasJobDraft: false, hasPublishedJob: false })).toBe('job');
-    expect(nextClientStep({ hasCompany: true, hasJobDraft: true, hasPublishedJob: false })).toBe('review');
+    expect(nextClientStep({ hasCompany: false, hasJobDraft: false, hasPublishedJob: false })).toBe(
+      'company',
+    );
+    expect(nextClientStep({ hasCompany: true, hasJobDraft: false, hasPublishedJob: false })).toBe(
+      'job',
+    );
+    expect(nextClientStep({ hasCompany: true, hasJobDraft: true, hasPublishedJob: false })).toBe(
+      'review',
+    );
   });
 
   it('marks review complete only once a job is actually published', () => {

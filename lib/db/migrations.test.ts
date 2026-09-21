@@ -17,7 +17,9 @@ const readCode = (f: string) =>
     .split('\n')
     .filter((line) => !line.trimStart().startsWith('--'))
     .join('\n');
-const files = readdirSync(dir).filter((f) => f.endsWith('.sql')).sort();
+const files = readdirSync(dir)
+  .filter((f) => f.endsWith('.sql'))
+  .sort();
 
 describe('migrations', () => {
   it('has at least one migration', () => {

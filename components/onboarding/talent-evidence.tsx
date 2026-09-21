@@ -5,7 +5,11 @@ import { useActionState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { Submit } from './talent-forms';
-import { addPortfolioItem, deletePortfolioItem, saveTalentEvidence } from '@/lib/actions/onboarding';
+import {
+  addPortfolioItem,
+  deletePortfolioItem,
+  saveTalentEvidence,
+} from '@/lib/actions/onboarding';
 import type { ActionResult } from '@/lib/actions/auth';
 
 type Item = { id: string; title: string; description: string; tech_stack: string[] };
@@ -24,8 +28,14 @@ const str = (p: Profile, k: string) => (p?.[k] as string | null) ?? '';
  * persuasive than blocking publish.
  */
 export function TalentEvidenceStep({ profile, items }: { profile: Profile; items: Item[] }) {
-  const [linkState, linkAction] = useActionState<ActionResult | null, FormData>(saveTalentEvidence, null);
-  const [itemState, itemAction] = useActionState<ActionResult | null, FormData>(addPortfolioItem, null);
+  const [linkState, linkAction] = useActionState<ActionResult | null, FormData>(
+    saveTalentEvidence,
+    null,
+  );
+  const [itemState, itemAction] = useActionState<ActionResult | null, FormData>(
+    addPortfolioItem,
+    null,
+  );
   const linkFields = linkState?.ok === false ? linkState.fields : undefined;
   const itemFields = itemState?.ok === false ? itemState.fields : undefined;
 
@@ -56,12 +66,30 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
 
       <form action={linkAction} className="space-y-4" noValidate>
         <h2 className="font-medium">Your links</h2>
-        <Field label="Portfolio site" name="websiteUrl" type="url" placeholder="https://yoursite.dev"
-          defaultValue={str(profile, 'website_url')} errors={linkFields?.websiteUrl} />
-        <Field label="GitHub" name="githubUrl" type="url" placeholder="https://github.com/you"
-          defaultValue={str(profile, 'github_url')} errors={linkFields?.githubUrl} />
-        <Field label="LinkedIn" name="linkedinUrl" type="url" placeholder="https://linkedin.com/in/you"
-          defaultValue={str(profile, 'linkedin_url')} errors={linkFields?.linkedinUrl} />
+        <Field
+          label="Portfolio site"
+          name="websiteUrl"
+          type="url"
+          placeholder="https://yoursite.dev"
+          defaultValue={str(profile, 'website_url')}
+          errors={linkFields?.websiteUrl}
+        />
+        <Field
+          label="GitHub"
+          name="githubUrl"
+          type="url"
+          placeholder="https://github.com/you"
+          defaultValue={str(profile, 'github_url')}
+          errors={linkFields?.githubUrl}
+        />
+        <Field
+          label="LinkedIn"
+          name="linkedinUrl"
+          type="url"
+          placeholder="https://linkedin.com/in/you"
+          defaultValue={str(profile, 'linkedin_url')}
+          errors={linkFields?.linkedinUrl}
+        />
         <Submit label="Save links and continue" />
       </form>
 
@@ -69,8 +97,8 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
         <div>
           <h2 className="font-medium">Projects</h2>
           <p className="mt-1 text-sm text-text-muted text-pretty">
-            These are what matching reads most closely — what you did and what changed because
-            of it matters more than the stack list.
+            These are what matching reads most closely — what you did and what changed because of it
+            matters more than the stack list.
           </p>
         </div>
 
@@ -98,30 +126,59 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
           </ul>
         )}
 
-        <form action={itemAction} className="space-y-4 rounded-[--radius] border border-dashed border-border-strong p-4" noValidate>
-          <Field label="Project title" name="title" placeholder="Subscription checkout rebuild"
-            required errors={itemFields?.title} />
+        <form
+          action={itemAction}
+          className="space-y-4 rounded-[--radius] border border-dashed border-border-strong p-4"
+          noValidate
+        >
+          <Field
+            label="Project title"
+            name="title"
+            placeholder="Subscription checkout rebuild"
+            required
+            errors={itemFields?.title}
+          />
           <div className="space-y-1.5">
-            <label htmlFor="description" className="block text-sm font-medium">What was it, and what did you do?</label>
-            <textarea id="description" name="description" rows={3}
+            <label htmlFor="description" className="block text-sm font-medium">
+              What was it, and what did you do?
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={3}
               aria-invalid={Boolean(itemFields?.description)}
               className={`w-full rounded-[--radius] border bg-surface-raised p-3 placeholder:text-text-subtle
                 ${itemFields?.description ? 'border-danger' : 'border-border-strong'}`}
-              placeholder="Replaced a hand-rolled checkout with Stripe Checkout and webhook reconciliation." />
-            {itemFields?.description && <p className="text-sm text-danger">{itemFields.description[0]}</p>}
+              placeholder="Replaced a hand-rolled checkout with Stripe Checkout and webhook reconciliation."
+            />
+            {itemFields?.description && (
+              <p className="text-sm text-danger">{itemFields.description[0]}</p>
+            )}
           </div>
-          <Field label="Outcome" name="outcome" placeholder="Failed payments fell from 4.1% to 0.6%"
-            hint="A number if you have one. This is the most persuasive field on the page." />
-          <Field label="Tech stack" name="techStack" placeholder="Next.js, Stripe, Postgres"
-            hint="Comma separated." />
+          <Field
+            label="Outcome"
+            name="outcome"
+            placeholder="Failed payments fell from 4.1% to 0.6%"
+            hint="A number if you have one. This is the most persuasive field on the page."
+          />
+          <Field
+            label="Tech stack"
+            name="techStack"
+            placeholder="Next.js, Stripe, Postgres"
+            hint="Comma separated."
+          />
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Repo" name="repoUrl" type="url" placeholder="https://github.com/…" />
             <Field label="Live URL" name="liveUrl" type="url" placeholder="https://…" />
           </div>
           {itemState?.ok === false && !itemState.fields && (
-            <p role="alert" className="text-sm text-danger">{itemState.message}</p>
+            <p role="alert" className="text-sm text-danger">
+              {itemState.message}
+            </p>
           )}
-          <Button type="submit" variant="secondary">Add project</Button>
+          <Button type="submit" variant="secondary">
+            Add project
+          </Button>
         </form>
       </section>
     </div>

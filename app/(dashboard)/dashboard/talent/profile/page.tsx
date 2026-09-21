@@ -10,7 +10,9 @@ export const metadata: Metadata = { title: 'Profile' };
 
 export default async function ProfilePage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: p } = await supabase
@@ -58,7 +60,9 @@ export default async function ProfilePage() {
         <div className="mt-4 rounded-[--radius] border border-border-base bg-surface-sunken p-4 text-sm">
           <p className="font-medium">Before you can publish</p>
           <ul className="mt-2 space-y-1 text-text-muted">
-            {blockers.map((b) => <li key={b}>· {b}</li>)}
+            {blockers.map((b) => (
+              <li key={b}>· {b}</li>
+            ))}
           </ul>
         </div>
       )}

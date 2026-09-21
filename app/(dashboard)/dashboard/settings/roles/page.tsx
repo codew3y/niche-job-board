@@ -14,7 +14,9 @@ export const metadata: Metadata = { title: 'Roles' };
  */
 export default async function RolesPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: profile } = await supabase

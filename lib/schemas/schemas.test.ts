@@ -93,7 +93,9 @@ describe('publish gate (ADR-004) — both paths', () => {
   const bio = 'x'.repeat(200);
 
   it('PATH A: passes with a bio and an external site, zero items', () => {
-    expect(ok(publishTalentProfile, { bio, websiteUrl: 'https://example.dev', portfolioItemCount: 0 })).toBe(true);
+    expect(
+      ok(publishTalentProfile, { bio, websiteUrl: 'https://example.dev', portfolioItemCount: 0 }),
+    ).toBe(true);
   });
 
   it('PATH B: passes with a bio and two items, no site', () => {
@@ -101,7 +103,9 @@ describe('publish gate (ADR-004) — both paths', () => {
   });
 
   it('passes with both', () => {
-    expect(ok(publishTalentProfile, { bio, websiteUrl: 'https://example.dev', portfolioItemCount: 5 })).toBe(true);
+    expect(
+      ok(publishTalentProfile, { bio, websiteUrl: 'https://example.dev', portfolioItemCount: 5 }),
+    ).toBe(true);
   });
 
   it('fails with neither', () => {
@@ -113,16 +117,34 @@ describe('publish gate (ADR-004) — both paths', () => {
   });
 
   it('fails with evidence but an empty bio', () => {
-    expect(ok(publishTalentProfile, { bio: '', websiteUrl: 'https://example.dev', portfolioItemCount: 3 })).toBe(false);
-    expect(ok(publishTalentProfile, { bio: '   ', websiteUrl: 'https://example.dev', portfolioItemCount: 3 })).toBe(false);
+    expect(
+      ok(publishTalentProfile, {
+        bio: '',
+        websiteUrl: 'https://example.dev',
+        portfolioItemCount: 3,
+      }),
+    ).toBe(false);
+    expect(
+      ok(publishTalentProfile, {
+        bio: '   ',
+        websiteUrl: 'https://example.dev',
+        portfolioItemCount: 3,
+      }),
+    ).toBe(false);
   });
 
   it('names what is missing instead of saying "invalid"', () => {
     // The whole reason this rule is duplicated outside the CHECK constraint.
-    expect(publishBlockers({ bio, websiteUrl: null, portfolioItemCount: 1 })[0]).toMatch(/one more project/i);
-    expect(publishBlockers({ bio, websiteUrl: null, portfolioItemCount: 0 })[0]).toMatch(/portfolio site|two projects/i);
+    expect(publishBlockers({ bio, websiteUrl: null, portfolioItemCount: 1 })[0]).toMatch(
+      /one more project/i,
+    );
+    expect(publishBlockers({ bio, websiteUrl: null, portfolioItemCount: 0 })[0]).toMatch(
+      /portfolio site|two projects/i,
+    );
     expect(publishBlockers({ bio: '', websiteUrl: null, portfolioItemCount: 0 })).toHaveLength(2);
-    expect(publishBlockers({ bio, websiteUrl: 'https://example.dev', portfolioItemCount: 0 })).toEqual([]);
+    expect(
+      publishBlockers({ bio, websiteUrl: 'https://example.dev', portfolioItemCount: 0 }),
+    ).toEqual([]);
   });
 
   it('matches the database CHECK constraint truth table exactly', () => {
@@ -139,7 +161,9 @@ describe('publish gate (ADR-004) — both paths', () => {
       ['', null, 0, false],
     ];
     for (const [b, site, count, expected] of cases) {
-      expect(ok(publishTalentProfile, { bio: b, websiteUrl: site, portfolioItemCount: count })).toBe(expected);
+      expect(
+        ok(publishTalentProfile, { bio: b, websiteUrl: site, portfolioItemCount: count }),
+      ).toBe(expected);
     }
   });
 });
@@ -166,8 +190,12 @@ describe('talent profile', () => {
   });
 
   it('rejects an inverted rate range', () => {
-    expect(ok(talentProfileInput, { ...valid, hourlyRateMin: '200', hourlyRateMax: '50' })).toBe(false);
-    expect(ok(talentProfileInput, { ...valid, hourlyRateMin: '50', hourlyRateMax: '200' })).toBe(true);
+    expect(ok(talentProfileInput, { ...valid, hourlyRateMin: '200', hourlyRateMax: '50' })).toBe(
+      false,
+    );
+    expect(ok(talentProfileInput, { ...valid, hourlyRateMin: '50', hourlyRateMax: '200' })).toBe(
+      true,
+    );
   });
 
   it('rejects a non-https portfolio link', () => {
@@ -183,13 +211,19 @@ describe('portfolio item', () => {
   });
 
   it('rejects dates in the wrong order', () => {
-    expect(ok(portfolioItemInput, { ...valid, startedAt: '2026-06-01', endedAt: '2026-01-01' })).toBe(false);
-    expect(ok(portfolioItemInput, { ...valid, startedAt: '2026-01-01', endedAt: '2026-06-01' })).toBe(true);
+    expect(
+      ok(portfolioItemInput, { ...valid, startedAt: '2026-06-01', endedAt: '2026-01-01' }),
+    ).toBe(false);
+    expect(
+      ok(portfolioItemInput, { ...valid, startedAt: '2026-01-01', endedAt: '2026-06-01' }),
+    ).toBe(true);
   });
 
   it('requires alt text on media — an accessibility gate, not a nicety', () => {
     expect(ok(itemMediaInput, { url: 'https://example.dev/a.png', altText: '' })).toBe(false);
-    expect(ok(itemMediaInput, { url: 'https://example.dev/a.png', altText: 'Checkout screen' })).toBe(true);
+    expect(
+      ok(itemMediaInput, { url: 'https://example.dev/a.png', altText: 'Checkout screen' }),
+    ).toBe(true);
   });
 });
 
@@ -234,23 +268,39 @@ describe('application status transitions', () => {
   const base = { applicationId: UUID };
 
   it('lets a client move applied → shortlisted → hired', () => {
-    expect(ok(statusChangeInput, { ...base, actor: 'client', from: 'applied', to: 'shortlisted' })).toBe(true);
-    expect(ok(statusChangeInput, { ...base, actor: 'client', from: 'shortlisted', to: 'hired' })).toBe(true);
+    expect(
+      ok(statusChangeInput, { ...base, actor: 'client', from: 'applied', to: 'shortlisted' }),
+    ).toBe(true);
+    expect(
+      ok(statusChangeInput, { ...base, actor: 'client', from: 'shortlisted', to: 'hired' }),
+    ).toBe(true);
   });
 
   it('stops a client skipping straight to hired', () => {
-    expect(ok(statusChangeInput, { ...base, actor: 'client', from: 'applied', to: 'hired' })).toBe(false);
+    expect(ok(statusChangeInput, { ...base, actor: 'client', from: 'applied', to: 'hired' })).toBe(
+      false,
+    );
   });
 
   it('stops anyone reopening a rejected or hired application', () => {
-    expect(ok(statusChangeInput, { ...base, actor: 'client', from: 'rejected', to: 'shortlisted' })).toBe(false);
-    expect(ok(statusChangeInput, { ...base, actor: 'client', from: 'hired', to: 'rejected' })).toBe(false);
+    expect(
+      ok(statusChangeInput, { ...base, actor: 'client', from: 'rejected', to: 'shortlisted' }),
+    ).toBe(false);
+    expect(ok(statusChangeInput, { ...base, actor: 'client', from: 'hired', to: 'rejected' })).toBe(
+      false,
+    );
   });
 
   it('lets talent withdraw but not promote themselves', () => {
-    expect(ok(statusChangeInput, { ...base, actor: 'talent', from: 'applied', to: 'withdrawn' })).toBe(true);
-    expect(ok(statusChangeInput, { ...base, actor: 'talent', from: 'applied', to: 'hired' })).toBe(false);
-    expect(ok(statusChangeInput, { ...base, actor: 'talent', from: 'applied', to: 'shortlisted' })).toBe(false);
+    expect(
+      ok(statusChangeInput, { ...base, actor: 'talent', from: 'applied', to: 'withdrawn' }),
+    ).toBe(true);
+    expect(ok(statusChangeInput, { ...base, actor: 'talent', from: 'applied', to: 'hired' })).toBe(
+      false,
+    );
+    expect(
+      ok(statusChangeInput, { ...base, actor: 'talent', from: 'applied', to: 'shortlisted' }),
+    ).toBe(false);
   });
 
   it('rejects an empty cover note', () => {
@@ -273,14 +323,24 @@ describe('messaging (ADR-007 D1)', () => {
 
   it('requires a substantive reason on a report', () => {
     expect(ok(reportInput, { subjectType: 'message', subjectId: UUID, reason: 'bad' })).toBe(false);
-    expect(ok(reportInput, { subjectType: 'message', subjectId: UUID, reason: 'Unsolicited advertising.' })).toBe(true);
+    expect(
+      ok(reportInput, {
+        subjectType: 'message',
+        subjectId: UUID,
+        reason: 'Unsolicited advertising.',
+      }),
+    ).toBe(true);
   });
 });
 
 describe('auth and search', () => {
   it('requires a 12-character password', () => {
-    expect(ok(signupInput, { email: 'a@b.co', password: 'short', displayName: 'Maya' })).toBe(false);
-    expect(ok(signupInput, { email: 'a@b.co', password: 'correct horse battery', displayName: 'Maya' })).toBe(true);
+    expect(ok(signupInput, { email: 'a@b.co', password: 'short', displayName: 'Maya' })).toBe(
+      false,
+    );
+    expect(
+      ok(signupInput, { email: 'a@b.co', password: 'correct horse battery', displayName: 'Maya' }),
+    ).toBe(true);
   });
 
   it('parses comma-separated filters from a query string', () => {

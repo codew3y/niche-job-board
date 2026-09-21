@@ -32,7 +32,9 @@ function fieldErrors(error: { issues: { path: PropertyKey[]; message: string }[]
 
 async function requireUser() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/login');
   return { supabase, user };
 }
@@ -53,16 +55,24 @@ export async function saveTalentBasics(
   const errors: Record<string, string[]> = {};
   if (headline.length < 10) errors.headline = ['Say what you do — at least 10 characters.'];
   if (bio.length < 120) {
-    errors.bio = ['At least 120 characters. This is the text matching reads, so a thin bio gets thin matches.'];
+    errors.bio = [
+      'At least 120 characters. This is the text matching reads, so a thin bio gets thin matches.',
+    ];
   }
   if (Object.keys(errors).length) {
     return { ok: false, message: 'Check the fields below.', fields: errors };
   }
 
   const { data: existing } = await supabase
-    .from('talent_profiles').select('slug').eq('user_id', user.id).maybeSingle();
+    .from('talent_profiles')
+    .select('slug')
+    .eq('user_id', user.id)
+    .maybeSingle();
   const { data: profile } = await supabase
-    .from('user_profiles').select('display_name').eq('user_id', user.id).maybeSingle();
+    .from('user_profiles')
+    .select('display_name')
+    .eq('user_id', user.id)
+    .maybeSingle();
 
   const { error } = await supabase.from('talent_profiles').upsert(
     {
@@ -93,11 +103,17 @@ export async function saveTalentSkills(
     return { ok: false, message: 'Pick at least one skill so clients can find you.' };
   }
   if (skillIds.length > 30) {
-    return { ok: false, message: 'Pick your strongest 30 at most — a list of everything says nothing.' };
+    return {
+      ok: false,
+      message: 'Pick your strongest 30 at most — a list of everything says nothing.',
+    };
   }
 
   const { data: profile } = await supabase
-    .from('talent_profiles').select('id').eq('user_id', user.id).maybeSingle();
+    .from('talent_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
   if (!profile) redirect('/onboarding/talent/basics');
 
   const min = String(formData.get('hourlyRateMin') ?? '').trim();
@@ -110,17 +126,21 @@ export async function saveTalentSkills(
     };
   }
 
-  const { error: rateError } = await supabase.from('talent_profiles').update({
-    hourly_rate_min: min || null,
-    hourly_rate_max: max || null,
-    currency: String(formData.get('currency') ?? 'USD'),
-    availability: String(formData.get('availability') ?? 'part_time'),
-  }).eq('id', profile.id);
+  const { error: rateError } = await supabase
+    .from('talent_profiles')
+    .update({
+      hourly_rate_min: min || null,
+      hourly_rate_max: max || null,
+      currency: String(formData.get('currency') ?? 'USD'),
+      availability: String(formData.get('availability') ?? 'part_time'),
+    })
+    .eq('id', profile.id);
   if (rateError) return { ok: false, message: 'Could not save your rates.' };
 
   // Replace rather than merge: the form carries the full set, so a removed skill must go.
   await supabase.from('talent_skills').delete().eq('talent_id', profile.id);
-  const { error } = await supabase.from('talent_skills')
+  const { error } = await supabase
+    .from('talent_skills')
     .insert(skillIds.map((skillId) => ({ talent_id: profile.id, skill_id: skillId })));
   if (error) return { ok: false, message: 'Could not save your skills.' };
 
@@ -135,7 +155,10 @@ export async function saveTalentEvidence(
   const { supabase, user } = await requireUser();
 
   const { data: profile } = await supabase
-    .from('talent_profiles').select('id').eq('user_id', user.id).maybeSingle();
+    .from('talent_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
   if (!profile) redirect('/onboarding/talent/basics');
 
   const clean = (v: FormDataEntryValue | null) => {
@@ -147,13 +170,19 @@ export async function saveTalentEvidence(
   const linkedin = clean(formData.get('linkedinUrl'));
 
   const errors: Record<string, string[]> = {};
-  for (const [key, value] of [['websiteUrl', website], ['githubUrl', github], ['linkedinUrl', linkedin]] as const) {
+  for (const [key, value] of [
+    ['websiteUrl', website],
+    ['githubUrl', github],
+    ['linkedinUrl', linkedin],
+  ] as const) {
     // https only — the *_urls_https CHECK enforces the same rule. This copy names the field.
     if (value && !/^https:\/\//i.test(value)) errors[key] = ['Must be a full https:// link.'];
   }
-  if (Object.keys(errors).length) return { ok: false, message: 'Check the links below.', fields: errors };
+  if (Object.keys(errors).length)
+    return { ok: false, message: 'Check the links below.', fields: errors };
 
-  const { error } = await supabase.from('talent_profiles')
+  const { error } = await supabase
+    .from('talent_profiles')
     .update({ website_url: website, github_url: github, linkedin_url: linkedin })
     .eq('id', profile.id);
   if (error) return { ok: false, message: 'Could not save your links.' };
@@ -169,7 +198,10 @@ export async function addPortfolioItem(
   const { supabase, user } = await requireUser();
 
   const { data: profile } = await supabase
-    .from('talent_profiles').select('id, portfolio_item_count').eq('user_id', user.id).maybeSingle();
+    .from('talent_profiles')
+    .select('id, portfolio_item_count')
+    .eq('user_id', user.id)
+    .maybeSingle();
   if (!profile) redirect('/onboarding/talent/basics');
 
   const title = String(formData.get('title') ?? '').trim();
@@ -179,19 +211,25 @@ export async function addPortfolioItem(
   if (description.length < 40) {
     errors.description = ['Describe what it was and what you did — at least 40 characters.'];
   }
-  if (Object.keys(errors).length) return { ok: false, message: 'Check the fields below.', fields: errors };
+  if (Object.keys(errors).length)
+    return { ok: false, message: 'Check the fields below.', fields: errors };
 
   const { error } = await supabase.from('portfolio_items').insert({
     talent_id: profile.id,
     title,
     description,
     outcome: trimOrNull(formData.get('outcome')),
-    tech_stack: String(formData.get('techStack') ?? '').split(',').map((s) => s.trim()).filter(Boolean).slice(0, 20),
+    tech_stack: String(formData.get('techStack') ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 20),
     repo_url: trimOrNull(formData.get('repoUrl')),
     live_url: trimOrNull(formData.get('liveUrl')),
     sort_order: profile.portfolio_item_count,
   });
-  if (error) return { ok: false, message: 'Could not add that project. Check any links are https.' };
+  if (error)
+    return { ok: false, message: 'Could not add that project. Check any links are https.' };
 
   revalidatePath('/onboarding/talent/portfolio');
   return { ok: true };
@@ -214,7 +252,8 @@ export async function publishTalent(
   const { data: profile } = await supabase
     .from('talent_profiles')
     .select('id, bio, website_url, portfolio_item_count')
-    .eq('user_id', user.id).maybeSingle();
+    .eq('user_id', user.id)
+    .maybeSingle();
   if (!profile) redirect('/onboarding/talent/basics');
 
   // The same rule as talent_publish_gate. Checked here so the message names the blocker;
@@ -228,8 +267,10 @@ export async function publishTalent(
     return { ok: false, message: gate.error.issues[0]?.message ?? 'Not ready to publish yet.' };
   }
 
-  const { error } = await supabase.from('talent_profiles')
-    .update({ is_published: true }).eq('id', profile.id);
+  const { error } = await supabase
+    .from('talent_profiles')
+    .update({ is_published: true })
+    .eq('id', profile.id);
   if (error) return { ok: false, message: 'Could not publish. Try again.' };
 
   revalidatePath('/', 'layout');
@@ -277,7 +318,10 @@ export async function saveFirstJob(
   const { supabase, user } = await requireUser();
 
   const { data: client } = await supabase
-    .from('client_profiles').select('id').eq('user_id', user.id).maybeSingle();
+    .from('client_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
   if (!client) redirect('/onboarding/client/company');
 
   const skillIds = formData.getAll('skillId').map(String).filter(Boolean);
@@ -290,19 +334,27 @@ export async function saveFirstJob(
 
   const errors: Record<string, string[]> = {};
   if (title.length < 10) errors.title = ['Give the role a descriptive title.'];
-  if (description.length < 120) errors.description = ['At least 120 characters — short briefs get poor matches.'];
-  if (skillIds.length === 0) errors.skills = ['Add at least one skill, or nobody can be matched to this.'];
+  if (description.length < 120)
+    errors.description = ['At least 120 characters — short briefs get poor matches.'];
+  if (skillIds.length === 0)
+    errors.skills = ['Add at least one skill, or nobody can be matched to this.'];
   if (locationType !== 'remote' && !location) {
     errors.location = ['Hybrid and onsite roles need a location, or nobody can filter for them.'];
   }
   if (min && max && Number(min) > Number(max)) {
     errors.budgetMax = ['Maximum budget must be at least the minimum.'];
   }
-  if (Object.keys(errors).length) return { ok: false, message: 'Check the fields below.', fields: errors };
+  if (Object.keys(errors).length)
+    return { ok: false, message: 'Check the fields below.', fields: errors };
 
   const { data: existing } = await supabase
-    .from('jobs').select('id').eq('client_id', client.id).eq('status', 'draft')
-    .order('created_at', { ascending: false }).limit(1).maybeSingle();
+    .from('jobs')
+    .select('id')
+    .eq('client_id', client.id)
+    .eq('status', 'draft')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
   const shared = {
     client_id: client.id,
@@ -324,15 +376,21 @@ export async function saveFirstJob(
     if (error) return { ok: false, message: 'Could not save the brief.' };
   } else {
     const { data: created, error } = await supabase
-      .from('jobs').insert({ ...shared, slug: makeSlug(title) }).select('id').single();
+      .from('jobs')
+      .insert({ ...shared, slug: makeSlug(title) })
+      .select('id')
+      .single();
     if (error || !created) return { ok: false, message: 'Could not save the brief.' };
     jobId = created.id;
   }
 
   // Replace the skill set wholesale, same reasoning as talent_skills.
   await supabase.from('job_skills').delete().eq('job_id', jobId);
-  await supabase.from('job_skills')
-    .insert(skillIds.map((skillId, i) => ({ job_id: jobId, skill_id: skillId, is_required: i < 3 })));
+  await supabase
+    .from('job_skills')
+    .insert(
+      skillIds.map((skillId, i) => ({ job_id: jobId, skill_id: skillId, is_required: i < 3 })),
+    );
 
   revalidatePath('/onboarding/client', 'layout');
   redirect('/onboarding/client/review');
@@ -345,16 +403,26 @@ export async function publishFirstJob(
   const { supabase, user } = await requireUser();
 
   const { data: client } = await supabase
-    .from('client_profiles').select('id').eq('user_id', user.id).maybeSingle();
+    .from('client_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
   if (!client) redirect('/onboarding/client/company');
 
   const { data: job } = await supabase
-    .from('jobs').select('id').eq('client_id', client.id).eq('status', 'draft')
-    .order('created_at', { ascending: false }).limit(1).maybeSingle();
+    .from('jobs')
+    .select('id')
+    .eq('client_id', client.id)
+    .eq('status', 'draft')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
   if (!job) redirect('/onboarding/client/job');
 
-  const { error } = await supabase.from('jobs')
-    .update({ status: 'open', published_at: new Date().toISOString() }).eq('id', job.id);
+  const { error } = await supabase
+    .from('jobs')
+    .update({ status: 'open', published_at: new Date().toISOString() })
+    .eq('id', job.id);
   if (error) return { ok: false, message: 'Could not publish the brief.' };
 
   revalidatePath('/', 'layout');

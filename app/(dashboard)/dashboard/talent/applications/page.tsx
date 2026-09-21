@@ -9,11 +9,16 @@ export const metadata: Metadata = { title: 'Applications' };
 
 export default async function ApplicationsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: profile } = await supabase
-    .from('talent_profiles').select('id').eq('user_id', user.id).maybeSingle();
+    .from('talent_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
 
   const { data: applications } = profile
     ? await supabase

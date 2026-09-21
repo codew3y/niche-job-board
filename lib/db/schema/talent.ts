@@ -168,7 +168,10 @@ export const portfolioItems = pgTable(
     /** What the developer actually did. Matching leans on this more than on the stack. */
     role: text('role'),
     outcome: text('outcome'),
-    techStack: text('tech_stack').array().notNull().default(sql`'{}'::text[]`),
+    techStack: text('tech_stack')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     repoUrl: text('repo_url'),
     liveUrl: text('live_url'),
     coverImageUrl: text('cover_image_url'),
@@ -181,7 +184,10 @@ export const portfolioItems = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    check('item_date_order', sql`${t.startedAt} is null or ${t.endedAt} is null or ${t.startedAt} <= ${t.endedAt}`),
+    check(
+      'item_date_order',
+      sql`${t.startedAt} is null or ${t.endedAt} is null or ${t.startedAt} <= ${t.endedAt}`,
+    ),
     check(
       'item_urls_https',
       sql`(${t.repoUrl} is null or ${t.repoUrl} ~* '^https://') and (${t.liveUrl} is null or ${t.liveUrl} ~* '^https://')`,

@@ -362,7 +362,8 @@ export const skillsSeed: SkillSeed[] = [
     category: 'Mobile',
     aliases: ['Jetpack Compose', 'Android SDK', 'Play Store submission'],
     sources: ['COMP', 'RM'],
-    evidence: 'COMP: "Android developer" is a first-class marketplace category · RM Android roadmap',
+    evidence:
+      'COMP: "Android developer" is a first-class marketplace category · RM Android roadmap',
   },
 
   // ─────────────────────────────── Backend (11) ─────────────────────────────────
@@ -717,7 +718,8 @@ export const skillsSeed: SkillSeed[] = [
     category: 'Automation & integration',
     aliases: ['Microsoft Flow', 'Power Platform', 'Power Apps'],
     sources: ['NICHE', 'COMP'],
-    evidence: 'NICHE iPaaS coverage · COMP: the M365/enterprise automation path; pairs with PowerShell',
+    evidence:
+      'NICHE iPaaS coverage · COMP: the M365/enterprise automation path; pairs with PowerShell',
   },
   {
     name: 'Workato',

@@ -26,9 +26,7 @@ export const blockInput = z.object({ userId: uuid });
 export const reportInput = z.object({
   subjectType: reportSubject,
   subjectId: uuid,
-  reason: trimmed
-    .min(10, 'Tell us briefly what is wrong — at least 10 characters.')
-    .max(1000),
+  reason: trimmed.min(10, 'Tell us briefly what is wrong — at least 10 characters.').max(1000),
 });
 
 export type SendMessageInput = z.infer<typeof sendMessageInput>;

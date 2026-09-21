@@ -25,7 +25,11 @@ const PUBLIC_PREFIXES = [
  * get sent to onboarding, get bounced back to choose a role.
  */
 const PRE_ROLE_PREFIXES = [
-  '/select-role', '/onboarding', '/auth', '/logout', '/dashboard/settings/roles',
+  '/select-role',
+  '/onboarding',
+  '/auth',
+  '/logout',
+  '/dashboard/settings/roles',
 ];
 
 const isPublic = (path: string) =>
@@ -141,7 +145,7 @@ export async function updateSession(request: NextRequest) {
   if (path === '/login' || path === '/signup') {
     const dashboard = request.nextUrl.clone();
     dashboard.pathname =
-        profile?.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
+      profile?.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
     dashboard.search = '';
     return NextResponse.redirect(dashboard);
   }

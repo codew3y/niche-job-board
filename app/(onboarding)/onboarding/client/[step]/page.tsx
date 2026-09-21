@@ -10,7 +10,9 @@ export default async function ClientOnboarding({ params }: { params: Promise<{ s
   if (!CLIENT_STEPS.some((s) => s.slug === step)) notFound();
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: client } = await supabase
@@ -22,13 +24,25 @@ export default async function ClientOnboarding({ params }: { params: Promise<{ s
   const [{ data: skills }, { data: draft }, { data: published }] = await Promise.all([
     supabase.from('skills').select('id, name, category, aliases').order('name'),
     client
-      ? supabase.from('jobs')
-          .select('id, title, description, requirements, engagement_type, budget_min, budget_max, currency, location_type, location')
-          .eq('client_id', client.id).eq('status', 'draft')
-          .order('created_at', { ascending: false }).limit(1).maybeSingle()
+      ? supabase
+          .from('jobs')
+          .select(
+            'id, title, description, requirements, engagement_type, budget_min, budget_max, currency, location_type, location',
+          )
+          .eq('client_id', client.id)
+          .eq('status', 'draft')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
       : Promise.resolve({ data: null }),
     client
-      ? supabase.from('jobs').select('id').eq('client_id', client.id).neq('status', 'draft').limit(1).maybeSingle()
+      ? supabase
+          .from('jobs')
+          .select('id')
+          .eq('client_id', client.id)
+          .neq('status', 'draft')
+          .limit(1)
+          .maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
 

@@ -30,15 +30,24 @@ type Table = {
   name: string;
   schema?: string;
   columns: Record<string, Column>;
-  indexes: Record<string, { name: string; columns: unknown[]; isUnique?: boolean; method?: string }>;
+  indexes: Record<
+    string,
+    { name: string; columns: unknown[]; isUnique?: boolean; method?: string }
+  >;
   foreignKeys: Record<string, ForeignKey>;
   compositePrimaryKeys: Record<string, { name: string; columns: string[] }>;
   uniqueConstraints: Record<string, { name: string; columns: string[] }>;
   checkConstraints?: Record<string, { name: string; value: string }>;
-  policies?: Record<string, { name: string; as?: string; for?: string; to?: string[]; using?: string; withCheck?: string }>;
+  policies?: Record<
+    string,
+    { name: string; as?: string; for?: string; to?: string[]; using?: string; withCheck?: string }
+  >;
   isRLSEnabled?: boolean;
 };
-type Snapshot = { tables: Record<string, Table>; enums: Record<string, { name: string; values: string[] }> };
+type Snapshot = {
+  tables: Record<string, Table>;
+  enums: Record<string, { name: string; values: string[] }>;
+};
 
 const root = join(import.meta.dirname, '..', '..');
 const metaDir = join(import.meta.dirname, 'migrations', 'meta');
@@ -54,7 +63,10 @@ const tables = Object.values(snap.tables).sort((a, b) => a.name.localeCompare(b.
 
 /** Mermaid chokes on the punctuation Postgres type names carry. */
 const mermaidType = (t: string) =>
-  t.replace(/\(.*?\)/g, '').replace(/[^A-Za-z0-9_]/g, '_').replace(/_+$/, '') || 'unknown';
+  t
+    .replace(/\(.*?\)/g, '')
+    .replace(/[^A-Za-z0-9_]/g, '_')
+    .replace(/_+$/, '') || 'unknown';
 
 const erd: string[] = ['erDiagram'];
 for (const t of tables) {
@@ -62,7 +74,9 @@ for (const t of tables) {
   erd.push(`  ${t.name} {`);
   for (const c of cols) {
     const pk = c.primaryKey ? ' PK' : '';
-    const fk = Object.values(t.foreignKeys).some((f) => f.columnsFrom.includes(c.name)) ? ' FK' : '';
+    const fk = Object.values(t.foreignKeys).some((f) => f.columnsFrom.includes(c.name))
+      ? ' FK'
+      : '';
     erd.push(`    ${mermaidType(c.type)} ${c.name}${pk || fk}`);
   }
   erd.push('  }');
@@ -72,7 +86,9 @@ for (const t of tables) {
     const optional = Object.values(t.columns).some(
       (c) => fk.columnsFrom.includes(c.name) && !c.notNull,
     );
-    erd.push(`  ${fk.tableTo} ${optional ? '||--o{' : '||--|{'} ${fk.tableFrom} : "${fk.columnsFrom.join(',')}"`);
+    erd.push(
+      `  ${fk.tableTo} ${optional ? '||--o{' : '||--|{'} ${fk.tableFrom} : "${fk.columnsFrom.join(',')}"`,
+    );
   }
 }
 
@@ -102,16 +118,23 @@ const detail = tables
     }
 
     if (checks.length) {
-      parts.push('\n**Check constraints** — rules the database enforces so the service layer cannot bypass them:\n');
-      for (const c of checks) parts.push(`- \`${c.name}\`: \`${c.value.replace(/\s+/g, ' ').trim()}\``);
+      parts.push(
+        '\n**Check constraints** — rules the database enforces so the service layer cannot bypass them:\n',
+      );
+      for (const c of checks)
+        parts.push(`- \`${c.name}\`: \`${c.value.replace(/\s+/g, ' ').trim()}\``);
     }
     if (idx.length) {
       parts.push('\n**Indexes**\n');
       for (const i of idx) {
-        parts.push(`- \`${i.name}\`${i.isUnique ? ' (unique)' : ''}${i.method && i.method !== 'btree' ? ` — \`${i.method}\`` : ''}`);
+        parts.push(
+          `- \`${i.name}\`${i.isUnique ? ' (unique)' : ''}${i.method && i.method !== 'btree' ? ` — \`${i.method}\`` : ''}`,
+        );
       }
     }
-    parts.push(`\n**RLS:** ${t.isRLSEnabled ? 'enabled' : '**NOT ENABLED**'} · ${policies.length} polic${policies.length === 1 ? 'y' : 'ies'}\n`);
+    parts.push(
+      `\n**RLS:** ${t.isRLSEnabled ? 'enabled' : '**NOT ENABLED**'} · ${policies.length} polic${policies.length === 1 ? 'y' : 'ies'}\n`,
+    );
     if (policies.length) {
       parts.push('| Policy | For | To | Condition |');
       parts.push('|---|---|---|---|');

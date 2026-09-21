@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { createClient as createRawClient } from '@supabase/supabase-js';
 
 import { clientEnv, serverEnv } from '../env';
 
@@ -56,7 +57,6 @@ export function createServiceClient() {
         'Add it from Dashboard → Settings → API. It must never be a NEXT_PUBLIC_ variable.',
     );
   }
-  const { createClient: createRawClient } = require('@supabase/supabase-js') as typeof import('@supabase/supabase-js');
   return createRawClient(clientEnv.NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });

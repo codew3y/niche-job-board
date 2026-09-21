@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /*
  * Design tokens.
@@ -51,7 +51,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme='light']) {
     --surface: oklch(17% 0.008 95);
     --surface-raised: oklch(21% 0.009 95);
     --surface-sunken: oklch(14% 0.007 95);
@@ -77,7 +77,7 @@
   }
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   --surface: oklch(17% 0.008 95);
   --surface-raised: oklch(21% 0.009 95);
   --surface-sunken: oklch(14% 0.007 95);

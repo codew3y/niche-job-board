@@ -8,7 +8,9 @@ const csv = z
   .union([z.string(), z.array(z.string())])
   .optional()
   .transform((v) =>
-    v === undefined ? [] : (Array.isArray(v) ? v : v.split(',')).map((s) => s.trim()).filter(Boolean),
+    v === undefined
+      ? []
+      : (Array.isArray(v) ? v : v.split(',')).map((s) => s.trim()).filter(Boolean),
   );
 
 export const jobSearchParams = paginationParams.extend({

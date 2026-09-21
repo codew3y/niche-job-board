@@ -65,7 +65,8 @@ describe('skills taxonomy', () => {
     for (const s of skillsSeed) {
       for (const alias of s.aliases) {
         const key = normalize(alias);
-        if (owner.has(key)) collisions.push(`"${alias}" claimed by ${owner.get(key)} and ${s.name}`);
+        if (owner.has(key))
+          collisions.push(`"${alias}" claimed by ${owner.get(key)} and ${s.name}`);
         owner.set(key, s.name);
       }
     }

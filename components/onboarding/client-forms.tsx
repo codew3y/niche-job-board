@@ -19,32 +19,70 @@ export function CompanyForm({ client }: { client: Row }) {
 
   return (
     <form action={action} className="space-y-5" noValidate>
-      <Field label="Company name" name="companyName" required
-        defaultValue={str(client, 'company_name')} errors={fields?.companyName} />
-      <Field label="Website" name="website" type="url" placeholder="https://yourcompany.com"
-        defaultValue={str(client, 'website')} errors={fields?.website} />
-      <Field label="Industry" name="industry" placeholder="Logistics"
-        defaultValue={str(client, 'industry')} />
+      <Field
+        label="Company name"
+        name="companyName"
+        required
+        defaultValue={str(client, 'company_name')}
+        errors={fields?.companyName}
+      />
+      <Field
+        label="Website"
+        name="website"
+        type="url"
+        placeholder="https://yourcompany.com"
+        defaultValue={str(client, 'website')}
+        errors={fields?.website}
+      />
+      <Field
+        label="Industry"
+        name="industry"
+        placeholder="Logistics"
+        defaultValue={str(client, 'industry')}
+      />
       <div className="space-y-1.5">
-        <label htmlFor="about" className="block text-sm font-medium">About</label>
-        <textarea id="about" name="about" rows={4} defaultValue={str(client, 'about')}
+        <label htmlFor="about" className="block text-sm font-medium">
+          About
+        </label>
+        <textarea
+          id="about"
+          name="about"
+          rows={4}
+          defaultValue={str(client, 'about')}
           placeholder="What the company does, and what you need help with."
-          className="w-full rounded-[--radius] border border-border-strong bg-surface-raised p-3 placeholder:text-text-subtle" />
+          className="w-full rounded-[--radius] border border-border-strong bg-surface-raised p-3 placeholder:text-text-subtle"
+        />
       </div>
       {state?.ok === false && !state.fields && (
-        <p role="alert" className="text-sm text-danger">{state.message}</p>
+        <p role="alert" className="text-sm text-danger">
+          {state.message}
+        </p>
       )}
       <Submit label="Continue" />
     </form>
   );
 }
 
-const ENGAGEMENTS = [['fixed', 'Fixed price'], ['hourly', 'Hourly'], ['retainer', 'Retainer']] as const;
-const LOCATIONS = [['remote', 'Remote'], ['hybrid', 'Hybrid'], ['onsite', 'Onsite']] as const;
+const ENGAGEMENTS = [
+  ['fixed', 'Fixed price'],
+  ['hourly', 'Hourly'],
+  ['retainer', 'Retainer'],
+] as const;
+const LOCATIONS = [
+  ['remote', 'Remote'],
+  ['hybrid', 'Hybrid'],
+  ['onsite', 'Onsite'],
+] as const;
 
 export function FirstJobForm({
-  job, options, initial,
-}: { job: Row; options: SkillOption[]; initial: string[] }) {
+  job,
+  options,
+  initial,
+}: {
+  job: Row;
+  options: SkillOption[];
+  initial: string[];
+}) {
   const [state, action] = useActionState<ActionResult | null, FormData>(saveFirstJob, null);
   const fields = state?.ok === false ? state.fields : undefined;
   // Location is only required for hybrid/onsite, so the field appears when it becomes
@@ -53,18 +91,36 @@ export function FirstJobForm({
 
   return (
     <form action={action} className="space-y-6" noValidate>
-      <Field label="Title" name="title" required defaultValue={str(job, 'title')}
-        placeholder="Stripe and serverless payments integration" errors={fields?.title} />
+      <Field
+        label="Title"
+        name="title"
+        required
+        defaultValue={str(job, 'title')}
+        placeholder="Stripe and serverless payments integration"
+        errors={fields?.title}
+      />
 
       <div className="space-y-1.5">
-        <label htmlFor="description" className="block text-sm font-medium">What needs building?</label>
-        <textarea id="description" name="description" rows={7} defaultValue={str(job, 'description')}
-          aria-invalid={Boolean(fields?.description)} aria-describedby="desc-hint"
+        <label htmlFor="description" className="block text-sm font-medium">
+          What needs building?
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          rows={7}
+          defaultValue={str(job, 'description')}
+          aria-invalid={Boolean(fields?.description)}
+          aria-describedby="desc-hint"
           placeholder="The problem, what done looks like, and anything that has already been tried."
           className={`w-full rounded-[--radius] border bg-surface-raised p-3 placeholder:text-text-subtle
-            ${fields?.description ? 'border-danger' : 'border-border-strong'}`} />
-        <p id="desc-hint" className={`text-sm ${fields?.description ? 'text-danger' : 'text-text-muted'}`}>
-          {fields?.description?.[0] ?? 'At least 120 characters — a short brief gets poorly matched candidates.'}
+            ${fields?.description ? 'border-danger' : 'border-border-strong'}`}
+        />
+        <p
+          id="desc-hint"
+          className={`text-sm ${fields?.description ? 'text-danger' : 'text-text-muted'}`}
+        >
+          {fields?.description?.[0] ??
+            'At least 120 characters — a short brief gets poorly matched candidates.'}
         </p>
       </div>
 
@@ -78,8 +134,13 @@ export function FirstJobForm({
         <div className="flex flex-wrap gap-2">
           {ENGAGEMENTS.map(([value, label]) => (
             <label key={value} className="cursor-pointer">
-              <input type="radio" name="engagementType" value={value}
-                defaultChecked={(str(job, 'engagement_type') || 'fixed') === value} className="peer sr-only" />
+              <input
+                type="radio"
+                name="engagementType"
+                value={value}
+                defaultChecked={(str(job, 'engagement_type') || 'fixed') === value}
+                className="peer sr-only"
+              />
               <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-[--duration-fast] peer-checked:border-accent peer-checked:bg-accent-subtle">
                 {label}
               </span>
@@ -89,13 +150,36 @@ export function FirstJobForm({
       </fieldset>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Budget from" name="budgetMin" inputMode="decimal" defaultValue={str(job, 'budget_min')} placeholder="2000" />
-        <Field label="Budget to" name="budgetMax" inputMode="decimal" defaultValue={str(job, 'budget_max')} placeholder="4000" errors={fields?.budgetMax} />
+        <Field
+          label="Budget from"
+          name="budgetMin"
+          inputMode="decimal"
+          defaultValue={str(job, 'budget_min')}
+          placeholder="2000"
+        />
+        <Field
+          label="Budget to"
+          name="budgetMax"
+          inputMode="decimal"
+          defaultValue={str(job, 'budget_max')}
+          placeholder="4000"
+          errors={fields?.budgetMax}
+        />
         <div className="space-y-1.5">
-          <label htmlFor="currency" className="block text-sm font-medium">Currency</label>
-          <select id="currency" name="currency" defaultValue={str(job, 'currency') || 'USD'}
-            className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3">
-            {['USD', 'EUR', 'GBP', 'CHF'].map((c) => <option key={c} value={c}>{c}</option>)}
+          <label htmlFor="currency" className="block text-sm font-medium">
+            Currency
+          </label>
+          <select
+            id="currency"
+            name="currency"
+            defaultValue={str(job, 'currency') || 'USD'}
+            className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3"
+          >
+            {['USD', 'EUR', 'GBP', 'CHF'].map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -105,8 +189,14 @@ export function FirstJobForm({
         <div className="flex flex-wrap gap-2">
           {LOCATIONS.map(([value, label]) => (
             <label key={value} className="cursor-pointer">
-              <input type="radio" name="locationType" value={value} checked={locationType === value}
-                onChange={() => setLocationType(value)} className="peer sr-only" />
+              <input
+                type="radio"
+                name="locationType"
+                value={value}
+                checked={locationType === value}
+                onChange={() => setLocationType(value)}
+                className="peer sr-only"
+              />
               <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-[--duration-fast] peer-checked:border-accent peer-checked:bg-accent-subtle">
                 {label}
               </span>
@@ -115,14 +205,21 @@ export function FirstJobForm({
         </div>
         {locationType !== 'remote' && (
           <div className="mt-3">
-            <Field label="Where?" name="location" defaultValue={str(job, 'location')}
-              placeholder="Zurich" errors={fields?.location} />
+            <Field
+              label="Where?"
+              name="location"
+              defaultValue={str(job, 'location')}
+              placeholder="Zurich"
+              errors={fields?.location}
+            />
           </div>
         )}
       </fieldset>
 
       {state?.ok === false && !state.fields && (
-        <p role="alert" className="text-sm text-danger">{state.message}</p>
+        <p role="alert" className="text-sm text-danger">
+          {state.message}
+        </p>
       )}
       <Submit label="Continue" />
     </form>
@@ -136,7 +233,10 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
     return (
       <p className="text-text-muted">
         No draft yet —{' '}
-        <Link href="/onboarding/client/job" className="text-accent hover:underline">write your brief</Link>.
+        <Link href="/onboarding/client/job" className="text-accent hover:underline">
+          write your brief
+        </Link>
+        .
       </p>
     );
   }
@@ -145,15 +245,21 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
     <div className="space-y-6">
       <article className="rounded-[--radius] border border-border-base bg-surface-raised p-5">
         <h2 className="font-medium">{str(job, 'title')}</h2>
-        <p className="mt-2 whitespace-pre-line text-sm text-text-muted">{str(job, 'description')}</p>
+        <p className="mt-2 whitespace-pre-line text-sm text-text-muted">
+          {str(job, 'description')}
+        </p>
       </article>
 
       <form action={action} className="space-y-4">
         <p className="text-text-muted text-pretty">
-          Publishing makes this brief public so developers can find and apply to it. You can
-          close it at any time.
+          Publishing makes this brief public so developers can find and apply to it. You can close
+          it at any time.
         </p>
-        {state?.ok === false && <p role="alert" className="text-sm text-danger">{state.message}</p>}
+        {state?.ok === false && (
+          <p role="alert" className="text-sm text-danger">
+            {state.message}
+          </p>
+        )}
         <Submit label="Publish this brief" />
       </form>
     </div>

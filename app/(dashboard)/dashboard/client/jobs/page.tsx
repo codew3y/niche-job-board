@@ -10,11 +10,16 @@ export const metadata: Metadata = { title: 'Jobs' };
 
 export default async function ClientJobsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   const { data: client } = await supabase
-    .from('client_profiles').select('id').eq('user_id', user.id).maybeSingle();
+    .from('client_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
 
   const { data: jobs } = client
     ? await supabase
@@ -34,7 +39,9 @@ export default async function ClientJobsPage() {
               <span className="font-medium">{job.title}</span>
               <span
                 className={`rounded-full px-2.5 py-0.5 text-xs ${
-                  job.status === 'open' ? 'bg-success/15 text-success' : 'bg-surface-sunken text-text-subtle'
+                  job.status === 'open'
+                    ? 'bg-success/15 text-success'
+                    : 'bg-surface-sunken text-text-subtle'
                 }`}
               >
                 {job.status}
@@ -46,7 +53,11 @@ export default async function ClientJobsPage() {
         <EmptyState
           title="No briefs yet"
           body="Post one and we'll rank candidates against the work they've actually shipped."
-          action={<Link href="/onboarding/client/job" className="text-accent hover:underline">Write a brief</Link>}
+          action={
+            <Link href="/onboarding/client/job" className="text-accent hover:underline">
+              Write a brief
+            </Link>
+          }
         />
       )}
     </div>

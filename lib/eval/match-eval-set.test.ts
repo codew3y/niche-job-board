@@ -27,8 +27,10 @@ const profileIds = evalProfiles.map((p) => p.id);
 describe('eval set ↔ taxonomy', () => {
   it('only uses skill slugs that exist in the seed', () => {
     const unknown: string[] = [];
-    for (const j of evalJobs) for (const s of j.skills) if (!slugs.has(s)) unknown.push(`${j.id}: ${s}`);
-    for (const p of evalProfiles) for (const s of p.skills) if (!slugs.has(s)) unknown.push(`${p.id}: ${s}`);
+    for (const j of evalJobs)
+      for (const s of j.skills) if (!slugs.has(s)) unknown.push(`${j.id}: ${s}`);
+    for (const p of evalProfiles)
+      for (const s of p.skills) if (!slugs.has(s)) unknown.push(`${p.id}: ${s}`);
     expect(unknown).toEqual([]);
   });
 });

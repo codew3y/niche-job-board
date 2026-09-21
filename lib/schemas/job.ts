@@ -32,7 +32,8 @@ export const jobInput = z
       .max(20, 'Twenty skills at most — a long list matches nobody well.'),
   })
   .refine(
-    (v) => v.budgetMin === null || v.budgetMax === null || Number(v.budgetMin) <= Number(v.budgetMax),
+    (v) =>
+      v.budgetMin === null || v.budgetMax === null || Number(v.budgetMin) <= Number(v.budgetMax),
     { path: ['budgetMax'], message: 'Maximum budget must be at least the minimum.' },
   )
   .refine((v) => v.skills.some((s) => s.isRequired), {
@@ -48,11 +49,13 @@ export const jobInput = z
  * Publishing applies the deadline rule; saving a draft does not. A draft written on Friday
  * with a Monday deadline should still be editable on Tuesday rather than refusing to save.
  */
-export const publishJobInput = z.object({
-  deadline: z.coerce.date().nullable().optional(),
-}).refine((v) => !v.deadline || v.deadline.getTime() > Date.now(), {
-  path: ['deadline'],
-  message: 'The deadline has already passed.',
-});
+export const publishJobInput = z
+  .object({
+    deadline: z.coerce.date().nullable().optional(),
+  })
+  .refine((v) => !v.deadline || v.deadline.getTime() > Date.now(), {
+    path: ['deadline'],
+    message: 'The deadline has already passed.',
+  });
 
 export type JobInput = z.infer<typeof jobInput>;

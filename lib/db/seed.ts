@@ -51,22 +51,76 @@ const pick = <T>(xs: readonly T[]): T => xs[Math.floor(rand() * xs.length)]!;
 const pickMany = <T>(xs: readonly T[], n: number): T[] => {
   const pool = [...xs];
   const out: T[] = [];
-  while (out.length < n && pool.length) out.push(...pool.splice(Math.floor(rand() * pool.length), 1));
+  while (out.length < n && pool.length)
+    out.push(...pool.splice(Math.floor(rand() * pool.length), 1));
   return out;
 };
 const int = (lo: number, hi: number) => lo + Math.floor(rand() * (hi - lo + 1));
 
 // ───────────────────────── synthetic identities ─────────────────────────
 const FIRST = [
-  'Amara', 'Bruno', 'Chiara', 'Dev', 'Elif', 'Farid', 'Greta', 'Hugo', 'Ines', 'Jonas',
-  'Kaia', 'Luca', 'Mira', 'Nils', 'Oona', 'Pablo', 'Quinn', 'Rafa', 'Sana', 'Tomas',
-  'Ulla', 'Viktor', 'Wren', 'Xime', 'Yusuf', 'Zora', 'Ada', 'Bo', 'Cato', 'Dagny',
+  'Amara',
+  'Bruno',
+  'Chiara',
+  'Dev',
+  'Elif',
+  'Farid',
+  'Greta',
+  'Hugo',
+  'Ines',
+  'Jonas',
+  'Kaia',
+  'Luca',
+  'Mira',
+  'Nils',
+  'Oona',
+  'Pablo',
+  'Quinn',
+  'Rafa',
+  'Sana',
+  'Tomas',
+  'Ulla',
+  'Viktor',
+  'Wren',
+  'Xime',
+  'Yusuf',
+  'Zora',
+  'Ada',
+  'Bo',
+  'Cato',
+  'Dagny',
 ];
 const LAST = [
-  'Alder', 'Brandt', 'Costa', 'Duval', 'Eriksen', 'Ferrer', 'Grimm', 'Haas', 'Ibori',
-  'Janos', 'Keller', 'Lindqvist', 'Moretti', 'Novak', 'Okafor', 'Pryce', 'Quental',
-  'Rossi', 'Soto', 'Tamm', 'Ueda', 'Vance', 'Wyatt', 'Ximenes', 'Yilmaz', 'Zegers',
-  'Bauer', 'Cortes', 'Dahl', 'Engel',
+  'Alder',
+  'Brandt',
+  'Costa',
+  'Duval',
+  'Eriksen',
+  'Ferrer',
+  'Grimm',
+  'Haas',
+  'Ibori',
+  'Janos',
+  'Keller',
+  'Lindqvist',
+  'Moretti',
+  'Novak',
+  'Okafor',
+  'Pryce',
+  'Quental',
+  'Rossi',
+  'Soto',
+  'Tamm',
+  'Ueda',
+  'Vance',
+  'Wyatt',
+  'Ximenes',
+  'Yilmaz',
+  'Zegers',
+  'Bauer',
+  'Cortes',
+  'Dahl',
+  'Engel',
 ];
 
 /**
@@ -80,8 +134,14 @@ const ARCHETYPES = [
     bio: 'I build checkout and billing flows that survive contact with production: signed webhooks, idempotent replay, and reconciliation you can audit. Mostly Next.js on Vercel with Postgres behind it.',
     skills: ['typescript', 'nextjs', 'payment-integration', 'serverless', 'webhooks', 'postgresql'],
     items: [
-      ['Subscription checkout rebuild', 'Replaced a hand-rolled checkout with Stripe Checkout + webhook reconciliation. Failed payments fell from 4.1% to 0.6% over two months.'],
-      ['Webhook retry worker', 'Queue-backed retry with exponential backoff and a dead-letter table. Cleared a backlog of ~12k unprocessed events.'],
+      [
+        'Subscription checkout rebuild',
+        'Replaced a hand-rolled checkout with Stripe Checkout + webhook reconciliation. Failed payments fell from 4.1% to 0.6% over two months.',
+      ],
+      [
+        'Webhook retry worker',
+        'Queue-backed retry with exponential backoff and a dead-letter table. Cleared a backlog of ~12k unprocessed events.',
+      ],
     ],
     rate: [65, 110] as const,
   },
@@ -91,8 +151,14 @@ const ARCHETYPES = [
     bio: 'CRM-to-billing plumbing. I wire HubSpot, Zoho and Stripe together with n8n or custom workers — OAuth apps, scheduled reconciliation, dead-letter handling, and alerting that names the failing record.',
     skills: ['n8n', 'zapier', 'hubspot', 'oauth', 'etl', 'cron', 'rest-api-integration'],
     items: [
-      ['Two-way CRM ↔ billing sync', 'Bidirectional contact and invoice sync with conflict rules. Cut a 6-hour weekly manual reconciliation to zero.'],
-      ['Order routing automation', 'Rules engine over incoming orders with a human-approval step for exceptions.'],
+      [
+        'Two-way CRM ↔ billing sync',
+        'Bidirectional contact and invoice sync with conflict rules. Cut a 6-hour weekly manual reconciliation to zero.',
+      ],
+      [
+        'Order routing automation',
+        'Rules engine over incoming orders with a human-approval step for exceptions.',
+      ],
     ],
     rate: [55, 95] as const,
   },
@@ -100,10 +166,24 @@ const ARCHETYPES = [
     key: 'ai',
     headline: 'AI application developer — RAG & agents',
     bio: 'Retrieval systems that can be evaluated rather than demoed. pgvector on Supabase, LLM APIs, retrieval tuning, and an eval harness so improvements are provable. I care about refusal behaviour as much as recall.',
-    skills: ['rag', 'vector-search', 'supabase', 'llm-integration', 'prompt-engineering', 'llm-evals', 'chatbots'],
+    skills: [
+      'rag',
+      'vector-search',
+      'supabase',
+      'llm-integration',
+      'prompt-engineering',
+      'llm-evals',
+      'chatbots',
+    ],
     items: [
-      ['Documentation assistant', 'RAG over 4k support articles with a 120-case eval set. Answer accuracy 71% → 89% after chunking and reranking changes.'],
-      ['Support bot with guardrails', 'Refusal and escalation rules so the bot declines policy questions instead of inventing answers.'],
+      [
+        'Documentation assistant',
+        'RAG over 4k support articles with a 120-case eval set. Answer accuracy 71% → 89% after chunking and reranking changes.',
+      ],
+      [
+        'Support bot with guardrails',
+        'Refusal and escalation rules so the bot declines policy questions instead of inventing answers.',
+      ],
     ],
     rate: [80, 140] as const,
   },
@@ -111,10 +191,24 @@ const ARCHETYPES = [
     key: 'php',
     headline: 'Laravel & infrastructure generalist',
     bio: 'I take over neglected applications. Containerise them, add CI, harden the server, and fix the queries that are actually slow rather than the ones that look slow.',
-    skills: ['laravel', 'php', 'mysql', 'docker', 'github-actions', 'linux-admin', 'database-design'],
+    skills: [
+      'laravel',
+      'php',
+      'mysql',
+      'docker',
+      'github-actions',
+      'linux-admin',
+      'database-design',
+    ],
     items: [
-      ['Legacy monolith → Docker', 'Containerised a 9-year-old Laravel app, added CI, and cut deploys from 40 minutes of manual steps to 6 minutes.'],
-      ['Reporting query rescue', 'Index and query rewrite work that took a nightly report from 38 minutes to 90 seconds.'],
+      [
+        'Legacy monolith → Docker',
+        'Containerised a 9-year-old Laravel app, added CI, and cut deploys from 40 minutes of manual steps to 6 minutes.',
+      ],
+      [
+        'Reporting query rescue',
+        'Index and query rewrite work that took a nightly report from 38 minutes to 90 seconds.',
+      ],
     ],
     rate: [50, 85] as const,
   },
@@ -122,10 +216,23 @@ const ARCHETYPES = [
     key: 'ecommerce',
     headline: 'E-commerce developer — WooCommerce & Shopify',
     bio: 'Storefronts that load fast and rank. WooCommerce and Shopify builds, payment and shipping integrations, and the performance work that makes the difference on mobile.',
-    skills: ['woocommerce', 'wordpress', 'shopify', 'payment-integration', 'performance', 'developer-seo'],
+    skills: [
+      'woocommerce',
+      'wordpress',
+      'shopify',
+      'payment-integration',
+      'performance',
+      'developer-seo',
+    ],
     items: [
-      ['Homewares storefront', 'WooCommerce build with Stripe and PayPal. Mobile LCP 4.8s → 1.9s; organic sessions up 34% in a quarter.'],
-      ['Headless Shopify migration', 'Moved a themed store to a headless storefront without losing its existing URLs or rankings.'],
+      [
+        'Homewares storefront',
+        'WooCommerce build with Stripe and PayPal. Mobile LCP 4.8s → 1.9s; organic sessions up 34% in a quarter.',
+      ],
+      [
+        'Headless Shopify migration',
+        'Moved a themed store to a headless storefront without losing its existing URLs or rankings.',
+      ],
     ],
     rate: [45, 80] as const,
   },
@@ -133,9 +240,20 @@ const ARCHETYPES = [
     key: 'frontend',
     headline: 'Frontend engineer — React & design systems',
     bio: 'Interfaces and component systems in React and Next.js. Accessibility is part of the build, not a later audit: keyboard paths and focus states get written with the component.',
-    skills: ['react', 'nextjs', 'typescript', 'tailwind', 'accessibility', 'web-ux-build', 'testing'],
+    skills: [
+      'react',
+      'nextjs',
+      'typescript',
+      'tailwind',
+      'accessibility',
+      'web-ux-build',
+      'testing',
+    ],
     items: [
-      ['Design system in Storybook', '40-component library with keyboard and screen-reader coverage, adopted by three product teams.'],
+      [
+        'Design system in Storybook',
+        '40-component library with keyboard and screen-reader coverage, adopted by three product teams.',
+      ],
       ['Marketing site rebuild', 'Static-first rebuild. Lighthouse performance 62 → 98 on mobile.'],
     ],
     rate: [55, 100] as const,
@@ -144,10 +262,24 @@ const ARCHETYPES = [
     key: 'devops',
     headline: 'DevOps & platform engineer',
     bio: 'Containers, pipelines and infrastructure as code. I make deploys boring: Docker, Kubernetes where it earns its keep, Terraform, and monitoring that pages on symptoms rather than noise.',
-    skills: ['docker', 'kubernetes', 'terraform', 'github-actions', 'linux-admin', 'observability', 'aws'],
+    skills: [
+      'docker',
+      'kubernetes',
+      'terraform',
+      'github-actions',
+      'linux-admin',
+      'observability',
+      'aws',
+    ],
     items: [
-      ['Kubernetes migration', 'Moved 11 services off bare VMs. Deploy frequency went from weekly to on-demand.'],
-      ['Terraform module library', 'Reusable modules for networking and IAM, removing hand-clicked infrastructure.'],
+      [
+        'Kubernetes migration',
+        'Moved 11 services off bare VMs. Deploy frequency went from weekly to on-demand.',
+      ],
+      [
+        'Terraform module library',
+        'Reusable modules for networking and IAM, removing hand-clicked infrastructure.',
+      ],
     ],
     rate: [70, 120] as const,
   },
@@ -157,118 +289,164 @@ const ARCHETYPES = [
     bio: 'Cross-platform apps from first commit to store listing. React Native with Expo, offline-first data, and the release plumbing most quotes forget to include.',
     skills: ['react-native', 'typescript', 'firebase', 'ios', 'android', 'rest-api-integration'],
     items: [
-      ['Field-service app', 'Offline-first job sheets with conflict resolution on reconnect. Used daily by ~200 engineers.'],
-      ['Store release pipeline', 'Automated builds and submissions for both stores, cutting release overhead to one command.'],
+      [
+        'Field-service app',
+        'Offline-first job sheets with conflict resolution on reconnect. Used daily by ~200 engineers.',
+      ],
+      [
+        'Store release pipeline',
+        'Automated builds and submissions for both stores, cutting release overhead to one command.',
+      ],
     ],
     rate: [60, 105] as const,
   },
 ] as const;
 
 const COMPANIES = [
-  ['Northwind Logistics', 'Logistics'], ['Braid Health', 'Healthcare'],
-  ['Tallow & Co', 'Retail'], ['Kestrel Analytics', 'Data & analytics'],
-  ['Marlow Studio', 'Design agency'], ['Halden Fintech', 'Financial services'],
-  ['Pergola Labs', 'SaaS'], ['Ferrous Manufacturing', 'Manufacturing'],
-  ['Wavelet Media', 'Media'], ['Orchard Education', 'Education'],
-  ['Solaris Energy', 'Energy'], ['Cobalt Legal', 'Legal services'],
+  ['Northwind Logistics', 'Logistics'],
+  ['Braid Health', 'Healthcare'],
+  ['Tallow & Co', 'Retail'],
+  ['Kestrel Analytics', 'Data & analytics'],
+  ['Marlow Studio', 'Design agency'],
+  ['Halden Fintech', 'Financial services'],
+  ['Pergola Labs', 'SaaS'],
+  ['Ferrous Manufacturing', 'Manufacturing'],
+  ['Wavelet Media', 'Media'],
+  ['Orchard Education', 'Education'],
+  ['Solaris Energy', 'Energy'],
+  ['Cobalt Legal', 'Legal services'],
 ] as const;
 
 /** Job templates. The first five mirror the evaluation briefs so seeded data matches the eval. */
 const JOB_TEMPLATES = [
   {
     title: 'Stripe + serverless payments integration',
-    description: 'Our Next.js storefront needs Stripe Checkout and reliable webhook handling on Vercel serverless functions. Idempotency and retry behaviour matter more to us than UI polish — we have been burned by duplicate charges before.',
+    description:
+      'Our Next.js storefront needs Stripe Checkout and reliable webhook handling on Vercel serverless functions. Idempotency and retry behaviour matter more to us than UI polish — we have been burned by duplicate charges before.',
     skills: ['payment-integration', 'nextjs', 'serverless', 'webhooks', 'typescript'],
-    engagement: 'fixed' as const, budget: [2000, 4000] as const,
+    engagement: 'fixed' as const,
+    budget: [2000, 4000] as const,
   },
   {
     title: 'HubSpot ↔ Stripe operations sync',
-    description: 'Keep HubSpot contacts and Stripe invoices in sync in both directions using n8n or Zapier. Needs OAuth app setup, scheduled reconciliation, retry on failure, and alerting that tells us which record broke.',
+    description:
+      'Keep HubSpot contacts and Stripe invoices in sync in both directions using n8n or Zapier. Needs OAuth app setup, scheduled reconciliation, retry on failure, and alerting that tells us which record broke.',
     skills: ['n8n', 'zapier', 'hubspot', 'oauth', 'cron', 'etl'],
-    engagement: 'fixed' as const, budget: [1500, 3000] as const,
+    engagement: 'fixed' as const,
+    budget: [1500, 3000] as const,
   },
   {
     title: 'RAG support chatbot over our documentation',
-    description: 'Retrieval-augmented chatbot on Supabase and pgvector answering from our docs. We need an eval harness and guardrails — a previous attempt confidently invented our refund policy.',
+    description:
+      'Retrieval-augmented chatbot on Supabase and pgvector answering from our docs. We need an eval harness and guardrails — a previous attempt confidently invented our refund policy.',
     skills: ['rag', 'vector-search', 'supabase', 'llm-integration', 'llm-evals', 'chatbots'],
-    engagement: 'fixed' as const, budget: [4000, 7000] as const,
+    engagement: 'fixed' as const,
+    budget: [4000, 7000] as const,
   },
   {
     title: 'Laravel + MySQL app: containerise and tune',
-    description: 'We inherited a Laravel 9 application running on a bare VPS. We want it on Docker with CI, and the slow queries on the reporting page fixed.',
+    description:
+      'We inherited a Laravel 9 application running on a bare VPS. We want it on Docker with CI, and the slow queries on the reporting page fixed.',
     skills: ['laravel', 'php', 'mysql', 'docker', 'github-actions', 'database-design'],
-    engagement: 'hourly' as const, budget: [50, 80] as const,
+    engagement: 'hourly' as const,
+    budget: [50, 80] as const,
   },
   {
     title: 'WooCommerce store build',
-    description: 'WordPress and WooCommerce store for a small homewares brand. Stripe and PayPal checkout, fast on mobile, and product pages that actually rank.',
+    description:
+      'WordPress and WooCommerce store for a small homewares brand. Stripe and PayPal checkout, fast on mobile, and product pages that actually rank.',
     skills: ['woocommerce', 'wordpress', 'payment-integration', 'performance', 'developer-seo'],
-    engagement: 'fixed' as const, budget: [2000, 5000] as const,
+    engagement: 'fixed' as const,
+    budget: [2000, 5000] as const,
   },
   {
     title: 'Internal admin panel over our Postgres',
-    description: 'Operations team needs a usable admin interface over existing Postgres data: search, bulk edits, role-based access. Retool is fine, or a small custom app — we care about the workflow, not the tool.',
+    description:
+      'Operations team needs a usable admin interface over existing Postgres data: search, bulk edits, role-based access. Retool is fine, or a small custom app — we care about the workflow, not the tool.',
     skills: ['retool', 'postgresql', 'react', 'database-design'],
-    engagement: 'fixed' as const, budget: [3000, 6000] as const,
+    engagement: 'fixed' as const,
+    budget: [3000, 6000] as const,
   },
   {
     title: 'Shopify app for subscription boxes',
-    description: 'Private Shopify app managing subscription boxes: skip, swap and pause, with a customer portal. Liquid plus an embedded admin surface.',
+    description:
+      'Private Shopify app managing subscription boxes: skip, swap and pause, with a customer portal. Liquid plus an embedded admin surface.',
     skills: ['shopify', 'payment-integration', 'javascript', 'rest-api-integration'],
-    engagement: 'fixed' as const, budget: [5000, 9000] as const,
+    engagement: 'fixed' as const,
+    budget: [5000, 9000] as const,
   },
   {
     title: 'React Native app — MVP build',
-    description: 'Cross-platform MVP for a field-service product. Offline-first job sheets, photo capture, sync on reconnect, and both store submissions.',
+    description:
+      'Cross-platform MVP for a field-service product. Offline-first job sheets, photo capture, sync on reconnect, and both store submissions.',
     skills: ['react-native', 'typescript', 'firebase', 'ios', 'android'],
-    engagement: 'fixed' as const, budget: [8000, 15000] as const,
+    engagement: 'fixed' as const,
+    budget: [8000, 15000] as const,
   },
   {
     title: 'Kubernetes migration and CI overhaul',
-    description: 'Move eleven services off hand-managed VMs onto Kubernetes, with Terraform for the infrastructure and GitHub Actions for delivery. Monitoring and alerting included.',
+    description:
+      'Move eleven services off hand-managed VMs onto Kubernetes, with Terraform for the infrastructure and GitHub Actions for delivery. Monitoring and alerting included.',
     skills: ['kubernetes', 'terraform', 'docker', 'github-actions', 'observability', 'aws'],
-    engagement: 'hourly' as const, budget: [75, 120] as const,
+    engagement: 'hourly' as const,
+    budget: [75, 120] as const,
   },
   {
     title: 'Accessibility audit and remediation',
-    description: 'WCAG 2.2 AA audit of our customer portal and the fixes to go with it. Keyboard paths, focus management and screen-reader behaviour, with a report we can show a client.',
+    description:
+      'WCAG 2.2 AA audit of our customer portal and the fixes to go with it. Keyboard paths, focus management and screen-reader behaviour, with a report we can show a client.',
     skills: ['accessibility', 'react', 'html-css', 'testing'],
-    engagement: 'fixed' as const, budget: [3500, 6000] as const,
+    engagement: 'fixed' as const,
+    budget: [3500, 6000] as const,
   },
   {
     title: 'Data pipeline: Airtable → warehouse',
-    description: 'Nightly ETL from Airtable and a handful of SaaS APIs into BigQuery, with schema drift handling and a failure alert that is actually actionable.',
+    description:
+      'Nightly ETL from Airtable and a handful of SaaS APIs into BigQuery, with schema drift handling and a failure alert that is actually actionable.',
     skills: ['etl', 'bigquery', 'python', 'airtable', 'cron'],
-    engagement: 'fixed' as const, budget: [4000, 8000] as const,
+    engagement: 'fixed' as const,
+    budget: [4000, 8000] as const,
   },
   {
     title: 'Invoice OCR and document extraction',
-    description: 'Extract structured line items from supplier invoices (PDF and scanned) into our accounting system. Needs a confidence threshold and a human review queue for anything uncertain.',
+    description:
+      'Extract structured line items from supplier invoices (PDF and scanned) into our accounting system. Needs a confidence threshold and a human review queue for anything uncertain.',
     skills: ['computer-vision', 'python', 'llm-integration', 'rest-api-integration'],
-    engagement: 'fixed' as const, budget: [5000, 10000] as const,
+    engagement: 'fixed' as const,
+    budget: [5000, 10000] as const,
   },
   {
     title: 'Performance rescue on a Next.js site',
-    description: 'Our marketing site fails Core Web Vitals on mobile and it is hurting acquisition. We want measurements first, then the fixes that move them.',
+    description:
+      'Our marketing site fails Core Web Vitals on mobile and it is hurting acquisition. We want measurements first, then the fixes that move them.',
     skills: ['performance', 'nextjs', 'react', 'developer-seo'],
-    engagement: 'fixed' as const, budget: [2500, 4500] as const,
+    engagement: 'fixed' as const,
+    budget: [2500, 4500] as const,
   },
   {
     title: 'Google Workspace automation for onboarding',
-    description: 'Automate employee onboarding across Google Workspace: account creation, drive permissions, calendar invites, and a checklist that chases the stragglers.',
+    description:
+      'Automate employee onboarding across Google Workspace: account creation, drive permissions, calendar invites, and a checklist that chases the stragglers.',
     skills: ['google-apps-script', 'oauth', 'rest-api-integration', 'cron'],
-    engagement: 'fixed' as const, budget: [1200, 2500] as const,
+    engagement: 'fixed' as const,
+    budget: [1200, 2500] as const,
   },
   {
     title: 'Odoo customisation for inventory',
-    description: 'Customise Odoo inventory for a two-warehouse operation: custom fields, transfer rules, and a barcode-friendly picking view. Python module work, not configuration alone.',
+    description:
+      'Customise Odoo inventory for a two-warehouse operation: custom fields, transfer rules, and a barcode-friendly picking view. Python module work, not configuration alone.',
     skills: ['odoo', 'python', 'postgresql', 'docker'],
-    engagement: 'hourly' as const, budget: [55, 90] as const,
+    engagement: 'hourly' as const,
+    budget: [55, 90] as const,
   },
 ] as const;
 
 const slugify = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 60);
 
 async function main() {
   const { db, sql: pg } = createDbClient();
@@ -361,7 +539,13 @@ async function main() {
         currency: pick(['USD', 'EUR', 'GBP', 'CHF']),
         availability: pick(['full_time', 'part_time', 'occasional'] as const),
         yearsExperience: int(2, 14),
-        timezone: pick(['Europe/Zurich', 'Europe/London', 'Europe/Berlin', 'America/New_York', 'Asia/Manila']),
+        timezone: pick([
+          'Europe/Zurich',
+          'Europe/London',
+          'Europe/Berlin',
+          'America/New_York',
+          'Asia/Manila',
+        ]),
         websiteUrl: hasSite ? `https://example.test/${handle}` : null,
         githubUrl: rand() > 0.35 ? `https://github.test/${handle}` : null,
         linkedinUrl: rand() > 0.6 ? `https://linkedin.test/in/${handle}` : null,
@@ -393,9 +577,17 @@ async function main() {
         const [title, outcome] = arch.items[k % arch.items.length]!;
         await db.insert(portfolioItems).values({
           talentId: profile!.id,
-          title: n > arch.items.length && k >= arch.items.length ? `${title} (second engagement)` : title,
+          title:
+            n > arch.items.length && k >= arch.items.length
+              ? `${title} (second engagement)`
+              : title,
           description: outcome,
-          role: pick(['Sole developer', 'Tech lead', 'Contract developer', 'Part of a team of three']),
+          role: pick([
+            'Sole developer',
+            'Tech lead',
+            'Contract developer',
+            'Part of a team of three',
+          ]),
           outcome,
           techStack: pickMany([...arch.skills], Math.min(4, arch.skills.length)),
           repoUrl: rand() > 0.45 ? `https://github.test/${handle}/project-${k + 1}` : null,
@@ -463,9 +655,9 @@ async function main() {
 
     const ids = tpl.skills.map((s) => skillId.get(s)).filter((x): x is string => Boolean(x));
     if (ids.length) {
-      await db.insert(jobSkills).values(
-        ids.map((id, k) => ({ jobId: job!.id, skillId: id, isRequired: k < 3 })),
-      );
+      await db
+        .insert(jobSkills)
+        .values(ids.map((id, k) => ({ jobId: job!.id, skillId: id, isRequired: k < 3 })));
     }
     jobCount++;
   }
@@ -474,7 +666,10 @@ async function main() {
   // The evidence distribution is the number worth printing: if it ever collapses to
   // "everyone is complete", the thin-profile case stops being visible in the product.
   const [dist] = await db.execute<{
-    site_only: number; items_only: number; both: number; neither: number;
+    site_only: number;
+    items_only: number;
+    both: number;
+    neither: number;
   }>(sql`
     select
       count(*) filter (where website_url is not null and portfolio_item_count = 0) as site_only,

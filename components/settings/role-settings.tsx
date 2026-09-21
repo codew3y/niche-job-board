@@ -94,7 +94,9 @@ function RoleAction({
       <input type="hidden" name="role" value={role} />
       <Pending label={`Add ${role} profile`} />
       {state?.ok === false && (
-        <p role="alert" className="mt-2 text-sm text-danger">{state.message}</p>
+        <p role="alert" className="mt-2 text-sm text-danger">
+          {state.message}
+        </p>
       )}
     </form>
   );

@@ -45,14 +45,14 @@ database it measured.
 
 ## How the pieces fit
 
-| Path | What lives there |
-|---|---|
-| `lib/db/schema/` | Drizzle schema — 20 tables, 40 RLS policies. **The source of truth**; `docs/schema.md` is generated from it |
-| `lib/db/migrations/` | Generated SQL plus hand-written triggers and grants |
-| `lib/schemas/` | Zod schemas, shared by client forms and server actions |
-| `lib/actions/` | Server actions. Order is always: auth → authz → validate → act → revalidate |
-| `lib/seeds/skills.seed.ts` | The 126-skill taxonomy, with sources per row |
-| `lib/eval/` | Hand-labelled match evaluation set for Phase 4 |
+| Path                       | What lives there                                                                                            |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `lib/db/schema/`           | Drizzle schema — 20 tables, 40 RLS policies. **The source of truth**; `docs/schema.md` is generated from it |
+| `lib/db/migrations/`       | Generated SQL plus hand-written triggers and grants                                                         |
+| `lib/schemas/`             | Zod schemas, shared by client forms and server actions                                                      |
+| `lib/actions/`             | Server actions. Order is always: auth → authz → validate → act → revalidate                                 |
+| `lib/seeds/skills.seed.ts` | The 126-skill taxonomy, with sources per row                                                                |
+| `lib/eval/`                | Hand-labelled match evaluation set for Phase 4                                                              |
 
 ## Things worth knowing before changing anything
 

@@ -10,7 +10,9 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') as EmailOtpType | null;
 
   if (!token_hash || !type) {
-    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('That link is not valid.')}`);
+    return NextResponse.redirect(
+      `${origin}/login?error=${encodeURIComponent('That link is not valid.')}`,
+    );
   }
 
   const supabase = await createClient();
@@ -22,5 +24,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.redirect(`${origin}${type === 'recovery' ? '/reset-password/confirm' : '/select-role'}`);
+  return NextResponse.redirect(
+    `${origin}${type === 'recovery' ? '/reset-password/confirm' : '/select-role'}`,
+  );
 }

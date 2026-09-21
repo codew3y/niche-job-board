@@ -61,7 +61,9 @@ export function WizardFrame({
                     </span>
                   </span>
                 )}
-                {i < steps.length - 1 && <span className="h-px flex-1 bg-border-base" aria-hidden="true" />}
+                {i < steps.length - 1 && (
+                  <span className="h-px flex-1 bg-border-base" aria-hidden="true" />
+                )}
               </li>
             );
           })}

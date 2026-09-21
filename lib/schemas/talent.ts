@@ -50,7 +50,9 @@ export const talentProfileInput = z
   })
   .refine(
     (v) =>
-      v.hourlyRateMin === null || v.hourlyRateMax === null || Number(v.hourlyRateMin) <= Number(v.hourlyRateMax),
+      v.hourlyRateMin === null ||
+      v.hourlyRateMax === null ||
+      Number(v.hourlyRateMin) <= Number(v.hourlyRateMax),
     { path: ['hourlyRateMax'], message: 'Maximum rate must be at least the minimum.' },
   );
 
@@ -64,10 +66,7 @@ export const portfolioItemInput = z
     role: trimmed.max(120).nullable().optional(),
     /** What changed because of the work. This is the field that makes an entry credible. */
     outcome: richText(500, 'Outcome').nullable().optional(),
-    techStack: z
-      .array(trimmed.min(1).max(60))
-      .max(20, 'Twenty technologies at most.')
-      .default([]),
+    techStack: z.array(trimmed.min(1).max(60)).max(20, 'Twenty technologies at most.').default([]),
     repoUrl: optionalHttpsUrl,
     liveUrl: optionalHttpsUrl,
     coverImageUrl: optionalHttpsUrl,

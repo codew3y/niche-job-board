@@ -1,13 +1,5 @@
 import { sql } from 'drizzle-orm';
-import {
-  boolean,
-  index,
-  pgPolicy,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-} from 'drizzle-orm/pg-core';
+import { boolean, index, pgPolicy, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { anonRole, authUsers, authenticatedRole } from 'drizzle-orm/supabase';
 
 import { skillCategory } from './enums';
@@ -28,7 +20,10 @@ export const skills = pgTable(
     slug: text('slug').notNull().unique(),
     category: skillCategory('category').notNull(),
     /** Alias strings that resolve TO this row. Globally unique — see skills.seed.test.ts. */
-    aliases: text('aliases').array().notNull().default(sql`'{}'::text[]`),
+    aliases: text('aliases')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     isApproved: boolean('is_approved').notNull().default(false),
     /** Who asked for it, when it came in via the request path. */
     requestedBy: uuid('requested_by').references(() => authUsers.id, { onDelete: 'set null' }),

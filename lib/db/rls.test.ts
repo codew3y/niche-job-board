@@ -82,7 +82,10 @@ const ids = {
  *
  * Setting both makes this suite correct against either generation.
  */
-async function asUser<T>(userId: string, fn: (tx: postgres.TransactionSql) => Promise<T>): Promise<T> {
+async function asUser<T>(
+  userId: string,
+  fn: (tx: postgres.TransactionSql) => Promise<T>,
+): Promise<T> {
   return sql.begin(async (tx) => {
     await tx.unsafe(`SET LOCAL ROLE authenticated`);
     await tx`select set_config('request.jwt.claim.sub', ${userId}, true)`;
@@ -167,7 +170,6 @@ afterAll(async () => {
 
 const maybe = () => (reachable ? describe : describe.skip);
 
-
 maybe()('RLS: messaging is participant-only', () => {
   // ADR-007 D1 made this the highest-consequence surface in the product: a leak here exposes
   // private correspondence, not a draft job post.
@@ -196,17 +198,23 @@ maybe()('RLS: messaging is participant-only', () => {
 
   it('refuses a message sent as someone else', async () => {
     await expect(
-      asUser(MALLORY, (tx) =>
-        tx`insert into messages (conversation_id, sender_id, body)
-           values (${ids.conversation}, ${BOB}, 'spoofed')`),
+      asUser(
+        MALLORY,
+        (tx) =>
+          tx`insert into messages (conversation_id, sender_id, body)
+           values (${ids.conversation}, ${BOB}, 'spoofed')`,
+      ),
     ).rejects.toThrow(/row-level security/i);
   });
 
   it('refuses a third party injecting into someone else’s thread', async () => {
     await expect(
-      asUser(MALLORY, (tx) =>
-        tx`insert into messages (conversation_id, sender_id, body)
-           values (${ids.conversation}, ${MALLORY}, 'hello')`),
+      asUser(
+        MALLORY,
+        (tx) =>
+          tx`insert into messages (conversation_id, sender_id, body)
+           values (${ids.conversation}, ${MALLORY}, 'hello')`,
+      ),
     ).rejects.toThrow(/row-level security/i);
   });
 });
@@ -218,9 +226,12 @@ maybe()('RLS: blocks', () => {
     try {
       // The block is re-evaluated per message, not only at thread creation.
       await expect(
-        asUser(BOB, (tx) =>
-          tx`insert into messages (conversation_id, sender_id, body)
-             values (${ids.conversation}, ${BOB}, 'still here')`),
+        asUser(
+          BOB,
+          (tx) =>
+            tx`insert into messages (conversation_id, sender_id, body)
+             values (${ids.conversation}, ${BOB}, 'still here')`,
+        ),
       ).rejects.toThrow(/row-level security/i);
 
       // Bob must not be able to discover that he was blocked by reading the table.
@@ -233,8 +244,10 @@ maybe()('RLS: blocks', () => {
 
   it('refuses a block created on someone else’s behalf', async () => {
     await expect(
-      asUser(MALLORY, (tx) =>
-        tx`insert into blocks (blocker_id, blocked_id) values (${ALICE}, ${BOB})`),
+      asUser(
+        MALLORY,
+        (tx) => tx`insert into blocks (blocker_id, blocked_id) values (${ALICE}, ${BOB})`,
+      ),
     ).rejects.toThrow(/row-level security/i);
   });
 });
@@ -259,9 +272,12 @@ maybe()('RLS: applications are visible only to the two parties', () => {
 
   it('refuses an application filed on another talent’s behalf', async () => {
     await expect(
-      asUser(MALLORY, (tx) =>
-        tx`insert into applications (job_id, talent_id, cover_note)
-           values (${ids.job}, ${ids.aliceTalent}, 'not mine to send')`),
+      asUser(
+        MALLORY,
+        (tx) =>
+          tx`insert into applications (job_id, talent_id, cover_note)
+           values (${ids.job}, ${ids.aliceTalent}, 'not mine to send')`,
+      ),
     ).rejects.toThrow(/row-level security/i);
   });
 });

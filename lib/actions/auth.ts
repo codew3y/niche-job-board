@@ -18,8 +18,7 @@ import { createClient } from '../supabase/server';
  */
 
 export type ActionResult =
-  | { ok: true }
-  | { ok: false; message: string; fields?: Record<string, string[]> };
+  { ok: true } | { ok: false; message: string; fields?: Record<string, string[]> };
 
 /** Zod's field errors, flattened into the shape the forms render. */
 function fieldErrors(error: { issues: { path: PropertyKey[]; message: string }[] }) {
@@ -38,7 +37,10 @@ function safeNext(next: FormDataEntryValue | null): string | null {
   return value.startsWith('/') && !value.startsWith('//') ? value : null;
 }
 
-export async function signUp(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+export async function signUp(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
   const parsed = signupInput.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -68,7 +70,10 @@ export async function signUp(_prev: ActionResult | null, formData: FormData): Pr
   redirect('/verify');
 }
 
-export async function signIn(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+export async function signIn(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
   const parsed = loginInput.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -115,7 +120,9 @@ export async function signInWithProvider(formData: FormData): Promise<void> {
   });
 
   if (error || !data.url) {
-    redirect(`/login?error=${encodeURIComponent(`Could not start ${provider} sign-in. Try again.`)}`);
+    redirect(
+      `/login?error=${encodeURIComponent(`Could not start ${provider} sign-in. Try again.`)}`,
+    );
   }
   redirect(data.url);
 }
@@ -180,7 +187,9 @@ export async function selectRole(
   if (profileError) return { ok: false, message: 'Could not save your choice. Try again.' };
 
   revalidatePath('/', 'layout');
-  redirect(parsed.data.role === 'client' ? '/onboarding/client/company' : '/onboarding/talent/basics');
+  redirect(
+    parsed.data.role === 'client' ? '/onboarding/client/company' : '/onboarding/talent/basics',
+  );
 }
 
 /** Switch between roles the user already has. Does not create anything. */
@@ -262,7 +271,10 @@ export async function updatePassword(
  * `has_talent` / `has_client` flags are trigger-maintained — writing them here would give
  * two sources of truth for the same fact.
  */
-export async function addRole(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+export async function addRole(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
   const parsed = selectRoleInput.safeParse({ role: formData.get('role') });
   if (!parsed.success) return { ok: false, message: 'Unknown role.' };
 

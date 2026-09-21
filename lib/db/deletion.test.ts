@@ -151,13 +151,29 @@ maybe('account deletion', () => {
       return Number(r!.n);
     };
 
-    expect(await gone(sql`select count(*)::int as n from talent_profiles where user_id = ${LEAVER}`)).toBe(0);
-    expect(await gone(sql`select count(*)::int as n from portfolio_items where talent_id = ${fx.talentId}`)).toBe(0);
-    expect(await gone(sql`select count(*)::int as n from applications where talent_id = ${fx.talentId}`)).toBe(0);
-    expect(await gone(sql`select count(*)::int as n from saved_jobs where talent_id = ${fx.talentId}`)).toBe(0);
-    expect(await gone(sql`select count(*)::int as n from notifications where user_id = ${LEAVER}`)).toBe(0);
-    expect(await gone(sql`select count(*)::int as n from blocks where blocker_id = ${LEAVER}`)).toBe(0);
-    expect(await gone(sql`select count(*)::int as n from user_profiles where user_id = ${LEAVER}`)).toBe(0);
+    expect(
+      await gone(sql`select count(*)::int as n from talent_profiles where user_id = ${LEAVER}`),
+    ).toBe(0);
+    expect(
+      await gone(
+        sql`select count(*)::int as n from portfolio_items where talent_id = ${fx.talentId}`,
+      ),
+    ).toBe(0);
+    expect(
+      await gone(sql`select count(*)::int as n from applications where talent_id = ${fx.talentId}`),
+    ).toBe(0);
+    expect(
+      await gone(sql`select count(*)::int as n from saved_jobs where talent_id = ${fx.talentId}`),
+    ).toBe(0);
+    expect(
+      await gone(sql`select count(*)::int as n from notifications where user_id = ${LEAVER}`),
+    ).toBe(0);
+    expect(
+      await gone(sql`select count(*)::int as n from blocks where blocker_id = ${LEAVER}`),
+    ).toBe(0);
+    expect(
+      await gone(sql`select count(*)::int as n from user_profiles where user_id = ${LEAVER}`),
+    ).toBe(0);
 
     // The embedding lived on talent_profiles, so it goes with the row. An orphaned
     // vector(1536) derived from someone's bio is still their personal data.
@@ -184,12 +200,14 @@ maybe('account deletion', () => {
   it('redacts the leaver’s messages but keeps the stayer’s intact', async () => {
     await sql`delete from auth.users where id = ${LEAVER}`;
 
-    const [left] = await sql`select sender_id, body, redacted_reason from messages where id = ${fx.leaverMessageId}`;
+    const [left] =
+      await sql`select sender_id, body, redacted_reason from messages where id = ${fx.leaverMessageId}`;
     expect(left!.sender_id).toBeNull();
     expect(left!.body).toBe('[message removed — account deleted]');
     expect(left!.redacted_reason).toBe('account_deleted');
 
-    const [kept] = await sql`select sender_id, body, redacted_reason from messages where id = ${fx.stayerMessageId}`;
+    const [kept] =
+      await sql`select sender_id, body, redacted_reason from messages where id = ${fx.stayerMessageId}`;
     expect(kept!.sender_id).toBe(STAYER);
     expect(kept!.body).toBe('Great — can you start in March?');
     expect(kept!.redacted_reason).toBeNull();
@@ -198,7 +216,8 @@ maybe('account deletion', () => {
   it('does not touch the other party’s own data', async () => {
     await sql`delete from auth.users where id = ${LEAVER}`;
 
-    const [client] = await sql`select count(*)::int as n from client_profiles where id = ${fx.clientId}`;
+    const [client] =
+      await sql`select count(*)::int as n from client_profiles where id = ${fx.clientId}`;
     expect(client!.n).toBe(1);
     const [job] = await sql`select count(*)::int as n from jobs where id = ${fx.jobId}`;
     expect(job!.n).toBe(1);
