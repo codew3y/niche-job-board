@@ -282,7 +282,8 @@ async function main() {
     truncate table job_skills, jobs, client_profiles, item_media, portfolio_items,
                    talent_skills, talent_profiles, skills restart identity cascade`);
   await db.execute(
-    sql`delete from auth.users where raw_app_meta_data->>'seed' = 'niche-job-board'`,
+    // Matches the old tag too: renaming the project must not orphan users seeded under it.
+    sql`delete from auth.users where raw_app_meta_data->>'seed' in ('techselect', 'niche-job-board')`,
   );
 
   /** Creates a synthetic auth user and its user_profiles row, returning the id. */
@@ -295,7 +296,7 @@ async function main() {
                               created_at, updated_at, raw_app_meta_data)
       values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated',
               'authenticated', ${`${handle}@example.test`}, 'seed-not-a-real-password',
-              now(), now(), '{"seed":"niche-job-board"}'::jsonb)
+              now(), now(), '{"seed":"techselect"}'::jsonb)
       returning id`);
     const id = row!.id;
     await db.insert(userProfiles).values({ userId: id, displayName });

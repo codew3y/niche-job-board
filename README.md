@@ -1,4 +1,4 @@
-# niche-job-board
+# TechSelect
 
 A job board for **software, web and automation work** where shipped projects are the profile.
 Freelancers publish evidence of real work — an external portfolio, a GitHub, or in-app project

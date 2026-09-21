@@ -17,9 +17,9 @@ export function AuthCard({
       <div className="w-full max-w-sm">
         <Link
           href="/"
-          className="mb-8 block text-center font-mono text-sm text-text-subtle hover:text-text transition-colors duration-[--duration-fast]"
+          className="mb-8 block text-center text-sm font-semibold tracking-tight text-text-muted hover:text-text transition-colors duration-[--duration-fast]"
         >
-          nichejobboard
+          TechSelect
         </Link>
 
         <div className="rounded-[--radius] border border-border-base bg-surface-raised p-6 shadow-sm">

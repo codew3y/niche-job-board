@@ -32,8 +32,8 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
     <div className="flex min-h-full flex-col">
       <header className="sticky top-0 z-10 border-b border-border-base bg-surface/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-          <Link href="/" className="font-mono text-sm shrink-0">
-            nichejobboard
+          <Link href="/" className="shrink-0 font-semibold tracking-tight">
+            TechSelect
           </Link>
 
           <nav aria-label="Main" className="hidden sm:flex items-center gap-1 flex-1">

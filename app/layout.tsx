@@ -10,7 +10,7 @@ const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin']
 export const metadata: Metadata = {
   title: {
     default: 'Portfolio-first hiring for developers',
-    template: '%s · nichejobboard',
+    template: '%s · TechSelect',
   },
   description:
     'A job board for software, web and automation work where shipped projects are the profile — semantic matching over portfolio evidence, in both directions.',
