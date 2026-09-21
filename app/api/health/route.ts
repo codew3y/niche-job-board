@@ -38,7 +38,9 @@ export async function GET() {
       },
       { headers: { 'cache-control': 'no-store' } },
     );
-  } catch (e) {
+  } catch (_e) {
+    // Deliberately unused: the driver error can carry connection details, so it is never
+    // echoed to the caller. Log it server-side if this ever needs diagnosing.
     // 503 rather than 500: this is "dependency unavailable", which is what an uptime monitor
     // needs to distinguish from a bug in the app.
     return NextResponse.json(
