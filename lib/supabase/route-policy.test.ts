@@ -25,6 +25,26 @@ describe('signed out', () => {
   });
 });
 
+describe('the health endpoint', () => {
+  // The keep-alive depends on this. If /api/health ever redirects, the ping returns a
+  // cheerful 200 from the login page, the database is never touched, and the project
+  // pauses anyway — with a green check every three days saying it did not.
+  it('is reachable by everyone, in every state', () => {
+    for (const session of [anon, fresh, chosen, chosenClient, done]) {
+      expect(decideRoute('/api/health', session)).toBeNull();
+    }
+  });
+
+  it('so are the public browse pages, even mid-onboarding', () => {
+    // Browsing is not a privilege earned by finishing a wizard.
+    for (const session of [anon, fresh, chosen, done]) {
+      expect(decideRoute('/jobs', session)).toBeNull();
+      expect(decideRoute('/talent', session)).toBeNull();
+      expect(decideRoute('/', session)).toBeNull();
+    }
+  });
+});
+
 describe('signed in, no role chosen', () => {
   it('sends dashboards to role selection', () => {
     expect(decideRoute('/dashboard/client', fresh)).toBe('/select-role');

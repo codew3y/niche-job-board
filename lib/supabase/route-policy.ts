@@ -31,6 +31,9 @@ const PUBLIC_PREFIXES = [
   '/reset-password',
   '/auth/callback',
   '/auth/confirm',
+  // Must be public, and must stay public: the keep-alive pings it, and a redirect here
+  // would look like a healthy 200 while never touching the database.
+  '/api/health',
 ];
 
 /** Reachable before the role profile exists — onboarding must be here, see above. */
@@ -63,8 +66,19 @@ const dashboard = (role: 'talent' | 'client' | null) =>
 
 /** Where this request should go, or null to let it through. */
 export function decideRoute(path: string, session: Session): string | null {
+  // Public paths are public for EVERYONE, signed in or not. Checking this only for
+  // signed-out visitors meant a user mid-onboarding was redirected away from /jobs, /talent
+  // and /api/health — browsing is not a privilege you earn by finishing a wizard, and the
+  // keep-alive ping has no session at all.
+  if (isPublic(path)) {
+    // The one exception: someone fully onboarded has no reason to sit on the auth screens.
+    if (session.signedIn && session.hasRole && (path === '/login' || path === '/signup')) {
+      return dashboard(session.activeRole);
+    }
+    return null;
+  }
+
   if (!session.signedIn) {
-    if (isPublic(path)) return null;
     return `/login?next=${encodeURIComponent(path)}`;
   }
 
@@ -78,8 +92,6 @@ export function decideRoute(path: string, session: Session): string | null {
     // Mid-onboarding resumes where they were; otherwise they still have to choose.
     return session.hasChosen ? firstStep(session.activeRole) : '/select-role';
   }
-
-  if (path === '/login' || path === '/signup') return dashboard(session.activeRole);
 
   return null;
 }

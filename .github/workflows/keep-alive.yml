@@ -1,0 +1,33 @@
+name: Keep-alive
+
+# Stops the free Supabase project pausing, and doubles as the uptime check §9 asks for.
+#
+# Supabase pauses a free project after 7 days without DATABASE activity. /api/health runs a
+# real query, so hitting it counts; pinging the homepage would not.
+#
+# Every 3 days gives two chances to recover before the 7-day window closes. Daily would be
+# wasteful; weekly would leave no margin if one run failed.
+on:
+  schedule:
+    - cron: '17 6 */3 * *' # 06:17 UTC, every third day
+  workflow_dispatch: # so it can be triggered by hand before a demo
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping health endpoint
+        run: |
+          echo "Pinging ${{ vars.SITE_URL || 'https://techselect.vercel.app' }}/api/health"
+          RESPONSE=$(curl -sS --max-time 30 --fail-with-body \
+            "${{ vars.SITE_URL || 'https://techselect.vercel.app' }}/api/health") || {
+              echo "::error::Health check failed. The database may be paused or the deploy is down."
+              echo "$RESPONSE"
+              exit 1
+            }
+          echo "$RESPONSE"
+          echo "$RESPONSE" | grep -q '"database":"reachable"' || {
+            echo "::error::Endpoint responded but the database was not reachable."
+            exit 1
+          }
+          echo "Database reachable — pause timer reset."

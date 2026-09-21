@@ -14,6 +14,9 @@ const PUBLIC_PREFIXES = [
   '/reset-password',
   '/auth/callback',
   '/auth/confirm',
+  // Must be public, and must stay public: the keep-alive pings it, and a redirect here
+  // would look like a healthy 200 while never touching the database.
+  '/api/health',
 ];
 
 /**
@@ -80,6 +83,10 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
+
+  // Public paths are public for everyone — see lib/supabase/route-policy.ts for why this
+  // check comes before any session reasoning.
+  if (isPublic(path) && path !== '/login' && path !== '/signup') return response;
 
   // ── signed out ──
   if (!user) {
