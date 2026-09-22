@@ -4,10 +4,14 @@ import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Button } from '@/components/ui/button';
+import { ImageUpload } from '@/components/upload/image-upload';
+import { attachMedia, detachMedia } from '@/lib/actions/media';
 import { Field } from '@/components/ui/field';
 import { ItemList } from './item-list';
 import { saveItem } from '@/lib/actions/profile';
 import type { ActionResult } from '@/lib/actions/auth';
+
+type Media = { id: string; url: string; alt_text: string; sort_order: number };
 
 type Item = {
   id: string;
@@ -19,6 +23,7 @@ type Item = {
   repo_url: string | null;
   live_url: string | null;
   sort_order: number;
+  item_media?: Media[];
 };
 
 export function PortfolioManager({ items }: { items: Item[] }) {
@@ -48,6 +53,13 @@ export function PortfolioManager({ items }: { items: Item[] }) {
           }}
         />
       )}
+
+      {/*
+        Images attach to a SAVED item, so this only appears when editing one. A new project
+        has no id yet, and uploading against an id that does not exist would either orphan the
+        object or need a draft row nobody asked for.
+      */}
+      {editing && <ItemMedia item={editing} />}
 
       {!adding && !editing && (
         <Button type="button" variant="secondary" onClick={() => setAdding(true)}>
@@ -158,5 +170,59 @@ function SaveItem() {
     <Button type="submit" disabled={pending} aria-busy={pending}>
       {pending ? 'Saving…' : 'Save project'}
     </Button>
+  );
+}
+
+function ItemMedia({ item }: { item: Item }) {
+  const media = [...(item.item_media ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+
+  return (
+    <div className="space-y-3 rounded-[--radius] border border-border-base p-5">
+      <div>
+        <h3 className="font-medium">Images</h3>
+        <p className="mt-0.5 text-sm text-text-muted text-pretty">
+          Screenshots of the work. Every image needs a description — that is what someone using a
+          screen reader gets instead of the picture.
+        </p>
+      </div>
+
+      {media.length > 0 && (
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {media.map((m) => (
+            <li key={m.id} className="space-y-1.5">
+              {/* eslint-disable-next-line @next/next/no-img-element -- Supabase Storage is not
+                  configured as a next/image loader domain; these are already resized to 1600px
+                  and served from the CDN. */}
+              <img
+                src={m.url}
+                alt={m.alt_text}
+                className="aspect-video w-full rounded-[--radius-sm] border border-border-base object-cover"
+              />
+              <form action={detachMedia}>
+                <input type="hidden" name="mediaId" value={m.id} />
+                <button
+                  type="submit"
+                  className="text-xs text-text-muted underline hover:text-danger"
+                >
+                  Remove
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <ImageUpload
+        label="Add a screenshot"
+        onUploaded={async ({ url, altText }) => {
+          const data = new FormData();
+          data.set('itemId', item.id);
+          data.set('url', url);
+          data.set('altText', altText);
+          data.set('sortOrder', String(media.length));
+          await attachMedia(data);
+        }}
+      />
+    </div>
   );
 }

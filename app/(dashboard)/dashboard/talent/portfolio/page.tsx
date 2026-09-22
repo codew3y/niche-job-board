@@ -24,11 +24,12 @@ export default async function PortfolioPage() {
 
   const { data: items } = await supabase
     .from('portfolio_items')
-    .select('id, title, description, role, outcome, tech_stack, repo_url, live_url, sort_order')
+    .select(
+      `id, title, description, role, outcome, tech_stack, repo_url, live_url, sort_order,
+       item_media ( id, url, alt_text, sort_order )`,
+    )
     .eq('talent_id', profile.id)
     .order('sort_order');
-
-  const onlyEvidence = !profile.website_url && (items?.length ?? 0) <= 2;
 
   return (
     <div className="max-w-2xl">
@@ -46,14 +47,12 @@ export default async function PortfolioPage() {
         }
       />
 
-      {profile.is_published && onlyEvidence && (
-        // Said before they hit the constraint, not after. Deleting below two items would
-        // otherwise unpublish them without warning.
-        <p className="mb-5 rounded-[--radius] border border-warning/40 bg-warning/5 p-3 text-sm text-pretty">
-          These projects are the only evidence on your published profile. Deleting below two will
-          unpublish it until you add a portfolio site link or another project.
-        </p>
-      )}
+      {/*
+        There used to be a warning here that deleting below two projects would unpublish the
+        profile. That was true of the publish gate and is false since ADR-008 — nothing
+        unpublishes a profile but the author. A warning about a consequence that no longer
+        happens is worse than no warning.
+      */}
 
       <PortfolioManager items={items ?? []} />
     </div>

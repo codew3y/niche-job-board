@@ -111,7 +111,8 @@ export async function getTalentBySlug(slug: string) {
        portfolio_item_count, is_published, accepts_messages, updated_at,
        talent_skills ( proficiency, years, skills ( name, slug, category ) ),
        portfolio_items ( id, title, description, role, outcome, tech_stack, repo_url,
-                         live_url, cover_image_url, sort_order )`,
+                         live_url, cover_image_url, sort_order,
+                         item_media ( id, url, alt_text, sort_order ) )`,
     )
     .eq('slug', slug)
     .maybeSingle();
@@ -162,6 +163,7 @@ export type TalentProfileDetail = {
     live_url: string | null;
     cover_image_url: string | null;
     sort_order: number;
+    item_media: { id: string; url: string; alt_text: string; sort_order: number }[];
   }[];
 };
 

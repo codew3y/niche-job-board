@@ -7,6 +7,7 @@ type Item = {
   role: string | null;
   outcome: string | null;
   tech_stack: string[];
+  item_media?: { id: string; url: string; alt_text: string; sort_order: number }[];
   repo_url: string | null;
   live_url: string | null;
 };
@@ -87,6 +88,31 @@ export function PortfolioSection({
                   <p className="mt-2 border-l-2 border-accent/40 pl-3 text-sm text-pretty">
                     {item.outcome}
                   </p>
+                )}
+
+                {(item.item_media?.length ?? 0) > 0 && (
+                  <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {[...(item.item_media ?? [])]
+                      .sort((a, b) => a.sort_order - b.sort_order)
+                      .map((m) => (
+                        <li key={m.id}>
+                          {/* eslint-disable-next-line @next/next/no-img-element -- Supabase
+                              Storage is not a configured next/image loader domain; these are
+                              already resized to 1600px and CDN-served.
+
+                              loading="lazy" because a profile can carry a dozen of these
+                              below the fold, and decoding="async" so a slow decode does not
+                              block the rest of the page painting. */}
+                          <img
+                            src={m.url}
+                            alt={m.alt_text}
+                            loading="lazy"
+                            decoding="async"
+                            className="aspect-video w-full rounded-[--radius-sm] border border-border-base object-cover"
+                          />
+                        </li>
+                      ))}
+                  </ul>
                 )}
 
                 {item.tech_stack.length > 0 && (
