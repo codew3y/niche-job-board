@@ -16,7 +16,20 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
   } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  // RLS scopes jobs to their owner, so a miss is "not yours" or "gone" — both 404.
+  /**
+   * Same explicit ownership check as the applications page, and for the same reason: RLS does
+   * NOT scope jobs to their owner. `jobs_select_open_or_own` allows any authenticated user to
+   * read any non-draft job, so this page's `if (!job) notFound()` never fired for an open one
+   * and the edit form loaded for a stranger. Writes would still have been refused by the
+   * update policy, but a form that renders and then fails on submit is not a boundary.
+   */
+  const { data: client } = await supabase
+    .from('client_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (!client) notFound();
+
   const { data: job } = await supabase
     .from('jobs')
     .select(
@@ -24,6 +37,7 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
        currency, location_type, location, experience_level, deadline, status, slug`,
     )
     .eq('id', id)
+    .eq('client_id', client.id)
     .maybeSingle();
   if (!job) notFound();
 

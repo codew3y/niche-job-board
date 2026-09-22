@@ -34,6 +34,12 @@ const CLIENT_ENV = {
 
 export default defineConfig({
   test: {
+    // e2e/ belongs to Playwright. Vitest's default include picks up .spec.ts files and dies
+    // importing @playwright/test, reporting two failed FILES alongside 337 passing tests —
+    // a red suite that says nothing about the code.
+    // (Written as line comments on purpose: a glob containing a star-slash ends a block
+    // comment early, which is how this line broke the config the first time.)
+    exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**'],
     // The database-backed suites share one database, so they must not run concurrently.
     fileParallelism: false,
     env: { DATABASE_URL, ...CLIENT_ENV },

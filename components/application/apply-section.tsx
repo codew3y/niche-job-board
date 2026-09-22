@@ -18,8 +18,15 @@ export type ApplyState =
   | { kind: 'own-job' }
   | { kind: 'closed' };
 
+/**
+ * This is the confirmation after applying, not just a status readout.
+ *
+ * ApplyDialog used to carry a success screen; it could never render, because this component is
+ * a Server Component and the re-render after applying unmounts the dialog. So the `applied`
+ * line has to do that job, which is why it reads as a completed action rather than a label.
+ */
 const STATUS_COPY: Record<string, string> = {
-  applied: 'Applied — waiting on the client.',
+  applied: 'Application sent — waiting on the client.',
   viewed: 'The client has opened your application.',
   shortlisted: "You've been shortlisted.",
   rejected: 'Not taken forward this time.',

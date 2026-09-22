@@ -17,13 +17,32 @@ export default async function JobApplicationsPage({ params }: { params: Promise<
   } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  // RLS already restricts jobs to their owner, so a miss here means "not yours" or
-  // "does not exist" — both 404, because a 403 would confirm which.
+  /**
+   * Ownership is checked HERE, explicitly. It is not implied by RLS.
+   *
+   * `jobs_select_open_or_own` reads `status <> 'draft' OR owner` — which is correct for a
+   * public job board and means ANY authenticated user can select ANY open job by id. This
+   * file used to carry a comment claiming RLS restricted jobs to their owner and rely on a
+   * `if (!job) notFound()` that therefore never fired for an open job. A developer who had
+   * applied could open the client-side management page for that job.
+   *
+   * Found by e2e/flows.spec.ts. Scoping the query to the viewer's own client profile is what
+   * makes the 404 real.
+   */
+  const { data: client } = await supabase
+    .from('client_profiles')
+    .select('id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (!client) notFound();
+
   const { data: job } = await supabase
     .from('jobs')
     .select('id, title, slug, status')
     .eq('id', id)
+    .eq('client_id', client.id)
     .maybeSingle();
+  // 404 rather than 403: a 403 confirms the job exists, which is itself a disclosure.
   if (!job) notFound();
 
   const { data: applications } = await supabase

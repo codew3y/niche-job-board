@@ -29,7 +29,13 @@ export default async function MarketingLayout({ children }: { children: ReactNod
   return (
     <div className="flex min-h-full flex-col">
       <header className="border-b border-border-base">
-        <div className="mx-auto flex h-14 max-w-5xl items-center gap-5 px-4">
+        {/*
+          Wraps rather than fixing a 56px row. At 320px the logo, two nav links and two auth
+          links do not fit on one line — measured by e2e/responsive.spec.ts, which caught this
+          pushing ~40px past the viewport on /jobs and /talent. A second line is the honest
+          answer; squeezing is how text ends up clipped.
+        */}
+        <div className="mx-auto flex min-h-14 max-w-5xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2">
           <Link href="/" className="font-semibold tracking-tight shrink-0">
             TechSelect
           </Link>
@@ -47,7 +53,7 @@ export default async function MarketingLayout({ children }: { children: ReactNod
               Developers
             </Link>
           </nav>
-          <div className="ml-auto flex items-center gap-2 text-sm">
+          <div className="ml-auto flex shrink-0 items-center gap-2 text-sm">
             {dashboard ? (
               <Link
                 href={dashboard}

@@ -387,6 +387,28 @@ maybe()('database-enforced business rules', () => {
     expect(rows[0]!.is_published).toBe(true);
   });
 
+  it('AN OPEN JOB IS READABLE BY ANYONE — which is why pages must check ownership', async () => {
+    /**
+     * This is correct behaviour for a public job board, and it is also a trap.
+     *
+     * `jobs_select_open_or_own` is `status <> 'draft' OR owner`, so any authenticated user can
+     * select any open job by id. Two dashboard pages relied on a comment claiming RLS scoped
+     * jobs to their owner and guarded with `if (!job) notFound()` — which never fired. A
+     * developer who had applied could open the client-side management page for that job.
+     *
+     * Pinned here so the policy's real shape is written down where the next person looks.
+     */
+    const rows = await asUser(MALLORY, (tx) => tx`select id from jobs where id = ${ids.job}`);
+    expect(rows).toHaveLength(1);
+  });
+
+  it('a DRAFT job is not readable by a stranger', async () => {
+    await sql`update jobs set status = 'draft' where id = ${ids.job}`;
+    const rows = await asUser(MALLORY, (tx) => tx`select id from jobs where id = ${ids.job}`);
+    expect(rows).toHaveLength(0);
+    await sql`update jobs set status = 'open' where id = ${ids.job}`;
+  });
+
   it('blocks a second application from the same talent to the same job', async () => {
     await expect(
       sql`insert into applications (job_id, talent_id, cover_note)

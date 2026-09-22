@@ -56,3 +56,9 @@ next-env.d.ts
 # contract as a package lockfile. The copies themselves are third-party and regenerable.
 .agents/
 .claude/skills/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
