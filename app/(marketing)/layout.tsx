@@ -1,0 +1,87 @@
+import Link from 'next/link';
+import type { ReactNode } from 'react';
+
+import { createClient } from '@/lib/supabase/server';
+
+/**
+ * Public shell. Signed-out visitors get sign-in links; signed-in ones get a way back to
+ * their dashboard, because browsing while signed in is normal and being offered "Sign up"
+ * again is not.
+ */
+export default async function MarketingLayout({ children }: { children: ReactNode }) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let dashboard: string | null = null;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('active_role, has_talent, has_client')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (profile?.has_talent || profile?.has_client) {
+      dashboard = profile.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
+    }
+  }
+
+  return (
+    <div className="flex min-h-full flex-col">
+      <header className="border-b border-border-base">
+        <div className="mx-auto flex h-14 max-w-5xl items-center gap-5 px-4">
+          <Link href="/" className="font-semibold tracking-tight shrink-0">
+            TechSelect
+          </Link>
+          <nav aria-label="Browse" className="flex items-center gap-1">
+            <Link
+              href="/jobs"
+              className="rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted transition-colors duration-[--duration-fast] hover:bg-surface-sunken hover:text-text"
+            >
+              Jobs
+            </Link>
+            <Link
+              href="/talent"
+              className="rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted transition-colors duration-[--duration-fast] hover:bg-surface-sunken hover:text-text"
+            >
+              Developers
+            </Link>
+          </nav>
+          <div className="ml-auto flex items-center gap-2 text-sm">
+            {dashboard ? (
+              <Link
+                href={dashboard}
+                className="rounded-[--radius-sm] border border-border-strong px-3 py-1.5 transition-colors duration-[--duration-fast] hover:bg-surface-sunken"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-[--radius-sm] px-3 py-1.5 text-text-muted hover:text-text"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="rounded-[--radius-sm] bg-accent px-3 py-1.5 font-medium text-accent-text transition-colors duration-[--duration-fast] hover:bg-accent-hover"
+                >
+                  Get started
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {children}
+
+      <footer className="mt-16 border-t border-border-base py-8">
+        <div className="mx-auto max-w-5xl px-4 text-sm text-text-subtle">
+          TechSelect — portfolio-first hiring for developers.
+        </div>
+      </footer>
+    </div>
+  );
+}
