@@ -34,3 +34,4 @@ export const talentSearchParams = paginationParams.extend({
 });
 
 export type JobSearchParams = z.infer<typeof jobSearchParams>;
+export type TalentSearchParams = z.infer<typeof talentSearchParams>;
