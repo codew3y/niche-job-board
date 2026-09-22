@@ -17,6 +17,8 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import postgres from 'postgres';
 
+import { itAnnouncesTarget } from './test-target';
+
 const DB_URL =
   process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
 
@@ -126,6 +128,8 @@ afterAll(async () => {
   if (reachable) await cleanup();
   await sql.end();
 });
+
+itAnnouncesTarget(sql, DB_URL);
 
 const maybe = reachable ? describe : describe.skip;
 

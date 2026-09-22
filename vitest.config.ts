@@ -9,7 +9,10 @@ import { defineConfig } from 'vitest/config';
  * aimed at a hosted database would have tested the local one and reported green. A test that
  * passes while measuring the wrong thing is worse than one that fails.
  *
- * The suites print which host they connected to for the same reason.
+ * The suites also name the host they connected to, as a test rather than a log line: vitest's
+ * reporter only surfaces console output produced while a task is running, so the module-scope
+ * console.info this file used to advertise was never printed even once. See
+ * lib/db/test-target.ts.
  */
 const env = { ...loadEnv('', process.cwd(), ''), ...process.env };
 const DATABASE_URL = env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';

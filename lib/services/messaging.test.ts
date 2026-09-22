@@ -17,6 +17,8 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import postgres from 'postgres';
 
+import { itAnnouncesTarget } from '../db/test-target';
+
 const DB_URL =
   process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
 const sql: postgres.Sql = postgres(DB_URL, {
@@ -26,8 +28,19 @@ const sql: postgres.Sql = postgres(DB_URL, {
   onnotice: () => {},
 });
 const reachable = await sql`select 1`.then(
-  () => true,
-  () => false,
+  () => {
+    // Announce the target. Reporting green without saying WHICH database was measured is how
+    // a hosted verification silently becomes a local one — the failure that made every DB
+    // suite here print this line.
+    console.info(`[messaging.test] connected to ${DB_URL.replace(/:[^:@]+@/, ':****@')}`);
+    return true;
+  },
+  (e: Error) => {
+    // Never swallow the reason: a silent skip hides a broken database as well as a broken
+    // test does.
+    console.warn(`[messaging.test] skipping — cannot reach ${DB_URL}: ${e.message}`);
+    return false;
+  },
 );
 
 const CLIENT = '21212121-2121-4121-8121-212121212121';
@@ -89,6 +102,8 @@ afterAll(async () => {
     await sql`delete from auth.users where id in (${CLIENT}, ${TALENT}, ${STRANGER}, ${QUIET})`;
   await sql.end();
 });
+
+itAnnouncesTarget(sql, DB_URL);
 
 const maybe = reachable ? describe : describe.skip;
 
