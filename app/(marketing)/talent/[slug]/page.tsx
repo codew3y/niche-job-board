@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { ContactDialog } from '@/components/messaging/contact-dialog';
 import { ExternalLink } from '@/components/shared/external-link';
 import { formatRange } from '@/components/shared/money';
 import { PortfolioSection } from '@/components/portfolio/portfolio-section';
@@ -34,6 +35,31 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
     data: { user },
   } = await supabase.auth.getUser();
   const isOwner = user?.id === p.user_id;
+
+  /**
+   * The contact button appears only for a signed-in client, on a published profile that
+   * accepts messages — the same three conditions `conversations_insert_client` enforces. This
+   * is the courtesy copy of the rule; the policy is the rule, and it is what stops a crafted
+   * POST from an account with no client profile.
+   */
+  let contactJobs: { id: string; title: string }[] | null = null;
+  if (user && !isOwner && p.is_published && p.accepts_messages) {
+    const { data: client } = await supabase
+      .from('client_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (client) {
+      const { data: openJobs } = await supabase
+        .from('jobs')
+        .select('id, title')
+        .eq('client_id', client.id)
+        .eq('status', 'open')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      contactJobs = openJobs ?? [];
+    }
+  }
 
   // RLS lets the owner read their own draft. Everyone else gets a 404 — not a 403, which
   // would confirm the profile exists (docs/api.md §4).
@@ -135,6 +161,12 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
       <div className="mt-8">
         <PortfolioSection websiteUrl={p.website_url} items={items} isOwner={isOwner} />
       </div>
+
+      {contactJobs !== null && (
+        <div className="mt-10 border-t border-border-base pt-6">
+          <ContactDialog talentId={p.id} talentHeadline={p.headline} jobs={contactJobs} />
+        </div>
+      )}
     </main>
   );
 }

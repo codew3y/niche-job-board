@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { AppShell, type ShellUser } from '@/components/layout/app-shell';
+import { unreadCount } from '@/lib/services/messaging';
 import { createClient } from '@/lib/supabase/server';
 
 /**
@@ -28,6 +29,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     activeRole: profile.active_role,
     hasTalent: profile.has_talent,
     hasClient: profile.has_client,
+    unread: await unreadCount(user.id),
   };
 
   return <AppShell user={shellUser}>{children}</AppShell>;

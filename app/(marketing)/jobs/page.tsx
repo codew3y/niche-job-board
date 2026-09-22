@@ -7,6 +7,7 @@ import { JobFilters } from '@/components/job/job-filters';
 import { JobListSkeleton } from '@/components/shared/skeleton';
 import { jobSearchParams } from '@/lib/schemas/search';
 import { listJobs } from '@/lib/services/jobs';
+import { canSave, savedJobIds } from '@/lib/services/saved-ids';
 
 export const metadata: Metadata = {
   title: 'Browse jobs',
@@ -52,6 +53,8 @@ export default async function JobsPage({
 
 async function JobResults({ params }: { params: ReturnType<typeof jobSearchParams.parse> }) {
   const { jobs, nextCursor } = await listJobs(params);
+  // One query for the page rather than a lookup per card.
+  const [saveable, saved] = await Promise.all([canSave('job'), savedJobIds(jobs.map((j) => j.id))]);
 
   if (jobs.length === 0) {
     return (
@@ -72,7 +75,7 @@ async function JobResults({ params }: { params: ReturnType<typeof jobSearchParam
       </p>
       <div className="mt-2 overflow-hidden rounded-[--radius] border border-border-base">
         {jobs.map((job) => (
-          <JobCard key={job.id} job={job} />
+          <JobCard key={job.id} job={job} saveable={saveable} saved={saved.has(job.id)} />
         ))}
       </div>
       {nextCursor && (

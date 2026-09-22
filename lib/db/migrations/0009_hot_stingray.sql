@@ -1,0 +1,12 @@
+-- Bookkeeping only. This index has existed since 0001, where it was written by hand; it was
+-- never declared in lib/db/schema/messaging.ts, so drizzle's snapshot did not know about it
+-- and every `db:generate` would propose creating it again.
+--
+-- Declaring it in the schema makes the schema file the truth. IF NOT EXISTS is what makes
+-- that safe: on any database that has run 0001 — which is all of them — this is a no-op, and
+-- on a clean one it is redundant with 0001 rather than conflicting.
+--
+-- What it enforces: Postgres treats NULLs as DISTINCT in a UNIQUE constraint, so the
+-- composite unique on (client_id, talent_id, job_id) does NOT stop two general-enquiry
+-- threads between the same pair. This closes that.
+CREATE UNIQUE INDEX IF NOT EXISTS "conversations_general_unique" ON "conversations" USING btree ("client_id","talent_id") WHERE "conversations"."job_id" is null;

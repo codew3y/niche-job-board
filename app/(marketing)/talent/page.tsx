@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { JobListSkeleton } from '@/components/shared/skeleton';
 import { TalentCard } from '@/components/talent/talent-card';
 import { talentSearchParams } from '@/lib/schemas/search';
+import { canSave, savedTalentIds } from '@/lib/services/saved-ids';
 import { listTalent } from '@/lib/services/talent';
 
 export const metadata: Metadata = {
@@ -40,6 +41,10 @@ export default async function TalentPage({
 
 async function TalentResults({ params }: { params: ReturnType<typeof talentSearchParams.parse> }) {
   const { talent, nextCursor } = await listTalent(params);
+  const [saveable, saved] = await Promise.all([
+    canSave('talent'),
+    savedTalentIds(talent.map((p) => p.id)),
+  ]);
 
   if (talent.length === 0) {
     return (
@@ -57,7 +62,12 @@ async function TalentResults({ params }: { params: ReturnType<typeof talentSearc
       </p>
       <div className="mt-2 overflow-hidden rounded-[--radius] border border-border-base">
         {talent.map((person) => (
-          <TalentCard key={person.id} person={person} />
+          <TalentCard
+            key={person.id}
+            person={person}
+            saveable={saveable}
+            saved={saved.has(person.id)}
+          />
         ))}
       </div>
       {nextCursor && (

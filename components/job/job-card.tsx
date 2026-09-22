@@ -1,9 +1,19 @@
 import Link from 'next/link';
 
 import { ENGAGEMENT_LABEL, LOCATION_LABEL, formatRange } from '@/components/shared/money';
+import { SaveButton } from '@/components/shared/save-button';
 import type { JobListItem } from '@/lib/services/jobs';
 
-export function JobCard({ job }: { job: JobListItem }) {
+export function JobCard({
+  job,
+  saveable = false,
+  saved = false,
+}: {
+  job: JobListItem;
+  /** False for signed-out visitors and for clients — neither has a jobs list to save into. */
+  saveable?: boolean;
+  saved?: boolean;
+}) {
   const budget = formatRange(
     job.budget_min,
     job.budget_max,
@@ -28,7 +38,10 @@ export function JobCard({ job }: { job: JobListItem }) {
             {job.title}
           </Link>
         </h2>
-        {budget && <p className="text-sm font-medium tabular-nums">{budget}</p>}
+        <div className="flex items-center gap-3">
+          {budget && <p className="text-sm font-medium tabular-nums">{budget}</p>}
+          {saveable && <SaveButton kind="job" id={job.id} saved={saved} label={job.title} />}
+        </div>
       </div>
 
       <p className="mt-1 text-sm text-text-muted">

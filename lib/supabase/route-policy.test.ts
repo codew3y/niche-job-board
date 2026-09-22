@@ -117,4 +117,28 @@ describe('fully onboarded', () => {
   it('still allows public browsing', () => {
     expect(decideRoute('/jobs', done)).toBeNull();
   });
+
+  it('opens the shared inbox for either role', () => {
+    // /dashboard/messages is one route for both roles: a conversation belongs to two people,
+    // and a per-role inbox would show the same thread twice to anyone holding both roles.
+    expect(decideRoute('/dashboard/messages', done)).toBeNull();
+    expect(decideRoute('/dashboard/messages/abc', done)).toBeNull();
+    expect(decideRoute('/dashboard/messages', { ...done, activeRole: 'client' })).toBeNull();
+  });
+});
+
+describe('the inbox is private', () => {
+  it('sends a signed-out visitor to login, keeping the thread they wanted', () => {
+    expect(decideRoute('/dashboard/messages/abc', anon)).toBe(
+      '/login?next=%2Fdashboard%2Fmessages%2Fabc',
+    );
+  });
+
+  it('is not reachable before a role exists', () => {
+    // Messaging needs a client or talent profile on at least one side; landing here
+    // mid-onboarding would render an inbox that cannot contain anything.
+    expect(decideRoute('/dashboard/messages', fresh)).toBe('/select-role');
+    expect(decideRoute('/dashboard/messages', chosen)).toBe('/onboarding/talent/basics');
+    expect(decideRoute('/dashboard/messages', chosenClient)).toBe('/onboarding/client/company');
+  });
 });

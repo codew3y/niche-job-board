@@ -9,6 +9,8 @@ export type ShellUser = {
   activeRole: 'talent' | 'client';
   hasTalent: boolean;
   hasClient: boolean;
+  /** Unread messages across every thread, both roles. */
+  unread: number;
 };
 
 const NAV = {
@@ -17,11 +19,13 @@ const NAV = {
     ['/dashboard/talent/matches', 'Matches'],
     ['/dashboard/talent/applications', 'Applications'],
     ['/dashboard/talent/profile', 'Profile'],
+    ['/dashboard/messages', 'Messages'],
   ],
   client: [
     ['/dashboard/client', 'Dashboard'],
     ['/dashboard/client/jobs', 'Jobs'],
     ['/dashboard/client/saved', 'Saved'],
+    ['/dashboard/messages', 'Messages'],
   ],
 } as const;
 
@@ -41,9 +45,10 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
               <Link
                 key={href}
                 href={href}
-                className="rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted transition-colors duration-[--duration-fast] hover:bg-surface-sunken hover:text-text"
+                className="flex items-center gap-1.5 rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted transition-colors duration-[--duration-fast] hover:bg-surface-sunken hover:text-text"
               >
                 {label}
+                <UnreadBadge show={href === '/dashboard/messages'} count={user.unread} />
               </Link>
             ))}
           </nav>
@@ -69,9 +74,10 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
             <Link
               key={href}
               href={href}
-              className="shrink-0 rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken"
+              className="flex shrink-0 items-center gap-1.5 rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken"
             >
               {label}
+              <UnreadBadge show={href === '/dashboard/messages'} count={user.unread} />
             </Link>
           ))}
         </nav>
@@ -87,5 +93,19 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
         </div>
       </footer>
     </div>
+  );
+}
+
+/**
+ * The unread count, and nothing when it is zero. A "0" badge is visual noise that trains
+ * people to stop reading the badge at all.
+ */
+function UnreadBadge({ show, count }: { show: boolean; count: number }) {
+  if (!show || count < 1) return null;
+  return (
+    <span className="rounded-full bg-accent px-1.5 py-0.5 text-xs font-medium tabular-nums text-accent-text">
+      {count > 99 ? '99+' : count}
+      <span className="sr-only"> unread messages</span>
+    </span>
   );
 }

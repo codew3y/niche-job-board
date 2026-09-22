@@ -1,9 +1,19 @@
 import Link from 'next/link';
 
 import { formatRange } from '@/components/shared/money';
+import { SaveButton } from '@/components/shared/save-button';
 import { AVAILABILITY_LABEL, type TalentListItem } from '@/lib/services/talent';
 
-export function TalentCard({ person }: { person: TalentListItem }) {
+export function TalentCard({
+  person,
+  saveable = false,
+  saved = false,
+}: {
+  person: TalentListItem;
+  /** Only a client has a saved-developers list; hidden for everyone else. */
+  saveable?: boolean;
+  saved?: boolean;
+}) {
   const rate = formatRange(person.hourly_rate_min, person.hourly_rate_max, person.currency, '/hr');
   const skills = person.talent_skills
     .map((s) => s.skills?.name)
@@ -18,7 +28,12 @@ export function TalentCard({ person }: { person: TalentListItem }) {
             {person.headline}
           </Link>
         </h2>
-        {rate && <p className="text-sm font-medium tabular-nums">{rate}</p>}
+        <div className="flex items-center gap-3">
+          {rate && <p className="text-sm font-medium tabular-nums">{rate}</p>}
+          {saveable && (
+            <SaveButton kind="talent" id={person.id} saved={saved} label={person.headline} />
+          )}
+        </div>
       </div>
 
       <p className="mt-1 text-sm text-text-muted">
