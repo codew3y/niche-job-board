@@ -92,6 +92,13 @@
       "when": 1790093236361,
       "tag": "0012_welcomed_at",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1790094276810,
+      "tag": "0013_real_full_text_search",
+      "breakpoints": true
     }
   ]
 }

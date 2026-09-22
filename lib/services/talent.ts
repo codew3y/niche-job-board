@@ -43,13 +43,34 @@ export async function listTalent(params: TalentSearchParams) {
     .order('id', { ascending: false })
     .limit(limit + 1);
 
-  if (params.q) query = query.or(`headline.ilike.%${params.q}%,bio.ilike.%${params.q}%`);
+  if (params.q) {
+    // Same real search as jobs — see the note in lib/services/jobs.ts. Previously ilike, so
+    // "React developer" matched only that literal substring and nothing else.
+    query = query.textSearch('search_vector', params.q, { type: 'websearch' });
+  }
   if (params.availability) query = query.eq('availability', params.availability);
   if (params.rateMin !== undefined) {
     query = query.or(`hourly_rate_max.gte.${params.rateMin},hourly_rate_max.is.null`);
   }
   if (params.rateMax !== undefined) {
     query = query.or(`hourly_rate_min.lte.${params.rateMax},hourly_rate_min.is.null`);
+  }
+
+  /**
+   * Skill filtering over the curated taxonomy — the same 126-row seed, slugs and aliases that
+   * job browse filters on, so a client filtering "Rust" and a developer tagging "Rust" are
+   * talking about the same row rather than two strings that happen to match.
+   *
+   * This replaces the `techStack` parameter, which read free text typed into a portfolio
+   * item's "Tech stack" box. That field is unnormalised by design — "Next.js", "nextjs" and
+   * "Next 15" are all real answers people give — so filtering it would have either missed
+   * most matches or returned wrong ones. Skills are where structure lives; tech_stack stays a
+   * human-readable credit line on a project.
+   */
+  if (params.skills.length > 0) {
+    const ids = await talentIdsWithSkills(params.skills);
+    if (ids.length === 0) return { talent: [], nextCursor: null };
+    query = query.in('id', ids);
   }
 
   const cursor = decodeCursor(params.cursor);
@@ -67,6 +88,17 @@ export async function listTalent(params: TalentSearchParams) {
     talent: page,
     nextCursor: hasMore && last ? encodeCursor({ at: last.updated_at, id: last.id }) : null,
   };
+}
+
+/** Talent-profile ids carrying any of these skill slugs. Unknown slugs match nothing. */
+export async function talentIdsWithSkills(slugs: string[]): Promise<string[]> {
+  const supabase = await createClient();
+  const { data: skillRows } = await supabase.from('skills').select('id').in('slug', slugs);
+  const ids = (skillRows ?? []).map((s) => s.id);
+  if (ids.length === 0) return [];
+
+  const { data } = await supabase.from('talent_skills').select('talent_id').in('skill_id', ids);
+  return [...new Set((data ?? []).map((r) => r.talent_id))];
 }
 
 export async function getTalentBySlug(slug: string) {

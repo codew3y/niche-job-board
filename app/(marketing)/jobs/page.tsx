@@ -8,6 +8,7 @@ import { JobListSkeleton } from '@/components/shared/skeleton';
 import { jobSearchParams } from '@/lib/schemas/search';
 import { listJobs } from '@/lib/services/jobs';
 import { canSave, savedJobIds } from '@/lib/services/saved-ids';
+import { groupByCategory, listSkills } from '@/lib/services/skills';
 
 export const metadata: Metadata = {
   title: 'Browse jobs',
@@ -24,6 +25,9 @@ export default async function JobsPage({
   // Parse rather than trust: query strings are user input like any other (§5.4).
   const parsed = jobSearchParams.safeParse(raw);
   const params = parsed.success ? parsed.data : jobSearchParams.parse({});
+  // Fetched at the route boundary and passed down — no component below here fetches its own
+  // data (docs/components.md).
+  const skills = groupByCategory(await listSkills());
 
   return (
     <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
@@ -35,7 +39,7 @@ export default async function JobsPage({
         </p>
       </header>
 
-      <JobFilters />
+      <JobFilters skills={skills} />
 
       <Suspense
         key={JSON.stringify(raw)}

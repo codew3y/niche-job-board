@@ -27,7 +27,12 @@ export const jobSearchParams = paginationParams.extend({
 export const talentSearchParams = paginationParams.extend({
   q: trimmed.max(200).optional(),
   skills: csv,
-  techStack: csv,
+  /**
+   * `techStack` was here and was never read by listTalent. Removed rather than wired:
+   * portfolio_items.tech_stack is free text a user types into a comma-separated box, so
+   * filtering it matches "Next.js" and misses "nextjs". Skill filtering over the curated
+   * taxonomy is the structured version of the same intent.
+   */
   availability: z.enum(['full_time', 'part_time', 'occasional']).optional(),
   rateMin: z.coerce.number().min(0).optional(),
   rateMax: z.coerce.number().min(0).optional(),

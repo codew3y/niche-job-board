@@ -17,6 +17,7 @@ import {
 import { anonRole, authUsers, authenticatedRole } from 'drizzle-orm/supabase';
 
 import { availability, proficiency } from './enums';
+import { tsvector } from './types';
 import { skills } from './skills';
 
 /**
@@ -67,6 +68,10 @@ export const talentProfiles = pgTable(
     portfolioItemCount: integer('portfolio_item_count').notNull().default(0),
 
     isPublished: boolean('is_published').notNull().default(false),
+    /** Generated full-text vector — headline weighted above bio. Migration 0013. */
+    searchVector: tsvector('search_vector').generatedAlwaysAs(
+      sql`setweight(to_tsvector('english', coalesce(headline, '')), 'A') || setweight(to_tsvector('english', coalesce(bio, '')), 'B')`,
+    ),
     embedding: vector('embedding', { dimensions: 1536 }),
     embeddingUpdatedAt: timestamp('embedding_updated_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

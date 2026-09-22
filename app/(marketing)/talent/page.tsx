@@ -4,8 +4,10 @@ import { Suspense } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { JobListSkeleton } from '@/components/shared/skeleton';
 import { TalentCard } from '@/components/talent/talent-card';
+import { TalentFilters } from '@/components/talent/talent-filters';
 import { talentSearchParams } from '@/lib/schemas/search';
 import { canSave, savedTalentIds } from '@/lib/services/saved-ids';
+import { groupByCategory, listSkills } from '@/lib/services/skills';
 import { listTalent } from '@/lib/services/talent';
 
 export const metadata: Metadata = {
@@ -22,6 +24,7 @@ export default async function TalentPage({
   const raw = await searchParams;
   const parsed = talentSearchParams.safeParse(raw);
   const params = parsed.success ? parsed.data : talentSearchParams.parse({});
+  const skills = groupByCategory(await listSkills());
 
   return (
     <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
@@ -31,6 +34,8 @@ export default async function TalentPage({
           Every profile here carries evidence — shipped projects, or a portfolio site.
         </p>
       </header>
+
+      <TalentFilters skills={skills} />
 
       <Suspense key={JSON.stringify(raw)} fallback={<JobListSkeleton />}>
         <TalentResults params={params} />

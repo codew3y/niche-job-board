@@ -15,6 +15,7 @@ import {
 import { anonRole, authUsers, authenticatedRole } from 'drizzle-orm/supabase';
 
 import { engagementType, experienceLevel, jobStatus, locationType } from './enums';
+import { tsvector } from './types';
 import { skills } from './skills';
 
 export const clientProfiles = pgTable(
@@ -89,6 +90,13 @@ export const jobs = pgTable(
     deadline: timestamp('deadline', { withTimezone: true }),
     publishedAt: timestamp('published_at', { withTimezone: true }),
 
+    /**
+     * Generated, so it can never drift from the text it indexes — there is no trigger to
+     * forget and no write path that can skip it. setweight ranks the title above the body.
+     */
+    searchVector: tsvector('search_vector').generatedAlwaysAs(
+      sql`setweight(to_tsvector('english', coalesce(title, '')), 'A') || setweight(to_tsvector('english', coalesce(description, '')), 'B') || setweight(to_tsvector('english', coalesce(requirements, '')), 'C')`,
+    ),
     embedding: vector('embedding', { dimensions: 1536 }),
     embeddingUpdatedAt: timestamp('embedding_updated_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -114,11 +122,15 @@ export const jobs = pgTable(
     index('jobs_status_published_idx').on(t.status, t.publishedAt),
     index('jobs_client_idx').on(t.clientId),
     index('jobs_embedding_hnsw_idx').using('hnsw', t.embedding.op('vector_cosine_ops')),
-    // Postgres full-text search — the non-AI fallback path (flow §8, story M8).
-    index('jobs_fts_idx').using(
-      'gin',
-      sql`to_tsvector('english', ${t.title} || ' ' || ${t.description} || ' ' || coalesce(${t.requirements}, ''))`,
-    ),
+    /**
+     * Postgres full-text search — the non-AI fallback path (flow §8, story M8).
+     *
+     * Indexes the generated `searchVector` COLUMN, not an expression. The previous version
+     * indexed to_tsvector(...) directly, which PostgREST cannot target with textSearch — so
+     * the index existed, was never queried, and the service fell back to ilike under a comment
+     * claiming otherwise. See migration 0013.
+     */
+    index('jobs_search_idx').using('gin', t.searchVector),
 
     pgPolicy('jobs_select_open_or_own', {
       for: 'select',

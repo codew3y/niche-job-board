@@ -4,6 +4,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { ENGAGEMENT_LABEL, LOCATION_LABEL } from '@/components/shared/money';
+import { SkillFilter } from '@/components/shared/skill-filter';
+import type { SkillOption } from '@/lib/services/skills';
 
 /**
  * Filters for the non-AI browse path (story M8).
@@ -12,7 +14,7 @@ import { ENGAGEMENT_LABEL, LOCATION_LABEL } from '@/components/shared/money';
  * and survivable across a refresh — and it means the server component does the filtering,
  * so there is no client-side data fetch to keep in sync.
  */
-export function JobFilters() {
+export function JobFilters({ skills }: { skills: [string, SkillOption[]][] }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -31,7 +33,9 @@ export function JobFilters() {
     apply(next);
   };
 
-  const hasFilters = ['q', 'engagement', 'locationType', 'experience'].some((k) => params.get(k));
+  const hasFilters = ['q', 'skills', 'engagement', 'locationType', 'experience', 'sort'].some((k) =>
+    params.get(k),
+  );
 
   return (
     <search className="space-y-3">
@@ -59,6 +63,11 @@ export function JobFilters() {
       </form>
 
       <div className="flex flex-wrap gap-2">
+        <SkillFilter
+          skills={skills}
+          value={params.get('skills') ?? ''}
+          onChange={(v) => set('skills', v)}
+        />
         <Select
           label="Engagement"
           value={params.get('engagement') ?? ''}
@@ -76,6 +85,16 @@ export function JobFilters() {
           value={params.get('experience') ?? ''}
           options={{ junior: 'Junior', mid: 'Mid', senior: 'Senior', lead: 'Lead' }}
           onChange={(v) => set('experience', v)}
+        />
+        <Select
+          label="Sort"
+          value={params.get('sort') ?? ''}
+          options={{
+            recent: 'Newest first',
+            budget_high: 'Highest budget',
+            budget_low: 'Lowest budget',
+          }}
+          onChange={(v) => set('sort', v)}
         />
         {hasFilters && (
           <button
