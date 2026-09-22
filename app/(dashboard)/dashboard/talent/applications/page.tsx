@@ -1,11 +1,36 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { StatusBadge } from '@/components/application/status-badge';
+import { StatusTimeline } from '@/components/application/status-timeline';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
+import { formatRange } from '@/components/shared/money';
+import { withdrawApplication } from '@/lib/actions/applications';
+import { allowedStatusTransitions } from '@/lib/schemas/enums';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Applications' };
+
+type Row = {
+  id: string;
+  status: string;
+  cover_note: string;
+  created_at: string;
+  jobs: {
+    id: string;
+    slug: string;
+    title: string;
+    status: string;
+    budget_min: string | null;
+    budget_max: string | null;
+    currency: string;
+    engagement_type: string;
+    client_profiles: { company_name: string } | null;
+  } | null;
+};
 
 export default async function ApplicationsPage() {
   const supabase = await createClient();
@@ -20,36 +45,122 @@ export default async function ApplicationsPage() {
     .eq('user_id', user.id)
     .maybeSingle();
 
-  const { data: applications } = profile
+  const { data } = profile
     ? await supabase
         .from('applications')
-        .select('id, status, created_at, jobs(title)')
+        .select(
+          `id, status, cover_note, created_at,
+           jobs ( id, slug, title, status, budget_min, budget_max, currency, engagement_type,
+                  client_profiles ( company_name ) )`,
+        )
         .eq('talent_id', profile.id)
         .order('created_at', { ascending: false })
     : { data: null };
 
-  return (
-    <div>
-      <PageHeader title="Applications" subtitle="Where each one stands." />
-      {applications?.length ? (
-        <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
-          {applications.map((a) => (
-            <li key={a.id} className="flex items-center justify-between gap-4 p-4">
-              <span className="font-medium">
-                {(a.jobs as { title?: string } | null)?.title ?? 'A job'}
-              </span>
-              <span className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs text-text-subtle">
-                {a.status}
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : (
+  const rows = (data ?? []) as unknown as Row[];
+
+  // One query for every timeline rather than one per row — the N+1 the plan says to keep
+  // out of the codebase rather than audit back out in Phase 5.
+  const { data: events } = rows.length
+    ? await supabase
+        .from('application_events')
+        .select('application_id, from_status, to_status, at')
+        .in(
+          'application_id',
+          rows.map((r) => r.id),
+        )
+        .order('at')
+    : { data: [] };
+
+  const byApplication = new Map<
+    string,
+    { from_status: string | null; to_status: string; at: string }[]
+  >();
+  for (const e of events ?? []) {
+    const list = byApplication.get(e.application_id) ?? [];
+    list.push(e);
+    byApplication.set(e.application_id, list);
+  }
+
+  if (rows.length === 0) {
+    return (
+      <div>
+        <PageHeader title="Applications" subtitle="Where each one stands." />
         <EmptyState
           title="No applications yet"
-          body="Applications you send appear here, and you'll see every status change as it happens."
+          body="Applications you send appear here, with every status change as it happens."
+          action={
+            <Link href="/jobs" className="text-accent hover:underline">
+              Browse jobs
+            </Link>
+          }
         />
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <PageHeader
+        title="Applications"
+        subtitle={`${rows.length} ${rows.length === 1 ? 'application' : 'applications'}.`}
+      />
+
+      <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+        {rows.map((row) => {
+          const job = row.jobs;
+          const budget = job
+            ? formatRange(
+                job.budget_min,
+                job.budget_max,
+                job.currency,
+                job.engagement_type === 'hourly' ? '/hr' : '',
+              )
+            : null;
+          const canWithdraw = (
+            allowedStatusTransitions.talent[
+              row.status as keyof typeof allowedStatusTransitions.talent
+            ] as readonly string[]
+          ).includes('withdrawn');
+
+          return (
+            <li key={row.id} className="p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="font-medium">
+                    {job ? (
+                      <Link href={`/jobs/${job.slug}`} className="hover:text-accent">
+                        {job.title}
+                      </Link>
+                    ) : (
+                      'This job was removed'
+                    )}
+                  </h2>
+                  <p className="mt-0.5 text-sm text-text-subtle">
+                    {job?.client_profiles?.company_name ?? 'A client'}
+                    {budget ? ` · ${budget}` : ''}
+                    {job && job.status !== 'open' ? ' · job closed' : ''}
+                  </p>
+                </div>
+                <StatusBadge status={row.status} />
+              </div>
+
+              <StatusTimeline events={byApplication.get(row.id) ?? []} />
+
+              {canWithdraw && (
+                <form action={withdrawApplication} className="mt-3">
+                  <input type="hidden" name="applicationId" value={row.id} />
+                  {/* Only offered while the outcome is still open — the transition table
+                      says a rejected or hired application cannot be withdrawn. */}
+                  <Button type="submit" variant="ghost" size="sm" className="text-text-muted">
+                    Withdraw
+                  </Button>
+                </form>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

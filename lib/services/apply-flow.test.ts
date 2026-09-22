@@ -185,3 +185,56 @@ maybe('status transitions', () => {
     expect(allowedStatusTransitions.client.withdrawn).toHaveLength(0);
   });
 });
+
+maybe('the talent tracker', () => {
+  beforeEach(reset);
+
+  it('offers withdraw only while the outcome is still open', () => {
+    // The tracker renders the button straight from this table, so these are the states a
+    // user will and will not see it in.
+    for (const open of ['applied', 'viewed', 'shortlisted'] as const) {
+      expect(allowedStatusTransitions.talent[open]).toContain('withdrawn');
+    }
+    for (const terminal of ['rejected', 'hired', 'withdrawn'] as const) {
+      expect(allowedStatusTransitions.talent[terminal]).toHaveLength(0);
+    }
+  });
+
+  it('builds a timeline the applicant can read, written by the trigger', async () => {
+    const [app] = await sql`insert into applications (job_id, talent_id, cover_note)
+      values (${ids.job}, ${ids.talent}, 'note') returning id`;
+    await sql`update applications set status = 'viewed' where id = ${app!.id}`;
+    await sql`update applications set status = 'shortlisted' where id = ${app!.id}`;
+
+    const events = await asUser(
+      TALENT,
+      (tx) =>
+        tx`select from_status, to_status from application_events
+         where application_id = ${app!.id} order by at`,
+    );
+
+    expect(events.map((e) => e.to_status)).toEqual(['applied', 'viewed', 'shortlisted']);
+    expect(events[0]!.from_status).toBeNull(); // the first row is the application itself
+  });
+
+  it('does not leak another applicant’s timeline', async () => {
+    const [app] = await sql`insert into applications (job_id, talent_id, cover_note)
+      values (${ids.job}, ${ids.talent}, 'note') returning id`;
+    const seen = await asUser(
+      OTHER,
+      (tx) => tx`select id from application_events where application_id = ${app!.id}`,
+    );
+    expect(seen).toHaveLength(0);
+  });
+
+  it('survives the job being deleted — the row goes, so the tracker must not assume it', async () => {
+    // The page renders "This job was removed" for a null join rather than crashing.
+    const [app] = await sql`insert into applications (job_id, talent_id, cover_note)
+      values (${ids.job}, ${ids.talent}, 'note') returning id`;
+    await sql`delete from jobs where id = ${ids.job}`;
+    const rows = await sql`select id from applications where id = ${app!.id}`;
+    // ON DELETE CASCADE: the application goes with the job. The null-join branch is
+    // defensive for the window where a page was already rendered.
+    expect(rows).toHaveLength(0);
+  });
+});
