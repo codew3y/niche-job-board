@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { serverEnv } from '@/lib/env';
 import { createClient } from '@/lib/supabase/server';
 
 /**
@@ -12,12 +13,42 @@ import { createClient } from '@/lib/supabase/server';
  *
  * The query is deliberately trivial and reads a public table, so no service-role credential
  * is involved and RLS still applies.
+ *
+ * It also reports WHICH optional services are configured, as booleans. Every one of them fails
+ * silently by design — a missing RESEND_API_KEY means no mail is sent, a missing
+ * SUPABASE_SERVICE_ROLE_KEY means no mail is sent AND no welcome is claimed, and neither
+ * breaks a single user-facing action. That is the right runtime behaviour and a terrible
+ * diagnostic story, because a deploy can be missing both and look perfectly healthy.
+ *
+ * Booleans only. Never a value, never a prefix, never a length — the question being answered
+ * is "is it set", and anything more is a credential leak on a public endpoint.
  */
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET() {
   const startedAt = Date.now();
+
+  /**
+   * Read before the database call, so configuration is reported even when Postgres is down —
+   * which is exactly the moment someone is trying to work out what is wrong.
+   */
+  let config: Record<string, boolean> = {};
+  try {
+    const env = serverEnv();
+    config = {
+      // Required for notification email and for claiming the welcome send. Without it, all
+      // three emails silently never send.
+      serviceRoleKey: Boolean(env.SUPABASE_SERVICE_ROLE_KEY),
+      resendApiKey: Boolean(env.RESEND_API_KEY),
+      // False means the shared onboarding@resend.dev sender, which can only deliver to the
+      // Resend account owner. Mail to real users goes nowhere and looks like success.
+      verifiedSender: Boolean(env.EMAIL_FROM),
+    };
+  } catch {
+    // serverEnv throws only if a required variable is malformed, which the database check
+    // below will surface anyway.
+  }
 
   try {
     const supabase = await createClient();
@@ -32,6 +63,7 @@ export async function GET() {
       {
         status: 'ok',
         database: 'reachable',
+        config,
         skills: count ?? null,
         latencyMs: Date.now() - startedAt,
         at: new Date().toISOString(),
@@ -47,6 +79,7 @@ export async function GET() {
       {
         status: 'error',
         database: 'unreachable',
+        config,
         // Never echo the driver error — it can carry connection details.
         message: 'Database did not respond.',
         latencyMs: Date.now() - startedAt,
