@@ -17,10 +17,25 @@ import { defineConfig } from 'vitest/config';
 const env = { ...loadEnv('', process.cwd(), ''), ...process.env };
 const DATABASE_URL = env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
 
+/**
+ * lib/env.ts validates the client variables at MODULE LOAD, so any test importing anything
+ * that transitively reaches it fails at import with "Invalid client environment" — which
+ * reads like a broken test rather than a missing variable. Forwarding them keeps the suite
+ * running against the same configuration the app does.
+ *
+ * The fallbacks are obvious placeholders rather than plausible values: a test that needs a
+ * real Supabase URL should fail loudly, not quietly talk to a decoy.
+ */
+const CLIENT_ENV = {
+  NEXT_PUBLIC_SUPABASE_URL: env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://example.test',
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'test-anon-key-placeholder',
+  NEXT_PUBLIC_SITE_URL: env.NEXT_PUBLIC_SITE_URL ?? 'https://techselect.vercel.app',
+};
+
 export default defineConfig({
   test: {
     // The database-backed suites share one database, so they must not run concurrently.
     fileParallelism: false,
-    env: { DATABASE_URL },
+    env: { DATABASE_URL, ...CLIENT_ENV },
   },
 });

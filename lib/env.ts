@@ -35,6 +35,17 @@ const serverSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(20).optional(),
   /** The database owner connection. Migrations, seeding and service-role work only. */
   DATABASE_URL: z.string().startsWith('postgresql://').optional(),
+  /**
+   * Optional on purpose. Email is a notification, not a feature the product stops working
+   * without — a missing key must degrade to "no mail was sent", never to a failed signup or a
+   * failed application. lib/email/send.ts is what enforces that.
+   */
+  RESEND_API_KEY: z.string().startsWith('re_', 'RESEND_API_KEY should start with re_.').optional(),
+  /**
+   * Who mail appears to come from. Defaults to Resend's shared sender, which needs no domain
+   * and CAN ONLY DELIVER TO THE RESEND ACCOUNT OWNER'S OWN ADDRESS — see lib/email/send.ts.
+   */
+  EMAIL_FROM: z.string().min(3).optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 

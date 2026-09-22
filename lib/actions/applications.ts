@@ -3,6 +3,9 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { applicantEmail, applicantHeadline, jobOwnerEmail } from '../email/recipients';
+import { sendEmailInBackground } from '../email/send';
+import { newApplicationEmail, statusChangeEmail } from '../email/templates';
 import { applyInput, statusChangeInput } from '../schemas/application';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
@@ -94,8 +97,33 @@ export async function applyToJob(
     return { ok: false, message: 'Could not send your application. Try again.' };
   }
 
+  /**
+   * Notify the job owner — AFTER the insert, and never in a way that can undo it.
+   *
+   * Order matters: the recipient lookup uses the service role, which answers for anyone. Doing
+   * it before the RLS-checked insert would mean an address was resolved for a job the caller
+   * had not yet proven they could apply to. The insert is the authorization.
+   */
+  void notifyJobOwner(parsed.data.jobId, profile.id);
+
   revalidatePath('/dashboard/talent/applications');
   return { ok: true };
+}
+
+async function notifyJobOwner(jobId: string, talentProfileId: string): Promise<void> {
+  const [owner, headline] = await Promise.all([
+    jobOwnerEmail(jobId),
+    applicantHeadline(talentProfileId),
+  ]);
+  if (!owner) return;
+  sendEmailInBackground(
+    newApplicationEmail({
+      to: owner.email,
+      jobTitle: owner.jobTitle,
+      jobId,
+      applicantHeadline: headline,
+    }),
+  );
 }
 
 export async function withdrawApplication(formData: FormData): Promise<void> {
@@ -152,9 +180,31 @@ export async function updateApplicationStatus(formData: FormData): Promise<void>
   });
   if (!legal.success) return;
 
-  await supabase.from('applications').update({ status: to }).eq('id', id);
+  const { error: updateError } = await supabase
+    .from('applications')
+    .update({ status: to })
+    .eq('id', id);
+  /**
+   * Only notify if the write actually landed. Sending "you have been shortlisted" for an
+   * update RLS refused is worse than sending nothing — it is a promise the database did not
+   * make. The previous version ignored the result entirely.
+   */
+  if (!updateError) void notifyApplicant(id, to);
+
   // The status timeline is written by the application_events trigger, not here — an audit
   // log the caller writes is not an audit log (migration 0001).
   revalidatePath(`/dashboard/client/jobs/${application.job_id}`);
   revalidatePath('/dashboard/client/jobs');
+}
+
+async function notifyApplicant(applicationId: string, status: string): Promise<void> {
+  const recipient = await applicantEmail(applicationId);
+  if (!recipient) return;
+  // Returns null for transitions not worth an email — `viewed` most of all. See templates.ts.
+  const message = statusChangeEmail({
+    to: recipient.email,
+    jobTitle: recipient.jobTitle,
+    status,
+  });
+  if (message) sendEmailInBackground(message);
 }

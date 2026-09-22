@@ -25,6 +25,11 @@ export const userProfiles = pgTable(
     activeRole: activeRole('active_role').notNull().default('talent'),
     hasTalent: boolean('has_talent').notNull().default(false),
     hasClient: boolean('has_client').notNull().default(false),
+    /**
+     * When the welcome email was sent. NULL means it has not been, and the send is guarded by
+     * `is null` so it happens exactly once — see lib/email/welcome.ts and migration 0012.
+     */
+    welcomedAt: timestamp('welcomed_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

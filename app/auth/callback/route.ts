@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { sendWelcomeOnce } from '@/lib/email/welcome';
 import { createClient } from '@/lib/supabase/server';
 
 /**
@@ -29,6 +30,13 @@ export async function GET(request: NextRequest) {
       `${origin}/login?error=${encodeURIComponent('Could not complete sign-in. Please try again.')}`,
     );
   }
+
+  /**
+   * Both auth landings call this, because there are two ways to arrive with a session for the
+   * first time. It is a no-op for everyone who has been welcomed already, so calling it on
+   * every OAuth sign-in is correct rather than wasteful.
+   */
+  await sendWelcomeOnce();
 
   /*
    * Deployment note: behind a proxy, `origin` is the internal host. Vercel sets

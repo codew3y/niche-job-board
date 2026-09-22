@@ -1,0 +1,14 @@
+-- When the welcome email was sent, or NULL if it has not been.
+--
+-- Not a boolean, and not inferred. The alternatives considered and rejected:
+--
+--   * "send it during signup" — the address is unverified at that point, and Supabase is
+--     already sending a confirmation email to it. Two emails, one of them to an address
+--     nobody has proven they own.
+--   * "send it whenever created_at is within the last minute" — a heuristic that sends twice
+--     if a redirect is retried, and never if a cold start is slow. Timing is not identity.
+--
+-- A timestamp claimed exactly once is what makes the send idempotent: the UPDATE that sets it
+-- is conditional on it being NULL, so two concurrent requests cannot both win. It also answers
+-- "did this person ever get the welcome", which a boolean flag set and forgotten does not.
+ALTER TABLE "user_profiles" ADD COLUMN IF NOT EXISTS "welcomed_at" timestamp with time zone;

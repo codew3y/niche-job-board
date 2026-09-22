@@ -1,6 +1,7 @@
 import { type EmailOtpType } from '@supabase/supabase-js';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { sendWelcomeOnce } from '@/lib/email/welcome';
 import { createClient } from '@/lib/supabase/server';
 
 /** Email confirmation and magic-link/recovery landing. */
@@ -23,6 +24,12 @@ export async function GET(request: NextRequest) {
       `${origin}/login?error=${encodeURIComponent('That link has expired. Request a new one.')}`,
     );
   }
+
+  /**
+   * Not on a recovery link. Someone resetting a password is not a new account, and greeting
+   * them with "welcome" is how a product shows it is not paying attention.
+   */
+  if (type !== 'recovery') await sendWelcomeOnce();
 
   return NextResponse.redirect(
     `${origin}${type === 'recovery' ? '/reset-password/confirm' : '/select-role'}`,
