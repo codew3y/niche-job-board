@@ -127,6 +127,22 @@ describe('fully onboarded', () => {
   });
 });
 
+describe('the legal pages', () => {
+  // Google's consent screen links straight at these, and everyone following that link is
+  // signed out. A redirect here breaks the OAuth consent screen for every new user.
+  it('are readable by signed-out visitors', () => {
+    expect(decideRoute('/privacy', anon)).toBeNull();
+    expect(decideRoute('/terms', anon)).toBeNull();
+  });
+
+  it('stay readable mid-onboarding, when someone is most likely to want them', () => {
+    for (const session of [fresh, chosen, chosenClient, done]) {
+      expect(decideRoute('/privacy', session)).toBeNull();
+      expect(decideRoute('/terms', session)).toBeNull();
+    }
+  });
+});
+
 describe('the inbox is private', () => {
   it('sends a signed-out visitor to login, keeping the thread they wanted', () => {
     expect(decideRoute('/dashboard/messages/abc', anon)).toBe(

@@ -29,6 +29,11 @@ const PUBLIC_PREFIXES = [
   '/signup',
   '/verify',
   '/reset-password',
+  // Linked from Google's OAuth consent screen, which is shown to people who are BY DEFINITION
+  // not signed in yet. Bouncing those links to /login would make the consent screen point at
+  // a wall, and a privacy policy you must authenticate to read is not a published one.
+  '/privacy',
+  '/terms',
   '/auth/callback',
   '/auth/confirm',
   // Must be public, and must stay public: the keep-alive pings it, and a redirect here

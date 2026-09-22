@@ -78,8 +78,18 @@ export default async function MarketingLayout({ children }: { children: ReactNod
       {children}
 
       <footer className="mt-16 border-t border-border-base py-8">
-        <div className="mx-auto max-w-5xl px-4 text-sm text-text-subtle">
-          TechSelect — portfolio-first hiring for developers.
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-4 text-sm text-text-subtle">
+          <span>TechSelect — portfolio-first hiring for developers.</span>
+          {/* Linked from every public page, not only from Google's consent screen. A policy
+              reachable only by those who already went looking is not really published. */}
+          <nav aria-label="Legal" className="flex gap-5">
+            <Link href="/privacy" className="hover:text-text">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-text">
+              Terms
+            </Link>
+          </nav>
         </div>
       </footer>
     </div>
