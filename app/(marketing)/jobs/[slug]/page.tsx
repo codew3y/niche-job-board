@@ -6,7 +6,9 @@ import { ExternalLink } from '@/components/shared/external-link';
 import { ENGAGEMENT_LABEL, LOCATION_LABEL, formatRange } from '@/components/shared/money';
 import { siteUrl } from '@/lib/env';
 import { jobPostingJsonLd } from '@/lib/seo/job-posting';
+import { ApplySection, type ApplyState } from '@/components/application/apply-section';
 import { getJobBySlug } from '@/lib/services/jobs';
+import { createClient } from '@/lib/supabase/server';
 import type { Job } from '@/lib/services/job-types';
 
 export async function generateMetadata({
@@ -49,6 +51,8 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   const niceToHave = job.job_skills.filter((s) => !s.is_required);
   const closed = job.status !== 'open';
   const expired = job.deadline ? new Date(job.deadline) < new Date() : false;
+
+  const applyState = await resolveApplyState(job.id, closed || expired);
 
   return (
     <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
@@ -174,19 +178,63 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
         </section>
       )}
 
-      {!closed && !expired && (
-        <div className="mt-8 border-t border-border-base pt-6">
-          {/* The apply flow lands next; the button is deliberately not rendered yet rather
-              than rendered dead. A button that does nothing is worse than no button. */}
-          <p className="text-sm text-text-muted">
-            Applying opens in the next release.{' '}
-            <Link href="/signup" className="text-accent hover:underline">
-              Create a profile
-            </Link>{' '}
-            so you&rsquo;re ready.
-          </p>
-        </div>
-      )}
+      <div className="mt-8 border-t border-border-base pt-6">
+        <ApplySection state={applyState} jobId={job.id} jobTitle={job.title} slug={job.slug} />
+      </div>
     </main>
   );
+}
+
+/**
+ * Which apply branch this visitor is in.
+ *
+ * Read server-side so the page ships the right state in the HTML rather than flashing a
+ * wrong one and correcting it on hydrate.
+ */
+async function resolveApplyState(jobId: string, closed: boolean): Promise<ApplyState> {
+  if (closed) return { kind: 'closed' };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: 'signed-out' };
+
+  const { data: profile } = await supabase
+    .from('talent_profiles')
+    .select('id, is_published')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (!profile) {
+    // No talent profile: either they are a client, or they have not started one.
+    const { data: client } = await supabase
+      .from('client_profiles')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (client) {
+      const { data: ownsJob } = await supabase
+        .from('jobs')
+        .select('id')
+        .eq('id', jobId)
+        .eq('client_id', client.id)
+        .maybeSingle();
+      if (ownsJob) return { kind: 'own-job' };
+      return { kind: 'is-client' };
+    }
+    return { kind: 'no-profile' };
+  }
+
+  const { data: existing } = await supabase
+    .from('applications')
+    .select('status')
+    .eq('job_id', jobId)
+    .eq('talent_id', profile.id)
+    .maybeSingle();
+  if (existing) return { kind: 'already-applied', status: existing.status };
+
+  if (!profile.is_published) return { kind: 'unpublished' };
+  return { kind: 'can-apply' };
 }

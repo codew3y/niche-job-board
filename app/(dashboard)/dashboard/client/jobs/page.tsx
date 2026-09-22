@@ -36,7 +36,12 @@ export default async function ClientJobsPage() {
         <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
           {jobs.map((job) => (
             <li key={job.id} className="flex items-center justify-between gap-4 p-4">
-              <span className="font-medium">{job.title}</span>
+              <Link
+                href={`/dashboard/client/jobs/${job.id}`}
+                className="font-medium hover:text-accent"
+              >
+                {job.title}
+              </Link>
               <span
                 className={`rounded-full px-2.5 py-0.5 text-xs ${
                   job.status === 'open'
