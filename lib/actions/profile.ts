@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { publishTalentProfile } from '../schemas/talent';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
 
@@ -68,24 +67,12 @@ export async function updateProfile(
   }
 
   /**
-   * A published profile cannot edit its way below the publish gate.
+   * A published profile can now be edited down to nothing without being stopped. There used
+   * to be a check here mirroring talent_publish_gate, refusing an edit that would leave a
+   * live profile without evidence; both it and the constraint are gone (ADR-008).
    *
-   * The CHECK constraint would reject the update anyway, but with a constraint-violation
-   * message nobody can act on. Catching it here lets the message name the consequence and
-   * offer the alternative: unpublish first.
+   * Removing someone's own text from their own profile is their business.
    */
-  if (profile.is_published) {
-    const gate = publishTalentProfile.safeParse({
-      bio,
-      websiteUrl: website,
-      portfolioItemCount: profile.portfolio_item_count,
-    });
-    if (!gate.success) {
-      errors._ = [
-        'That would leave your published profile without enough evidence. Add a project or keep the site link — or unpublish first.',
-      ];
-    }
-  }
 
   if (Object.keys(errors).length) {
     return { ok: false, message: errors._?.[0] ?? 'Check the fields below.', fields: errors };
@@ -139,15 +126,8 @@ export async function togglePublish(formData: FormData): Promise<void> {
   const { supabase, profile } = await requireTalent();
   const wantPublished = formData.get('publish') === 'true';
 
-  if (wantPublished) {
-    const gate = publishTalentProfile.safeParse({
-      bio: profile.bio ?? '',
-      websiteUrl: profile.website_url,
-      portfolioItemCount: profile.portfolio_item_count,
-    });
-    if (!gate.success) return; // the UI does not offer the button in this state
-  }
-
+  // No gate. Publishing is unconditional (ADR-008) — the button is always live, and a sparse
+  // profile goes public and competes on its merits.
   await supabase
     .from('talent_profiles')
     .update({ is_published: wantPublished })

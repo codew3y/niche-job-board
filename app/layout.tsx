@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Portfolio-first hiring for developers',
+    default: 'Hiring for developers, by what they can do',
     template: '%s · TechSelect',
   },
   description:
-    'A job board for software, web and automation work where shipped projects are the profile — semantic matching over portfolio evidence, in both directions.',
+    'A job board for software, web and automation work. Anyone can list — show a portfolio if you have one, and let clients decide. Semantic matching in both directions.',
   robots: { index: true, follow: true },
 };
 

@@ -13,7 +13,7 @@ import { listTalent } from '@/lib/services/talent';
 export const metadata: Metadata = {
   title: 'Browse developers',
   description:
-    'Freelance software, web and automation developers — with the work they have actually shipped.',
+    'Freelance software, web and automation developers. Browse everyone, filter by skill, and decide for yourself.',
 };
 
 export default async function TalentPage({
@@ -31,7 +31,7 @@ export default async function TalentPage({
       <header className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight">Developers</h1>
         <p className="mt-1 text-text-muted">
-          Every profile here carries evidence — shipped projects, or a portfolio site.
+          Everyone who wants to be listed is listed. Judge them on what you see.
         </p>
       </header>
 

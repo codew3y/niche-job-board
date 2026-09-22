@@ -378,11 +378,13 @@ maybe()('RLS: saved lists and notifications are owner-only', () => {
 });
 
 maybe()('database-enforced business rules', () => {
-  it('blocks publishing a profile with no evidence and no bio', async () => {
-    await expect(
-      sql`insert into talent_profiles (user_id, slug, headline, bio, is_published)
-          values (${MALLORY}, 'no-evidence', 'Dev', '', true)`,
-    ).rejects.toThrow(/talent_publish_gate/);
+  it('ALLOWS publishing a profile with no evidence and no bio (ADR-008)', async () => {
+    // This asserted the opposite until 2026-09-23, when talent_publish_gate was dropped.
+    // Inverted rather than deleted: the database is where the old gate lived, so this is
+    // where its return would first show up.
+    const rows = await sql`insert into talent_profiles (user_id, slug, headline, bio, is_published)
+          values (${MALLORY}, 'no-evidence', 'Dev', '', true) returning is_published`;
+    expect(rows[0]!.is_published).toBe(true);
   });
 
   it('blocks a second application from the same talent to the same job', async () => {

@@ -172,10 +172,12 @@ ${erd.join('\n')}
 - **Roles are separate profile tables** (\`talent_profiles\`, \`client_profiles\`) linked to one
   \`auth.users\` row — never a role column. That is what makes dual-role accounts work without
   a flag leaking into every query (PROJECT.md §5.1).
-- **The publish gate is a CHECK**, not only a Zod refinement: \`talent_publish_gate\` requires a
-  non-empty bio AND (\`website_url\` OR ≥2 portfolio items). Because a CHECK cannot run a
-  subquery, \`portfolio_item_count\` is maintained by trigger — if that counter drifts, the gate
-  is decorative (ADR-004).
+- **There is no publish gate** (ADR-008, migration 0014). Any profile may be published with no
+  bio, no site, no projects and no skills. A \`talent_publish_gate\` CHECK used to require a
+  non-empty bio AND (\`website_url\` OR ≥2 portfolio items); it was dropped because who is worth
+  hiring is the client's judgement, not the platform's. \`portfolio_item_count\` is still
+  maintained by trigger — it now feeds ranking and the profile suggestions panel rather than an
+  admission test.
 - **\`website_checked_at\` / \`website_status\` exist but are never written in v1** (ADR-007 D3).
   Two nullable columns now cost nothing; adding them later to a live RLS-protected table costs
   a migration.

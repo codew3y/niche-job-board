@@ -18,8 +18,7 @@ import { jobSearchParams } from './search';
 import {
   itemMediaInput,
   portfolioItemInput,
-  publishBlockers,
-  publishTalentProfile,
+  profileSuggestions,
   talentProfileInput,
 } from './talent';
 import { imageUploadInput } from './upload';
@@ -88,83 +87,82 @@ describe('primitives', () => {
   });
 });
 
-// ─────────────────────────── the publish gate ───────────────────────────
-describe('publish gate (ADR-004) — both paths', () => {
-  const bio = 'x'.repeat(200);
+// ─────────────────────── no publish gate (ADR-008) ───────────────────────
+describe('publishing is unconditional', () => {
+  // ADR-004 required a bio plus either an external site or two in-app projects. ADR-008
+  // removed it: anyone may publish, and who is worth hiring is the client's judgement.
+  // These tests exist so the gate cannot quietly come back as a validation rule.
 
-  it('PATH A: passes with a bio and an external site, zero items', () => {
+  it('accepts a profile with no bio, no site and no projects', () => {
     expect(
-      ok(publishTalentProfile, { bio, websiteUrl: 'https://example.dev', portfolioItemCount: 0 }),
+      ok(talentProfileInput, {
+        slug: 'nobody',
+        headline: 'Developer',
+        skills: [],
+      }),
     ).toBe(true);
   });
 
-  it('PATH B: passes with a bio and two items, no site', () => {
-    expect(ok(publishTalentProfile, { bio, websiteUrl: null, portfolioItemCount: 2 })).toBe(true);
-  });
-
-  it('passes with both', () => {
+  it('accepts a profile with no skills at all', () => {
     expect(
-      ok(publishTalentProfile, { bio, websiteUrl: 'https://example.dev', portfolioItemCount: 5 }),
+      ok(talentProfileInput, { slug: 'nobody', headline: 'Developer', bio: '', skills: [] }),
     ).toBe(true);
   });
 
-  it('fails with neither', () => {
-    expect(ok(publishTalentProfile, { bio, websiteUrl: null, portfolioItemCount: 0 })).toBe(false);
+  it("still requires a headline — it is the profile's name, not evidence", () => {
+    // Without one, every browse card and inbox row renders blank. This is the one field the
+    // product cannot display a profile without, which is a different thing from a gate.
+    expect(ok(talentProfileInput, { slug: 'nobody', headline: '', skills: [] })).toBe(false);
   });
+});
 
-  it('fails with exactly one item and no site — the off-by-one the rule turns on', () => {
-    expect(ok(publishTalentProfile, { bio, websiteUrl: null, portfolioItemCount: 1 })).toBe(false);
-  });
-
-  it('fails with evidence but an empty bio', () => {
+describe('profileSuggestions — advice, never refusal', () => {
+  it('says nothing when a profile is already substantial', () => {
     expect(
-      ok(publishTalentProfile, {
-        bio: '',
+      profileSuggestions({
+        bio: 'x'.repeat(200),
         websiteUrl: 'https://example.dev',
-        portfolioItemCount: 3,
+        portfolioItemCount: 2,
+        skillCount: 3,
       }),
-    ).toBe(false);
-    expect(
-      ok(publishTalentProfile, {
-        bio: '   ',
-        websiteUrl: 'https://example.dev',
-        portfolioItemCount: 3,
-      }),
-    ).toBe(false);
-  });
-
-  it('names what is missing instead of saying "invalid"', () => {
-    // The whole reason this rule is duplicated outside the CHECK constraint.
-    expect(publishBlockers({ bio, websiteUrl: null, portfolioItemCount: 1 })[0]).toMatch(
-      /one more project/i,
-    );
-    expect(publishBlockers({ bio, websiteUrl: null, portfolioItemCount: 0 })[0]).toMatch(
-      /portfolio site|two projects/i,
-    );
-    expect(publishBlockers({ bio: '', websiteUrl: null, portfolioItemCount: 0 })).toHaveLength(2);
-    expect(
-      publishBlockers({ bio, websiteUrl: 'https://example.dev', portfolioItemCount: 0 }),
     ).toEqual([]);
   });
 
-  it('matches the database CHECK constraint truth table exactly', () => {
-    // If these ever disagree, the UI promises something the database refuses — or worse,
-    // allows something it should not. Mirrors `talent_publish_gate`.
-    const cases: [string, string | null, number, boolean][] = [
-      [bio, 'https://example.dev', 0, true],
-      [bio, null, 2, true],
-      [bio, null, 3, true],
-      [bio, 'https://example.dev', 9, true],
-      [bio, null, 1, false],
-      [bio, null, 0, false],
-      ['', 'https://example.dev', 4, false],
-      ['', null, 0, false],
-    ];
-    for (const [b, site, count, expected] of cases) {
-      expect(
-        ok(publishTalentProfile, { bio: b, websiteUrl: site, portfolioItemCount: count }),
-      ).toBe(expected);
-    }
+  it('names what is thin without ever blocking', () => {
+    const out = profileSuggestions({
+      bio: '',
+      websiteUrl: null,
+      portfolioItemCount: 0,
+      skillCount: 0,
+    });
+    expect(out).toHaveLength(3);
+  });
+
+  it('treats a site link and a project as interchangeable evidence', () => {
+    const withSite = profileSuggestions({
+      bio: 'x'.repeat(200),
+      websiteUrl: 'https://example.dev',
+      portfolioItemCount: 0,
+      skillCount: 1,
+    });
+    const withItem = profileSuggestions({
+      bio: 'x'.repeat(200),
+      websiteUrl: null,
+      portfolioItemCount: 1,
+      skillCount: 1,
+    });
+    expect(withSite).toEqual([]);
+    expect(withItem).toEqual([]);
+  });
+
+  it('flags one project as fine — the old two-item rule is gone', () => {
+    const out = profileSuggestions({
+      bio: 'x'.repeat(200),
+      websiteUrl: null,
+      portfolioItemCount: 1,
+      skillCount: 1,
+    });
+    expect(out).toEqual([]);
   });
 });
 
@@ -181,12 +179,19 @@ describe('talent profile', () => {
     expect(ok(talentProfileInput, valid)).toBe(true);
   });
 
-  it('rejects a thin bio — this is the §8 thin-profile mitigation', () => {
-    expect(ok(talentProfileInput, { ...valid, bio: 'Full-stack dev.' })).toBe(false);
+  it('ACCEPTS a thin bio — the 120-character minimum was part of the gate (ADR-008)', () => {
+    // It used to be rejected as the §8 thin-profile mitigation. It now ranks badly instead of
+    // being refused, which is the whole substance of the change.
+    expect(ok(talentProfileInput, { ...valid, bio: 'Full-stack dev.' })).toBe(true);
   });
 
-  it('requires at least one skill', () => {
-    expect(ok(talentProfileInput, { ...valid, skills: [] })).toBe(false);
+  it('accepts no skills, which only costs visibility in skill filters', () => {
+    expect(ok(talentProfileInput, { ...valid, skills: [] })).toBe(true);
+  });
+
+  it('still caps skills at 30 — a list of everything says nothing', () => {
+    const many = Array.from({ length: 31 }, () => ({ skillId: UUID }));
+    expect(ok(talentProfileInput, { ...valid, skills: many })).toBe(false);
   });
 
   it('rejects an inverted rate range', () => {

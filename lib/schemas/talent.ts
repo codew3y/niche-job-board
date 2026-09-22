@@ -22,17 +22,23 @@ export const talentSkillInput = z.object({
 export const talentProfileInput = z
   .object({
     slug,
-    headline: trimmed.min(10, 'Say what you do — at least 10 characters.').max(120),
     /**
-     * Required, and required to have substance. This is the thin-profile mitigation from §8:
-     * when someone's portfolio lives behind a URL the system never reads, the bio is the only
-     * first-party text there is to embed. "Full-stack dev" produces a profile that matches
-     * badly no matter how good the model is.
+     * The one field still required, and it is not an evidence gate: the headline IS the
+     * profile's name everywhere it appears — browse cards, the inbox, the public page's
+     * <h1>. A row without one renders as a blank card with a link. Three characters, which
+     * is a check that something was typed rather than a judgement about what.
      */
-    bio: richText(4000, 'Bio').min(
-      120,
-      'Tell us what you build, the stack you use, and a piece of work you are proud of — at least 120 characters. This is what matching reads.',
-    ),
+    headline: trimmed.min(3, 'Give your profile a title — even just what you do.').max(120),
+    /**
+     * Optional, with no minimum (ADR-008). It used to require 120 characters as a
+     * thin-profile mitigation; that gate is gone along with every other one.
+     *
+     * The advice still holds and is now given as a hint rather than enforced as a rule: the
+     * bio is the only first-party text the matching layer can read, so "Full-stack dev"
+     * produces a profile that ranks badly however good the model is. That is a consequence
+     * the author chooses, not a door the platform closes.
+     */
+    bio: richText(4000, 'Bio').default(''),
     hourlyRateMin: optionalMoney,
     hourlyRateMax: optionalMoney,
     currency: currency.default('USD'),
@@ -43,10 +49,14 @@ export const talentProfileInput = z
     githubUrl: optionalHttpsUrl,
     linkedinUrl: optionalHttpsUrl,
     acceptsMessages: z.boolean().default(true),
+    /**
+     * No minimum. A profile with no skills is publishable — it simply will not appear under
+     * any skill filter, which is the author's trade to make.
+     */
     skills: z
       .array(talentSkillInput)
-      .min(1, 'Pick at least one skill so clients can find you.')
-      .max(30, 'Pick your strongest 30 at most — a list of everything says nothing.'),
+      .max(30, 'Pick your strongest 30 at most — a list of everything says nothing.')
+      .default([]),
   })
   .refine(
     (v) =>
@@ -80,46 +90,50 @@ export const portfolioItemInput = z
   });
 
 /**
- * THE PUBLISH GATE (§5.4, ADR-004).
+ * THERE IS NO PUBLISH GATE (ADR-008, superseding ADR-004).
  *
- * A profile may be published only with a substantive bio AND at least one form of evidence:
- * an external site, or two or more in-app items. The same rule exists as the
- * `talent_publish_gate` CHECK constraint — that copy is the one that cannot be bypassed;
- * this copy exists to produce an error message that names what is actually missing, because
- * "validation failed" tells the user nothing about what to do next.
+ * `publishTalentProfile` and `publishBlockers()` used to live here and refuse a profile that
+ * had no bio and neither a portfolio site nor two projects. Both are gone, along with the
+ * `talent_publish_gate` CHECK constraint they mirrored (migration 0014).
+ *
+ * What replaces them is advice, not enforcement. `profileSuggestions()` returns the same
+ * observations the blockers used to make — no bio, no evidence, no skills — as things worth
+ * doing rather than reasons to refuse. The profile publishes either way.
+ *
+ * The distinction matters in the UI: a blocker disables the button, a suggestion does not.
  */
 export const publishGateInput = z.object({
-  bio: trimmed,
+  bio: trimmed.default(''),
   websiteUrl: z.string().nullable().optional(),
-  portfolioItemCount: z.coerce.number().int().min(0),
+  portfolioItemCount: z.coerce.number().int().min(0).default(0),
+  skillCount: z.coerce.number().int().min(0).default(0),
 });
 
-export const publishTalentProfile = publishGateInput.superRefine((v, ctx) => {
-  if (v.bio.length === 0) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['bio'],
-      message: 'Add a bio before publishing — it is what matching reads.',
-    });
-  }
-  const hasSite = Boolean(v.websiteUrl);
-  const hasItems = v.portfolioItemCount >= 2;
-  if (!hasSite && !hasItems) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['portfolioItems'],
-      message:
-        v.portfolioItemCount === 1
-          ? 'One more project will do it — publish needs either a portfolio site link or two projects.'
-          : 'Add a link to your portfolio site, or add two projects here.',
-    });
-  }
-});
+/**
+ * What would make this profile land better, in priority order. Never blocks publishing.
+ *
+ * Worded as consequences rather than instructions — "clients cannot see what you have built"
+ * says why it matters; "add a portfolio" is a platform telling someone how to present
+ * themselves, which is the thing we just stopped doing.
+ */
+export function profileSuggestions(input: z.input<typeof publishGateInput>): string[] {
+  const v = publishGateInput.parse(input);
+  const out: string[] = [];
 
-/** The completeness checklist the UI renders. Names the blocker rather than just refusing. */
-export function publishBlockers(input: z.infer<typeof publishGateInput>): string[] {
-  const result = publishTalentProfile.safeParse(input);
-  return result.success ? [] : result.error.issues.map((i) => i.message);
+  if (v.bio.trim().length < 120) {
+    out.push(
+      'A fuller bio is the main thing matching reads — a few sentences on what you build and the stack you use will place you better.',
+    );
+  }
+  if (!v.websiteUrl && v.portfolioItemCount === 0) {
+    out.push(
+      'Nothing here shows your work yet. A portfolio link or a project gives a client something to judge.',
+    );
+  }
+  if (v.skillCount === 0) {
+    out.push('Without skills tagged, you will not appear under any skill filter.');
+  }
+  return out;
 }
 
 export const talentLinksInput = z.object({

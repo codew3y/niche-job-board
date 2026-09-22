@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation';
 
 import { makeSlug } from '../onboarding/steps';
 import { clientProfileInput } from '../schemas/client';
-import { publishTalentProfile } from '../schemas/talent';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
 
@@ -256,17 +255,9 @@ export async function publishTalent(
     .maybeSingle();
   if (!profile) redirect('/onboarding/talent/basics');
 
-  // The same rule as talent_publish_gate. Checked here so the message names the blocker;
-  // the CHECK is what makes bypassing it impossible.
-  const gate = publishTalentProfile.safeParse({
-    bio: profile.bio ?? '',
-    websiteUrl: profile.website_url,
-    portfolioItemCount: profile.portfolio_item_count,
-  });
-  if (!gate.success) {
-    return { ok: false, message: gate.error.issues[0]?.message ?? 'Not ready to publish yet.' };
-  }
-
+  // Nothing to check. Onboarding used to refuse here unless the profile had a bio and either
+  // a site link or two projects; that gate is gone (ADR-008). Whoever wants to be listed is
+  // listed, and clients decide from there.
   const { error } = await supabase
     .from('talent_profiles')
     .update({ is_published: true })

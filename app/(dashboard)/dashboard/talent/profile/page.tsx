@@ -6,7 +6,7 @@ import { ProfileEditor, SkillsEditor } from '@/components/talent/profile-editor'
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { togglePublish } from '@/lib/actions/profile';
-import { publishBlockers } from '@/lib/schemas/talent';
+import { profileSuggestions } from '@/lib/schemas/talent';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Profile' };
@@ -34,12 +34,15 @@ export default async function ProfilePage() {
     supabase.from('talent_skills').select('skill_id').eq('talent_id', profile.id),
   ]);
 
-  // The same function the publish action calls, so the page can never offer something the
-  // server would refuse (docs/components.md).
-  const blockers = publishBlockers({
+  /**
+   * Suggestions, not blockers. Nothing here can prevent publishing (ADR-008) — the publish
+   * button is always live, and this panel sits alongside it rather than in front of it.
+   */
+  const suggestions = profileSuggestions({
     bio: profile.bio ?? '',
     websiteUrl: profile.website_url,
     portfolioItemCount: profile.portfolio_item_count,
+    skillCount: (mySkills ?? []).length,
   });
 
   return (
@@ -61,13 +64,36 @@ export default async function ProfilePage() {
           }
         />
 
-        <div className="rounded-[--radius] border border-border-base bg-surface-raised p-4">
-          {blockers.length > 0 ? (
-            <>
-              <p className="font-medium">Before you can publish</p>
+        <div className="space-y-4 rounded-[--radius] border border-border-base bg-surface-raised p-4">
+          {/* The publish control comes FIRST and is never conditional. Putting advice above a
+              button people are entitled to press reads as a gate even when it is not one. */}
+          <form
+            action={togglePublish}
+            className="flex flex-wrap items-center justify-between gap-3"
+          >
+            <input type="hidden" name="publish" value={profile.is_published ? 'false' : 'true'} />
+            <p className="text-sm text-text-muted text-pretty">
+              {profile.is_published
+                ? 'Your profile is public and can be matched to briefs.'
+                : 'Publish whenever you like — you can keep editing afterwards.'}
+            </p>
+            <Button
+              type="submit"
+              variant={profile.is_published ? 'secondary' : 'primary'}
+              size="sm"
+            >
+              {profile.is_published ? 'Unpublish' : 'Publish'}
+            </Button>
+          </form>
+
+          {suggestions.length > 0 && (
+            <div className="border-t border-border-base pt-3">
+              <p className="text-sm font-medium">Would help you land better</p>
               <ul className="mt-2 space-y-1 text-sm text-text-muted">
-                {blockers.map((b) => (
-                  <li key={b}>· {b}</li>
+                {suggestions.map((s) => (
+                  <li key={s} className="text-pretty">
+                    · {s}
+                  </li>
                 ))}
               </ul>
               <Link
@@ -76,26 +102,7 @@ export default async function ProfilePage() {
               >
                 Add a project
               </Link>
-            </>
-          ) : (
-            <form
-              action={togglePublish}
-              className="flex flex-wrap items-center justify-between gap-3"
-            >
-              <input type="hidden" name="publish" value={profile.is_published ? 'false' : 'true'} />
-              <p className="text-sm text-text-muted text-pretty">
-                {profile.is_published
-                  ? 'Your profile is public and can be matched to briefs.'
-                  : 'Ready to publish — clients will be able to find you.'}
-              </p>
-              <Button
-                type="submit"
-                variant={profile.is_published ? 'secondary' : 'primary'}
-                size="sm"
-              >
-                {profile.is_published ? 'Unpublish' : 'Publish'}
-              </Button>
-            </form>
+            </div>
           )}
         </div>
       </div>

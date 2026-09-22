@@ -78,7 +78,7 @@ Your TechSelect account is ready.
 
 Next, pick whether you are here to find work or to hire. You can do both — adding the second role later takes a minute.
 
-If you are a developer: your profile needs a real bio and either a portfolio link or two projects before it can be published. That is not bureaucracy. It is the only thing a client can judge you on, and it is what the matching reads.
+If you are a developer: you can publish whenever you like — there is no bar to clear. A fuller bio and a piece of work you are proud of will place you better, because that is what the matching reads and what a client judges. But that is your call, not ours.
 
 ${url}
 
@@ -91,7 +91,7 @@ ${url}
           'Next, pick whether you are here to find work or to hire. You can do both &mdash; adding the second role later takes a minute.',
         ) +
         p(
-          '<strong>If you are a developer:</strong> your profile needs a real bio and either a portfolio link or two projects before it can be published. That is not bureaucracy &mdash; it is the only thing a client can judge you on, and it is what the matching reads.',
+          '<strong>If you are a developer:</strong> you can publish whenever you like &mdash; there is no bar to clear. A fuller bio and a piece of work you are proud of will place you better, because that is what the matching reads and what a client judges. But that is your call, not ours.',
         ),
       cta: { label: 'Choose your role', href: url },
     }),

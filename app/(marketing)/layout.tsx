@@ -79,7 +79,7 @@ export default async function MarketingLayout({ children }: { children: ReactNod
 
       <footer className="mt-16 border-t border-border-base py-8">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-4 text-sm text-text-subtle">
-          <span>TechSelect — portfolio-first hiring for developers.</span>
+          <span>TechSelect — open to every developer; clients decide.</span>
           {/* Linked from every public page, not only from Google's consent screen. A policy
               reachable only by those who already went looking is not really published. */}
           <nav aria-label="Legal" className="flex gap-5">

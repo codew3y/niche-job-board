@@ -78,11 +78,15 @@ export const talentProfiles = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    // The publish gate, at the only layer that cannot be bypassed (ADR-004).
-    check(
-      'talent_publish_gate',
-      sql`not ${t.isPublished} or (length(btrim(${t.bio})) > 0 and (${t.websiteUrl} is not null or ${t.portfolioItemCount} >= 2))`,
-    ),
+    /**
+     * There is NO publish gate. Anyone may publish, with or without a bio, a portfolio site or
+     * a single project (ADR-008, migration 0014, superseding ADR-004).
+     *
+     * This is a deliberate removal, not an omission — the constraint existed here and was
+     * dropped. Who is worth hiring is the client's judgement; a platform gate substitutes its
+     * taste for theirs and decides who gets a hearing. Thin profiles are handled by ranking
+     * badly, not by being excluded.
+     */
     check(
       'talent_rate_order',
       sql`${t.hourlyRateMin} is null or ${t.hourlyRateMax} is null or ${t.hourlyRateMin} <= ${t.hourlyRateMax}`,
@@ -100,6 +104,8 @@ export const talentProfiles = pgTable(
     index('talent_availability_idx').on(t.availability),
     // HNSW for cosine similarity — the retrieve step of §8. 1536 dims is inside pgvector's
     // 2000-dim index ceiling (docs/constraints.md §2).
+    // Full-text search over the generated column — see the note in jobs.ts.
+    index('talent_search_idx').using('gin', t.searchVector),
     index('talent_embedding_hnsw_idx').using('hnsw', t.embedding.op('vector_cosine_ops')),
 
     // Published profiles are public by design (docs/constraints.md §5); drafts are owner-only.

@@ -89,7 +89,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
 
       <footer className="border-t border-border-base py-6">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 px-4 text-sm text-text-subtle">
-          <span>Portfolio-first hiring for developers.</span>
+          <span>Open to every developer; clients decide.</span>
           <nav aria-label="Legal" className="flex gap-5">
             <Link href="/privacy" className="hover:text-text">
               Privacy

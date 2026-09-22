@@ -1,7 +1,8 @@
 /**
  * Editing a profile that is ALREADY published.
  *
- * Onboarding only ever builds up to the publish gate. Editing can walk back through it, and
+ * Onboarding used to build up to a publish gate, and editing could walk back through it. The
+ * gate is gone (ADR-008); this suite now pins its absence. Originally:
  * that is where the interesting failures are: an edit that removes the last piece of
  * evidence must not leave a published profile the gate would reject.
  */
@@ -9,7 +10,7 @@
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import postgres from 'postgres';
 
-import { publishBlockers } from '../schemas/talent';
+import { profileSuggestions } from '../schemas/talent';
 
 const DB_URL =
   process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
@@ -68,63 +69,61 @@ afterAll(async () => {
 
 const maybe = reachable ? describe : describe.skip;
 
-maybe('the publish gate holds during editing', () => {
+maybe('there is no publish gate (ADR-008)', () => {
   beforeEach(reset);
 
-  it('the fixture is genuinely published on two items alone', async () => {
-    const [p] =
-      await sql`select is_published, portfolio_item_count, website_url from talent_profiles where id = ${ids.profile}`;
+  /**
+   * This suite used to assert the opposite of everything below: that emptying a bio or
+   * dropping below two projects on a live profile was REFUSED by talent_publish_gate.
+   *
+   * Migration 0014 dropped that constraint. These tests are the inverse, and they exist so
+   * the gate cannot return by accident — a CHECK reintroduced in a later migration would
+   * fail here rather than quietly start refusing people again.
+   */
+
+  it('a published profile can be emptied to nothing and stays published', async () => {
+    await sql`update talent_profiles set bio = '' where id = ${ids.profile}`;
+    const [p] = await sql`select bio, is_published from talent_profiles where id = ${ids.profile}`;
+    expect(p!.bio).toBe('');
     expect(p!.is_published).toBe(true);
-    expect(p!.portfolio_item_count).toBe(2);
-    expect(p!.website_url).toBeNull();
   });
 
-  it('REFUSES to empty the bio of a published profile', async () => {
-    await expect(
-      sql`update talent_profiles set bio = '' where id = ${ids.profile}`,
-    ).rejects.toThrow(/talent_publish_gate/);
-  });
-
-  it('REFUSES to drop below two items while published', async () => {
-    // Deleting an item drops portfolio_item_count via trigger, which the CHECK then rejects.
-    const [item] =
-      await sql`select id from portfolio_items where talent_id = ${ids.profile} limit 1`;
-    await expect(sql`delete from portfolio_items where id = ${item!.id}`).rejects.toThrow(
-      /talent_publish_gate/,
-    );
-  });
-
-  it('ALLOWS the same delete once unpublished — which is what the action does first', async () => {
-    await sql`update talent_profiles set is_published = false where id = ${ids.profile}`;
-    const [item] =
-      await sql`select id from portfolio_items where talent_id = ${ids.profile} limit 1`;
-    await sql`delete from portfolio_items where id = ${item!.id}`;
+  it('EVERY PROJECT CAN BE DELETED while published', async () => {
+    const items = await sql`select id from portfolio_items where talent_id = ${ids.profile}`;
+    for (const item of items) {
+      await sql`delete from portfolio_items where id = ${item.id}`;
+    }
     const [p] =
-      await sql`select portfolio_item_count from talent_profiles where id = ${ids.profile}`;
-    expect(p!.portfolio_item_count).toBe(1);
-  });
-
-  it('ALLOWS dropping to one item if a site link is added first', async () => {
-    // The two evidence routes are interchangeable — that is the whole of ADR-004.
-    await sql`update talent_profiles set website_url = 'https://example.test/me' where id = ${ids.profile}`;
-    const [item] =
-      await sql`select id from portfolio_items where talent_id = ${ids.profile} limit 1`;
-    await sql`delete from portfolio_items where id = ${item!.id}`;
-    const [p] =
-      await sql`select is_published, portfolio_item_count from talent_profiles where id = ${ids.profile}`;
+      await sql`select portfolio_item_count, is_published from talent_profiles where id = ${ids.profile}`;
+    expect(p!.portfolio_item_count).toBe(0);
     expect(p!.is_published).toBe(true);
-    expect(p!.portfolio_item_count).toBe(1);
   });
 
-  it('the UI warning fires for exactly the states the constraint rejects', () => {
-    // publishBlockers is what the page renders; the CHECK is what the database enforces.
-    // If these disagree the user is told to do something the system refuses.
-    expect(publishBlockers({ bio: BIO, websiteUrl: null, portfolioItemCount: 2 })).toEqual([]);
-    expect(publishBlockers({ bio: BIO, websiteUrl: null, portfolioItemCount: 1 })).toHaveLength(1);
-    expect(publishBlockers({ bio: '', websiteUrl: null, portfolioItemCount: 2 })).toHaveLength(1);
+  it('a profile with no bio, no site and no projects can be published from scratch', async () => {
+    await sql`update talent_profiles
+              set bio = '', website_url = null, is_published = false
+              where id = ${ids.profile}`;
+    const items = await sql`select id from portfolio_items where talent_id = ${ids.profile}`;
+    for (const item of items) await sql`delete from portfolio_items where id = ${item.id}`;
+
+    await sql`update talent_profiles set is_published = true where id = ${ids.profile}`;
+    const [p] = await sql`select is_published from talent_profiles where id = ${ids.profile}`;
+    expect(p!.is_published).toBe(true);
+  });
+
+  it('THE CONSTRAINT IS ACTUALLY GONE, not merely unreached', async () => {
+    const rows = await sql`select 1 from pg_constraint where conname = 'talent_publish_gate'`;
+    expect(rows).toHaveLength(0);
+  });
+
+  it('the panel offers suggestions where it used to list blockers', () => {
+    // Same observations, different force: these never disable the publish button.
     expect(
-      publishBlockers({ bio: BIO, websiteUrl: 'https://x.test', portfolioItemCount: 0 }),
+      profileSuggestions({ bio: BIO, websiteUrl: null, portfolioItemCount: 2, skillCount: 1 }),
     ).toEqual([]);
+    expect(
+      profileSuggestions({ bio: '', websiteUrl: null, portfolioItemCount: 0, skillCount: 0 }),
+    ).toHaveLength(3);
   });
 });
 

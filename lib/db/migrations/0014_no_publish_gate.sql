@@ -1,0 +1,19 @@
+-- Anyone may publish a profile. No evidence requirement, no bio requirement, no gate.
+--
+-- What is being removed:
+--   CHECK (not is_published or (length(btrim(bio)) > 0
+--          and (website_url is not null or portfolio_item_count >= 2)))
+--
+-- That constraint, and ADR-004 behind it, made a portfolio site or two in-app projects a
+-- condition of being visible at all. Owner decision, 2026-09-23: the product is open to
+-- everyone, and who is worth hiring is the client's judgement to make, not the platform's.
+-- A gate that decides who may be seen is the platform substituting its taste for theirs.
+--
+-- The cost is real and is accepted knowingly: a published profile may now be a headline and
+-- nothing else. Browse will contain thin profiles, and the Phase 4 matching layer will have
+-- little or no first-party text to embed for them, so they will rank poorly on semantics
+-- rather than be excluded. That is a ranking problem, which is the right place for it —
+-- a thin profile competes badly instead of being refused a hearing.
+--
+-- ADR-004 is superseded by ADR-008.
+ALTER TABLE "talent_profiles" DROP CONSTRAINT IF EXISTS "talent_publish_gate";
