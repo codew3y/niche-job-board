@@ -5,6 +5,7 @@ import { useFormStatus } from 'react-dom';
 
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
+import { LinksPreview } from './links-preview';
 import { SkillPicker, type SkillOption } from '@/components/onboarding/skill-picker';
 import { updateProfile, updateSkills } from '@/lib/actions/profile';
 import type { ActionResult } from '@/lib/actions/auth';
@@ -52,30 +53,13 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
         </p>
       </div>
 
-      <fieldset className="space-y-4">
-        <legend className="text-sm font-medium">Links</legend>
-        <Field
-          label="Portfolio site"
-          name="websiteUrl"
-          type="url"
-          defaultValue={str(profile, 'website_url')}
-          errors={fields?.websiteUrl}
-        />
-        <Field
-          label="GitHub"
-          name="githubUrl"
-          type="url"
-          defaultValue={str(profile, 'github_url')}
-          errors={fields?.githubUrl}
-        />
-        <Field
-          label="LinkedIn"
-          name="linkedinUrl"
-          type="url"
-          defaultValue={str(profile, 'linkedin_url')}
-          errors={fields?.linkedinUrl}
-        />
-      </fieldset>
+      <LinksPreview
+        initial={{
+          website: str(profile, 'website_url'),
+          github: str(profile, 'github_url'),
+          linkedin: str(profile, 'linkedin_url'),
+        }}
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field
