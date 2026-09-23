@@ -43,6 +43,36 @@ afterAll(async () => {
 
 itAnnouncesTarget(sql, DB_URL);
 
+describe('the client-facing match service never returns a score', () => {
+  const source = readFileSync('lib/services/matches.ts', 'utf8');
+
+  it('CandidateMatch HAS NO SCORE FIELD', () => {
+    // Enforced in the service, not the component. Leaving it to the UI means one forgotten
+    // prop leaks the number — and a type that cannot carry a score cannot leak one.
+    const type = source.slice(
+      source.indexOf('export type CandidateMatch'),
+      source.indexOf('export type MatchFeed'),
+    );
+    expect(type).not.toMatch(/\bscore\b\s*:/);
+    expect(type).toMatch(/reason/);
+  });
+
+  it('TalentMatch DOES carry a score — the other half of the asymmetry', () => {
+    // Talent see their own score on their own matches. An asymmetry tested in only one
+    // direction is half a rule.
+    const type = source.slice(
+      source.indexOf('export type TalentMatch'),
+      source.indexOf('export type CandidateMatch'),
+    );
+    expect(type).toMatch(/score: number \| null/);
+  });
+
+  it('the display threshold is the same number the eval gate measures', () => {
+    // If these drift, the product shows "strong match" for scores the eval proved weak.
+    expect(source).toMatch(/STRONG_MATCH_SCORE = 70/);
+  });
+});
+
 describe('the candidate list never renders a score', () => {
   const source = readFileSync('components/application/candidate-list.tsx', 'utf8');
 
