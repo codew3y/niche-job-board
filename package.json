@@ -29,6 +29,7 @@
     "test:m2": "playwright test e2e/m2.spec.ts"
   },
   "dependencies": {
+    "@google/genai": "^2.24.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "drizzle-orm": "^0.45.2",

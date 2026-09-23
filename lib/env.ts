@@ -66,6 +66,15 @@ const serverSchema = z.object({
    * and CAN ONLY DELIVER TO THE RESEND ACCOUNT OWNER'S OWN ADDRESS — see lib/email/send.ts.
    */
   EMAIL_FROM: blankAsUndefined(z.string().min(3).optional()),
+  /**
+   * Embeddings. ADR-002 froze text-embedding-3-small into vector(1536), so this is OpenAI
+   * specifically and changing provider means a migration, not a config edit.
+   */
+  OPENAI_API_KEY: blankAsUndefined(
+    z.string().startsWith('sk-', 'OPENAI_API_KEY should start with sk-.').optional(),
+  ),
+  /** Re-ranking. Free tier, owner decision 2026-09-23 — see ADR-009. */
+  GEMINI_API_KEY: blankAsUndefined(z.string().min(20).optional()),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 
