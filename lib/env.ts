@@ -67,13 +67,12 @@ const serverSchema = z.object({
    */
   EMAIL_FROM: blankAsUndefined(z.string().min(3).optional()),
   /**
-   * Embeddings. ADR-002 froze text-embedding-3-small into vector(1536), so this is OpenAI
-   * specifically and changing provider means a migration, not a config edit.
+   * Embeddings AND re-ranking, both on Gemini's free tier (ADR-009, superseding ADR-002's
+   * OpenAI choice). One key for the whole matching pipeline.
+   *
+   * Absent means no matching: embeddings are not written, and the match feeds show their
+   * honest empty state rather than an error. Nothing else in the product depends on it.
    */
-  OPENAI_API_KEY: blankAsUndefined(
-    z.string().startsWith('sk-', 'OPENAI_API_KEY should start with sk-.').optional(),
-  ),
-  /** Re-ranking. Free tier, owner decision 2026-09-23 — see ADR-009. */
   GEMINI_API_KEY: blankAsUndefined(z.string().min(20).optional()),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });

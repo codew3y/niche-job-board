@@ -1,100 +1,125 @@
 import 'server-only';
 
+import { GoogleGenAI } from '@google/genai';
+
 import { serverEnv } from '../env';
+import { EMBEDDING_DIMENSIONS, EMBEDDING_MODEL, EMBEDDING_TASK_TYPE } from './config';
+
+export { EMBEDDING_DIMENSIONS, EMBEDDING_MODEL } from './config';
 
 /**
- * Embedding client — OpenAI `text-embedding-3-small`, 1536 dimensions.
+ * Embedding client — Gemini `gemini-embedding-2` at 1536 dimensions.
  *
- * Not a choice this file can revisit: ADR-002 froze the dimension into `vector(1536)` on four
- * tables, so a different model means a migration and a full re-embed, not a config change.
+ * ADR-002 originally froze OpenAI's `text-embedding-3-small`; ADR-009 replaces it with Gemini
+ * on the free tier (owner decision, 2026-09-23). The schema is untouched because
+ * `gemini-embedding-2` accepts a configurable `outputDimensionality` and 1536 is one of its
+ * recommended sizes — so `vector(1536)` and every HNSW index survive the swap.
  *
- * NEVER CALLED IN A REQUEST PATH. Embedding is ingest-side work (ADR-002), triggered when a
- * profile, item or job is written. A page that embeds on read inherits the API's latency and
- * its outages, and the §11 budget of 800ms p95 does not survive a cold call to a third party.
+ * WHAT DOES NOT SURVIVE IS ANY EXISTING EMBEDDING. Vectors from two different models are not
+ * comparable: cosine distance between an OpenAI vector and a Gemini one is a number with no
+ * meaning, and mixing them silently produces confident nonsense rather than an error. Anything
+ * already embedded has to be re-embedded, which is why the backfill clears before it writes.
  *
- * Raw fetch rather than the OpenAI SDK: this is one POST to one endpoint. A dependency would
- * be more bytes and more surface than the twenty lines it replaces.
+ * NEVER CALLED IN A REQUEST PATH. Embedding is ingest-side work: a page that embeds on read
+ * inherits the API's latency and its outages, and the 800ms p95 budget does not survive a cold
+ * call to a third party.
  */
-
-export const EMBEDDING_MODEL = 'text-embedding-3-small';
-export const EMBEDDING_DIMENSIONS = 1536;
-
-const ENDPOINT = 'https://api.openai.com/v1/embeddings';
 
 export type EmbedFailure = 'not_configured' | 'rate_limited' | 'api_error' | 'bad_response';
 
 export type EmbedResult =
-  | { ok: true; embedding: number[]; tokens: number }
+  | { ok: true; embedding: number[] }
   | { ok: false; reason: EmbedFailure; detail?: string; retryable: boolean };
+
+let client: GoogleGenAI | null = null;
+
+function genai(apiKey: string): GoogleGenAI {
+  client ??= new GoogleGenAI({ apiKey });
+  return client;
+}
 
 /**
  * Which failures are worth retrying.
  *
  * 429 and 5xx are transient and belong in a backoff loop. A 400 means the input is wrong and
- * will be wrong every time — retrying it burns quota and delays the dead-letter row that would
- * actually tell someone. 401 is a missing or revoked key: also permanent, also not worth
- * hammering.
+ * will be wrong every time — retrying burns free-tier quota, which is the scarce resource
+ * here, and delays the dead-letter row that would actually tell someone.
  */
-function classify(status: number): { reason: EmbedFailure; retryable: boolean } {
-  if (status === 429) return { reason: 'rate_limited', retryable: true };
-  if (status >= 500) return { reason: 'api_error', retryable: true };
+function classify(message: string): { reason: EmbedFailure; retryable: boolean } {
+  if (/\b429\b|rate.?limit|RESOURCE_EXHAUSTED|quota/i.test(message)) {
+    return { reason: 'rate_limited', retryable: true };
+  }
+  if (/\b5\d\d\b|UNAVAILABLE|INTERNAL|DEADLINE/i.test(message)) {
+    return { reason: 'api_error', retryable: true };
+  }
+  if (/\b401\b|\b403\b|API key|PERMISSION_DENIED|UNAUTHENTICATED/i.test(message)) {
+    return { reason: 'api_error', retryable: false };
+  }
   return { reason: 'api_error', retryable: false };
 }
 
 export async function embed(text: string, signal?: AbortSignal): Promise<EmbedResult> {
-  const { OPENAI_API_KEY } = serverEnv();
-  if (!OPENAI_API_KEY) return { ok: false, reason: 'not_configured', retryable: false };
+  const { GEMINI_API_KEY } = serverEnv();
+  if (!GEMINI_API_KEY) return { ok: false, reason: 'not_configured', retryable: false };
 
-  let response: Response;
   try {
-    response = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${OPENAI_API_KEY}`,
-        'content-type': 'application/json',
+    const response = await genai(GEMINI_API_KEY).models.embedContent({
+      model: EMBEDDING_MODEL,
+      contents: text,
+      config: {
+        outputDimensionality: EMBEDDING_DIMENSIONS,
+        taskType: EMBEDDING_TASK_TYPE,
+        ...(signal ? { abortSignal: signal } : {}),
       },
-      body: JSON.stringify({ model: EMBEDDING_MODEL, input: text }),
-      signal,
     });
+
+    const values = response.embeddings?.[0]?.values;
+
+    /**
+     * Verify the dimension rather than trusting it. The model defaults to 3072 and only
+     * returns 1536 because `outputDimensionality` asked; if that option were ever ignored,
+     * Postgres would reject the insert far from the cause, and a silent mismatch would be the
+     * hardest failure here to understand.
+     */
+    if (!Array.isArray(values) || values.length !== EMBEDDING_DIMENSIONS) {
+      return {
+        ok: false,
+        reason: 'bad_response',
+        detail: `expected ${EMBEDDING_DIMENSIONS} dimensions, got ${values?.length ?? 'none'}`,
+        retryable: false,
+      };
+    }
+
+    return { ok: true, embedding: normalize(values) };
   } catch (cause) {
-    // A network failure or an abort. Retryable — it says nothing about the input.
-    return {
-      ok: false,
-      reason: 'api_error',
-      detail: cause instanceof Error ? cause.message : String(cause),
-      retryable: true,
-    };
+    const detail = cause instanceof Error ? cause.message : String(cause);
+    const { reason, retryable } = classify(detail);
+    return { ok: false, reason, detail: detail.slice(0, 300), retryable };
   }
+}
 
-  if (!response.ok) {
-    const { reason, retryable } = classify(response.status);
-    // The body carries the reason a 400 was a 400, which is what a dead-letter row needs.
-    const detail = await response.text().catch(() => '');
-    return { ok: false, reason, detail: `${response.status}: ${detail.slice(0, 300)}`, retryable };
-  }
-
-  const body = (await response.json().catch(() => null)) as {
-    data?: { embedding?: number[] }[];
-    usage?: { total_tokens?: number };
-  } | null;
-
-  const embedding = body?.data?.[0]?.embedding;
-  /**
-   * Verify the dimension rather than trusting it. A vector of the wrong length is rejected by
-   * Postgres with a type error at insert time, far from the cause — and if the model ever
-   * changed under us, silently storing 3072 floats in a vector(1536) column is the failure
-   * that would take longest to understand.
-   */
-  if (!Array.isArray(embedding) || embedding.length !== EMBEDDING_DIMENSIONS) {
-    return {
-      ok: false,
-      reason: 'bad_response',
-      detail: `expected ${EMBEDDING_DIMENSIONS} dimensions, got ${embedding?.length ?? 'none'}`,
-      retryable: false,
-    };
-  }
-
-  return { ok: true, embedding, tokens: body?.usage?.total_tokens ?? 0 };
+/**
+ * Scale to unit length.
+ *
+ * These models are trained with Matryoshka representation learning, so asking for 1536
+ * dimensions truncates a 3072-wide vector rather than producing a natively 1536-wide one, and
+ * truncation costs the unit length the full vector had.
+ *
+ * MEASURED, not assumed: at 1536 dimensions `gemini-embedding-2` comes back with magnitude
+ * 1.0000 — Google renormalises server-side — while `gemini-embedding-001` comes back at
+ * 0.6932 and does not. So this is a no-op for the model in use and load-bearing for the older
+ * one, which is exactly why it belongs at the boundary: the rest of the pipeline gets the same
+ * guarantee whichever model answers.
+ *
+ * Cosine distance — what `vector_cosine_ops` uses — is scale-invariant, so this changes no
+ * ranking today either way. It matters the moment anything touches inner product or L2, where
+ * an unnormalised vector silently biases toward longer texts.
+ */
+function normalize(values: number[]): number[] {
+  const magnitude = Math.sqrt(values.reduce((sum, v) => sum + v * v, 0));
+  // A zero vector cannot be normalised; returning it unchanged is better than NaNs.
+  if (magnitude === 0) return values;
+  return values.map((v) => v / magnitude);
 }
 
 /** pgvector's text input format — `[0.1,0.2,…]`. */
