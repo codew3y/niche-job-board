@@ -27,7 +27,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:m2": "playwright test e2e/m2.spec.ts",
-    "eval": "tsx --env-file-if-exists=.env lib/eval/eval-cli.mts"
+    "eval": "tsx --env-file-if-exists=.env lib/eval/eval-cli.mts",
+    "embed:backfill": "tsx --env-file-if-exists=.env lib/matching/backfill.mts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
