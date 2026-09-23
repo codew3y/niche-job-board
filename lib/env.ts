@@ -24,28 +24,48 @@ const clientSchema = z.object({
    * than a nicety.
    */
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20, 'NEXT_PUBLIC_SUPABASE_ANON_KEY looks wrong.'),
-  NEXT_PUBLIC_SITE_URL: z.url().optional(),
+  NEXT_PUBLIC_SITE_URL: z.preprocess(
+    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+    z.url().optional(),
+  ),
 });
+
+/**
+ * `KEY=` in a .env file is how you say "not set", but dotenv loads it as an EMPTY STRING, not
+ * as undefined. So `z.string().min(3).optional()` rejects it — `.optional()` only permits
+ * undefined — and parseOrThrow takes down the WHOLE server environment over a variable nobody
+ * filled in.
+ *
+ * That is not a theoretical failure. Adding a commented, blank `EMAIL_FROM=` to .env made
+ * serverEnv() throw, which silently broke createServiceClient() and therefore every email,
+ * and left /api/health reporting an empty config object.
+ *
+ * Blank is treated as absent, which is what the author of the file meant.
+ */
+const blankAsUndefined = <T extends z.ZodTypeAny>(schema: T) =>
+  z.preprocess((v) => (typeof v === 'string' && v.trim() === '' ? undefined : v), schema);
 
 const serverSchema = z.object({
   /**
    * BYPASSES RLS ENTIRELY. Full read/write on every table regardless of policy. Server-side
    * only, never in a NEXT_PUBLIC_ variable, never logged.
    */
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20).optional(),
+  SUPABASE_SERVICE_ROLE_KEY: blankAsUndefined(z.string().min(20).optional()),
   /** The database owner connection. Migrations, seeding and service-role work only. */
-  DATABASE_URL: z.string().startsWith('postgresql://').optional(),
+  DATABASE_URL: blankAsUndefined(z.string().startsWith('postgresql://').optional()),
   /**
    * Optional on purpose. Email is a notification, not a feature the product stops working
    * without — a missing key must degrade to "no mail was sent", never to a failed signup or a
    * failed application. lib/email/send.ts is what enforces that.
    */
-  RESEND_API_KEY: z.string().startsWith('re_', 'RESEND_API_KEY should start with re_.').optional(),
+  RESEND_API_KEY: blankAsUndefined(
+    z.string().startsWith('re_', 'RESEND_API_KEY should start with re_.').optional(),
+  ),
   /**
    * Who mail appears to come from. Defaults to Resend's shared sender, which needs no domain
    * and CAN ONLY DELIVER TO THE RESEND ACCOUNT OWNER'S OWN ADDRESS — see lib/email/send.ts.
    */
-  EMAIL_FROM: z.string().min(3).optional(),
+  EMAIL_FROM: blankAsUndefined(z.string().min(3).optional()),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 
