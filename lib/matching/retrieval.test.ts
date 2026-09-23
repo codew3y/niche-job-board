@@ -128,17 +128,35 @@ maybe('match_talent_for_job', () => {
     expect(rows[0]!.id).toBe(ids.near);
     // Identical vectors: cosine distance 0, so similarity 1.
     expect(Number(rows[0]!.similarity)).toBeCloseTo(1, 5);
-    // Orthogonal: distance 1, so similarity 0.
-    const far = rows.find((r) => r.id === ids.far);
-    expect(Number(far!.similarity)).toBeCloseTo(0, 5);
+  });
+
+  it('reports an orthogonal vector as similarity 0', async () => {
+    /**
+     * Asked directly rather than looked for in the top 20.
+     *
+     * The original version searched the result set for this fixture and passed only while the
+     * database was empty. Once the backfill embedded 43 real profiles, every one of them
+     * outranked a vector orthogonal to the query and the fixture fell off the page — a test
+     * that silently depended on the rest of the database.
+     */
+    const [row] = await sql`
+      select 1 - (embedding <=> ${QUERY}::vector) as similarity
+      from talent_profiles where id = ${ids.far}`;
+    expect(Number(row!.similarity)).toBeCloseTo(0, 5);
   });
 
   it('EXCLUDES AN UNPUBLISHED PROFILE even though it is the closest possible match', async () => {
-    // The draft sits exactly on the query axis. If filters ran after the vector search it
-    // would be rank 1. This is the assertion that proves the order.
+    const [draft] = await sql`select id from talent_profiles where slug = 'ret-draft'`;
+
+    // First establish that it WOULD rank first: it sits exactly on the query axis, so its
+    // similarity is 1 and nothing can beat it. Absence is only evidence of filtering if the
+    // row would otherwise have been there.
+    const [similarity] = await sql`
+      select 1 - (embedding <=> ${QUERY}::vector) as s from talent_profiles where id = ${draft!.id}`;
+    expect(Number(similarity!.s)).toBeCloseTo(1, 5);
+
     const rows = await talentFor();
-    const slugs = await sql`select id, slug from talent_profiles where slug = 'ret-draft'`;
-    expect(rows.map((r) => r.id)).not.toContain(slugs[0]!.id);
+    expect(rows.map((r) => r.id)).not.toContain(draft!.id);
   });
 
   it('EXCLUDES AN UNAVAILABLE PROFILE, also a perfect vector match', async () => {
