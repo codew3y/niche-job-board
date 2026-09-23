@@ -1,0 +1,67 @@
+name: Warm match cache
+
+# Precomputes match rankings so readers never wait for one.
+#
+# Why this exists at all: the Gemini free tier queues. Measured, not assumed — re-ranking 20
+# candidates took 118s, and a one-word prompt took 31-109s. Nobody waits that long, so
+# rankings are computed ahead of time and served from `match_cache` in milliseconds.
+#
+# SEPARATE FROM keep-alive.yml on purpose. That runs every 3 days, which is right for stopping
+# Supabase pausing and far too slow for matching — a job posted on Monday would have no
+# candidates until Thursday. Coupling them would mean 8x the database pings to fix a problem
+# neither of them has.
+on:
+  schedule:
+    - cron: '23 * * * *' # hourly, off the hour so it does not pile up with everyone else's jobs
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Why you are running this by hand
+        required: false
+
+# One run at a time. Two concurrent warms would race on the same cold subjects, spend twice
+# the quota and cache one result — on a tier this slow, an overlapping run is pure waste.
+concurrency:
+  group: warm-matches
+  cancel-in-progress: false
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    # Generous, because a single re-rank can take two minutes and the endpoint works to its
+    # own internal budget. This is the outer guard, not the schedule.
+    timeout-minutes: 10
+    steps:
+      - name: Warm the match cache
+        env:
+          SITE: ${{ vars.SITE_URL || 'https://techselect.vercel.app' }}
+          SECRET: ${{ secrets.MATCH_WARM_SECRET }}
+        run: |
+          if [ -z "$SECRET" ]; then
+            echo "::error::MATCH_WARM_SECRET is not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          echo "Warming $SITE"
+          RESPONSE=$(curl -sS --max-time 540 --fail-with-body \
+            -X POST "$SITE/api/match/warm" \
+            -H "Authorization: Bearer $SECRET") || {
+              echo "::error::Warm request failed."
+              echo "$RESPONSE"
+              exit 1
+            }
+
+          echo "$RESPONSE"
+
+          # A 200 that warmed nothing is not a success worth reporting as one — it usually
+          # means the secret is wrong on one side, or nothing has an embedding yet.
+          echo "$RESPONSE" | grep -q '"status":"ok"' || {
+            echo "::error::Endpoint answered but did not report ok."
+            exit 1
+          }
+
+          WARMED=$(echo "$RESPONSE" | grep -o '"warmed":[0-9]*' | cut -d: -f2)
+          echo "Warmed ${WARMED:-0} subject(s)."
+          if [ "${WARMED:-0}" = "0" ]; then
+            echo "::notice::Nothing needed warming — every ranking is current."
+          fi
