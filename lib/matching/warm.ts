@@ -23,8 +23,15 @@ import { matchesForJob, matchesForTalent } from './match';
  * staleness is recomputed from the database each run.
  */
 
-/** Stop starting new work this close to the limit. One re-rank can take ~120s. */
-const SAFETY_MARGIN_MS = 130_000;
+/**
+ * Stop starting new work this close to the limit.
+ *
+ * Sized from measurement, not a guess: re-ranks against hosted data took 45s, 63s, 77s, 135s
+ * and 238s. The spread is the problem — there is no margin that is both safe and useful
+ * inside a 300s serverless ceiling, which is why the SCHEDULE runs in GitHub Actions instead
+ * (lib/matching/warm-cli.mts) and this path handles one subject at a time.
+ */
+const SAFETY_MARGIN_MS = 140_000;
 
 export type WarmResult = {
   warmed: { type: 'job' | 'talent'; id: string; count: number; ms: number }[];

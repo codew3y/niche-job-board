@@ -22,10 +22,21 @@ import { warmMatches } from '@/lib/matching/warm';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-/** Vercel Hobby allows up to 300s. One re-rank can take ~120s on this tier. */
 export const maxDuration = 300;
 
-const BUDGET_MS = 240_000;
+/**
+ * A MANUAL NUDGE, not the schedule.
+ *
+ * The scheduled warming runs in GitHub Actions (lib/matching/warm-cli.mts), because one
+ * re-rank was measured at 238 seconds against hosted data — and 118s earlier, so the variance
+ * is wider than any budget worth setting. Vercel caps a function at 300s, which leaves no
+ * useful margin: a slow response kills the function mid-call, spends the free-tier quota and
+ * caches nothing.
+ *
+ * So this deliberately attempts ONE subject and returns. It is for warming a specific thing
+ * on demand — a job you just posted, before a demo — and not for getting through a backlog.
+ */
+const BUDGET_MS = 150_000;
 
 function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;

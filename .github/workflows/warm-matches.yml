@@ -2,25 +2,26 @@ name: Warm match cache
 
 # Precomputes match rankings so readers never wait for one.
 #
-# Why this exists at all: the Gemini free tier queues. Measured, not assumed — re-ranking 20
-# candidates took 118s, and a one-word prompt took 31-109s. Nobody waits that long, so
-# rankings are computed ahead of time and served from `match_cache` in milliseconds.
+# Runs the warmer HERE rather than calling a Vercel route, and that is a deliberate move.
+# Measured against hosted data, one re-rank took 238 seconds — and the same call took 118s
+# earlier, so the variance is wider than any budget worth setting. Vercel caps a function at
+# 300s, which leaves no margin: one slow response and the function dies mid-call, the free-tier
+# quota is spent and nothing is cached. This job has hours.
 #
-# SEPARATE FROM keep-alive.yml on purpose. That runs every 3 days, which is right for stopping
-# Supabase pausing and far too slow for matching — a job posted on Monday would have no
-# candidates until Thursday. Coupling them would mean 8x the database pings to fix a problem
-# neither of them has.
+# SEPARATE FROM keep-alive.yml, which runs every 3 days — right for stopping Supabase pausing,
+# far too slow for matching, where a job posted Monday would have no candidates until Thursday.
 on:
   schedule:
     - cron: '23 * * * *' # hourly, off the hour so it does not pile up with everyone else's jobs
   workflow_dispatch:
     inputs:
-      reason:
-        description: Why you are running this by hand
+      budget_seconds:
+        description: How long to keep starting new subjects
         required: false
+        default: '1500'
 
-# One run at a time. Two concurrent warms would race on the same cold subjects, spend twice
-# the quota and cache one result — on a tier this slow, an overlapping run is pure waste.
+# One run at a time. Two concurrent warms would race the same cold subjects, spend double the
+# quota and cache one result.
 concurrency:
   group: warm-matches
   cancel-in-progress: false
@@ -28,40 +29,26 @@ concurrency:
 jobs:
   warm:
     runs-on: ubuntu-latest
-    # Generous, because a single re-rank can take two minutes and the endpoint works to its
-    # own internal budget. This is the outer guard, not the schedule.
-    timeout-minutes: 10
+    timeout-minutes: 45
     steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
       - name: Warm the match cache
         env:
-          SITE: ${{ vars.SITE_URL || 'https://techselect.vercel.app' }}
-          SECRET: ${{ secrets.MATCH_WARM_SECRET }}
+          # The hosted pooler connection. Nothing here touches the deployed app.
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          WARM_BUDGET_MS: ${{ github.event.inputs.budget_seconds && format('{0}000', github.event.inputs.budget_seconds) || '1500000' }}
         run: |
-          if [ -z "$SECRET" ]; then
-            echo "::error::MATCH_WARM_SECRET is not set. Add it under Settings → Secrets and variables → Actions."
+          if [ -z "$DATABASE_URL" ] || [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::DATABASE_URL and GEMINI_API_KEY must both be set under Settings → Secrets and variables → Actions."
             exit 1
           fi
-
-          echo "Warming $SITE"
-          RESPONSE=$(curl -sS --max-time 540 --fail-with-body \
-            -X POST "$SITE/api/match/warm" \
-            -H "Authorization: Bearer $SECRET") || {
-              echo "::error::Warm request failed."
-              echo "$RESPONSE"
-              exit 1
-            }
-
-          echo "$RESPONSE"
-
-          # A 200 that warmed nothing is not a success worth reporting as one — it usually
-          # means the secret is wrong on one side, or nothing has an embedding yet.
-          echo "$RESPONSE" | grep -q '"status":"ok"' || {
-            echo "::error::Endpoint answered but did not report ok."
-            exit 1
-          }
-
-          WARMED=$(echo "$RESPONSE" | grep -o '"warmed":[0-9]*' | cut -d: -f2)
-          echo "Warmed ${WARMED:-0} subject(s)."
-          if [ "${WARMED:-0}" = "0" ]; then
-            echo "::notice::Nothing needed warming — every ranking is current."
-          fi
+          npm run match:warm
