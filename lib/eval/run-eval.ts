@@ -28,7 +28,14 @@ import {
   type EvalJob,
   type EvalProfile,
 } from './match-eval-set';
-import { EMBEDDING_DIMENSIONS, EMBEDDING_MODEL, EMBEDDING_TASK_TYPE } from '../matching/config';
+import {
+  EMBEDDING_DIMENSIONS,
+  EMBEDDING_MODEL,
+  EMBEDDING_TASK_TYPE,
+  RERANK_MODEL,
+} from '../matching/config';
+import { parseRerank } from '../matching/rerank-parse';
+import { RERANK_RESPONSE_SCHEMA, buildRerankPrompt } from '../matching/rerank-prompt';
 import { jobToText, talentToText } from '../matching/text';
 
 /** Skill slugs are stored kebab-case; the text builders expect human names. */
@@ -53,15 +60,30 @@ export const evalProfileText = (profile: EvalProfile) =>
 /** Cosine similarity. Both sides are unit vectors, so this is a plain dot product. */
 export const cosine = (a: number[], b: number[]) => a.reduce((sum, x, i) => sum + x * b[i]!, 0);
 
+export type Pass = { name: string; value: number; gate: number; pass: boolean };
+
 export type EvalReport = {
-  clientNdcgAt5: number;
-  talentNdcgAt3: number;
-  precisionAt1: number;
-  calibrationTopScore: number;
+  /** Vector similarity alone — no re-ranker. The baseline the re-ranker has to beat. */
+  vectorOnly: {
+    clientNdcgAt5: number;
+    talentNdcgAt3: number;
+    precisionAt1: number;
+    calibrationTopScore: number;
+  };
+  /** The full pipeline, which is what ships. Gates are judged on this. */
+  reranked: { clientNdcgAt5: number; precisionAt1: number; calibrationTopScore: number } | null;
   perJob: { id: string; ndcg5: number; p1: number; top3: string[] }[];
-  passes: { name: string; value: number; gate: number; pass: boolean }[];
+  passes: Pass[];
 };
 
+/**
+ * Run the set twice: vector-only, then re-ranked.
+ *
+ * Both numbers are reported because the comparison IS the finding. Vector-only already ranks
+ * correctly and cannot calibrate; the re-ranker trades a hair of ordering accuracy for a
+ * score that means something. Reporting only the final number would hide which stage is
+ * earning its place — and if the re-ranker ever stops earning it, that shows up here.
+ */
 export async function runEval(apiKey: string): Promise<EvalReport> {
   const ai = new GoogleGenAI({ apiKey });
 
@@ -125,41 +147,124 @@ export async function runEval(apiKey: string): Promise<EvalReport> {
   }
 
   const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
-  const clientNdcgAt5 = mean(ndcg5);
-  const talentNdcgAt3 = mean(ndcg3);
-  const p1 = p1Total ? p1Hits / p1Total : 0;
+  const vectorOnly = {
+    clientNdcgAt5: mean(ndcg5),
+    talentNdcgAt3: mean(ndcg3),
+    precisionAt1: p1Total ? p1Hits / p1Total : 0,
+    calibrationTopScore,
+  };
+
+  /**
+   * Second pass: the same candidates through the real re-rank prompt.
+   *
+   * Every profile is sent rather than a retrieved top-20, because the eval set is ten
+   * profiles — retrieval would be a no-op and would only hide which stage produced which
+   * number.
+   */
+  const rerankCandidates = evalProfiles.map((p) => ({
+    id: p.id,
+    text: evalProfileText(p),
+    similarity: 0,
+  }));
+
+  const rerankedNdcg5: number[] = [];
+  let rerankedHits = 0;
+  let rerankedTotal = 0;
+  let rerankedCalibration = 0;
+  let rerankFailed = false;
+
+  for (const job of evalJobs) {
+    /**
+     * Retried, and caught. The free tier returns 503 "experiencing high demand" often enough
+     * that an eval which crashes on one is an eval nobody can run — and production has the
+     * same exposure, which is why ADR-002 requires a fallback rather than treating the
+     * re-ranker as reliable.
+     */
+    let parsed = null as ReturnType<typeof parseRerank> | null;
+    for (let attempt = 1; attempt <= 3 && !parsed?.ok; attempt++) {
+      try {
+        const response = await ai.models.generateContent({
+          model: RERANK_MODEL,
+          contents: buildRerankPrompt(evalJobText(job), rerankCandidates),
+          config: {
+            responseMimeType: 'application/json',
+            responseSchema: RERANK_RESPONSE_SCHEMA,
+            temperature: 0,
+          },
+        });
+        parsed = parseRerank(response.text ?? '', rerankCandidates);
+      } catch (cause) {
+        const detail = cause instanceof Error ? cause.message : String(cause);
+        console.warn(
+          `  [eval] ${job.id} re-rank attempt ${attempt} failed: ${detail.slice(0, 120)}`,
+        );
+        if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 2000));
+      }
+    }
+
+    if (!parsed?.ok) {
+      // A pipeline that cannot re-rank falls back to vector order in production; here it is
+      // reported as a failure rather than quietly measured as if it had worked.
+      rerankFailed = true;
+      break;
+    }
+
+    if (calibrationJobs.includes(job.id as never)) {
+      rerankedCalibration = parsed.items[0]?.score ?? 0;
+      continue;
+    }
+    const ids = parsed.items.map((i) => i.id);
+    const grades = gradesForJob(job.id);
+    rerankedNdcg5.push(ndcgAt(ids, grades, 5));
+    rerankedTotal++;
+    rerankedHits += precisionAt1(ids, grades);
+  }
+
+  const reranked = rerankFailed
+    ? null
+    : {
+        clientNdcgAt5: mean(rerankedNdcg5),
+        precisionAt1: rerankedTotal ? rerankedHits / rerankedTotal : 0,
+        calibrationTopScore: rerankedCalibration,
+      };
+
+  // Gates are judged on the FULL pipeline, because that is what ships. Talent-direction nDCG
+  // has no re-rank pass in this harness, so it is judged on the vectors that produce it.
+  const judged = reranked ?? {
+    clientNdcgAt5: vectorOnly.clientNdcgAt5,
+    precisionAt1: vectorOnly.precisionAt1,
+    calibrationTopScore: vectorOnly.calibrationTopScore,
+  };
 
   return {
-    clientNdcgAt5,
-    talentNdcgAt3,
-    precisionAt1: p1,
-    calibrationTopScore,
+    vectorOnly,
+    reranked,
     perJob,
     passes: [
       {
         name: 'nDCG@5 (client)',
-        value: clientNdcgAt5,
+        value: judged.clientNdcgAt5,
         gate: evalGates.clientNdcgAt5,
-        pass: clientNdcgAt5 >= evalGates.clientNdcgAt5,
+        pass: judged.clientNdcgAt5 >= evalGates.clientNdcgAt5,
       },
       {
         name: 'nDCG@3 (talent)',
-        value: talentNdcgAt3,
+        value: vectorOnly.talentNdcgAt3,
         gate: evalGates.talentNdcgAt3,
-        pass: talentNdcgAt3 >= evalGates.talentNdcgAt3,
+        pass: vectorOnly.talentNdcgAt3 >= evalGates.talentNdcgAt3,
       },
       {
         name: 'precision@1',
-        value: p1,
+        value: judged.precisionAt1,
         gate: evalGates.precisionAt1,
-        pass: p1 >= evalGates.precisionAt1,
+        pass: judged.precisionAt1 >= evalGates.precisionAt1,
       },
       // The only gate that is an upper bound: J5 must NOT look like a strong match.
       {
         name: 'J5 calibration (max)',
-        value: calibrationTopScore,
+        value: judged.calibrationTopScore,
         gate: evalGates.calibrationMaxScore,
-        pass: calibrationTopScore < evalGates.calibrationMaxScore,
+        pass: judged.calibrationTopScore < evalGates.calibrationMaxScore,
       },
     ],
   };

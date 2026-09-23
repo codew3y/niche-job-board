@@ -10,7 +10,17 @@ if (!key) {
 
 const report = await runEval(key);
 
-console.log('\nPer job (client direction):');
+console.log('\nVector only (no re-ranker):');
+console.log(`  nDCG@5 ${report.vectorOnly.clientNdcgAt5.toFixed(3)}  nDCG@3 ${report.vectorOnly.talentNdcgAt3.toFixed(3)}  p@1 ${report.vectorOnly.precisionAt1.toFixed(3)}  J5 ${report.vectorOnly.calibrationTopScore}`);
+
+if (report.reranked) {
+  console.log('\nWith re-ranker (what ships):');
+  console.log(`  nDCG@5 ${report.reranked.clientNdcgAt5.toFixed(3)}  p@1 ${report.reranked.precisionAt1.toFixed(3)}  J5 ${report.reranked.calibrationTopScore}`);
+} else {
+  console.log('\nRe-rank pass FAILED — gates judged on vectors alone.');
+}
+
+console.log('\nPer job (vector order):');
 for (const row of report.perJob) {
   console.log(`  ${row.id}  nDCG@5 ${row.ndcg5.toFixed(3)}  p@1 ${row.p1}  top: ${row.top3.join(', ')}`);
 }

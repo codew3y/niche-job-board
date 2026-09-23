@@ -17,3 +17,13 @@ export const EMBEDDING_DIMENSIONS = 1536;
  * would need two vectors per row to do the same work.
  */
 export const EMBEDDING_TASK_TYPE = 'SEMANTIC_SIMILARITY';
+
+/**
+ * Re-ranker model. Free tier (ADR-009).
+ *
+ * Flash-Lite rather than Flash: the task is scoring twenty short documents against a rubric,
+ * not reasoning, and the eval already showed the ordering is correct before the model sees it.
+ * If the reasoning sentences read as bland, this is a one-line change and `npm run eval`
+ * measures the difference.
+ */
+export const RERANK_MODEL = 'gemini-3.5-flash-lite';
