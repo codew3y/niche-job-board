@@ -39,6 +39,13 @@ const PUBLIC_PREFIXES = [
   // Must be public, and must stay public: the keep-alive pings it, and a redirect here
   // would look like a healthy 200 while never touching the database.
   '/api/health',
+  /**
+   * Scheduled, not public: it authenticates with MATCH_WARM_SECRET and refuses everything
+   * without it. Listed here so the session middleware does not redirect a machine caller to
+   * the login page — a redirect would turn a failed warm into a cheerful 200 from an HTML
+   * page, which is exactly the trap /api/health is public to avoid.
+   */
+  '/api/match/warm',
 ];
 
 /** Reachable before the role profile exists — onboarding must be here, see above. */

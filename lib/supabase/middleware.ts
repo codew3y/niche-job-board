@@ -2,44 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { clientEnv } from '../env';
-
-/** Routes a signed-out visitor may reach. Everything else redirects to /login. */
-const PUBLIC_PREFIXES = [
-  '/',
-  '/jobs',
-  '/talent',
-  '/login',
-  '/signup',
-  '/verify',
-  '/reset-password',
-  '/auth/callback',
-  '/auth/confirm',
-  // Must be public, and must stay public: the keep-alive pings it, and a redirect here
-  // would look like a healthy 200 while never touching the database.
-  '/api/health',
-];
-
-/**
- * Routes a signed-in user may reach before they have a completed role profile.
- *
- * `/onboarding` MUST be here. `has_talent` / `has_client` are set by trigger when the
- * talent_profiles or client_profiles row is created — and that row is created BY onboarding.
- * Gating onboarding on the flags it exists to produce is a redirect loop: choose a role,
- * get sent to onboarding, get bounced back to choose a role.
- */
-const PRE_ROLE_PREFIXES = [
-  '/select-role',
-  '/onboarding',
-  '/auth',
-  '/logout',
-  '/dashboard/settings/roles',
-];
-
-const isPublic = (path: string) =>
-  PUBLIC_PREFIXES.some((p) => path === p || (p !== '/' && path.startsWith(`${p}/`)));
-
-const matches = (path: string, prefixes: string[]) =>
-  prefixes.some((p) => path === p || path.startsWith(`${p}/`));
+import { decideRoute, type Session } from './route-policy';
 
 /**
  * Session refresh + route protection (Phase 2 §6).
@@ -57,6 +20,15 @@ const matches = (path: string, prefixes: string[]) =>
  * This is a convenience layer, NOT the authorization boundary. Middleware can be bypassed and
  * it never sees the data. RLS is what actually protects rows (lib/db/schema/*), and every
  * server action re-checks ownership regardless of what middleware decided.
+ *
+ * ROUTING DECISIONS COME FROM `decideRoute`, and this file must never reimplement them.
+ *
+ * It used to. There were two copies of the public-route list — one here, one in
+ * route-policy.ts — and they drifted: /privacy and /terms were added to the tested copy and
+ * not to this one, so production redirected both to /login for eighteen hours. Every test
+ * passed, because the tests exercised decideRoute and the middleware ran its own parallel
+ * implementation. A test that does not exercise the live path is a test that agrees with
+ * itself.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -84,78 +56,41 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Public paths are public for everyone — see lib/supabase/route-policy.ts for why this
-  // check comes before any session reasoning.
-  if (isPublic(path) && path !== '/login' && path !== '/signup') return response;
+  /**
+   * One read for the whole decision. `user_profiles` is the source rather than user metadata:
+   * metadata is client-writable, so a user could hand themselves a role by editing it.
+   *
+   * Skipped entirely when signed out — there is no profile to read, and a query per anonymous
+   * request is a cost for nothing.
+   */
+  let session: Session = { signedIn: false, hasChosen: false, hasRole: false, activeRole: null };
 
-  // ── signed out ──
-  if (!user) {
-    if (isPublic(path)) return response;
-    const login = request.nextUrl.clone();
-    login.pathname = '/login';
-    // Preserve where they were headed so sign-in can return them there. Only the path, never
-    // an absolute URL — accepting one would make this an open redirect.
-    login.searchParams.set('next', path);
-    return NextResponse.redirect(login);
+  if (user) {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('active_role, has_talent, has_client')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    session = {
+      signedIn: true,
+      // A user_profiles row means a role was chosen and onboarding is under way, even though
+      // the role profile it creates does not exist yet.
+      hasChosen: Boolean(profile),
+      hasRole: Boolean(profile?.has_talent || profile?.has_client),
+      activeRole: (profile?.active_role as 'talent' | 'client' | null) ?? null,
+    };
   }
 
-  // ── signed in, but has not chosen a role ──
-  // Read from user_profiles rather than user metadata: metadata is client-writable, and a
-  // user could hand themselves a role by editing it.
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('active_role, has_talent, has_client')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const target = decideRoute(path, session);
+  if (!target) return response;
 
-  const hasRole = Boolean(profile?.has_talent || profile?.has_client);
-  // A user_profiles row means they picked a role and onboarding is under way, even though
-  // the role profile it creates does not exist yet.
-  const hasChosen = Boolean(profile);
-
-  if (matches(path, PRE_ROLE_PREFIXES)) {
-    // Nothing chosen yet, but deep-linked into onboarding — send them to choose first.
-    if (!hasChosen && path.startsWith('/onboarding')) {
-      const select = request.nextUrl.clone();
-      select.pathname = '/select-role';
-      select.search = '';
-      return NextResponse.redirect(select);
-    }
-    // Already finished — no reason to sit on /select-role.
-    if (hasRole && path === '/select-role') {
-      const dashboard = request.nextUrl.clone();
-      dashboard.pathname =
-        profile?.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
-      dashboard.search = '';
-      return NextResponse.redirect(dashboard);
-    }
-    return response;
-  }
-
-  // Everything else is dashboard territory and needs a completed role profile.
-  if (!hasRole) {
-    const target = request.nextUrl.clone();
-    target.search = '';
-    if (hasChosen) {
-      // Mid-onboarding: resume where they left off rather than restarting the choice.
-      target.pathname =
-        profile?.active_role === 'client'
-          ? '/onboarding/client/company'
-          : '/onboarding/talent/basics';
-    } else {
-      target.pathname = '/select-role';
-    }
-    return NextResponse.redirect(target);
-  }
-
-  // Someone with a role has no reason to sit on the auth screens.
-  if (path === '/login' || path === '/signup') {
-    const dashboard = request.nextUrl.clone();
-    dashboard.pathname =
-      profile?.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
-    dashboard.search = '';
-    return NextResponse.redirect(dashboard);
-  }
-
-  return response;
+  const url = request.nextUrl.clone();
+  const [pathname, query] = target.split('?');
+  url.pathname = pathname!;
+  // decideRoute builds its own query string (the ?next= on /login), so anything already on
+  // the URL is replaced rather than merged — carrying a stale query onto a redirect target is
+  // how a filtered list ends up on a dashboard.
+  url.search = query ? `?${query}` : '';
+  return NextResponse.redirect(url);
 }

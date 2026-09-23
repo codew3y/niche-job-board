@@ -74,6 +74,11 @@ const serverSchema = z.object({
    * honest empty state rather than an error. Nothing else in the product depends on it.
    */
   GEMINI_API_KEY: blankAsUndefined(z.string().min(20).optional()),
+  /**
+   * Shared secret for the scheduled cache warmer. Without it the endpoint refuses every
+   * request — an unauthenticated route that spends API quota is a free denial-of-wallet.
+   */
+  MATCH_WARM_SECRET: blankAsUndefined(z.string().min(16).optional()),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 
