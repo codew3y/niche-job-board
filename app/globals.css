@@ -22,7 +22,15 @@
 
   --text: oklch(24% 0.012 95);
   --text-muted: oklch(52% 0.011 95);
-  --text-subtle: oklch(64% 0.009 95);
+  /*
+   * 4.5:1 against --surface, which is what AA requires for text under 18pt.
+   *
+   * This was 64%, which measured ~3.2:1 and failed axe on every page — the footer, the
+   * "N jobs" count and the image captions all use it. "Subtle" has to mean lower emphasis,
+   * not lower legibility: a shade nobody with imperfect vision can read is not a design
+   * choice, it is a page with missing text.
+   */
+  --text-subtle: oklch(55% 0.009 95);
 
   /* One accent. Restraint here is what makes the match score and status badges readable. */
   --accent: oklch(52% 0.17 256);
@@ -60,7 +68,8 @@
 
     --text: oklch(95% 0.006 95);
     --text-muted: oklch(72% 0.009 95);
-    --text-subtle: oklch(58% 0.009 95);
+    /* Same fix, other direction: lightened from 58%, which failed the same rule on dark. */
+    --text-subtle: oklch(66% 0.009 95);
 
     --accent: oklch(70% 0.14 256);
     --accent-hover: oklch(76% 0.14 256);
@@ -85,7 +94,7 @@
   --border-strong: oklch(36% 0.01 95);
   --text: oklch(95% 0.006 95);
   --text-muted: oklch(72% 0.009 95);
-  --text-subtle: oklch(58% 0.009 95);
+  --text-subtle: oklch(66% 0.009 95);
   --accent: oklch(70% 0.14 256);
   --accent-hover: oklch(76% 0.14 256);
   --accent-subtle: oklch(28% 0.05 256);
@@ -168,3 +177,18 @@ body {
 .skip-link:focus {
   top: 0.5rem;
 }
+
+/*
+ * Links inside prose are underlined, not just coloured.
+ *
+ * WCAG 1.4.1: colour alone cannot be the only way to convey information, and a link in a
+ * sentence is exactly that case — about 1 in 12 men cannot reliably distinguish the accent
+ * blue from the body text around it. axe flagged this on /signup ("Already have an account?
+ * Sign in"), and the same pattern was on twenty-six other links.
+ *
+ * `hover:underline` does not count: hover does not exist on touch, and a distinction you have
+ * to discover is not a distinction.
+ *
+ * Standalone links that already read as controls — nav items, buttons, cards — are exempt,
+ * because they are not inside a text block and an underline there is noise.
+ */

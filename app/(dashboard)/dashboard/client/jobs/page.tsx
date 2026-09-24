@@ -141,7 +141,10 @@ export default async function ClientJobsPage() {
           title="No briefs yet"
           body="Post one and we'll rank candidates against the work they've actually shipped."
           action={
-            <Link href="/dashboard/client/jobs/new" className="text-accent hover:underline">
+            <Link
+              href="/dashboard/client/jobs/new"
+              className="text-accent underline underline-offset-2"
+            >
               Post a job
             </Link>
           }

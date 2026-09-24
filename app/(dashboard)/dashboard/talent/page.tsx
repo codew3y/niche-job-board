@@ -44,7 +44,7 @@ export default async function TalentDashboard() {
                   : `Add ${2 - profile.portfolio_item_count} more project${profile.portfolio_item_count === 1 ? '' : 's'}, or link your portfolio site.`
           }
           action={
-            <Link href="/talent/profile" className="text-accent hover:underline">
+            <Link href="/talent/profile" className="text-accent underline underline-offset-2">
               Go to profile
             </Link>
           }

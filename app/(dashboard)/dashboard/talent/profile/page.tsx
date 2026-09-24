@@ -54,7 +54,10 @@ export default async function ProfilePage() {
             profile.is_published ? (
               <>
                 Live at{' '}
-                <Link href={`/talent/${profile.slug}`} className="text-accent hover:underline">
+                <Link
+                  href={`/talent/${profile.slug}`}
+                  className="text-accent underline underline-offset-2"
+                >
                   /talent/{profile.slug}
                 </Link>
               </>
@@ -98,7 +101,7 @@ export default async function ProfilePage() {
               </ul>
               <Link
                 href="/dashboard/talent/portfolio"
-                className="mt-3 inline-block text-sm text-accent hover:underline"
+                className="mt-3 inline-block text-sm text-accent underline underline-offset-2"
               >
                 Add a project
               </Link>

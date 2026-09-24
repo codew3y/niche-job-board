@@ -12,7 +12,7 @@ export default function VerifyPage() {
     >
       <p className="text-sm text-text-muted">
         Nothing arrived? Check spam, or{' '}
-        <a href="/signup" className="text-accent hover:underline">
+        <a href="/signup" className="text-accent underline underline-offset-2">
           try again
         </a>
         . Signing in with Google or GitHub skips this step entirely.

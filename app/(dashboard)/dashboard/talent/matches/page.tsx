@@ -45,7 +45,10 @@ export default async function MatchesPage() {
         <p className="mb-6 rounded-[--radius] border border-warning/40 bg-warning/5 p-3 text-sm text-pretty">
           Your profile is a draft, so clients cannot find you. Matching still runs, but nobody sees
           the result but you.{' '}
-          <Link href="/dashboard/talent/profile" className="text-accent hover:underline">
+          <Link
+            href="/dashboard/talent/profile"
+            className="text-accent underline underline-offset-2"
+          >
             Publish it
           </Link>
         </p>

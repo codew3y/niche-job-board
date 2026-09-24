@@ -106,7 +106,10 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
           className="mb-6 rounded-[--radius] border border-warning/40 bg-warning/5 p-3 text-sm"
         >
           This is a draft — only you can see it.{' '}
-          <Link href="/onboarding/talent/review" className="text-accent hover:underline">
+          <Link
+            href="/onboarding/talent/review"
+            className="text-accent underline underline-offset-2"
+          >
             Finish and publish
           </Link>
         </p>

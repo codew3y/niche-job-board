@@ -144,7 +144,7 @@ export function ImageUpload({
           />
           <label
             htmlFor={inputId}
-            className="cursor-pointer text-sm font-medium text-accent hover:underline"
+            className="cursor-pointer text-sm font-medium text-accent underline underline-offset-2"
           >
             {label}
           </label>

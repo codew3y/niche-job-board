@@ -233,7 +233,7 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
     return (
       <p className="text-text-muted">
         No draft yet —{' '}
-        <Link href="/onboarding/client/job" className="text-accent hover:underline">
+        <Link href="/onboarding/client/job" className="text-accent underline underline-offset-2">
           write your brief
         </Link>
         .

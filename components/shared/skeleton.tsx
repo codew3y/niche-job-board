@@ -25,6 +25,10 @@ export function JobListSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div
       className="overflow-hidden rounded-[--radius] border border-border-base"
+      /* A plain div cannot take aria-label: ARIA forbids it on an element with no role, so
+         axe flags it and a screen reader announces nothing. role="status" makes the label
+         legal AND puts it in a live region, which is what a loading state wants. */
+      role="status"
       aria-busy="true"
       aria-label="Loading jobs"
     >

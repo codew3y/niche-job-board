@@ -59,7 +59,7 @@ export default async function SavedJobsPage() {
           title="Nothing saved yet"
           body="Bookmark a job while browsing and it lands here."
           action={
-            <Link href="/jobs" className="text-accent hover:underline">
+            <Link href="/jobs" className="text-accent underline underline-offset-2">
               Browse jobs
             </Link>
           }

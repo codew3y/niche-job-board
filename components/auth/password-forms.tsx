@@ -52,7 +52,7 @@ export function SetPasswordForm() {
     return (
       <div role="status" className="space-y-4">
         <p className="font-medium">Password updated.</p>
-        <a href="/login" className="inline-block text-accent hover:underline">
+        <a href="/login" className="inline-block text-accent underline underline-offset-2">
           Sign in
         </a>
       </div>

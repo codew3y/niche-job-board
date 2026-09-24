@@ -49,7 +49,7 @@ export function TalentReview({
               <span className="sr-only">{check.done ? 'complete' : 'still needed'}</span>
             </span>
             {!check.done && (
-              <Link href={check.fix} className="text-sm text-accent hover:underline">
+              <Link href={check.fix} className="text-sm text-accent underline underline-offset-2">
                 Add
               </Link>
             )}
