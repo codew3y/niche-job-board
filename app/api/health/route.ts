@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { serverEnv } from '@/lib/env';
+import { usageToday } from '@/lib/matching/budget';
 import { createClient } from '@/lib/supabase/server';
 
 /**
@@ -59,11 +60,21 @@ export async function GET() {
 
     if (error) throw error;
 
+    /**
+     * Today's AI spend, so a cap is visible BEFORE it bites. Matching degrades silently when
+     * the cap is hit — embeddings stop, re-ranking falls back to vector order — which is the
+     * right runtime behaviour and impossible to notice without this.
+     *
+     * Counts and limits only. It reveals nothing about any user.
+     */
+    const ai = config.serviceRoleKey ? await usageToday().catch(() => null) : null;
+
     return NextResponse.json(
       {
         status: 'ok',
         database: 'reachable',
         config,
+        ai,
         skills: count ?? null,
         latencyMs: Date.now() - startedAt,
         at: new Date().toISOString(),

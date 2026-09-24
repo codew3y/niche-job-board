@@ -3,6 +3,7 @@ import 'server-only';
 import { GoogleGenAI } from '@google/genai';
 
 import { serverEnv } from '../env';
+import { reserveCall } from './budget';
 import { EMBEDDING_DIMENSIONS, EMBEDDING_MODEL, EMBEDDING_TASK_TYPE } from './config';
 
 export { EMBEDDING_DIMENSIONS, EMBEDDING_MODEL } from './config';
@@ -61,6 +62,14 @@ function classify(message: string): { reason: EmbedFailure; retryable: boolean }
 export async function embed(text: string, signal?: AbortSignal): Promise<EmbedResult> {
   const { GEMINI_API_KEY } = serverEnv();
   if (!GEMINI_API_KEY) return { ok: false, reason: 'not_configured', retryable: false };
+
+  /**
+   * Reserved BEFORE the call. Not retryable: the cap will still be reached on the next
+   * attempt, and retrying would spend the backoff loop discovering that repeatedly.
+   */
+  if (!(await reserveCall('embedding'))) {
+    return { ok: false, reason: 'rate_limited', detail: 'daily cap reached', retryable: false };
+  }
 
   try {
     const response = await genai(GEMINI_API_KEY).models.embedContent({

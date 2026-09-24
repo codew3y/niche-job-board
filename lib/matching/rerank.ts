@@ -3,6 +3,7 @@ import 'server-only';
 import { GoogleGenAI } from '@google/genai';
 
 import { serverEnv } from '../env';
+import { reserveCall } from './budget';
 import { RERANK_MODEL } from './config';
 import { parseRerank } from './rerank-parse';
 import { RERANK_RESPONSE_SCHEMA, buildRerankPrompt } from './rerank-prompt';
@@ -51,6 +52,12 @@ export async function rerank(
   const { GEMINI_API_KEY } = serverEnv();
   if (!GEMINI_API_KEY) return { ok: false, reason: 'not_configured' };
   if (candidates.length === 0) return { ok: true, items: [] };
+
+  // Over the cap, callers fall back to the vector ordering — the same path a 503 takes. A
+  // ranked list with no numbers is a working product; no list at all is not.
+  if (!(await reserveCall('rerank'))) {
+    return { ok: false, reason: 'api_error', detail: 'daily cap reached' };
+  }
 
   const capped = candidates.slice(0, RERANK_LIMIT);
 
