@@ -1,0 +1,134 @@
+name: CI
+
+# typecheck → lint → unit → build → E2E, on every push and pull request.
+#
+# This exists because tests that only run when someone remembers are tests that do not run.
+# Three defects reached main in this project while the suite was green locally: a middleware
+# that redirected /privacy and /terms to /login, a commit pushed with a failing test because a
+# shell pipe masked vitest's exit code, and a retrieval test that silently depended on an empty
+# database. CI would have caught the second immediately and the first the moment the
+# public-routes suite existed.
+#
+# The database-backed suites need a real Postgres with pgvector and the Supabase auth schema,
+# so this runs the Supabase CLI stack rather than a bare postgres service container — the RLS
+# tests set `request.jwt.claims` and call `auth.uid()`, neither of which exists without it.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # A superseded run on the same branch tells you nothing you still need.
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Typecheck, lint, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase
+        # The database suites are the ones that catch policy regressions, and skipping them
+        # when the database is absent would report green while testing nothing — a pattern
+        # this repo has already been bitten by three times.
+        run: supabase start
+
+      - name: Apply migrations
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+      - name: Seed
+        # Not decoration: retrieval tests assert a fixture outranks real data, and the taxonomy
+        # has to exist for the skill-filter tests to resolve a slug.
+        run: npm run db:seed
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+
+      - run: npm run typecheck
+
+      - run: npm run lint
+
+      - name: Unit and database tests
+        run: npm run test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          # A placeholder is enough here: the unit suites never call Supabase over HTTP, and
+          # vitest.config.ts supplies its own fallbacks. It only has to satisfy lib/env.ts,
+          # which requires a URL and 20+ characters.
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key-value
+
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key-value
+
+  e2e:
+    name: End-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase
+        run: supabase start
+
+      - name: Capture Supabase keys
+        # The E2E fixtures create accounts through the admin API, so they need the local
+        # stack's real service-role key. Without it the suite SKIPS every test and reports
+        # green — which is exactly how the first E2E run "passed" with 13 skipped.
+        run: |
+          eval "$(supabase status -o env)"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+          } >> "$GITHUB_ENV"
+
+      - name: Apply migrations and seed
+        run: |
+          npm run db:migrate
+          npm run db:seed
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
