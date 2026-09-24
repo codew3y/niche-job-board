@@ -34,6 +34,17 @@ const PUBLIC_PREFIXES = [
   // a wall, and a privacy policy you must authenticate to read is not a published one.
   '/privacy',
   '/terms',
+  /**
+   * Crawler-facing and must never redirect. A crawler that asks for /robots.txt and is handed
+   * a 307 to /login learns nothing about what it may crawl, and a sitemap behind a redirect
+   * indexes zero pages.
+   *
+   * Added after exactly that happened — the same omission as /privacy and /terms a day
+   * earlier, which is why e2e/public-routes.spec.ts now derives its list from this array
+   * rather than keeping a second copy to forget.
+   */
+  '/robots.txt',
+  '/sitemap.xml',
   '/auth/callback',
   '/auth/confirm',
   // Must be public, and must stay public: the keep-alive pings it, and a redirect here
@@ -56,6 +67,9 @@ const PRE_ROLE_PREFIXES = [
   '/logout',
   '/dashboard/settings/roles',
 ];
+
+/** Exported so tests assert against the real list rather than a copy that drifts. */
+export const PUBLIC_ROUTES = PUBLIC_PREFIXES;
 
 const matches = (path: string, prefixes: string[]) =>
   prefixes.some((p) => path === p || (p !== '/' && path.startsWith(`${p}/`)) || path === p);
