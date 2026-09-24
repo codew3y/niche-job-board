@@ -7,10 +7,19 @@ import { allowedStatusTransitions } from '@/lib/schemas/enums';
 
 type Candidate = {
   id: string;
+  /** The profile id, used to join against the cached ranking. */
+  talent_id: string;
   status: string;
   cover_note: string;
   created_at: string;
-  match_reason: string | null;
+  /**
+   * Why this applicant fits, from the cached ranking — NOT from a column on `applications`.
+   * `match_reason` used to be read from that table and was never written to it, so this
+   * always rendered nothing.
+   */
+  reason?: string | null;
+  /** False means unmeasured, not poor: usually they applied after the last warm. */
+  ranked?: boolean;
   talent_profiles: {
     slug: string;
     headline: string;
@@ -76,9 +85,9 @@ export function CandidateList({ candidates }: { candidates: Candidate[] }) {
               {c.cover_note}
             </p>
 
-            {c.match_reason && (
+            {c.reason && (
               <p className="mt-2 border-l-2 border-accent/40 pl-3 text-sm text-pretty">
-                {c.match_reason}
+                {c.reason}
               </p>
             )}
 

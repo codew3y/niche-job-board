@@ -183,3 +183,69 @@ export async function matchesForMe(talentId: string): Promise<MatchFeed<TalentMa
  * measured gate cannot drift apart.
  */
 export const STRONG_MATCH_SCORE = 70;
+
+/**
+ * Order a job's applications by how well each applicant fits, and attach the reason.
+ *
+ * Applications arrive in the order people happened to apply, which is noise. A client with
+ * twenty applications reads the first three; putting the best fit there is most of the value
+ * this product claims to add.
+ *
+ * ORDERING, NEVER A NUMBER (ADR-007 D2). The score decides the sequence and then stays behind
+ * — it is not returned, so no component can render it by accident.
+ *
+ * Applicants with no cached ranking keep their position AFTER the ranked ones, in application
+ * order. They are not "worse", they are unmeasured — usually because they applied after the
+ * last warm. Sorting them to the bottom as though they scored zero would be a lie told by the
+ * sort function.
+ */
+export async function rankApplicants<T extends { talentId: string }>(
+  jobId: string,
+  applicants: T[],
+): Promise<(T & { reason: string | null; ranked: boolean })[]> {
+  if (applicants.length === 0) return [];
+
+  const cached = await readCache('job', jobId);
+  if (!cached) {
+    return applicants.map((a) => ({ ...a, reason: null, ranked: false }));
+  }
+
+  const rank = new Map(cached.map((c, index) => [c.targetId, index]));
+  const reasons = new Map(cached.map((c) => [c.targetId, c.reason]));
+
+  return [...applicants]
+    .map((a) => ({
+      ...a,
+      reason: reasons.get(a.talentId) ?? null,
+      ranked: rank.has(a.talentId),
+    }))
+    .sort((a, b) => {
+      const ra = rank.get(a.talentId);
+      const rb = rank.get(b.talentId);
+      if (ra === undefined && rb === undefined) return 0;
+      // Unranked go last, preserving their incoming order rather than being scored as zero.
+      if (ra === undefined) return 1;
+      if (rb === undefined) return -1;
+      return ra - rb;
+    });
+}
+
+/**
+ * Developers who fit this job and have NOT applied.
+ *
+ * The other half of a two-sided market: a client should not have to wait for the right person
+ * to find them. Applicants are excluded because they already appear above, and showing
+ * someone twice makes the page look broken.
+ */
+export async function suggestedForJob(
+  jobId: string,
+  excludeTalentIds: string[],
+  limit = 5,
+): Promise<MatchFeed<CandidateMatch>> {
+  const feed = await candidatesForJob(jobId);
+  if (feed.state !== 'ready') return feed;
+
+  const exclude = new Set(excludeTalentIds);
+  const matches = feed.matches.filter((m) => !exclude.has(m.talentId)).slice(0, limit);
+  return matches.length > 0 ? { state: 'ready', matches } : { state: 'empty' };
+}

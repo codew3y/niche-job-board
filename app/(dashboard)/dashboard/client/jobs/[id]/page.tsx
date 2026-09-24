@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { CandidateList } from '@/components/application/candidate-list';
+import { SuggestedList } from '@/components/application/suggested-list';
+import { rankApplicants, suggestedForJob } from '@/lib/services/matches';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
@@ -48,15 +50,33 @@ export default async function JobApplicationsPage({ params }: { params: Promise<
   const { data: applications } = await supabase
     .from('applications')
     .select(
-      `id, status, cover_note, created_at, match_reason,
+      `id, talent_id, status, cover_note, created_at,
        talent_profiles ( slug, headline, portfolio_item_count, website_url )`,
     )
     .eq('job_id', job.id)
     .order('created_at', { ascending: false });
 
   const rows = (applications ?? []) as unknown as Parameters<typeof CandidateList>[0]['candidates'];
-  const active = rows.filter((r) => r.status !== 'withdrawn');
-  const withdrawn = rows.filter((r) => r.status === 'withdrawn');
+
+  /**
+   * Order applicants by fit and attach the reason. Applications arrive in the order people
+   * happened to apply, which is noise — a client reads the first three, so putting the best
+   * fit there is most of the value this product claims to add.
+   */
+  const ranked = await rankApplicants(
+    job.id,
+    rows.map((r) => ({ ...r, talentId: r.talent_id })),
+  );
+
+  const active = ranked.filter((r) => r.status !== 'withdrawn');
+  const withdrawn = ranked.filter((r) => r.status === 'withdrawn');
+
+  // People who fit and have not applied. Applicants are excluded because they appear above,
+  // and showing someone twice makes the page look broken.
+  const suggested = await suggestedForJob(
+    job.id,
+    rows.map((r) => r.talent_id),
+  );
 
   return (
     <div>
@@ -80,13 +100,60 @@ export default async function JobApplicationsPage({ params }: { params: Promise<
       />
 
       {active.length > 0 ? (
-        <CandidateList candidates={active} />
+        <>
+          <CandidateList candidates={active} />
+          {active.some((a) => !a.ranked) && (
+            // Said plainly rather than hidden. An applicant with no ranking is unmeasured,
+            // not poor — usually they applied since the last ranking was computed — and
+            // silently sorting them last would read as a verdict.
+            <p className="mt-2 text-sm text-text-subtle">
+              Applicants without a note below their cover letter haven&rsquo;t been assessed yet.
+              That usually means they applied recently; it updates within the hour.
+            </p>
+          )}
+        </>
       ) : (
         <EmptyState
           title="No applications yet"
-          body="They'll appear here as they arrive, newest first, with the evidence behind each one."
+          body="They'll appear here as they arrive, ordered by how well they fit, with the reason for each."
         />
       )}
+
+      <section className="mt-10">
+        <h2 className="font-medium">Developers who fit this brief</h2>
+        <p className="mt-0.5 mb-4 text-sm text-text-muted text-pretty">
+          They haven&rsquo;t applied. You can look at their work, or message them.
+        </p>
+
+        {suggested.state === 'ready' && <SuggestedList matches={suggested.matches} />}
+
+        {suggested.state === 'pending' && (
+          <EmptyState
+            title="Still working through this"
+            body="We're matching this brief against every published profile. It lands within the hour — nothing is wrong."
+          />
+        )}
+
+        {suggested.state === 'empty' && (
+          // Story S4 again: say nothing fits rather than padding the list.
+          <EmptyState
+            title="Nobody strong enough to suggest yet"
+            body="We'd rather show nothing than pad this with developers who don't fit. New profiles are published regularly."
+          />
+        )}
+
+        {suggested.state === 'too-sparse' && (
+          <EmptyState
+            title="Not enough in the brief to match on"
+            body="Matching reads the description and required skills. A fuller description gets better suggestions — it's the same text a developer reads before deciding to apply."
+            action={
+              <Link href={`/dashboard/client/jobs/${job.id}/edit`} className="text-sm underline">
+                Edit the job
+              </Link>
+            }
+          />
+        )}
+      </section>
 
       {withdrawn.length > 0 && (
         <details className="mt-6">
