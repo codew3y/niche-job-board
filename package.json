@@ -29,7 +29,8 @@
     "test:m2": "playwright test e2e/m2.spec.ts",
     "eval": "tsx --env-file-if-exists=.env lib/eval/eval-cli.mts",
     "embed:backfill": "tsx --env-file-if-exists=.env lib/matching/backfill.mts",
-    "match:warm": "tsx --env-file-if-exists=.env lib/matching/warm-cli.mts"
+    "match:warm": "tsx --env-file-if-exists=.env lib/matching/warm-cli.mts",
+    "bench:match": "tsx --env-file-if-exists=.env lib/eval/latency.mts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

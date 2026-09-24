@@ -26,7 +26,7 @@ export default function PrivacyPage() {
     <LegalPage
       title="Privacy"
       intro="What this site stores, who can see it, and what happens when you leave."
-      lastUpdated="2026-09-23"
+      lastUpdated="2026-09-24"
     >
       <Section heading="The short version">
         <p>
@@ -113,10 +113,51 @@ export default function PrivacyPage() {
             <strong>Resend</strong> — sends transactional email. Receives your email address and the
             contents of that email
           </li>
+          <li>
+            <strong>Google (Gemini API)</strong> — powers matching. See below, because this one
+            carries a condition worth reading rather than a line in a list
+          </li>
         </ul>
         <p className="text-text-muted">
           There is no analytics, no advertising and no tracking on this site. The only cookies set
           are the ones that keep you signed in.
+        </p>
+      </Section>
+
+      <Section heading="Matching, and what Google sees">
+        <p>
+          Matching works by turning text into a numerical representation and comparing it, then
+          asking a language model to judge the shortlist and write the one-line reason you see
+          beside each match. Both steps run on Google&rsquo;s Gemini API.
+        </p>
+        <p>
+          <strong>What is sent:</strong> job titles and descriptions, and developer headlines, bios
+          and portfolio text. <strong>Only from published profiles and open jobs</strong> — the
+          things already visible to anyone on the internet and indexed by search engines.
+        </p>
+        <p>
+          <strong>What is never sent:</strong> email addresses, messages, applications and cover
+          notes, saved lists, drafts, or any unpublished profile. Matching reads what you chose to
+          publish and nothing else.
+        </p>
+        <p>
+          {/*
+            Stated plainly rather than buried. This is the cost of the free tier, it is a real
+            trade, and someone deciding what to put in a public bio deserves to know it before
+            they write it — not after.
+          */}
+          <strong>
+            We use Google&rsquo;s free tier, and Google states that content sent to it may be used
+            to improve their products.
+          </strong>{' '}
+          In practice that means the public text described above may be used in training. Everything
+          private to you — your messages, your applications, your email — is never part of it,
+          because it is never sent.
+        </p>
+        <p className="text-text-muted">
+          If matching is unavailable, nothing else breaks: profiles, jobs, applications and messages
+          all work exactly as they do now. You would simply see &ldquo;no strong matches yet&rdquo;
+          instead of a ranked list.
         </p>
       </Section>
 
