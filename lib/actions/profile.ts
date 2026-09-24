@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { embedInBackground } from '../matching/ingest';
+import { invalidate } from '../matching/cache';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
 
@@ -97,6 +99,17 @@ export async function updateProfile(
 
   if (error) return { ok: false, message: 'Could not save. Try again.' };
 
+  /**
+   * The embedded text just changed, so the stored vector and every ranking built from it are
+   * stale. Re-embed, and drop the cached rankings in BOTH directions — this profile's own
+   * feed, and every job ranking that listed them.
+   *
+   * Neither can fail the save. The profile is the user's work; the vector is our convenience,
+   * and lib/matching/ingest.ts holds that line.
+   */
+  embedInBackground('talent_profile', profile.id);
+  void invalidate('talent', profile.id);
+
   revalidatePath('/dashboard/talent/profile');
   revalidatePath('/talent');
   return { ok: true };
@@ -109,14 +122,24 @@ export async function updateSkills(
   const { supabase, profile } = await requireTalent();
   const skillIds = formData.getAll('skillId').map(String).filter(Boolean);
 
-  if (skillIds.length === 0) return { ok: false, message: 'Pick at least one skill.' };
+  /**
+   * Zero skills is allowed. This refused it until now, which was a leftover from the publish
+   * gate ADR-008 removed — and it meant someone could not clear their skill list once set.
+   * The consequence is theirs: no skills means no skill filter will find them.
+   */
   if (skillIds.length > 30) return { ok: false, message: 'Thirty at most.' };
 
   await supabase.from('talent_skills').delete().eq('talent_id', profile.id);
-  const { error } = await supabase
-    .from('talent_skills')
-    .insert(skillIds.map((skillId) => ({ talent_id: profile.id, skill_id: skillId })));
-  if (error) return { ok: false, message: 'Could not save your skills.' };
+  if (skillIds.length > 0) {
+    const { error } = await supabase
+      .from('talent_skills')
+      .insert(skillIds.map((skillId) => ({ talent_id: profile.id, skill_id: skillId })));
+    if (error) return { ok: false, message: 'Could not save your skills.' };
+  }
+
+  // Skills are part of the embedded text — talentToText lists them with proficiency and years.
+  embedInBackground('talent_profile', profile.id);
+  void invalidate('talent', profile.id);
 
   revalidatePath('/dashboard/talent/profile');
   return { ok: true };
@@ -132,6 +155,15 @@ export async function togglePublish(formData: FormData): Promise<void> {
     .from('talent_profiles')
     .update({ is_published: wantPublished })
     .eq('id', profile.id);
+
+  /**
+   * Unpublishing must drop the cached rankings that list this profile, or they keep appearing
+   * in clients' candidate lists — the service filters unpublished profiles out on read, but
+   * the ranking slot is still spent on someone invisible.
+   */
+  void invalidate('talent', profile.id);
+  if (wantPublished) embedInBackground('talent_profile', profile.id);
+
   revalidatePath('/dashboard/talent/profile');
   revalidatePath('/talent');
 }
@@ -186,6 +218,12 @@ export async function saveItem(
 
   if (error) return { ok: false, message: 'Could not save that project.' };
 
+  // A project is part of the profile's embedded text, so the PROFILE is re-embedded, not just
+  // the item. Embedding the item alone would leave the profile matching on a version of
+  // itself that no longer exists.
+  embedInBackground('talent_profile', profile.id);
+  void invalidate('talent', profile.id);
+
   revalidatePath('/dashboard/talent/portfolio');
   revalidatePath('/talent');
   return { ok: true };
@@ -208,6 +246,10 @@ export async function deleteItem(formData: FormData): Promise<void> {
   }
 
   await supabase.from('portfolio_items').delete().eq('id', id).eq('talent_id', profile.id);
+  // Removing a project changes what the profile says it has shipped.
+  embedInBackground('talent_profile', profile.id);
+  void invalidate('talent', profile.id);
+
   revalidatePath('/dashboard/talent/portfolio');
   revalidatePath('/talent');
 }

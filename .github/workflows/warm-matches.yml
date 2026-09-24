@@ -29,7 +29,7 @@ concurrency:
 jobs:
   warm:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
 
@@ -39,6 +39,16 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # Embeddings first: a subject with no vector cannot be warmed, and ingest-on-write is
+      # in-process — on Vercel a function can be frozen once the response is sent, so a queued
+      # embed may never finish. This is the safety net for exactly that, and it is idempotent:
+      # only rows never embedded, or edited since, are touched.
+      - name: Backfill missing embeddings
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npm run embed:backfill
 
       - name: Warm the match cache
         env:

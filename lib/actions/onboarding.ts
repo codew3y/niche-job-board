@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { makeSlug } from '../onboarding/steps';
 import { clientProfileInput } from '../schemas/client';
+import { embedInBackground } from '../matching/ingest';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
 
@@ -98,9 +99,13 @@ export async function saveTalentSkills(
   const { supabase, user } = await requireUser();
 
   const skillIds = formData.getAll('skillId').map(String).filter(Boolean);
-  if (skillIds.length === 0) {
-    return { ok: false, message: 'Pick at least one skill so clients can find you.' };
-  }
+  /**
+   * Zero skills is allowed. This refused it, which was the last surviving piece of the publish
+   * gate ADR-008 removed — and here it was worse than elsewhere, because it blocked someone
+   * from finishing onboarding at all.
+   *
+   * The consequence is theirs and the UI states it: no skills means no skill filter finds you.
+   */
   if (skillIds.length > 30) {
     return {
       ok: false,
@@ -263,6 +268,11 @@ export async function publishTalent(
     .update({ is_published: true })
     .eq('id', profile.id);
   if (error) return { ok: false, message: 'Could not publish. Try again.' };
+
+  // Embed on publish rather than at each onboarding step: the text is only final now, and
+  // embedding a half-filled profile three times spends free-tier quota to store three
+  // versions of something nobody has finished writing.
+  embedInBackground('talent_profile', profile.id);
 
   revalidatePath('/', 'layout');
   redirect('/dashboard/talent?welcome=1');

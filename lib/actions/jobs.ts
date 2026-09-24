@@ -4,6 +4,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { makeSlug } from '../onboarding/steps';
+import { invalidate } from '../matching/cache';
+import { embedInBackground } from '../matching/ingest';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
 
@@ -136,6 +138,14 @@ export async function saveJob(
       .eq('client_id', client.id);
     if (error) return { ok: false, message: 'Could not save this job.' };
     await syncSkills(supabase, jobId, skillIds);
+    /**
+     * Re-embed and drop cached rankings in both directions: this job's candidate list, and
+     * every developer feed that recommended it on the strength of text that just changed.
+     *
+     * After syncSkills, because required skills are part of the embedded brief.
+     */
+    embedInBackground('job', jobId);
+    void invalidate('job', jobId);
   } else {
     const { data: created, error } = await supabase
       .from('jobs')
@@ -150,6 +160,7 @@ export async function saveJob(
       .single();
     if (error || !created) return { ok: false, message: 'Could not create this job.' };
     await syncSkills(supabase, created.id, skillIds);
+    embedInBackground('job', created.id);
   }
 
   revalidatePath('/dashboard/client/jobs');
@@ -170,6 +181,9 @@ export async function closeJob(formData: FormData): Promise<void> {
   if (!id) return;
 
   await supabase.from('jobs').update({ status: 'closed' }).eq('id', id).eq('client_id', client.id);
+  // A closed job must stop appearing in developers' match feeds. Retrieval filters it out on
+  // read, but the cached ranking would keep spending a slot on something nobody can apply to.
+  void invalidate('job', id);
   revalidatePath('/dashboard/client/jobs');
   revalidatePath('/jobs');
 }
