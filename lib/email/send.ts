@@ -27,6 +27,11 @@ import { serverEnv } from '../env';
  * the app is in so this is visible rather than discovered.
  *
  * To lift it: verify a domain at resend.com/domains and set EMAIL_FROM to an address on it.
+ *
+ * Owner decision 2026-09-24: no domain for now, so this is the live configuration rather than
+ * a temporary state on the way to something else. Notifications genuinely do not reach users.
+ * `deliverability().ownerOnly` reports it and /api/health surfaces it, because the failure is
+ * otherwise invisible — Resend accepts the call and refuses the recipient.
  */
 const SHARED_SENDER = 'TechSelect <onboarding@resend.dev>';
 

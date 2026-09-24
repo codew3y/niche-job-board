@@ -14,7 +14,15 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-const policy = readFileSync('app/(marketing)/privacy/page.tsx', 'utf8');
+/**
+ * Whitespace-normalised before matching.
+ *
+ * The first version of this file matched the raw source and broke the moment Prettier
+ * reflowed a paragraph — it was asserting line breaks, not meaning. JSX wraps wherever the
+ * formatter decides, so any phrase spanning a line would have failed for a reason that has
+ * nothing to do with what the policy says.
+ */
+const policy = readFileSync('app/(marketing)/privacy/page.tsx', 'utf8').replace(/\s+/g, ' ');
 
 /** Each processor, and a phrase the policy must contain if it is honest about them. */
 const PROCESSORS = [
