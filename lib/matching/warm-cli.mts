@@ -19,7 +19,7 @@
 import postgres from 'postgres';
 import { GoogleGenAI } from '@google/genai';
 
-import { EMBEDDING_DIMENSIONS, RERANK_MODEL } from './config';
+import { RERANK_MODEL } from './config';
 import { parseRerank } from './rerank-parse';
 import { RERANK_RESPONSE_SCHEMA, buildRerankPrompt } from './rerank-prompt';
 import { jobToText, talentToText } from './text';
@@ -113,9 +113,54 @@ async function jobText(id: string): Promise<string> {
   });
 }
 
+/**
+ * Re-rank with retry.
+ *
+ * The first scheduled run warmed 11 subjects and failed 10 — a 48% failure rate, essentially
+ * all of it 503 "experiencing high demand" from the free tier. Those are transient by
+ * definition, and the eval harness already retried them; the warmer did not, so every blip
+ * cost a subject and the quota spent reaching it.
+ *
+ * Backoff is linear and short rather than exponential: a 503 here means Google's scheduler is
+ * busy right now, not that we are hammering it, and the loop already paces itself at one
+ * request per 45+ seconds. Waiting four minutes to retry would spend the run's budget on
+ * sleeping.
+ */
+const RERANK_ATTEMPTS = 3;
+
+async function rerankWithRetry(brief: string, payload: { id: string; text: string; similarity: number }[]) {
+  let lastDetail = 'unknown';
+
+  for (let attempt = 1; attempt <= RERANK_ATTEMPTS; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: RERANK_MODEL,
+        contents: buildRerankPrompt(brief, payload),
+        config: { responseMimeType: 'application/json', responseSchema: RERANK_RESPONSE_SCHEMA, temperature: 0 },
+      });
+      const parsed = parseRerank(response.text ?? '', payload);
+      if (parsed.ok) return { ok: true as const, items: parsed.items, attempts: attempt };
+      // A malformed or partial answer is worth one more ask — temperature is 0, but the
+      // failure mode is the model truncating, not disagreeing with itself.
+      lastDetail = parsed.detail ?? parsed.reason;
+    } catch (cause) {
+      lastDetail = cause instanceof Error ? cause.message.slice(0, 160) : String(cause).slice(0, 160);
+      const transient = /503|429|UNAVAILABLE|RESOURCE_EXHAUSTED|high demand|deadline/i.test(lastDetail);
+      // A 401 or a 400 will fail identically every time; retrying spends quota to learn
+      // nothing.
+      if (!transient) return { ok: false as const, detail: lastDetail, attempts: attempt };
+    }
+    if (attempt < RERANK_ATTEMPTS) await new Promise((r) => setTimeout(r, attempt * 5000));
+  }
+
+  return { ok: false as const, detail: lastDetail, attempts: RERANK_ATTEMPTS };
+}
+
 let warmed = 0;
 let failed = 0;
+let retried = 0;
 let ranOutOfTime = false;
+const failureReasons = new Map<string, number>();
 
 for (const subject of cold) {
   if (Date.now() - startedAt > BUDGET_MS) {
@@ -152,20 +197,24 @@ for (const subject of cold) {
     if (payload.length === 0) continue;
 
     const brief = subject.type === 'job' ? await jobText(subject.id) : await talentText(subject.id);
-    const response = await ai.models.generateContent({
-      model: RERANK_MODEL,
-      contents: buildRerankPrompt(brief, payload),
-      config: { responseMimeType: 'application/json', responseSchema: RERANK_RESPONSE_SCHEMA, temperature: 0 },
-    });
+    const parsed = await rerankWithRetry(brief, payload);
 
-    const parsed = parseRerank(response.text ?? '', payload);
     if (!parsed.ok) {
       // A fallback ranking is deliberately NOT cached: freezing a degraded result for six
       // hours because the model was busy once is worse than re-deriving it next run.
-      console.warn(`[warm] ${subject.type} "${subject.label.slice(0, 40)}": ${parsed.detail ?? parsed.reason}`);
+      const kind = /503|UNAVAILABLE|high demand/i.test(parsed.detail)
+        ? 'busy (503)'
+        : /429|RESOURCE_EXHAUSTED|quota/i.test(parsed.detail)
+          ? 'rate limited'
+          : /scored \d+ of/.test(parsed.detail)
+            ? 'partial answer'
+            : 'other';
+      failureReasons.set(kind, (failureReasons.get(kind) ?? 0) + 1);
+      console.warn(`[warm] ${subject.type} "${subject.label.slice(0, 40)}": ${kind} after ${parsed.attempts} attempt(s)`);
       failed++;
       continue;
     }
+    if (parsed.attempts > 1) retried++;
 
     // Replace wholesale. A candidate in the old ranking and not the new one — unpublished,
     // or filtered out — would otherwise linger and keep being served.
@@ -190,8 +239,13 @@ for (const subject of cold) {
 }
 
 console.log(
-  `[warm] done: ${warmed} warmed, ${failed} failed, ${cold.length - warmed - failed} left${ranOutOfTime ? ' (out of time)' : ''}`,
+  `[warm] done: ${warmed} warmed (${retried} needed a retry), ${failed} failed, ${cold.length - warmed - failed} left${ranOutOfTime ? ' (out of time)' : ''}`,
 );
+if (failureReasons.size > 0) {
+  // Naming the shape of the failures is what distinguishes "the tier is busy" from "something
+  // is broken" — they look identical in a bare count.
+  console.log(`[warm] failures by kind: ${[...failureReasons].map(([k, n]) => `${k} x${n}`).join(', ')}`);
+}
 const [remaining] = await sql`select count(*)::int as n from match_cache`;
 console.log(`[warm] match_cache now holds ${remaining!.n} row(s)`);
 
