@@ -49,7 +49,20 @@ export async function createClient() {
  * almost always a sign that a policy is wrong, and swapping the client hides the bug instead
  * of fixing it.
  */
-export function createServiceClient() {
+/**
+ * Cached for the life of the function instance.
+ *
+ * It used to be built fresh on every call, which measured 7003ms per query in production
+ * against the same table the anon client read in 536ms. Consistently ~7000ms, which is a
+ * connection-level stall rather than query time — a new client means a new fetch connection,
+ * and nothing was reusing one.
+ *
+ * Safe to share: unlike the SSR client, this one holds no per-request state. It has no
+ * session, no cookies and `persistSession: false`, so there is nothing belonging to one
+ * request that could leak into another. That property is exactly what makes caching an
+ * anon/SSR client wrong and this one right.
+ */
+function buildServiceClient() {
   const { SUPABASE_SERVICE_ROLE_KEY } = serverEnv();
   if (!SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error(
@@ -60,4 +73,13 @@ export function createServiceClient() {
   return createRawClient(clientEnv.NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+}
+
+// Typed from the builder rather than from createRawClient directly: the bare ReturnType of
+// the generic factory loses the schema types and every caller degrades to `never`.
+let cachedServiceClient: ReturnType<typeof buildServiceClient> | null = null;
+
+export function createServiceClient() {
+  cachedServiceClient ??= buildServiceClient();
+  return cachedServiceClient;
 }
