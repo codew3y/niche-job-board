@@ -97,36 +97,27 @@ export async function GET() {
       : null;
 
     /**
-     * Does the service-role query actually SUCCEED?
+     * Whether the service-role client actually WORKS, as a boolean and nothing more.
      *
-     * Exactly ~7001ms every time is a timeout, not query time — and `config.serviceRoleKey`
-     * only reports that the variable is SET, never that it works. usageToday() returning
-     * zeros is indistinguishable from it returning nothing, so a dead key would look
-     * identical to a quiet day.
+     * `config.serviceRoleKey` only reports that the variable is set, which is how a key with
+     * a newline pasted into the middle of it read as healthy while every notification email
+     * silently failed for days.
      *
-     * That distinction matters well beyond this endpoint: the same client looks up email
-     * recipients and claims the welcome send, and both fail silently by design.
+     * NEVER ECHO THE PROVIDER ERROR HERE. This endpoint is public, and the error for a
+     * malformed key quotes the key back — which is exactly how this diagnostic briefly
+     * published a fragment of a live credential. The reason is logged server-side; the
+     * response carries a boolean.
      */
-    let serviceRole: { ok: boolean; rows: number; error?: string } = { ok: false, rows: 0 };
+    let serviceRoleWorks = false;
     if (config.serviceRoleKey) {
-      await timed('serviceRoleSkills', async () => {
+      await timed('serviceRoleCheck', async () => {
         try {
           const { createServiceClient } = await import('@/lib/supabase/server');
-          const { data, error } = await createServiceClient().from('skills').select('id').limit(1);
-          serviceRole = error
-            ? {
-                ok: false,
-                rows: 0,
-                error: `${error.code ?? ''} ${error.message}`.trim().slice(0, 120),
-              }
-            : { ok: true, rows: data?.length ?? 0 };
+          const { error } = await createServiceClient().from('skills').select('id').limit(1);
+          serviceRoleWorks = !error;
+          if (error) console.error('[health] service-role query failed:', error.message);
         } catch (cause) {
-          serviceRole = {
-            ok: false,
-            rows: 0,
-            error:
-              cause instanceof Error ? cause.message.slice(0, 120) : String(cause).slice(0, 120),
-          };
+          console.error('[health] service-role client threw:', String(cause).slice(0, 200));
         }
       });
     }
@@ -137,7 +128,7 @@ export async function GET() {
         database: 'reachable',
         config,
         ai,
-        serviceRole,
+        serviceRoleWorks,
         timings,
         skills: count ?? null,
         latencyMs: Date.now() - startedAt,
