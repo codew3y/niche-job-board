@@ -68,3 +68,45 @@ describe('blank optional variables', () => {
     expect(schema.safeParse({ SERVICE_KEY: 'sb_secret_' + 'z'.repeat(30) }).success).toBe(true);
   });
 });
+
+describe('credentials with whitespace', () => {
+  /**
+   * A service-role key reached production with a newline in the MIDDLE of it. Every presence
+   * check passed and `fetch` rejected it with "invalid header value" on every call — silently,
+   * because email and matching are designed so a failure never breaks the triggering action.
+   */
+  const guard = z.object({
+    KEY: z.preprocess(
+      (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+      z
+        .string()
+        .refine((v) => !/\s/.test(v), 'contains whitespace')
+        .min(20)
+        .optional(),
+    ),
+  });
+
+  it('REJECTS A KEY WITH AN INTERNAL NEWLINE', () => {
+    expect(guard.safeParse({ KEY: `sb_secret_abc\ndefghijklmnop12345` }).success).toBe(false);
+  });
+
+  it('rejects leading and trailing whitespace too', () => {
+    expect(guard.safeParse({ KEY: ' sb_secret_abcdefghijklmnop12345' }).success).toBe(false);
+    expect(guard.safeParse({ KEY: 'sb_secret_abcdefghijklmnop12345\n' }).success).toBe(false);
+  });
+
+  it('DOES NOT SILENTLY TRIM — a mangled key is someone to tell, not something to repair', () => {
+    // Trimming would hide the moment to fix it at the source, and an internal newline is not
+    // repairable by trimming anyway.
+    const result = guard.safeParse({ KEY: 'sb_secret_abcdefghijklmnop12345 ' });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a clean key', () => {
+    expect(guard.safeParse({ KEY: 'sb_secret_abcdefghijklmnop12345' }).success).toBe(true);
+  });
+
+  it('still treats blank as absent', () => {
+    expect(guard.safeParse({ KEY: '' }).success).toBe(true);
+  });
+});

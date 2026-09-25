@@ -23,7 +23,13 @@ const clientSchema = z.object({
    * the data behind it, which is why lib/db/rls.test.ts is a Phase 1 exit criterion rather
    * than a nicety.
    */
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20, 'NEXT_PUBLIC_SUPABASE_ANON_KEY looks wrong.'),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z
+    .string()
+    .min(20, 'NEXT_PUBLIC_SUPABASE_ANON_KEY looks wrong.')
+    .refine(
+      (v) => !/\s/.test(v),
+      'NEXT_PUBLIC_SUPABASE_ANON_KEY contains whitespace — it was probably pasted with a line break.',
+    ),
   NEXT_PUBLIC_SITE_URL: z.preprocess(
     (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
     z.url().optional(),
@@ -45,12 +51,32 @@ const clientSchema = z.object({
 const blankAsUndefined = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((v) => (typeof v === 'string' && v.trim() === '' ? undefined : v), schema);
 
+/**
+ * A credential must contain no whitespace, and this is not pedantry.
+ *
+ * A service-role key reached production with a newline pasted into the MIDDLE of it. Every
+ * presence check passed — the variable was set and long enough — and `fetch` then rejected it
+ * with "invalid header value" on every call. Because email and matching are both designed so
+ * that a failure never breaks the action that triggered it, this was invisible: notifications
+ * silently sent nothing for days while the health endpoint reported the key as configured.
+ *
+ * Trimming it silently would be worse. A key that arrives mangled is a key someone pasted
+ * wrong, and quietly repairing it hides the moment to fix it at the source — while an
+ * internal newline is not even repairable by trimming.
+ */
+const noWhitespace = (label: string) =>
+  z.string().refine((v) => !/\s/.test(v), {
+    message: `${label} contains whitespace. It was probably pasted with a line break — copy it again, and check it is one unbroken line.`,
+  });
+
 const serverSchema = z.object({
   /**
    * BYPASSES RLS ENTIRELY. Full read/write on every table regardless of policy. Server-side
    * only, never in a NEXT_PUBLIC_ variable, never logged.
    */
-  SUPABASE_SERVICE_ROLE_KEY: blankAsUndefined(z.string().min(20).optional()),
+  SUPABASE_SERVICE_ROLE_KEY: blankAsUndefined(
+    noWhitespace('SUPABASE_SERVICE_ROLE_KEY').min(20).optional(),
+  ),
   /** The database owner connection. Migrations, seeding and service-role work only. */
   DATABASE_URL: blankAsUndefined(z.string().startsWith('postgresql://').optional()),
   /**
@@ -59,7 +85,9 @@ const serverSchema = z.object({
    * failed application. lib/email/send.ts is what enforces that.
    */
   RESEND_API_KEY: blankAsUndefined(
-    z.string().startsWith('re_', 'RESEND_API_KEY should start with re_.').optional(),
+    noWhitespace('RESEND_API_KEY')
+      .startsWith('re_', 'RESEND_API_KEY should start with re_.')
+      .optional(),
   ),
   /**
    * Who mail appears to come from. Defaults to Resend's shared sender, which needs no domain
@@ -73,7 +101,7 @@ const serverSchema = z.object({
    * Absent means no matching: embeddings are not written, and the match feeds show their
    * honest empty state rather than an error. Nothing else in the product depends on it.
    */
-  GEMINI_API_KEY: blankAsUndefined(z.string().min(20).optional()),
+  GEMINI_API_KEY: blankAsUndefined(noWhitespace('GEMINI_API_KEY').min(20).optional()),
   /**
    * Shared secret for the scheduled cache warmer. Without it the endpoint refuses every
    * request — an unauthenticated route that spends API quota is a free denial-of-wallet.
