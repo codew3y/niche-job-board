@@ -96,11 +96,39 @@ export async function GET() {
       ? await timed('aiUsage', () => usageToday().catch(() => null))
       : null;
 
+    /**
+     * Does the service-role query actually SUCCEED?
+     *
+     * Exactly ~7001ms every time is a timeout, not query time — and `config.serviceRoleKey`
+     * only reports that the variable is SET, never that it works. usageToday() returning
+     * zeros is indistinguishable from it returning nothing, so a dead key would look
+     * identical to a quiet day.
+     *
+     * That distinction matters well beyond this endpoint: the same client looks up email
+     * recipients and claims the welcome send, and both fail silently by design.
+     */
+    let serviceRole: { ok: boolean; rows: number; error?: string } = { ok: false, rows: 0 };
     if (config.serviceRoleKey) {
       await timed('serviceRoleSkills', async () => {
-        const { createServiceClient } = await import('@/lib/supabase/server');
-        return createServiceClient().from('skills').select('id').limit(1);
-      }).catch(() => null);
+        try {
+          const { createServiceClient } = await import('@/lib/supabase/server');
+          const { data, error } = await createServiceClient().from('skills').select('id').limit(1);
+          serviceRole = error
+            ? {
+                ok: false,
+                rows: 0,
+                error: `${error.code ?? ''} ${error.message}`.trim().slice(0, 120),
+              }
+            : { ok: true, rows: data?.length ?? 0 };
+        } catch (cause) {
+          serviceRole = {
+            ok: false,
+            rows: 0,
+            error:
+              cause instanceof Error ? cause.message.slice(0, 120) : String(cause).slice(0, 120),
+          };
+        }
+      });
     }
 
     return NextResponse.json(
@@ -109,6 +137,7 @@ export async function GET() {
         database: 'reachable',
         config,
         ai,
+        serviceRole,
         timings,
         skills: count ?? null,
         latencyMs: Date.now() - startedAt,
