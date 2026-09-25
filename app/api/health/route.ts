@@ -85,9 +85,23 @@ export async function GET() {
      *
      * Counts and limits only. It reveals nothing about any user.
      */
+    /**
+     * Two service-role timings, not one. `aiUsage` measured 7005ms while the anon-key query
+     * beside it measured 572ms — which does not say whether the cost is the service-role
+     * CLIENT or the ai_usage TABLE. Timing a service-role read of the same `skills` table the
+     * anon client just read separates them: if both service-role calls are slow it is the
+     * key, if only ai_usage is slow it is the table.
+     */
     const ai = config.serviceRoleKey
       ? await timed('aiUsage', () => usageToday().catch(() => null))
       : null;
+
+    if (config.serviceRoleKey) {
+      await timed('serviceRoleSkills', async () => {
+        const { createServiceClient } = await import('@/lib/supabase/server');
+        return createServiceClient().from('skills').select('id').limit(1);
+      }).catch(() => null);
+    }
 
     return NextResponse.json(
       {
