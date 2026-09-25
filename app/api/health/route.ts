@@ -51,12 +51,30 @@ export async function GET() {
     // below will surface anyway.
   }
 
+  /**
+   * Per-step timings, not just a total.
+   *
+   * A single latencyMs said 7.4s and could not say which of three steps spent it — the
+   * anon-key query, the service-role query, or client construction. A health endpoint that
+   * reports a number nobody can act on is a number, not a diagnostic.
+   */
+  const timings: Record<string, number> = {};
+  const timed = async <T>(name: string, fn: () => Promise<T>): Promise<T> => {
+    const at = Date.now();
+    try {
+      return await fn();
+    } finally {
+      timings[name] = Date.now() - at;
+    }
+  };
+
   try {
-    const supabase = await createClient();
-    const { error, count } = await supabase
-      .from('skills')
-      .select('id', { count: 'exact', head: true })
-      .limit(1);
+    const supabase = await timed('createClient', async () => createClient());
+    // Awaited inside the closure: a PostgrestFilterBuilder is thenable but not a Promise,
+    // so returning it directly gives back the builder rather than the result.
+    const { error, count } = await timed('skillsCount', async () =>
+      supabase.from('skills').select('id', { count: 'exact', head: true }).limit(1),
+    );
 
     if (error) throw error;
 
@@ -67,7 +85,9 @@ export async function GET() {
      *
      * Counts and limits only. It reveals nothing about any user.
      */
-    const ai = config.serviceRoleKey ? await usageToday().catch(() => null) : null;
+    const ai = config.serviceRoleKey
+      ? await timed('aiUsage', () => usageToday().catch(() => null))
+      : null;
 
     return NextResponse.json(
       {
@@ -75,6 +95,7 @@ export async function GET() {
         database: 'reachable',
         config,
         ai,
+        timings,
         skills: count ?? null,
         latencyMs: Date.now() - startedAt,
         at: new Date().toISOString(),
