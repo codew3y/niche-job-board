@@ -127,6 +127,13 @@
       "when": 1790262123477,
       "tag": "0017_ai_usage",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790344028076,
+      "tag": "0018_foreign_key_indexes",
+      "breakpoints": true
     }
   ]
 }
