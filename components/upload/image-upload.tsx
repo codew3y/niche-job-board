@@ -4,7 +4,6 @@ import { useId, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { resizeImage, storagePath } from '@/lib/upload/resize';
-import { createClient } from '@/lib/supabase/client';
 
 /**
  * Upload an image to the `media` bucket.
@@ -73,6 +72,19 @@ export function ImageUpload({
     setMessage('Uploading…');
     setProgress(10);
 
+    /**
+     * Imported here rather than at the top of the file.
+     *
+     * `createBrowserClient` pulls in the whole of supabase-js, including realtime-js — about
+     * 1MB of dependency for a feature this product does not use at all. This is the ONLY
+     * component that needs a browser client, it lives inside the portfolio editor, and most
+     * visitors never open it. A static import would put that weight on every page including
+     * /jobs and the homepage.
+     *
+     * The cost is a fetch at the moment of upload, which is already a network operation and
+     * already behind a deliberate click.
+     */
+    const { createClient } = await import('@/lib/supabase/client');
     const supabase = createClient();
     const {
       data: { user },
