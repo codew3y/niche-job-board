@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+
+import { jsonLdScript } from '@/lib/seo/json-ld';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -61,7 +63,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
         // Only emitted while the posting is genuinely open. Structured data for a job nobody
         // can apply to is what gets a site demoted in Google Jobs (§9).
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(closed || expired ? {} : jobPostingJsonLd(job, siteUrl())),
+          __html: jsonLdScript(closed || expired ? {} : jobPostingJsonLd(job, siteUrl())),
         }}
       />
 

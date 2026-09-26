@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+
+import { jsonLdScript } from '@/lib/seo/json-ld';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -73,7 +75,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdScript(
             p.is_published
               ? {
                   '@context': 'https://schema.org',
