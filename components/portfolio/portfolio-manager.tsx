@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 
@@ -190,14 +191,17 @@ function ItemMedia({ item }: { item: Item }) {
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {media.map((m) => (
             <li key={m.id} className="space-y-1.5">
-              {/* eslint-disable-next-line @next/next/no-img-element -- Supabase Storage is not
-                  configured as a next/image loader domain; these are already resized to 1600px
-                  and served from the CDN. */}
-              <img
-                src={m.url}
-                alt={m.alt_text}
-                className="aspect-video w-full rounded-[--radius-sm] border border-border-base object-cover"
-              />
+              {/* Two columns on phones, three from sm — a thumbnail grid, so the widths are
+                  small and the savings from resizing are correspondingly large. */}
+              <div className="relative aspect-video w-full overflow-hidden rounded-[--radius-sm] border border-border-base">
+                <Image
+                  src={m.url}
+                  alt={m.alt_text}
+                  fill
+                  sizes="(min-width: 640px) 33vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
               <form action={detachMedia}>
                 <input type="hidden" name="mediaId" value={m.id} />
                 <button

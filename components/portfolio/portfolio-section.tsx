@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { ExternalLink } from '@/components/shared/external-link';
 
 type Item = {
@@ -96,20 +97,20 @@ export function PortfolioSection({
                       .sort((a, b) => a.sort_order - b.sort_order)
                       .map((m) => (
                         <li key={m.id}>
-                          {/* eslint-disable-next-line @next/next/no-img-element -- Supabase
-                              Storage is not a configured next/image loader domain; these are
-                              already resized to 1600px and CDN-served.
-
-                              loading="lazy" because a profile can carry a dozen of these
-                              below the fold, and decoding="async" so a slow decode does not
-                              block the rest of the page painting. */}
-                          <img
-                            src={m.url}
-                            alt={m.alt_text}
-                            loading="lazy"
-                            decoding="async"
-                            className="aspect-video w-full rounded-[--radius-sm] border border-border-base object-cover"
-                          />
+                          {/* `sizes` is the whole point: one column on phones, two from the
+                              sm breakpoint. Get it wrong and Next serves a 1600px file to a
+                              360px slot, which is the state this page was already in with a
+                              raw <img>. Lazy by default, so a profile carrying a dozen of
+                              these below the fold costs nothing until it is scrolled to. */}
+                          <div className="relative aspect-video w-full overflow-hidden rounded-[--radius-sm] border border-border-base">
+                            <Image
+                              src={m.url}
+                              alt={m.alt_text}
+                              fill
+                              sizes="(min-width: 640px) 50vw, 100vw"
+                              className="object-cover"
+                            />
+                          </div>
                         </li>
                       ))}
                   </ul>
