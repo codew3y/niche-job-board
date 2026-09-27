@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { createClient } from '@/lib/supabase/server';
+import { getSessionProfile } from '@/lib/supabase/session';
 
 /**
  * Public shell. Signed-out visitors get sign-in links; signed-in ones get a way back to
@@ -9,22 +9,15 @@ import { createClient } from '@/lib/supabase/server';
  * again is not.
  */
 export default async function MarketingLayout({ children }: { children: ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  let dashboard: string | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('active_role, has_talent, has_client')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    if (profile?.has_talent || profile?.has_client) {
-      dashboard = profile.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
-    }
-  }
+  // Cached per request: the page below often needs the same profile, and previously fetched
+  // it again.
+  const profile = await getSessionProfile();
+  const dashboard =
+    profile && (profile.hasTalent || profile.hasClient)
+      ? profile.activeRole === 'client'
+        ? '/dashboard/client'
+        : '/dashboard/talent'
+      : null;
 
   return (
     <div className="flex min-h-full flex-col">

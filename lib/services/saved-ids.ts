@@ -1,4 +1,5 @@
 import { createClient } from '../supabase/server';
+import { getClientProfileId, getSessionUser, getTalentProfileId } from '../supabase/session';
 
 /**
  * Which of the rows on this page the viewer has already saved.
@@ -12,24 +13,19 @@ import { createClient } from '../supabase/server';
  */
 export async function savedJobIds(jobIds: string[]): Promise<Set<string>> {
   if (jobIds.length === 0) return new Set();
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return new Set();
+  // Deduped per request — this page also calls canSave(), which asked the same question.
+  if (!(await getSessionUser())) return new Set();
 
+  const supabase = await createClient();
   const { data } = await supabase.from('saved_jobs').select('job_id').in('job_id', jobIds);
   return new Set((data ?? []).map((r) => r.job_id));
 }
 
 export async function savedTalentIds(talentIds: string[]): Promise<Set<string>> {
   if (talentIds.length === 0) return new Set();
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return new Set();
+  if (!(await getSessionUser())) return new Set();
 
+  const supabase = await createClient();
   const { data } = await supabase
     .from('saved_talent')
     .select('talent_id')
@@ -42,17 +38,8 @@ export async function savedTalentIds(talentIds: string[]): Promise<Set<string>> 
  * otherwise — a control that always fails is worse than no control.
  */
 export async function canSave(kind: 'job' | 'talent'): Promise<boolean> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  // A talent saves jobs; a client saves developers.
-  const table = kind === 'job' ? 'talent_profiles' : 'client_profiles';
-  const { count } = await supabase
-    .from(table)
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id);
-  return (count ?? 0) > 0;
+  // A talent saves jobs; a client saves developers. Both lookups are cached per request, and
+  // savedJobIds() on the same page needs the same answer.
+  const id = kind === 'job' ? await getTalentProfileId() : await getClientProfileId();
+  return id !== null;
 }

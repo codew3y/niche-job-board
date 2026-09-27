@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { createClient } from '@/lib/supabase/server';
+import { getSessionProfile } from '@/lib/supabase/session';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -21,30 +21,19 @@ export const metadata: Metadata = {
  * admits.
  */
 export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Cached per request, so the layout above and this page share one lookup rather than two.
+  const profile = await getSessionProfile();
+  const displayName = profile?.displayName ?? null;
 
-  let dashboard: string | null = null;
-  let displayName: string | null = null;
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('display_name, active_role, has_talent, has_client')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    displayName = profile?.display_name ?? null;
-    // Somebody mid-onboarding has no role profile yet; send them to finish rather than into
-    // a dashboard that would bounce them straight back out.
-    if (profile?.has_talent || profile?.has_client) {
-      dashboard = profile.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
-    } else if (profile) {
-      dashboard = '/select-role';
-    }
-  }
+  // Somebody mid-onboarding has no role profile yet; send them to finish rather than into a
+  // dashboard that would bounce them straight back out.
+  const dashboard = profile
+    ? profile.hasTalent || profile.hasClient
+      ? profile.activeRole === 'client'
+        ? '/dashboard/client'
+        : '/dashboard/talent'
+      : '/select-role'
+    : null;
 
   return (
     <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-16 sm:py-24">
