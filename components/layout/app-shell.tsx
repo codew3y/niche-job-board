@@ -36,7 +36,16 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
     <div className="flex min-h-full flex-col">
       <header className="sticky top-0 z-10 border-b border-border-base bg-surface/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-          <Link href="/" className="shrink-0 font-semibold tracking-tight">
+          {/*
+            Inside the app the logo goes to the DASHBOARD, not the marketing page.
+            It used to go to `/`, so a signed-in user clicking it landed on a page inviting
+            them to "Get started" — the product apparently forgetting who they were. A logo
+            inside an application is a home button for that application.
+          */}
+          <Link
+            href={user.activeRole === 'client' ? '/dashboard/client' : '/dashboard/talent'}
+            className="shrink-0 font-semibold tracking-tight"
+          >
             TechSelect
           </Link>
 

@@ -83,7 +83,7 @@ export async function signIn(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     // Deliberately identical for a wrong password and a non-existent account.
@@ -91,7 +91,33 @@ export async function signIn(
   }
 
   revalidatePath('/', 'layout');
-  redirect(safeNext(formData.get('next')) ?? '/select-role');
+
+  const next = safeNext(formData.get('next'));
+  if (next) redirect(next);
+
+  /**
+   * Send them where they belong, rather than to /select-role and letting middleware bounce
+   * them onward.
+   *
+   * It used to redirect to /select-role unconditionally. A returning user with a role would
+   * land there, the middleware would see the session and redirect again — an extra hop, and
+   * a race: the session cookie is being set by this very response, so the first request can
+   * arrive before it is readable and the bounce does not happen at all. That is exactly what
+   * an E2E test caught, sitting on /select-role after a successful sign-in.
+   *
+   * The lookup is cheap and we already have the user.
+   */
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('active_role, has_talent, has_client')
+    .eq('user_id', data.user.id)
+    .maybeSingle();
+
+  if (profile?.has_talent || profile?.has_client) {
+    redirect(profile.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent');
+  }
+  // No role yet — either brand new, or abandoned onboarding. /select-role is correct for both.
+  redirect('/select-role');
 }
 
 /**

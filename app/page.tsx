@@ -1,35 +1,125 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
+import { createClient } from '@/lib/supabase/server';
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
+
 /**
- * Placeholder landing page. The real marketing page is Phase 3; this exists so the walking
- * skeleton has a front door and the deploy has something to serve.
+ * The front door.
+ *
+ * SESSION-AWARE, because the previous version was not and that was a real defect: a signed-in
+ * user who clicked the logo landed on a page inviting them to "Get started", as though the
+ * product had forgotten them. A landing page that ignores the session is a landing page that
+ * only works for strangers.
+ *
+ * The copy avoids the positioning ADR-008 removed. This page used to read "What you've
+ * shipped IS the profile", which was true of a product that required a portfolio to publish
+ * and false of the one that exists now — anyone may list, and evidence helps rather than
+ * admits.
  */
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let dashboard: string | null = null;
+  let displayName: string | null = null;
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('display_name, active_role, has_talent, has_client')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    displayName = profile?.display_name ?? null;
+    // Somebody mid-onboarding has no role profile yet; send them to finish rather than into
+    // a dashboard that would bounce them straight back out.
+    if (profile?.has_talent || profile?.has_client) {
+      dashboard = profile.active_role === 'client' ? '/dashboard/client' : '/dashboard/talent';
+    } else if (profile) {
+      dashboard = '/select-role';
+    }
+  }
+
   return (
-    <main id="main" className="flex-1 grid place-items-center px-4 py-16">
-      <div className="w-full max-w-xl text-center">
-        <p className="text-sm font-mono text-text-subtle">Phase 2 · walking skeleton</p>
-        <h1 className="mt-4 text-4xl sm:text-5xl font-semibold tracking-tight text-balance">
-          What you&rsquo;ve shipped <span className="text-accent">is</span> the profile.
+    <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-16 sm:py-24">
+      <div className="text-center">
+        <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+          Work found by what you <span className="text-accent">actually do</span>
         </h1>
-        <p className="mt-5 text-lg text-text-muted text-pretty">
-          A job board for software, web and automation work — matched on the evidence of real
-          projects rather than on keywords.
+        <p className="mx-auto mt-5 max-w-xl text-lg text-text-muted text-pretty">
+          A job board for software, web and automation work. Matching reads what you have built and
+          what a brief actually needs — not whether the same keyword appears in both.
         </p>
-        <div className="mt-9 flex flex-wrap gap-3 justify-center">
-          <Link
-            href="/signup"
-            className="inline-flex h-11 items-center rounded-[--radius] bg-accent px-6 font-medium text-accent-text shadow-sm transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-accent-hover active:scale-[0.98]"
-          >
-            Get started
-          </Link>
-          <Link
-            href="/login"
-            className="inline-flex h-11 items-center rounded-[--radius] border border-border-strong px-6 font-medium transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-surface-sunken active:scale-[0.98]"
-          >
-            Sign in
-          </Link>
+
+        <div className="mt-9 flex flex-wrap justify-center gap-3">
+          {dashboard ? (
+            <>
+              <Link
+                href={dashboard}
+                className="inline-flex h-11 items-center rounded-[--radius] bg-accent px-6 font-medium text-accent-text shadow-sm transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-accent-hover active:scale-[0.98]"
+              >
+                {displayName ? `Continue as ${displayName.split(' ')[0]}` : 'Go to your dashboard'}
+              </Link>
+              <Link
+                href="/jobs"
+                className="inline-flex h-11 items-center rounded-[--radius] border border-border-strong px-6 font-medium transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-surface-sunken active:scale-[0.98]"
+              >
+                Browse jobs
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/signup"
+                className="inline-flex h-11 items-center rounded-[--radius] bg-accent px-6 font-medium text-accent-text shadow-sm transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-accent-hover active:scale-[0.98]"
+              >
+                Get started
+              </Link>
+              <Link
+                href="/jobs"
+                className="inline-flex h-11 items-center rounded-[--radius] border border-border-strong px-6 font-medium transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-surface-sunken active:scale-[0.98]"
+              >
+                Browse without signing up
+              </Link>
+            </>
+          )}
         </div>
+
+        {/* Said on the front page rather than discovered later. It is the thing most likely to
+            stop someone bouncing, and it is the whole of ADR-008 in one line. */}
+        {!dashboard && (
+          <p className="mt-5 text-sm text-text-subtle">
+            No approval queue and nothing to qualify for — publish a profile whenever you like.
+          </p>
+        )}
+      </div>
+
+      <div className="mt-16 grid gap-6 sm:grid-cols-3">
+        {[
+          {
+            title: 'Evidence, not keywords',
+            body: 'Matching reads your bio and the projects you describe. Someone who has shipped the work outranks someone who listed the tool.',
+          },
+          {
+            title: 'A reason, every time',
+            body: 'Every match carries one sentence saying why. If nothing fits, it says that instead of padding the list.',
+          },
+          {
+            title: 'Both directions',
+            body: 'Clients see ranked candidates for a brief. Developers see briefs that fit what they have built.',
+          },
+        ].map((card) => (
+          <div key={card.title} className="rounded-[--radius] border border-border-base p-5">
+            <h2 className="font-medium">{card.title}</h2>
+            <p className="mt-1.5 text-sm text-text-muted text-pretty">{card.body}</p>
+          </div>
+        ))}
       </div>
     </main>
   );
