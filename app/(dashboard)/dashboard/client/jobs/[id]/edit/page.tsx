@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -47,10 +48,13 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
   ]);
 
   return (
-    <div className="max-w-2xl">
-      <nav aria-label="Breadcrumb" className="mb-4 text-sm">
-        <Link href="/dashboard/client/jobs" className="text-text-muted hover:text-text">
-          ← All jobs
+    <div className="max-w-3xl">
+      <nav aria-label="Breadcrumb" className="mb-5 text-sm">
+        <Link
+          href="/dashboard/client/jobs"
+          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+        >
+          <ArrowLeft aria-hidden="true" size={15} /> All jobs
         </Link>
       </nav>
       <PageHeader

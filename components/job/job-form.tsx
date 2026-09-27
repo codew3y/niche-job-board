@@ -1,11 +1,12 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import { useFormStatus } from 'react-dom';
 
-import { Button } from '@/components/ui/button';
-import { Field } from '@/components/ui/field';
 import { SkillPicker, type SkillOption } from '@/components/onboarding/skill-picker';
+import { CURRENCIES } from '@/components/onboarding/talent-forms';
+import { Card, CardHeader } from '@/components/ui/card';
+import { ChoiceChips, Field, FormError, SelectField, TextareaField } from '@/components/ui/field';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { saveJob } from '@/lib/actions/jobs';
 import type { ActionResult } from '@/lib/actions/auth';
 
@@ -31,11 +32,13 @@ const LEVELS = [
 ] as const;
 
 /**
- * One form for creating and editing.
+ * One form for creating and editing, in four sections — the brief, the skills, the terms,
+ * the logistics — in the order someone thinks about a job.
  *
  * Two submit buttons rather than a status dropdown: "save draft" and "publish" are different
- * intents, and making the user set a state field to express one is a worse way to ask.
- * The intent travels as a hidden value on the button itself.
+ * intents, and making the user set a state field to express one is a worse way to ask. The
+ * intent travels as a value on the button itself. The action row is sticky at the bottom of
+ * the viewport, so it is reachable from the first field without scrolling a long form.
  */
 export function JobForm({
   job,
@@ -56,212 +59,150 @@ export function JobForm({
     <form action={action} className="space-y-6" noValidate>
       {job?.id ? <input type="hidden" name="jobId" value={String(job.id)} /> : null}
 
-      <Field
-        label="Title"
-        name="title"
-        required
-        defaultValue={str(job, 'title')}
-        placeholder="Stripe and serverless payments integration"
-        errors={fields?.title}
-      />
-
-      <div className="space-y-1.5">
-        <label htmlFor="description" className="block text-sm font-medium">
-          What needs building?
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          rows={8}
-          defaultValue={str(job, 'description')}
-          aria-invalid={Boolean(fields?.description)}
-          aria-describedby="desc-hint"
-          placeholder="The problem, what done looks like, and anything already tried."
-          className={`w-full rounded-md border bg-surface-raised p-3 placeholder:text-text-subtle
-            ${fields?.description ? 'border-danger' : 'border-border-strong'}`}
+      <Card>
+        <CardHeader
+          title="The brief"
+          description="What matching reads, and what candidates judge."
         />
-        <p
-          id="desc-hint"
-          className={`text-sm ${fields?.description ? 'text-danger' : 'text-text-muted'}`}
-        >
-          {fields?.description?.[0] ??
-            'At least 120 characters — this is what matching reads, and what candidates judge.'}
-        </p>
-      </div>
-
-      <div className="space-y-1.5">
-        <label htmlFor="requirements" className="block text-sm font-medium">
-          Requirements <span className="font-normal text-text-subtle">(optional)</span>
-        </label>
-        <textarea
-          id="requirements"
-          name="requirements"
-          rows={3}
-          defaultValue={str(job, 'requirements')}
-          className="w-full rounded-md border border-border-strong bg-surface-raised p-3"
-        />
-      </div>
-
-      <div>
-        <SkillPicker options={options} initial={initialSkills} max={20} />
-        {fields?.skills && <p className="mt-1 text-sm text-danger">{fields.skills[0]}</p>}
-        <p className="mt-1 text-sm text-text-subtle">The first three count as required.</p>
-      </div>
-
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium">Engagement</legend>
-        <div className="flex flex-wrap gap-2">
-          {ENGAGEMENTS.map(([value, label]) => (
-            <label key={value} className="cursor-pointer">
-              <input
-                type="radio"
-                name="engagementType"
-                value={value}
-                defaultChecked={(str(job, 'engagement_type') || 'fixed') === value}
-                className="peer sr-only"
-              />
-              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-fast peer-checked:border-accent peer-checked:bg-accent-subtle">
-                {label}
-              </span>
-            </label>
-          ))}
+        <div className="space-y-6 p-5 sm:p-6">
+          <Field
+            label="Title"
+            name="title"
+            required
+            defaultValue={str(job, 'title')}
+            placeholder="Stripe and serverless payments integration"
+            errors={fields?.title}
+          />
+          <TextareaField
+            label="What needs building?"
+            name="description"
+            rows={8}
+            defaultValue={str(job, 'description')}
+            errors={fields?.description}
+            placeholder="The problem, what done looks like, and anything already tried."
+            hint="At least 120 characters — this is what matching reads, and what candidates judge."
+          />
+          <TextareaField
+            label="Requirements"
+            name="requirements"
+            rows={3}
+            optional
+            defaultValue={str(job, 'requirements')}
+          />
         </div>
-      </fieldset>
+      </Card>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field
-          label="Budget from"
-          name="budgetMin"
-          inputMode="decimal"
-          defaultValue={str(job, 'budget_min')}
-          placeholder="2000"
-        />
-        <Field
-          label="Budget to"
-          name="budgetMax"
-          inputMode="decimal"
-          defaultValue={str(job, 'budget_max')}
-          placeholder="4000"
-          errors={fields?.budgetMax}
-        />
-        <div className="space-y-1.5">
-          <label htmlFor="currency" className="block text-sm font-medium">
-            Currency
-          </label>
-          <select
-            id="currency"
-            name="currency"
-            defaultValue={str(job, 'currency') || 'USD'}
-            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
-          >
-            {['USD', 'EUR', 'GBP', 'CHF'].map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
+      <Card>
+        <CardHeader title="Skills" description="The first three count as required." />
+        <div className="p-5 sm:p-6">
+          <SkillPicker options={options} initial={initialSkills} max={20} />
+          {fields?.skills && <p className="mt-1.5 text-sm text-danger">{fields.skills[0]}</p>}
         </div>
-      </div>
+      </Card>
 
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium">Location</legend>
-        <div className="flex flex-wrap gap-2">
-          {LOCATIONS.map(([value, label]) => (
-            <label key={value} className="cursor-pointer">
-              <input
-                type="radio"
-                name="locationType"
-                value={value}
-                checked={locationType === value}
-                onChange={() => setLocationType(value)}
-                className="peer sr-only"
-              />
-              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-fast peer-checked:border-accent peer-checked:bg-accent-subtle">
-                {label}
-              </span>
-            </label>
-          ))}
-        </div>
-        {/* Only rendered when it is actually required, rather than sitting there disabled. */}
-        {locationType !== 'remote' && (
-          <div className="mt-3">
+      <Card>
+        <CardHeader title="Terms" />
+        <div className="space-y-6 p-5 sm:p-6">
+          <ChoiceChips
+            legend="Engagement"
+            name="engagementType"
+            options={ENGAGEMENTS}
+            defaultValue={str(job, 'engagement_type') || 'fixed'}
+          />
+          <div className="grid gap-5 sm:grid-cols-3">
             <Field
-              label="Where?"
-              name="location"
-              defaultValue={str(job, 'location')}
-              placeholder="Zurich"
-              errors={fields?.location}
+              label="Budget from"
+              name="budgetMin"
+              inputMode="decimal"
+              defaultValue={str(job, 'budget_min')}
+              placeholder="2000"
+            />
+            <Field
+              label="Budget to"
+              name="budgetMax"
+              inputMode="decimal"
+              defaultValue={str(job, 'budget_max')}
+              placeholder="4000"
+              errors={fields?.budgetMax}
+            />
+            <SelectField
+              label="Currency"
+              name="currency"
+              defaultValue={str(job, 'currency') || 'USD'}
+            >
+              {CURRENCIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </SelectField>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader title="Location and timing" />
+        <div className="space-y-6 p-5 sm:p-6">
+          <div className="space-y-4">
+            <ChoiceChips
+              legend="Location"
+              name="locationType"
+              options={LOCATIONS}
+              value={locationType}
+              onChange={setLocationType}
+            />
+            {/* Only rendered when it is actually required, rather than sitting there disabled. */}
+            {locationType !== 'remote' && (
+              <Field
+                label="Where?"
+                name="location"
+                defaultValue={str(job, 'location')}
+                placeholder="Zurich"
+                errors={fields?.location}
+              />
+            )}
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <SelectField
+              label="Experience"
+              name="experienceLevel"
+              id="experienceLevel"
+              defaultValue={str(job, 'experience_level')}
+            >
+              {LEVELS.map(([v, l]) => (
+                <option key={v} value={v}>
+                  {l}
+                </option>
+              ))}
+            </SelectField>
+            <Field
+              label="Deadline"
+              name="deadline"
+              type="date"
+              optional
+              defaultValue={str(job, 'deadline').slice(0, 10)}
+              errors={fields?.deadline}
+              hint="Shown to candidates and used in search listings."
             />
           </div>
-        )}
-      </fieldset>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <label htmlFor="experienceLevel" className="block text-sm font-medium">
-            Experience
-          </label>
-          <select
-            id="experienceLevel"
-            name="experienceLevel"
-            defaultValue={str(job, 'experience_level')}
-            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
-          >
-            {LEVELS.map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
         </div>
-        <Field
-          label="Deadline"
-          name="deadline"
-          type="date"
-          defaultValue={str(job, 'deadline').slice(0, 10)}
-          errors={fields?.deadline}
-          hint="Optional. Shown to candidates and used in search listings."
-        />
-      </div>
+      </Card>
 
-      {state?.ok === false && !state.fields && (
-        <p role="alert" className="text-sm text-danger">
-          {state.message}
+      {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
+
+      <div className="sticky bottom-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px)+0.75rem)] z-sticky flex flex-wrap items-center justify-end gap-3 rounded-lg border border-border-base bg-surface-raised/95 p-3 shadow-md backdrop-blur-md sm:bottom-4">
+        <p className="mr-auto hidden text-sm text-text-subtle sm:block">
+          {isPublished ? 'Changes go live when you save.' : 'Drafts are private until you publish.'}
         </p>
-      )}
-
-      <div className="flex flex-wrap gap-3 border-t border-border-base pt-5">
-        {!isPublished && <Submit intent="draft" label="Save draft" variant="secondary" />}
-        <Submit
-          intent="publish"
-          label={isPublished ? 'Save changes' : 'Publish'}
-          variant="primary"
-        />
+        {!isPublished && (
+          <SubmitButton name="intent" value="draft" variant="secondary" pendingLabel="Saving…">
+            Save draft
+          </SubmitButton>
+        )}
+        <SubmitButton name="intent" value="publish" variant="accent" pendingLabel="Saving…">
+          {isPublished ? 'Save changes' : 'Publish'}
+        </SubmitButton>
       </div>
     </form>
-  );
-}
-
-function Submit({
-  intent,
-  label,
-  variant,
-}: {
-  intent: string;
-  label: string;
-  variant: 'primary' | 'secondary';
-}) {
-  const { pending } = useFormStatus();
-  return (
-    <Button
-      type="submit"
-      name="intent"
-      value={intent}
-      variant={variant}
-      disabled={pending}
-      aria-busy={pending}
-    >
-      {pending ? 'Saving…' : label}
-    </Button>
   );
 }
