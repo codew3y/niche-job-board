@@ -1,7 +1,9 @@
+import { Bookmark } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { buttonStyles } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { SaveButton } from '@/components/shared/save-button';
@@ -51,21 +53,22 @@ export default async function SavedJobsPage() {
   }[];
 
   return (
-    <div>
+    <div className="max-w-3xl">
       <PageHeader title="Saved jobs" subtitle="Private to you — clients are never told." />
 
       {rows.length === 0 ? (
         <EmptyState
+          icon={Bookmark}
           title="Nothing saved yet"
           body="Bookmark a job while browsing and it lands here."
           action={
-            <Link href="/jobs" className="prose-link font-medium">
+            <Link href="/jobs" className={buttonStyles({ size: 'sm' })}>
               Browse jobs
             </Link>
           }
         />
       ) : (
-        <ul className="divide-y divide-border-base rounded-md border border-border-base">
+        <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
           {rows.map(({ jobs: job }) => {
             const budget = formatRange(
               job.budget_min,
@@ -74,16 +77,19 @@ export default async function SavedJobsPage() {
               job.engagement_type === 'hourly' ? '/hr' : '',
             );
             return (
-              <li key={job.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+              <li
+                key={job.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+              >
                 <div className="min-w-0">
                   <h2 className="font-medium">
-                    <Link href={`/jobs/${job.slug}`} className="hover:text-accent">
+                    <Link href={`/jobs/${job.slug}`} className="hover:underline">
                       {job.title}
                     </Link>
                   </h2>
                   <p className="mt-0.5 text-sm text-text-subtle">
                     {job.client_profiles?.company_name ?? 'A client'}
-                    {budget ? ` · ${budget}` : ''}
+                    {budget ? <span className="tabular-nums"> · {budget}</span> : ''}
                     {job.status !== 'open' ? ' · closed' : ''}
                   </p>
                 </div>

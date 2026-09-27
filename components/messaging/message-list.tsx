@@ -1,4 +1,5 @@
 import type { ThreadMessage } from '@/lib/services/messaging';
+import { cn } from '@/lib/ui/cn';
 
 /**
  * A thread, oldest first.
@@ -7,30 +8,35 @@ import type { ThreadMessage } from '@/lib/services/messaging';
  * (lib/schemas/messaging.ts) and React escapes it — there is no dangerouslySetInnerHTML here
  * and there must never be one. Whitespace is preserved with CSS so paragraph breaks survive
  * without any parsing step that could reintroduce markup.
+ *
+ * Mine on the right in ink, theirs on the left on paper — the convention every messaging app
+ * has taught, so nobody has to read a name to know who said what.
  */
 export function MessageList({ messages }: { messages: ThreadMessage[] }) {
   if (messages.length === 0) {
-    return <p className="py-10 text-center text-sm text-text-muted">No messages yet.</p>;
+    return <p className="py-16 text-center text-sm text-text-muted">No messages yet.</p>;
   }
 
   return (
-    <ol className="space-y-3 py-2">
+    <ol aria-label="Messages" className="space-y-3 py-6">
       {messages.map((m) => (
-        <li key={m.id} className={m.mine ? 'flex justify-end' : 'flex justify-start'}>
+        <li key={m.id} className={cn('flex', m.mine ? 'justify-end' : 'justify-start')}>
           <div
-            className={`max-w-[min(34rem,85%)] rounded-md px-4 py-2.5 ${
+            className={cn(
+              'max-w-[min(34rem,85%)] rounded-2xl px-4 py-3',
               m.redacted
                 ? 'border border-dashed border-border-strong text-text-subtle italic'
                 : m.mine
-                  ? 'bg-accent text-accent-text'
-                  : 'border border-border-base bg-surface-raised'
-            }`}
+                  ? 'rounded-br-md bg-surface-inverse text-text-inverse'
+                  : 'rounded-bl-md border border-border-base bg-surface-raised',
+            )}
           >
-            <p className="whitespace-pre-wrap text-sm text-pretty">{m.body}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap text-pretty">{m.body}</p>
             <p
-              className={`mt-1 text-xs tabular-nums ${
-                m.mine && !m.redacted ? 'text-accent-text/70' : 'text-text-subtle'
-              }`}
+              className={cn(
+                'mt-1.5 text-2xs tabular-nums',
+                m.mine && !m.redacted ? 'text-text-inverse/65' : 'text-text-subtle',
+              )}
             >
               <time dateTime={m.createdAt}>
                 {new Date(m.createdAt).toLocaleString(undefined, {

@@ -1,3 +1,4 @@
+import { ArrowLeft, ChevronRight, Hourglass, Inbox } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
@@ -6,7 +7,9 @@ import { CandidateList } from '@/components/application/candidate-list';
 import { SuggestedList } from '@/components/application/suggested-list';
 import { rankApplicants, suggestedForJob } from '@/lib/services/matches';
 import { EmptyState } from '@/components/ui/empty-state';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageHeader, SectionHeading } from '@/components/ui/page-header';
+import { buttonStyles } from '@/components/ui/button';
+import { JobStatusBadge } from '@/components/job/job-status-badge';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Applications' };
@@ -80,91 +83,127 @@ export default async function JobApplicationsPage({ params }: { params: Promise<
 
   return (
     <div>
-      <nav aria-label="Breadcrumb" className="mb-4 text-sm">
-        <Link href="/dashboard/client/jobs" className="text-text-muted hover:text-text">
-          ← All jobs
+      <nav aria-label="Breadcrumb" className="mb-5 text-sm">
+        <Link
+          href="/dashboard/client/jobs"
+          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+        >
+          <ArrowLeft aria-hidden="true" size={15} /> All jobs
         </Link>
       </nav>
 
       <PageHeader
         title={job.title}
         subtitle={
-          <>
-            {active.length} {active.length === 1 ? 'application' : 'applications'}
-            {' · '}
-            <Link href={`/jobs/${job.slug}`} className="prose-link font-medium">
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <JobStatusBadge status={job.status} />
+            <span>
+              {active.length} {active.length === 1 ? 'application' : 'applications'}
+            </span>
+            <Link href={`/jobs/${job.slug}`} className="prose-link">
               View the public page
             </Link>
-          </>
+          </span>
+        }
+        actions={
+          <Link
+            href={`/dashboard/client/jobs/${job.id}/edit`}
+            className={buttonStyles({ variant: 'secondary' })}
+          >
+            Edit job
+          </Link>
         }
       />
 
-      {active.length > 0 ? (
-        <>
-          <CandidateList candidates={active} />
-          {active.some((a) => !a.ranked) && (
-            // Said plainly rather than hidden. An applicant with no ranking is unmeasured,
-            // not poor — usually they applied since the last ranking was computed — and
-            // silently sorting them last would read as a verdict.
-            <p className="mt-2 text-sm text-text-subtle">
-              Applicants without a note below their cover letter haven&rsquo;t been assessed yet.
-              That usually means they applied recently; it updates within the hour.
-            </p>
+      <div className="grid gap-10 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:items-start">
+        <section aria-labelledby="applicants-heading">
+          <SectionHeading
+            id="applicants-heading"
+            title="Applicants"
+            description="Ordered by fit, with the reason — never a number on a person."
+          />
+          {active.length > 0 ? (
+            <>
+              <CandidateList candidates={active} />
+              {active.some((a) => !a.ranked) && (
+                // Said plainly rather than hidden. An applicant with no ranking is unmeasured,
+                // not poor — usually they applied since the last ranking was computed — and
+                // silently sorting them last would read as a verdict.
+                <p className="mt-3 text-sm text-text-subtle">
+                  Applicants without a reason haven&rsquo;t been assessed yet. That usually means
+                  they applied recently; it updates within the hour.
+                </p>
+              )}
+            </>
+          ) : (
+            <EmptyState
+              icon={Inbox}
+              title="No applications yet"
+              body="They'll appear here as they arrive, ordered by how well they fit, with the reason for each."
+            />
           )}
-        </>
-      ) : (
-        <EmptyState
-          title="No applications yet"
-          body="They'll appear here as they arrive, ordered by how well they fit, with the reason for each."
-        />
-      )}
 
-      <section className="mt-10">
-        <h2 className="font-medium">Developers who fit this brief</h2>
-        <p className="mt-0.5 mb-4 text-sm text-text-muted text-pretty">
-          They haven&rsquo;t applied. You can look at their work, or message them.
-        </p>
+          {withdrawn.length > 0 && (
+            <details className="group mt-6">
+              <summary className="cursor-pointer list-none text-sm text-text-muted hover:text-text [&::-webkit-details-marker]:hidden">
+                <span className="inline-flex items-center gap-1.5">
+                  <ChevronRight
+                    aria-hidden="true"
+                    size={15}
+                    className="transition-transform duration-fast ease-out group-open:rotate-90"
+                  />
+                  {withdrawn.length} withdrawn
+                </span>
+              </summary>
+              <div className="mt-3">
+                <CandidateList candidates={withdrawn} />
+              </div>
+            </details>
+          )}
+        </section>
 
-        {suggested.state === 'ready' && <SuggestedList matches={suggested.matches} />}
-
-        {suggested.state === 'pending' && (
-          <EmptyState
-            title="Still working through this"
-            body="We're matching this brief against every published profile. It lands within the hour — nothing is wrong."
+        <section aria-labelledby="suggested-heading">
+          <SectionHeading
+            id="suggested-heading"
+            title="Developers who fit this brief"
+            description="They haven’t applied. You can look at their work, or message them."
           />
-        )}
 
-        {suggested.state === 'empty' && (
-          // Story S4 again: say nothing fits rather than padding the list.
-          <EmptyState
-            title="Nobody strong enough to suggest yet"
-            body="We'd rather show nothing than pad this with developers who don't fit. New profiles are published regularly."
-          />
-        )}
+          {suggested.state === 'ready' && <SuggestedList matches={suggested.matches} />}
 
-        {suggested.state === 'too-sparse' && (
-          <EmptyState
-            title="Not enough in the brief to match on"
-            body="Matching reads the description and required skills. A fuller description gets better suggestions — it's the same text a developer reads before deciding to apply."
-            action={
-              <Link href={`/dashboard/client/jobs/${job.id}/edit`} className="text-sm underline">
-                Edit the job
-              </Link>
-            }
-          />
-        )}
-      </section>
+          {suggested.state === 'pending' && (
+            <EmptyState
+              icon={Hourglass}
+              tone="pending"
+              title="Still working through this"
+              body="We're matching this brief against every published profile. It lands within the hour — nothing is wrong."
+            />
+          )}
 
-      {withdrawn.length > 0 && (
-        <details className="mt-6">
-          <summary className="cursor-pointer text-sm text-text-muted">
-            {withdrawn.length} withdrawn
-          </summary>
-          <div className="mt-3">
-            <CandidateList candidates={withdrawn} />
-          </div>
-        </details>
-      )}
+          {suggested.state === 'empty' && (
+            // Story S4 again: say nothing fits rather than padding the list.
+            <EmptyState
+              title="Nobody strong enough yet"
+              body="We'd rather show nothing than pad this with developers who don't fit. New profiles are published regularly."
+            />
+          )}
+
+          {suggested.state === 'too-sparse' && (
+            <EmptyState
+              title="Not enough in the brief to match on"
+              body="Matching reads the description and required skills. A fuller description gets better suggestions — it's the same text a developer reads before deciding to apply."
+              action={
+                <Link
+                  href={`/dashboard/client/jobs/${job.id}/edit`}
+                  className={buttonStyles({ size: 'sm' })}
+                >
+                  Edit the job
+                </Link>
+              }
+            />
+          )}
+        </section>
+      </div>
     </div>
   );
 }

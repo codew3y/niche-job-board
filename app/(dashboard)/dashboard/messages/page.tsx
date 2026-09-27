@@ -1,7 +1,11 @@
+import { MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { Avatar } from '@/components/ui/avatar';
+import { buttonStyles } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { cn } from '@/lib/ui/cn';
 import { PageHeader } from '@/components/ui/page-header';
 import { listConversations } from '@/lib/services/messaging';
 import { createClient } from '@/lib/supabase/server';
@@ -26,66 +30,75 @@ export default async function MessagesPage() {
   const conversations = await listConversations(user.id);
 
   return (
-    <>
+    <div className="max-w-3xl">
       <PageHeader
         title="Messages"
-        subtitle="Conversations you are part of. Replies are not expected — nobody is obliged to answer."
+        subtitle="Conversations you are part of. Nobody is obliged to answer."
       />
 
       {conversations.length === 0 ? (
         <EmptyState
+          icon={MessageSquare}
           title="No messages"
           body="Clients can message you from your profile, and you can reply here. Nothing arrives until someone starts a conversation."
           action={
-            <Link href="/jobs" className="text-sm underline">
+            <Link href="/jobs" className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
               Browse jobs
             </Link>
           }
         />
       ) : (
-        <ul className="divide-y divide-border-base rounded-md border border-border-base">
-          {conversations.map((c) => (
-            <li key={c.id}>
-              <Link
-                href={`/dashboard/messages/${c.id}`}
-                className="flex items-start gap-3 p-4 transition-colors duration-fast hover:bg-surface-sunken"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline gap-2">
-                    <span className={`truncate ${c.unread > 0 ? 'font-semibold' : 'font-medium'}`}>
-                      {/* A deleted counterparty is named as one rather than blanked — the
-                          thread is still the viewer's record of what was said. */}
-                      {c.counterparty?.name ?? 'Deleted account'}
-                    </span>
+        <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
+          {conversations.map((c) => {
+            const name = c.counterparty?.name ?? 'Deleted account';
+            const unread = c.unread > 0;
+            return (
+              <li key={c.id}>
+                <Link
+                  href={`/dashboard/messages/${c.id}`}
+                  className="flex items-start gap-3.5 px-5 py-4 transition-colors duration-fast ease-out hover:bg-surface-sunken/60"
+                >
+                  <Avatar name={name} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className={cn('truncate', unread ? 'font-semibold' : 'font-medium')}>
+                        {/* A deleted counterparty is named as one rather than blanked — the thread
+                            is still the viewer's record of what was said. */}
+                        {name}
+                      </span>
+                      <time
+                        dateTime={c.lastMessageAt}
+                        className="shrink-0 text-xs text-text-subtle tabular-nums"
+                      >
+                        {new Date(c.lastMessageAt).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </time>
+                    </div>
                     {c.jobTitle && (
-                      <span className="truncate text-sm text-text-muted">· {c.jobTitle}</span>
+                      <p className="truncate text-xs text-text-subtle">{c.jobTitle}</p>
                     )}
+                    <div className="mt-1 flex items-center justify-between gap-3">
+                      <p
+                        className={cn('truncate text-sm', unread ? 'text-text' : 'text-text-muted')}
+                      >
+                        {c.preview}
+                      </p>
+                      {unread && (
+                        <span className="shrink-0 rounded-full bg-accent px-2 text-2xs leading-5 font-semibold text-accent-text tabular-nums">
+                          {c.unread}
+                          <span className="sr-only"> unread messages</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className="mt-0.5 truncate text-sm text-text-muted">{c.preview}</p>
-                </div>
-
-                <div className="flex shrink-0 flex-col items-end gap-1">
-                  <time
-                    dateTime={c.lastMessageAt}
-                    className="text-xs tabular-nums text-text-subtle"
-                  >
-                    {new Date(c.lastMessageAt).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </time>
-                  {c.unread > 0 && (
-                    <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-medium tabular-nums text-accent-text">
-                      {c.unread}
-                      <span className="sr-only"> unread messages</span>
-                    </span>
-                  )}
-                </div>
-              </Link>
-            </li>
-          ))}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
-    </>
+    </div>
   );
 }

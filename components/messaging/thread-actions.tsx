@@ -1,9 +1,12 @@
 'use client';
 
-import { useActionState, useRef } from 'react';
-import { useFormStatus } from 'react-dom';
+import { Ban, Flag, ShieldCheck } from 'lucide-react';
+import { useActionState, type ReactElement } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { FormError, TextareaField } from '@/components/ui/field';
+import { Modal, ModalClose } from '@/components/ui/modal';
+import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
 import { blockUser, reportContent, unblockUser } from '@/lib/actions/messaging';
 
@@ -27,23 +30,34 @@ export function ThreadActions({
   counterpartyName: string;
   blocked: boolean;
 }) {
-  const reportRef = useRef<HTMLDialogElement>(null);
-
   if (!counterpartyUserId) return null;
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
       <form action={blocked ? unblockUser : blockUser}>
         <input type="hidden" name="userId" value={counterpartyUserId} />
-        <BlockButton blocked={blocked} name={counterpartyName} />
+        <SubmitButton
+          variant={blocked ? 'secondary' : 'ghost'}
+          size="sm"
+          // The title states the RESULT of pressing, not the current state.
+          title={
+            blocked
+              ? `${counterpartyName} can message you again`
+              : `Nobody can write in either direction while this stands. ${counterpartyName} is not told.`
+          }
+        >
+          {blocked ? <ShieldCheck aria-hidden="true" /> : <Ban aria-hidden="true" />}
+          {blocked ? 'Unblock' : 'Block'}
+        </SubmitButton>
       </form>
 
-      <Button variant="ghost" size="sm" onClick={() => reportRef.current?.showModal()}>
-        Report
-      </Button>
-
       <ReportDialog
-        dialogRef={reportRef}
+        trigger={
+          <Button variant="ghost" size="sm">
+            <Flag aria-hidden="true" />
+            Report
+          </Button>
+        }
         subjectType="conversation"
         subjectId={conversationId}
         subjectLabel={`this conversation with ${counterpartyName}`}
@@ -52,33 +66,13 @@ export function ThreadActions({
   );
 }
 
-function BlockButton({ blocked, name }: { blocked: boolean; name: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button
-      type="submit"
-      variant={blocked ? 'secondary' : 'ghost'}
-      size="sm"
-      disabled={pending}
-      // The label states the resulting state, not the current one.
-      title={
-        blocked
-          ? `${name} can message you again`
-          : `Nobody can write in either direction while this stands. ${name} is not told.`
-      }
-    >
-      {blocked ? 'Unblock' : 'Block'}
-    </Button>
-  );
-}
-
 export function ReportDialog({
-  dialogRef,
+  trigger,
   subjectType,
   subjectId,
   subjectLabel,
 }: {
-  dialogRef: React.RefObject<HTMLDialogElement | null>;
+  trigger: ReactElement;
   subjectType: 'profile' | 'job' | 'message' | 'conversation';
   subjectId: string;
   subjectLabel: string;
@@ -86,86 +80,55 @@ export function ReportDialog({
   const [state, action] = useActionState<ActionResult | null, FormData>(reportContent, null);
 
   return (
-    <dialog
-      ref={dialogRef}
-      aria-labelledby="report-title"
-      className="m-auto w-[min(30rem,calc(100vw-2rem))] rounded-md border border-border-base bg-surface-raised p-0 text-text shadow-md backdrop:bg-black/40"
+    <Modal
+      trigger={trigger}
+      size="sm"
+      title={state?.ok ? 'Report received' : 'Report'}
+      description={state?.ok ? undefined : `Reporting ${subjectLabel}.`}
     >
-      <div className="p-6">
-        {state?.ok ? (
-          <div role="status">
-            <h2 id="report-title" className="text-lg font-semibold tracking-tight">
-              Report received
-            </h2>
-            {/*
-              No queue, no SLA, no automatic action. Saying "we'll look into it" would be a
-              promise this product cannot keep, so it says what actually happens instead —
-              and points at block, which is the control the reporter holds themselves.
-            */}
-            <p className="mt-2 text-sm text-text-muted text-pretty">
-              A person reads these; there is no automatic action and no set turnaround. If you want
-              the messages to stop now, block them as well.
-            </p>
-            <div className="mt-5 flex justify-end">
-              <Button variant="secondary" size="sm" onClick={() => dialogRef.current?.close()}>
-                Close
-              </Button>
-            </div>
+      {state?.ok ? (
+        <div role="status" className="space-y-5">
+          {/*
+            No queue, no SLA, no automatic action. Saying "we'll look into it" would be a promise
+            this product cannot keep, so it says what actually happens instead — and points at
+            block, which is the control the reporter holds themselves.
+          */}
+          <p className="text-sm text-text-muted text-pretty">
+            A person reads these; there is no automatic action and no set turnaround. If you want
+            the messages to stop now, block them as well.
+          </p>
+          <div className="flex justify-end">
+            <ModalClose
+              render={
+                <Button variant="secondary" size="sm">
+                  Close
+                </Button>
+              }
+            />
           </div>
-        ) : (
-          <form action={action} className="space-y-4">
-            <input type="hidden" name="subjectType" value={subjectType} />
-            <input type="hidden" name="subjectId" value={subjectId} />
-
-            <div>
-              <h2 id="report-title" className="text-lg font-semibold tracking-tight">
-                Report
-              </h2>
-              <p className="mt-1 text-sm text-text-muted text-pretty">Reporting {subjectLabel}.</p>
-            </div>
-
-            <div className="space-y-1.5">
-              <label htmlFor="reason" className="block text-sm font-medium">
-                What is wrong?
-              </label>
-              <textarea
-                id="reason"
-                name="reason"
-                rows={4}
-                required
-                maxLength={1000}
-                placeholder="Spam, abuse, a scam, something else — and anything we would need to see it."
-                className={`w-full rounded-md border bg-surface p-3 placeholder:text-text-subtle ${
-                  state?.ok === false && state.fields?.reason
-                    ? 'border-danger'
-                    : 'border-border-strong'
-                }`}
-              />
-              {state?.ok === false && (
-                <p role="alert" className="text-sm text-danger">
-                  {state.fields?.reason?.[0] ?? state.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={() => dialogRef.current?.close()}>
-                Cancel
-              </Button>
-              <SubmitReport />
-            </div>
-          </form>
-        )}
-      </div>
-    </dialog>
-  );
-}
-
-function SubmitReport() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" variant="danger" disabled={pending}>
-      {pending ? 'Sending…' : 'Send report'}
-    </Button>
+        </div>
+      ) : (
+        <form action={action} className="space-y-5">
+          <input type="hidden" name="subjectType" value={subjectType} />
+          <input type="hidden" name="subjectId" value={subjectId} />
+          <TextareaField
+            label="What is wrong?"
+            name="reason"
+            rows={4}
+            required
+            maxLength={1000}
+            errors={state?.ok === false ? state.fields?.reason : undefined}
+            placeholder="Spam, abuse, a scam, something else — and anything we would need to see it."
+          />
+          {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <ModalClose render={<Button variant="ghost">Cancel</Button>} />
+            <SubmitButton variant="danger" pendingLabel="Sending…">
+              Send report
+            </SubmitButton>
+          </div>
+        </form>
+      )}
+    </Modal>
   );
 }

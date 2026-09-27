@@ -6,6 +6,10 @@ import { cn } from '@/lib/ui/cn';
 /**
  * A summary number. Linked when there is somewhere to go — a count you cannot click through to
  * is a number that asks a question and refuses to answer it.
+ *
+ * The figure is in the SANS, with tabular numerals — not the display serif. Instrument Serif's
+ * "1" is a near-twin of a lowercase "l", so "Open jobs 1" read as "Open jobs l" in the first
+ * screenshot of this page. Data is set to be read, not admired (DESIGN.md §9, J3).
  */
 export function Stat({
   label,
@@ -28,7 +32,7 @@ export function Stat({
       </dt>
       <dd
         className={cn(
-          'mt-2 font-serif text-4xl leading-none tabular-nums',
+          'mt-2 text-3xl leading-none font-semibold tracking-tight tabular-nums',
           emphasis && 'text-accent',
         )}
       >

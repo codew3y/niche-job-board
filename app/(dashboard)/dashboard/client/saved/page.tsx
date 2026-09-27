@@ -1,7 +1,10 @@
+import { Bookmark } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { Avatar } from '@/components/ui/avatar';
+import { buttonStyles } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { SaveButton } from '@/components/shared/save-button';
@@ -49,38 +52,45 @@ export default async function SavedTalentPage() {
   }[];
 
   return (
-    <div>
+    <div className="max-w-3xl">
       <PageHeader title="Saved developers" subtitle="Private to you — they are never told." />
 
       {rows.length === 0 ? (
         <EmptyState
+          icon={Bookmark}
           title="Nothing saved yet"
           body="Bookmark a developer while browsing and they land here."
           action={
-            <Link href="/talent" className="prose-link font-medium">
+            <Link href="/talent" className={buttonStyles({ size: 'sm' })}>
               Browse developers
             </Link>
           }
         />
       ) : (
-        <ul className="divide-y divide-border-base rounded-md border border-border-base">
+        <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
           {rows.map(({ talent_profiles: p }) => {
             const rate = formatRange(p.hourly_rate_min, p.hourly_rate_max, p.currency, '/hr');
             return (
-              <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <div className="min-w-0">
-                  <h2 className="font-medium">
-                    <Link href={`/talent/${p.slug}`} className="hover:text-accent">
-                      {p.headline}
-                    </Link>
-                  </h2>
-                  <p className="mt-0.5 text-sm text-text-subtle">
-                    {p.portfolio_item_count} project{p.portfolio_item_count === 1 ? '' : 's'}
-                    {rate ? ` · ${rate}` : ''}
-                    {/* A profile can be unpublished after being saved — say so rather than
-                        linking to a 404. */}
-                    {!p.is_published ? ' · no longer public' : ''}
-                  </p>
+              <li
+                key={p.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+              >
+                <div className="flex min-w-0 items-center gap-3.5">
+                  <Avatar name={p.headline} />
+                  <div className="min-w-0">
+                    <h2 className="font-medium">
+                      <Link href={`/talent/${p.slug}`} className="hover:underline">
+                        {p.headline}
+                      </Link>
+                    </h2>
+                    <p className="mt-0.5 text-sm text-text-subtle">
+                      {p.portfolio_item_count} project{p.portfolio_item_count === 1 ? '' : 's'}
+                      {rate ? <span className="tabular-nums"> · {rate}</span> : ''}
+                      {/* A profile can be unpublished after being saved — say so rather than
+                          linking to a 404. */}
+                      {!p.is_published ? ' · no longer public' : ''}
+                    </p>
+                  </div>
                 </div>
                 <SaveButton kind="talent" id={p.id} saved label={p.headline} />
               </li>

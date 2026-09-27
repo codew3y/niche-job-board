@@ -1,10 +1,14 @@
+import { Send } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { StatusBadge } from '@/components/application/status-badge';
 import { StatusTimeline } from '@/components/application/status-timeline';
-import { Button } from '@/components/ui/button';
+import { ActionForm } from '@/components/ui/action-form';
+import { buttonStyles } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
 import { formatRange } from '@/components/shared/money';
@@ -84,13 +88,14 @@ export default async function ApplicationsPage() {
 
   if (rows.length === 0) {
     return (
-      <div>
+      <div className="max-w-3xl">
         <PageHeader title="Applications" subtitle="Where each one stands." />
         <EmptyState
+          icon={Send}
           title="No applications yet"
           body="Applications you send appear here, with every status change as it happens."
           action={
-            <Link href="/jobs" className="prose-link font-medium">
+            <Link href="/jobs" className={buttonStyles({ size: 'sm' })}>
               Browse jobs
             </Link>
           }
@@ -100,13 +105,13 @@ export default async function ApplicationsPage() {
   }
 
   return (
-    <div>
+    <div className="max-w-3xl">
       <PageHeader
         title="Applications"
-        subtitle={`${rows.length} ${rows.length === 1 ? 'application' : 'applications'}.`}
+        subtitle={`${rows.length} ${rows.length === 1 ? 'application' : 'applications'} — every status change, as it happens.`}
       />
 
-      <ul className="divide-y divide-border-base rounded-md border border-border-base">
+      <ul className="space-y-3">
         {rows.map((row) => {
           const job = row.jobs;
           const budget = job
@@ -124,39 +129,45 @@ export default async function ApplicationsPage() {
           ).includes('withdrawn');
 
           return (
-            <li key={row.id} className="p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <h2 className="font-medium">
-                    {job ? (
-                      <Link href={`/jobs/${job.slug}`} className="hover:text-accent">
-                        {job.title}
-                      </Link>
-                    ) : (
-                      'This job was removed'
-                    )}
-                  </h2>
-                  <p className="mt-0.5 text-sm text-text-subtle">
-                    {job?.client_profiles?.company_name ?? 'A client'}
-                    {budget ? ` · ${budget}` : ''}
-                    {job && job.status !== 'open' ? ' · job closed' : ''}
-                  </p>
+            <li key={row.id}>
+              <Card className="p-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="font-medium text-balance">
+                      {job ? (
+                        <Link href={`/jobs/${job.slug}`} className="hover:underline">
+                          {job.title}
+                        </Link>
+                      ) : (
+                        'This job was removed'
+                      )}
+                    </h2>
+                    <p className="mt-0.5 text-sm text-text-subtle">
+                      {job?.client_profiles?.company_name ?? 'A client'}
+                      {budget ? <span className="tabular-nums"> · {budget}</span> : ''}
+                      {job && job.status !== 'open' ? ' · job closed' : ''}
+                    </p>
+                  </div>
+                  <StatusBadge status={row.status} />
                 </div>
-                <StatusBadge status={row.status} />
-              </div>
 
-              <StatusTimeline events={byApplication.get(row.id) ?? []} />
+                <StatusTimeline events={byApplication.get(row.id) ?? []} />
 
-              {canWithdraw && (
-                <form action={withdrawApplication} className="mt-3">
-                  <input type="hidden" name="applicationId" value={row.id} />
-                  {/* Only offered while the outcome is still open — the transition table
-                      says a rejected or hired application cannot be withdrawn. */}
-                  <Button type="submit" variant="ghost" size="sm" className="text-text-muted">
-                    Withdraw
-                  </Button>
-                </form>
-              )}
+                {canWithdraw && (
+                  // Only offered while the outcome is still open — the transition table says a
+                  // rejected or hired application cannot be withdrawn.
+                  <ActionForm
+                    action={withdrawApplication}
+                    success="Application withdrawn"
+                    className="mt-4 border-t border-border-base pt-3"
+                  >
+                    <input type="hidden" name="applicationId" value={row.id} />
+                    <SubmitButton variant="ghost" size="sm" pendingLabel="Withdrawing…">
+                      Withdraw
+                    </SubmitButton>
+                  </ActionForm>
+                )}
+              </Card>
             </li>
           );
         })}
