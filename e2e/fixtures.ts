@@ -122,6 +122,21 @@ export async function seed(): Promise<Seeded> {
     .single();
   if (cErr) throw new Error(`client profile: ${cErr.message}`);
 
+  /**
+   * The role the account actually signs in as.
+   *
+   * Inserting `client_profiles` alone leaves `active_role` at its 'talent' default, so the
+   * "client" fixture signed in and got the DEVELOPER shell — talent nav, talent dashboard,
+   * "Add client profile" in the header. Every nav assertion passed anyway, because both roles
+   * use the same five labels and only the hrefs differ. Real signup sets this from the chosen
+   * intent; the fixture has to as well, or it tests a state no user is ever in.
+   */
+  const { error: rErr } = await db
+    .from('user_profiles')
+    .update({ active_role: 'client' })
+    .eq('user_id', clientUser.userId);
+  if (rErr) throw new Error(`client active_role: ${rErr.message}`);
+
   const jobSlug = `e2e-job-${runId}`;
   const title = `Subscription billing rebuild ${runId}`;
   const { data: job, error: jErr } = await db

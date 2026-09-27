@@ -13,19 +13,41 @@ export type ShellUser = {
   unread: number;
 };
 
+/**
+ * The same five destinations for both roles, pointing at whatever they mean for that role.
+ *
+ * Owner request, modelled on Upwork's shape. The previous nav named FEATURES — "Matches",
+ * "Applications", "Saved" — which required knowing the product to navigate it. This names
+ * INTENTIONS, so the mental model transfers between roles and from other marketplaces:
+ * Home is where I start, Search is where I find the other side, Jobs is my own work,
+ * Messages is my inbox, Profile is how I appear.
+ *
+ * "Search" points OUTWARD at the public browse pages, which is deliberate. A client looking
+ * for developers and a developer looking for work are doing the same thing from opposite
+ * sides, and those pages already do it well.
+ *
+ * Two items Upwork has are deliberately absent: Contracts and Finances. This product handles
+ * no agreements and no money — docs/decisions/ADR-007 and the terms page both say so
+ * explicitly — and a navigation item leading to an explanation of why it does not exist is
+ * worse than its absence.
+ *
+ * Matches and Saved lost their nav slots rather than their pages; both are linked from the
+ * dashboards, which is where someone looks for them.
+ */
 const NAV = {
   talent: [
-    ['/dashboard/talent', 'Dashboard'],
-    ['/dashboard/talent/matches', 'Matches'],
-    ['/dashboard/talent/applications', 'Applications'],
-    ['/dashboard/talent/profile', 'Profile'],
+    ['/dashboard/talent', 'Home'],
+    ['/jobs', 'Search'],
+    ['/dashboard/talent/applications', 'Jobs'],
     ['/dashboard/messages', 'Messages'],
+    ['/dashboard/talent/profile', 'Profile'],
   ],
   client: [
-    ['/dashboard/client', 'Dashboard'],
+    ['/dashboard/client', 'Home'],
+    ['/talent', 'Search'],
     ['/dashboard/client/jobs', 'Jobs'],
-    ['/dashboard/client/saved', 'Saved'],
     ['/dashboard/messages', 'Messages'],
+    ['/dashboard/client/profile', 'Profile'],
   ],
 } as const;
 

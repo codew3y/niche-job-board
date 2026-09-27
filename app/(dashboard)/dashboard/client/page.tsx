@@ -58,6 +58,30 @@ export default async function ClientDashboard() {
           />
         )}
       </section>
+
+      {/* Matches and Saved left the top navigation when it was restructured around
+          intentions rather than features. They are linked here instead, which is where
+          someone goes looking for them. */}
+      <nav aria-label="Quick links" className="mt-10 border-t border-border-base pt-6">
+        <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          <li>
+            <Link
+              href="/dashboard/client/saved"
+              className="text-accent underline underline-offset-2"
+            >
+              Saved developers
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/dashboard/client/jobs/new"
+              className="text-accent underline underline-offset-2"
+            >
+              Post a job
+            </Link>
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 }

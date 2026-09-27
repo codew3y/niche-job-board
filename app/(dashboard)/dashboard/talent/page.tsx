@@ -58,6 +58,38 @@ export default async function TalentDashboard() {
           body="Once your profile is published we’ll surface briefs that fit what you’ve shipped. We’d rather show nothing than pad the list."
         />
       </section>
+
+      {/* Matches and Saved left the top navigation when it was restructured around
+          intentions rather than features. They are linked here instead, which is where
+          someone goes looking for them. */}
+      <nav aria-label="Quick links" className="mt-10 border-t border-border-base pt-6">
+        <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          <li>
+            <Link
+              href="/dashboard/talent/matches"
+              className="text-accent underline underline-offset-2"
+            >
+              Your matches
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/dashboard/talent/saved"
+              className="text-accent underline underline-offset-2"
+            >
+              Saved jobs
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/dashboard/talent/portfolio"
+              className="text-accent underline underline-offset-2"
+            >
+              Portfolio
+            </Link>
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 }
