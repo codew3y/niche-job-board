@@ -1,5 +1,6 @@
 'use client';
 
+import { FilterSelect } from './filter-select';
 import type { SkillOption } from '@/lib/services/skills';
 
 /**
@@ -24,28 +25,23 @@ export function SkillFilter({
   onChange: (slug: string) => void;
 }) {
   return (
-    <span className="inline-flex items-center">
-      <label className="sr-only" htmlFor="filter-skill">
-        Skill
-      </label>
-      <select
-        id="filter-skill"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`h-9 max-w-[12rem] rounded-sm border px-2.5 text-sm transition-colors duration-fast
-          ${value ? 'border-accent bg-accent-subtle' : 'border-border-strong bg-surface-raised'}`}
-      >
-        <option value="">Skill: any</option>
-        {skills.map(([category, options]) => (
-          <optgroup key={category} label={category}>
-            {options.map((s) => (
-              <option key={s.slug} value={s.slug}>
-                {s.name}
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </select>
-    </span>
+    <FilterSelect
+      id="filter-skill"
+      label="Skill"
+      value={value}
+      onChange={onChange}
+      className="max-w-[14rem]"
+    >
+      <option value="">Skill: any</option>
+      {skills.map(([category, options]) => (
+        <optgroup key={category} label={category}>
+          {options.map((s) => (
+            <option key={s.slug} value={s.slug}>
+              {s.name}
+            </option>
+          ))}
+        </optgroup>
+      ))}
+    </FilterSelect>
   );
 }

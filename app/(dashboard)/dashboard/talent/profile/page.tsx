@@ -1,9 +1,13 @@
+import { Lightbulb } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { ProfileEditor, SkillsEditor } from '@/components/talent/profile-editor';
-import { Button } from '@/components/ui/button';
+import { ActionForm } from '@/components/ui/action-form';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardHeader } from '@/components/ui/card';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { PageHeader } from '@/components/ui/page-header';
 import { togglePublish } from '@/lib/actions/profile';
 import { profileSuggestions } from '@/lib/schemas/talent';
@@ -46,82 +50,92 @@ export default async function ProfilePage() {
   });
 
   return (
-    <div className="max-w-2xl space-y-10">
-      <div>
-        <PageHeader
-          title="Profile"
-          subtitle={
-            profile.is_published ? (
-              <>
-                Live at{' '}
-                <Link href={`/talent/${profile.slug}`} className="prose-link font-medium">
-                  /talent/{profile.slug}
-                </Link>
-              </>
-            ) : (
-              'Draft — only you can see it.'
-            )
-          }
-        />
+    <div className="max-w-3xl space-y-8">
+      <PageHeader
+        title="Profile"
+        subtitle={
+          profile.is_published ? (
+            <>
+              Live at{' '}
+              <Link href={`/talent/${profile.slug}`} className="prose-link font-medium text-text">
+                /talent/{profile.slug}
+              </Link>
+            </>
+          ) : (
+            'Draft — only you can see it.'
+          )
+        }
+      />
 
-        <div className="space-y-4 rounded-md border border-border-base bg-surface-raised p-4">
-          {/* The publish control comes FIRST and is never conditional. Putting advice above a
-              button people are entitled to press reads as a gate even when it is not one. */}
-          <form
-            action={togglePublish}
-            className="flex flex-wrap items-center justify-between gap-3"
-          >
-            <input type="hidden" name="publish" value={profile.is_published ? 'false' : 'true'} />
+      <Card className="p-5 sm:p-6">
+        {/* The publish control comes FIRST and is never conditional. Putting advice above a
+            button people are entitled to press reads as a gate even when it is not one. */}
+        <ActionForm
+          action={togglePublish}
+          success={profile.is_published ? 'Profile unpublished' : 'Profile published'}
+          className="flex flex-wrap items-center justify-between gap-4"
+        >
+          <input type="hidden" name="publish" value={profile.is_published ? 'false' : 'true'} />
+          <div className="flex min-w-0 items-center gap-3">
+            <Badge tone={profile.is_published ? 'success' : 'outline'} size="md">
+              {profile.is_published ? 'Published' : 'Draft'}
+            </Badge>
             <p className="text-sm text-text-muted text-pretty">
               {profile.is_published
-                ? 'Your profile is public and can be matched to briefs.'
+                ? 'Public, and matched to new briefs.'
                 : 'Publish whenever you like — you can keep editing afterwards.'}
             </p>
-            <Button
-              type="submit"
-              variant={profile.is_published ? 'secondary' : 'primary'}
-              size="sm"
+          </div>
+          <SubmitButton
+            variant={profile.is_published ? 'secondary' : 'accent'}
+            size="sm"
+            pendingLabel={profile.is_published ? 'Unpublishing…' : 'Publishing…'}
+          >
+            {profile.is_published ? 'Unpublish' : 'Publish'}
+          </SubmitButton>
+        </ActionForm>
+
+        {suggestions.length > 0 && (
+          <div className="mt-5 border-t border-border-base pt-5">
+            <p className="flex items-center gap-2 text-sm font-medium">
+              <Lightbulb aria-hidden="true" size={16} className="text-accent" />
+              Would help you land better
+            </p>
+            <ul className="mt-2 space-y-1.5 text-sm text-text-muted">
+              {suggestions.map((s) => (
+                <li key={s} className="text-pretty">
+                  {s}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/dashboard/talent/portfolio"
+              className="prose-link mt-3 inline-block text-sm font-medium"
             >
-              {profile.is_published ? 'Unpublish' : 'Publish'}
-            </Button>
-          </form>
+              Add a project
+            </Link>
+          </div>
+        )}
+      </Card>
 
-          {suggestions.length > 0 && (
-            <div className="border-t border-border-base pt-3">
-              <p className="text-sm font-medium">Would help you land better</p>
-              <ul className="mt-2 space-y-1 text-sm text-text-muted">
-                {suggestions.map((s) => (
-                  <li key={s} className="text-pretty">
-                    · {s}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/dashboard/talent/portfolio"
-                className="prose-link mt-3 inline-block text-sm font-medium"
-              >
-                Add a project
-              </Link>
-            </div>
-          )}
+      <Card>
+        <CardHeader title="Details" description="What clients read, and what matching reads." />
+        <div className="p-5 sm:p-6">
+          <ProfileEditor profile={profile} />
         </div>
-      </div>
+      </Card>
 
-      <section>
-        <h2 className="mb-4 font-medium">Details</h2>
-        <ProfileEditor profile={profile} />
-      </section>
-
-      <section>
-        <h2 className="mb-4 font-medium">Skills</h2>
-        <SkillsEditor options={skills ?? []} initial={(mySkills ?? []).map((s) => s.skill_id)} />
-      </section>
+      <Card>
+        <CardHeader title="Skills" description="Only the ones you would take work in." />
+        <div className="p-5 sm:p-6">
+          <SkillsEditor options={skills ?? []} initial={(mySkills ?? []).map((s) => s.skill_id)} />
+        </div>
+      </Card>
 
       {/* /privacy tells people they can delete their account "from settings", so settings has
-          to be reachable from the page they are most likely to be on when they go looking.
-          It was not reachable from anywhere. */}
-      <p className="border-t border-border-base pt-6 text-sm text-text-muted">
-        Roles, sign-in address and deleting your account are in{' '}
+          to be reachable from the page they are most likely to be on when they go looking. */}
+      <p className="text-sm text-text-muted">
+        Roles, sign-in address, appearance and deleting your account are in{' '}
         <Link href="/dashboard/settings" className="prose-link font-medium">
           settings
         </Link>

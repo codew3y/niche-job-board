@@ -1,12 +1,14 @@
+import { CheckCircle2, CircleAlert, Lock } from 'lucide-react';
 import Link from 'next/link';
 
+import { buttonStyles } from '@/components/ui/button';
 import { ApplyDialog } from './apply-dialog';
 
 /**
  * Everything that can be true when someone lands on a job, and what to show for each.
  *
- * Each branch says what to DO next rather than just what is wrong. "You need a profile" is
- * a dead end; "create one, it takes a few minutes" is a path.
+ * Each branch says what to DO next rather than just what is wrong. "You need a profile" is a
+ * dead end; "create one, it takes a few minutes" is a path.
  */
 export type ApplyState =
   | { kind: 'can-apply' }
@@ -19,11 +21,8 @@ export type ApplyState =
   | { kind: 'closed' };
 
 /**
- * This is the confirmation after applying, not just a status readout.
- *
- * ApplyDialog used to carry a success screen; it could never render, because this component is
- * a Server Component and the re-render after applying unmounts the dialog. So the `applied`
- * line has to do that job, which is why it reads as a completed action rather than a label.
+ * This is the confirmation after applying, not just a status readout — ApplyDialog cannot show
+ * one (see its comment), so the `applied` line reads as a completed action.
  */
 const STATUS_COPY: Record<string, string> = {
   applied: 'Application sent — waiting on the client.',
@@ -51,42 +50,47 @@ export function ApplySection({
 
     case 'already-applied':
       return (
-        <div className="rounded-md border border-border-base bg-surface-sunken p-4">
-          <p className="font-medium">{STATUS_COPY[state.status] ?? state.status}</p>
-          <p className="mt-1 text-sm">
-            <Link href="/dashboard/talent/applications" className="prose-link font-medium">
-              See all your applications
-            </Link>
+        <div role="status" className="rounded-lg bg-success-subtle p-4">
+          <p className="flex items-start gap-2 font-medium text-success">
+            <CheckCircle2 aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
+            {STATUS_COPY[state.status] ?? state.status}
           </p>
+          <Link
+            href="/dashboard/talent/applications"
+            className="prose-link mt-2 inline-block text-sm"
+          >
+            See all your applications
+          </Link>
         </div>
       );
 
     case 'signed-out':
       return (
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="space-y-2.5">
+          {/* ?next preserves where they were, so signing in returns them to this job rather than
+              dumping them on a dashboard. */}
           <Link
             href={`/login?next=${encodeURIComponent(`/jobs/${slug}`)}`}
-            className="inline-flex h-11 items-center rounded-md bg-accent px-5 font-medium text-accent-text transition-colors duration-fast hover:bg-accent-hover"
+            className={buttonStyles({ variant: 'accent', size: 'lg', className: 'w-full' })}
           >
             Sign in to apply
           </Link>
-          {/* ?next preserves where they were, so signing in returns them to this job rather
-              than dumping them on a dashboard. */}
-          <p className="text-sm text-text-muted">Takes a minute with Google or GitHub.</p>
+          <p className="text-center text-sm text-text-subtle">
+            Takes a minute with Google or GitHub.
+          </p>
         </div>
       );
 
     case 'no-profile':
       return (
-        <div className="rounded-md border border-border-base p-4">
-          <p className="font-medium">You need a talent profile to apply</p>
-          <p className="mt-1 text-sm text-text-muted text-pretty">
+        <div className="space-y-3">
+          <p className="text-sm text-text-muted text-pretty">
+            <strong className="block font-medium text-text">
+              You need a talent profile to apply
+            </strong>
             Clients see the work behind an application, not just the note.
           </p>
-          <Link
-            href="/onboarding/talent/basics"
-            className="mt-3 inline-flex h-10 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-text"
-          >
+          <Link href="/onboarding/talent/basics" className={buttonStyles({ className: 'w-full' })}>
             Create one
           </Link>
         </div>
@@ -94,16 +98,18 @@ export function ApplySection({
 
     case 'unpublished':
       return (
-        <div className="rounded-md border border-warning/40 bg-warning/5 p-4">
-          <p className="font-medium">Publish your profile first</p>
-          <p className="mt-1 text-sm text-text-muted text-pretty">
-            Otherwise the client receives your application but cannot see any of your work — which
-            is the one thing that would make them say yes.
+        <div className="space-y-3 rounded-lg bg-warning-subtle p-4">
+          <p className="text-sm text-pretty">
+            <strong className="flex items-center gap-1.5 font-medium text-warning">
+              <CircleAlert aria-hidden="true" size={16} />
+              Publish your profile first
+            </strong>
+            <span className="mt-1 block text-text-muted">
+              Otherwise the client receives your application but cannot see any of your work — the
+              one thing that would make them say yes.
+            </span>
           </p>
-          <Link
-            href="/onboarding/talent/review"
-            className="mt-3 inline-flex h-10 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-text"
-          >
+          <Link href="/onboarding/talent/review" className={buttonStyles({ size: 'sm' })}>
             Finish and publish
           </Link>
         </div>
@@ -111,12 +117,15 @@ export function ApplySection({
 
     case 'own-job':
       return (
-        <p className="text-sm text-text-muted">
-          This is your job.{' '}
-          <Link href="/dashboard/client/jobs" className="prose-link font-medium">
+        <div className="space-y-3">
+          <p className="text-sm text-text-muted">This is your job.</p>
+          <Link
+            href="/dashboard/client/jobs"
+            className={buttonStyles({ variant: 'secondary', className: 'w-full' })}
+          >
             See applications
           </Link>
-        </p>
+        </div>
       );
 
     case 'is-client':
@@ -132,7 +141,10 @@ export function ApplySection({
 
     case 'closed':
       return (
-        <p className="text-sm text-text-muted">This job is no longer accepting applications.</p>
+        <p className="flex items-center gap-2 text-sm text-text-muted">
+          <Lock aria-hidden="true" size={15} />
+          No longer accepting applications.
+        </p>
       );
   }
 }

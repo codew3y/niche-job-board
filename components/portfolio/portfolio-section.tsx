@@ -1,5 +1,9 @@
+import { Code2, Globe, SquareArrowOutUpRight } from 'lucide-react';
 import Image from 'next/image';
+
 import { ExternalLink } from '@/components/shared/external-link';
+import { MatchReason } from '@/components/matches/match-items';
+import { TagList } from '@/components/ui/badge';
 
 type Item = {
   id: string;
@@ -17,13 +21,13 @@ type Item = {
  * The four evidence states of ADR-004, rendered.
  *
  *   site only  → a prominent link-out card
- *   items only → the gallery
+ *   items only → the projects
  *   both       → both, site first
- *   neither    → cannot happen on a published profile; the publish gate forbids it
+ *   neither    → shown to the owner only, as a prompt; a visitor sees nothing rather than an
+ *                empty box with an apology in it
  *
- * The site-only card says plainly that we do not read the linked site. That is the honest
- * framing of the §8 thin-profile trade-off: a URL is a link, not text we can match on, and
- * telling the visitor so is better than implying we have assessed it.
+ * The site card says plainly that we do not read the linked site. That is the honest framing of
+ * the §8 thin-profile trade-off: a URL is a link, not text we can match on.
  */
 export function PortfolioSection({
   websiteUrl,
@@ -38,113 +42,129 @@ export function PortfolioSection({
   const hasItems = items.length > 0;
 
   if (!hasSite && !hasItems) {
-    // Only ever visible to the owner, since the publish gate blocks this state going public.
     return isOwner ? (
-      <section className="rounded-md border border-dashed border-border-strong p-6 text-center">
-        <p className="font-medium">No evidence yet</p>
-        <p className="mx-auto mt-1 max-w-sm text-sm text-text-muted text-pretty">
-          Link your portfolio site, or add two projects. Either unlocks publishing.
+      <section className="rounded-lg border border-dashed border-border-strong p-8 text-center">
+        <p className="font-serif text-2xl">No work shown yet</p>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-text-muted text-pretty">
+          Link your portfolio site, or add a couple of projects. Either gives a client something to
+          judge.
         </p>
       </section>
     ) : null;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {hasSite && (
-        <section className="rounded-md border border-border-base bg-surface-raised p-5">
-          <h2 className="font-medium">Portfolio site</h2>
-          <p className="mt-1">
-            <ExternalLink href={websiteUrl} className="text-accent">
-              {websiteUrl!.replace(/^https:\/\//, '')}
-            </ExternalLink>
-          </p>
-          <p className="mt-2 text-sm text-text-subtle text-pretty">
-            Hosted elsewhere — we link it but never fetch it, so it doesn&rsquo;t feed matching.
-          </p>
+        <section className="flex items-start gap-4 rounded-lg border border-border-base bg-surface-raised p-5">
+          <span
+            aria-hidden="true"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-sunken text-text-subtle"
+          >
+            <Globe size={18} />
+          </span>
+          <div className="min-w-0">
+            <h2 className="font-semibold tracking-tight">Portfolio site</h2>
+            <p className="mt-0.5 truncate">
+              <ExternalLink href={websiteUrl} className="font-medium">
+                {websiteUrl!.replace(/^https:\/\//, '')}
+              </ExternalLink>
+            </p>
+            <p className="mt-2 text-sm text-text-subtle text-pretty">
+              Hosted elsewhere — linked, never fetched, so it doesn&rsquo;t feed matching.
+            </p>
+          </div>
         </section>
       )}
 
       {hasItems && (
         <section>
-          <h2 className="font-medium">
+          <h2 className="text-lg font-semibold tracking-tight">
             {items.length} {items.length === 1 ? 'project' : 'projects'}
           </h2>
-          <ul className="mt-3 space-y-3">
-            {items.map((item) => (
-              <li
-                key={item.id}
-                className="rounded-md border border-border-base bg-surface-raised p-5"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                  <h3 className="font-medium">{item.title}</h3>
-                  {item.role && <p className="text-sm text-text-subtle">{item.role}</p>}
-                </div>
-
-                <p className="mt-1.5 text-sm text-text-muted text-pretty">{item.description}</p>
-
-                {item.outcome && item.outcome !== item.description && (
-                  // Outcome is the most persuasive field on a profile — what changed, not
-                  // what was used. Given its own visual weight for that reason.
-                  <p className="mt-2 border-l-2 border-accent/40 pl-3 text-sm text-pretty">
-                    {item.outcome}
-                  </p>
-                )}
-
-                {(item.item_media?.length ?? 0) > 0 && (
-                  <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {[...(item.item_media ?? [])]
-                      .sort((a, b) => a.sort_order - b.sort_order)
-                      .map((m) => (
-                        <li key={m.id}>
-                          {/* `sizes` is the whole point: one column on phones, two from the
-                              sm breakpoint. Get it wrong and Next serves a 1600px file to a
-                              360px slot, which is the state this page was already in with a
-                              raw <img>. Lazy by default, so a profile carrying a dozen of
-                              these below the fold costs nothing until it is scrolled to. */}
-                          <div className="relative aspect-video w-full overflow-hidden rounded-sm border border-border-base">
-                            <Image
-                              src={m.url}
-                              alt={m.alt_text}
-                              fill
-                              sizes="(min-width: 640px) 50vw, 100vw"
-                              className="object-cover"
-                            />
-                          </div>
+          <ul className="mt-4 space-y-4">
+            {items.map((item) => {
+              const media = [...(item.item_media ?? [])].sort(
+                (a, b) => a.sort_order - b.sort_order,
+              );
+              return (
+                <li
+                  key={item.id}
+                  className="overflow-hidden rounded-lg border border-border-base bg-surface-raised"
+                >
+                  {media.length > 0 && (
+                    <ul
+                      className={`grid gap-px bg-border-base ${media.length > 1 ? 'sm:grid-cols-2' : ''}`}
+                    >
+                      {media.map((m) => (
+                        <li key={m.id} className="relative aspect-video bg-surface-sunken">
+                          {/* `sizes` does the work: one column on phones, two from sm. Get it
+                              wrong and Next serves a 1600px file to a 360px slot. Lazy by default,
+                              so a dozen of these below the fold cost nothing until scrolled to. */}
+                          <Image
+                            src={m.url}
+                            alt={m.alt_text}
+                            fill
+                            sizes={
+                              media.length > 1
+                                ? '(min-width: 640px) 40vw, 100vw'
+                                : '(min-width: 1024px) 720px, 100vw'
+                            }
+                            className="object-cover"
+                          />
                         </li>
                       ))}
-                  </ul>
-                )}
+                    </ul>
+                  )}
 
-                {item.tech_stack.length > 0 && (
-                  <ul className="mt-3 flex flex-wrap gap-1.5">
-                    {item.tech_stack.map((tech) => (
-                      <li
-                        key={tech}
-                        className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs text-text-muted"
-                      >
-                        {tech}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                  <div className="p-5 sm:p-6">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                      <h3 className="font-serif text-2xl leading-tight text-balance">
+                        {item.title}
+                      </h3>
+                      {item.role && <p className="text-sm text-text-subtle">{item.role}</p>}
+                    </div>
 
-                {(item.repo_url || item.live_url) && (
-                  <p className="mt-3 flex gap-4 text-sm">
-                    {item.repo_url && (
-                      <ExternalLink href={item.repo_url} className="text-accent">
-                        Code
-                      </ExternalLink>
+                    <p className="mt-2 text-text-muted text-pretty">{item.description}</p>
+
+                    {item.outcome && item.outcome !== item.description && (
+                      // Outcome is the most persuasive field on a profile — what changed, not what
+                      // was used — so it gets the same treatment as a match reason.
+                      <MatchReason className="mt-4">{item.outcome}</MatchReason>
                     )}
-                    {item.live_url && (
-                      <ExternalLink href={item.live_url} className="text-accent">
-                        Live
-                      </ExternalLink>
-                    )}
-                  </p>
-                )}
-              </li>
-            ))}
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <TagList
+                        label="Built with"
+                        tags={item.tech_stack.map((name) => ({ name }))}
+                      />
+                      {(item.repo_url || item.live_url) && (
+                        <p className="flex gap-4 text-sm">
+                          {item.repo_url && (
+                            <ExternalLink
+                              href={item.repo_url}
+                              className="inline-flex items-center gap-1 font-medium"
+                            >
+                              <Code2 aria-hidden="true" size={15} />
+                              Code
+                            </ExternalLink>
+                          )}
+                          {item.live_url && (
+                            <ExternalLink
+                              href={item.live_url}
+                              className="inline-flex items-center gap-1 font-medium"
+                            >
+                              <SquareArrowOutUpRight aria-hidden="true" size={15} />
+                              Live
+                            </ExternalLink>
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}

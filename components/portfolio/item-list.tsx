@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 
+import { ArrowDown, ArrowUp, GripVertical, Pencil, Trash2 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
+import { SubmitButton } from '@/components/ui/submit-button';
+import { cn } from '@/lib/ui/cn';
 import { deleteItem, reorderItems } from '@/lib/actions/profile';
 
 type Item = {
@@ -90,12 +94,29 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
               setDragIndex(null);
               setOverIndex(null);
             }}
-            className={`rounded-md border bg-surface-raised p-4 transition-colors duration-fast
-              ${dragIndex === i ? 'opacity-50' : ''}
-              ${overIndex === i && dragIndex !== i ? 'border-accent bg-accent-subtle' : 'border-border-base'}`}
+            className={cn(
+              'rounded-lg border bg-surface-raised p-4 transition-[border-color,background-color,opacity] duration-fast ease-out sm:p-5',
+              dragIndex === i && 'opacity-50',
+              overIndex === i && dragIndex !== i
+                ? 'border-accent bg-accent-subtle'
+                : 'border-border-base',
+            )}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
+            <div className="flex items-start gap-3">
+              {/*
+                A grab affordance for mouse users. aria-hidden and not focusable on purpose: it is
+                decoration, and the two buttons beside it are what a keyboard or screen reader
+                actually uses. Announcing a handle that cannot be operated by keyboard would be
+                worse than not mentioning it.
+              */}
+              <span
+                aria-hidden="true"
+                title="Drag to reorder"
+                className="mt-0.5 hidden cursor-grab text-text-subtle select-none active:cursor-grabbing sm:block"
+              >
+                <GripVertical size={18} />
+              </span>
+              <div className="min-w-0 flex-1">
                 <h3 className="font-medium">{item.title}</h3>
                 <p className="mt-0.5 line-clamp-2 text-sm text-text-muted">{item.description}</p>
                 {item.tech_stack.length > 0 && (
@@ -104,50 +125,39 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
                   </p>
                 )}
               </div>
-              <div className="flex shrink-0 items-center gap-1">
-                {/*
-                  A grab affordance for mouse users. aria-hidden and not focusable on purpose:
-                  it is decoration, and the two buttons beside it are what a keyboard or screen
-                  reader actually uses. Announcing a handle that cannot be operated by keyboard
-                  would be worse than not mentioning it.
-                */}
-                <span
-                  aria-hidden="true"
-                  className="cursor-grab select-none px-1 text-text-subtle active:cursor-grabbing"
-                  title="Drag to reorder"
-                >
-                  ⠿
-                </span>
-                <button
-                  type="button"
+              <div className="flex shrink-0 items-center gap-0.5">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => move(i, -1)}
                   disabled={i === 0}
                   aria-label={`Move ${item.title} up`}
-                  className="grid h-8 w-8 place-items-center rounded-sm transition-colors duration-fast hover:bg-surface-sunken disabled:opacity-30"
                 >
-                  <span aria-hidden="true">↑</span>
-                </button>
-                <button
-                  type="button"
+                  <ArrowUp aria-hidden="true" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => move(i, 1)}
                   disabled={i === order.length - 1}
                   aria-label={`Move ${item.title} down`}
-                  className="grid h-8 w-8 place-items-center rounded-sm transition-colors duration-fast hover:bg-surface-sunken disabled:opacity-30"
                 >
-                  <span aria-hidden="true">↓</span>
-                </button>
+                  <ArrowDown aria-hidden="true" />
+                </Button>
               </div>
             </div>
 
-            <div className="mt-3 flex gap-2">
-              <Button type="button" variant="ghost" size="sm" onClick={() => onEdit(item.id)}>
+            <div className="mt-3 flex gap-1 border-t border-border-base pt-3">
+              <Button variant="ghost" size="sm" onClick={() => onEdit(item.id)}>
+                <Pencil aria-hidden="true" />
                 Edit
               </Button>
               <form action={deleteItem}>
                 <input type="hidden" name="itemId" value={item.id} />
-                <Button type="submit" variant="ghost" size="sm" className="text-danger">
+                <SubmitButton variant="danger-ghost" size="sm" pendingLabel="Deleting…">
+                  <Trash2 aria-hidden="true" />
                   Delete
-                </Button>
+                </SubmitButton>
               </form>
             </div>
           </li>
@@ -161,23 +171,22 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
       </p>
 
       {dirty && (
-        <form action={reorderItems} className="flex items-center gap-3">
+        <form
+          action={reorderItems}
+          className="sticky bottom-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px)+0.75rem)] flex flex-wrap items-center gap-3 rounded-lg border border-border-base bg-surface-raised p-3 shadow-md sm:bottom-4"
+        >
           {order.map((item) => (
             <input key={item.id} type="hidden" name="itemId" value={item.id} />
           ))}
-          <Button type="submit" size="sm">
-            Save order
-          </Button>
-          <button
-            type="button"
-            onClick={() => setOrder(items)}
-            className="text-sm text-text-muted hover:text-text"
-          >
-            Reset
-          </button>
-          <span role="status" className="text-sm text-text-subtle">
+          <span role="status" className="mr-auto text-sm text-text-muted">
             Order changed
           </span>
+          <Button variant="ghost" size="sm" onClick={() => setOrder(items)}>
+            Reset
+          </Button>
+          <SubmitButton size="sm" pendingLabel="Saving…">
+            Save order
+          </SubmitButton>
         </form>
       )}
     </div>

@@ -1,3 +1,4 @@
+import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import { jsonLdScript } from '@/lib/seo/json-ld';
@@ -6,6 +7,9 @@ import { notFound } from 'next/navigation';
 
 import { ContactDialog } from '@/components/messaging/contact-dialog';
 import { ExternalLink } from '@/components/shared/external-link';
+import { Avatar } from '@/components/ui/avatar';
+import { TagList } from '@/components/ui/badge';
+import { buttonStyles } from '@/components/ui/button';
 import { formatRange } from '@/components/shared/money';
 import { PortfolioSection } from '@/components/portfolio/portfolio-section';
 import { siteUrl } from '@/lib/env';
@@ -69,9 +73,23 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
 
   const rate = formatRange(p.hourly_rate_min, p.hourly_rate_max, p.currency, '/hr');
   const items = [...(p.portfolio_items ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+  const facts = [
+    rate
+      ? [
+          'Rate',
+          <span key="r" className="tabular-nums">
+            {rate}
+          </span>,
+        ]
+      : null,
+    ['Availability', AVAILABILITY_LABEL[p.availability] ?? p.availability],
+    p.years_experience ? ['Experience', `${p.years_experience} years`] : null,
+    p.timezone ? ['Time zone', p.timezone] : null,
+  ].filter(Boolean) as [string, React.ReactNode][];
+  const hasLinks = p.github_url || p.linkedin_url;
 
   return (
-    <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
+    <main id="main" className="gutter mx-auto w-full max-w-6xl flex-1 py-8 sm:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -96,16 +114,19 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
         }}
       />
 
-      <nav aria-label="Breadcrumb" className="mb-6 text-sm">
-        <Link href="/talent" className="text-text-muted hover:text-text">
-          ← All developers
+      <nav aria-label="Breadcrumb" className="mb-8 text-sm">
+        <Link
+          href="/talent"
+          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+        >
+          <ArrowLeft aria-hidden="true" size={15} /> All developers
         </Link>
       </nav>
 
       {!p.is_published && isOwner && (
         <p
           role="status"
-          className="mb-6 rounded-md border border-warning/40 bg-warning/5 p-3 text-sm"
+          className="mb-8 rounded-lg border border-warning/30 bg-warning-subtle px-4 py-3 text-sm"
         >
           This is a draft — only you can see it.{' '}
           <Link href="/onboarding/talent/review" className="prose-link font-medium">
@@ -114,61 +135,82 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
         </p>
       )}
 
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-balance">{p.headline}</h1>
-        <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-muted">
-          <span>{AVAILABILITY_LABEL[p.availability] ?? p.availability}</span>
-          {p.years_experience ? <span>{p.years_experience} years</span> : null}
-          {p.timezone ? <span>{p.timezone}</span> : null}
-          {rate ? <span className="font-medium text-text tabular-nums">{rate}</span> : null}
-        </p>
+      {/* Same single-aside grid as the job page: header → facts → body in DOM order. */}
+      <div className="grid gap-x-14 gap-y-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr]">
+        <header className="min-w-0 lg:col-start-1">
+          <Avatar name={p.headline} size="lg" />
+          <h1 className="mt-5 font-serif text-display-md text-balance">{p.headline}</h1>
+          {hasLinks && (
+            <p className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+              {p.github_url && (
+                <ExternalLink href={p.github_url} className="font-medium">
+                  GitHub
+                </ExternalLink>
+              )}
+              {p.linkedin_url && (
+                <ExternalLink href={p.linkedin_url} className="font-medium">
+                  LinkedIn
+                </ExternalLink>
+              )}
+            </p>
+          )}
+        </header>
 
-        {(p.github_url || p.linkedin_url) && (
-          <p className="mt-3 flex gap-4 text-sm">
-            {p.github_url && (
-              <ExternalLink href={p.github_url} className="text-accent">
-                GitHub
-              </ExternalLink>
+        <aside aria-label="Profile details" className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <div className="rounded-lg border border-border-base bg-surface-raised p-5 lg:sticky lg:top-[calc(var(--nav-height)+1.5rem)]">
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-4 lg:grid-cols-1">
+              {facts.map(([term, value]) => (
+                <div key={term}>
+                  <dt className="text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+                    {term}
+                  </dt>
+                  <dd className="mt-1 font-medium">{value}</dd>
+                </div>
+              ))}
+            </dl>
+            {contactJobs !== null && (
+              <div className="mt-6 border-t border-border-base pt-5 [&_button]:w-full">
+                <ContactDialog talentId={p.id} talentHeadline={p.headline} jobs={contactJobs} />
+              </div>
             )}
-            {p.linkedin_url && (
-              <ExternalLink href={p.linkedin_url} className="text-accent">
-                LinkedIn
-              </ExternalLink>
+            {isOwner && (
+              <div className="mt-6 border-t border-border-base pt-5">
+                <Link
+                  href="/dashboard/talent/profile"
+                  className={buttonStyles({ variant: 'secondary', className: 'w-full' })}
+                >
+                  Edit your profile
+                </Link>
+              </div>
             )}
-          </p>
-        )}
-      </header>
+          </div>
+        </aside>
 
-      <section className="mt-6">
-        <h2 className="sr-only">About</h2>
-        <p className="whitespace-pre-line leading-relaxed text-pretty">{p.bio}</p>
-      </section>
+        <div className="min-w-0 lg:col-start-1">
+          <section>
+            <h2 className="sr-only">About</h2>
+            <p className="text-lg leading-relaxed whitespace-pre-line text-pretty">{p.bio}</p>
+          </section>
 
-      {p.talent_skills.length > 0 && (
-        <section className="mt-8">
-          <h2 className="font-medium">Skills</h2>
-          <ul className="mt-2 flex flex-wrap gap-1.5">
-            {p.talent_skills.map((s) => (
-              <li
-                key={s.skills?.slug}
-                className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-sm text-text-muted"
-              >
-                {s.skills?.name}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {p.talent_skills.length > 0 && (
+            <section className="mt-10 border-t border-border-base pt-8">
+              <h2 className="text-lg font-semibold tracking-tight">Skills</h2>
+              <TagList
+                className="mt-3"
+                label="Skills"
+                tags={p.talent_skills
+                  .map((s) => s.skills?.name)
+                  .filter((n): n is string => Boolean(n))
+                  .map((name) => ({ name }))}
+              />
+            </section>
+          )}
 
-      <div className="mt-8">
-        <PortfolioSection websiteUrl={p.website_url} items={items} isOwner={isOwner} />
-      </div>
-
-      {contactJobs !== null && (
-        <div className="mt-10 border-t border-border-base pt-6">
-          <ContactDialog talentId={p.id} talentHeadline={p.headline} jobs={contactJobs} />
+          <div className="mt-10 border-t border-border-base pt-8">
+            <PortfolioSection websiteUrl={p.website_url} items={items} isOwner={isOwner} />
+          </div>
         </div>
-      )}
+      </div>
     </main>
   );
 }

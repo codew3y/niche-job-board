@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
+import { SearchX } from 'lucide-react';
+import Link from 'next/link';
 import { Suspense } from 'react';
 
+import { buttonStyles } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { PageHeader } from '@/components/ui/page-header';
 import { JobListSkeleton } from '@/components/shared/skeleton';
 import { TalentCard } from '@/components/talent/talent-card';
 import { TalentFilters } from '@/components/talent/talent-filters';
@@ -27,17 +31,23 @@ export default async function TalentPage({
   const skills = groupByCategory(await listSkills());
 
   return (
-    <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Developers</h1>
-        <p className="mt-1 text-text-muted">
-          Everyone who wants to be listed is listed. Judge them on what you see.
-        </p>
-      </header>
+    <main id="main" className="gutter mx-auto w-full max-w-5xl flex-1 py-10 sm:py-14">
+      <PageHeader
+        eyebrow="Browse"
+        title="Developers"
+        subtitle="Everyone who wants to be listed is listed. Judge them on what you see."
+      />
 
       <TalentFilters skills={skills} />
 
-      <Suspense key={JSON.stringify(raw)} fallback={<JobListSkeleton />}>
+      <Suspense
+        key={JSON.stringify(raw)}
+        fallback={
+          <div className="mt-8">
+            <JobListSkeleton label="Loading developers" />
+          </div>
+        }
+      >
         <TalentResults params={params} />
       </Suspense>
     </main>
@@ -53,19 +63,27 @@ async function TalentResults({ params }: { params: ReturnType<typeof talentSearc
 
   if (talent.length === 0) {
     return (
-      <EmptyState
-        title="No developers yet"
-        body="Published profiles appear here. Nobody has published one that matches."
-      />
+      <div className="mt-8">
+        <EmptyState
+          icon={SearchX}
+          title="Nobody matches that"
+          body="Published profiles appear here. Nobody has published one that matches those filters."
+          action={
+            <Link href="/talent" className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
+              Clear everything
+            </Link>
+          }
+        />
+      </div>
     );
   }
 
   return (
     <>
-      <p className="text-sm text-text-subtle" aria-live="polite">
+      <p className="mt-8 mb-3 text-sm text-text-subtle" aria-live="polite">
         {talent.length} {talent.length === 1 ? 'developer' : 'developers'}
       </p>
-      <div className="mt-2 overflow-hidden rounded-md border border-border-base">
+      <div className="overflow-hidden rounded-lg border border-border-base bg-surface-raised">
         {talent.map((person) => (
           <TalentCard
             key={person.id}
@@ -76,13 +94,13 @@ async function TalentResults({ params }: { params: ReturnType<typeof talentSearc
         ))}
       </div>
       {nextCursor && (
-        <div className="mt-5 text-center">
-          <a
+        <div className="mt-6 text-center">
+          <Link
             href={`/talent?cursor=${nextCursor}`}
-            className="inline-flex h-10 items-center rounded-md border border-border-strong px-5 text-sm transition-colors duration-fast hover:bg-surface-sunken"
+            className={buttonStyles({ variant: 'secondary' })}
           >
             Load more
-          </a>
+          </Link>
         </div>
       )}
     </>

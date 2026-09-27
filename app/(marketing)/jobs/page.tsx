@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
+import { SearchX } from 'lucide-react';
+import Link from 'next/link';
 import { Suspense } from 'react';
 
+import { buttonStyles } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { PageHeader } from '@/components/ui/page-header';
 import { JobCard } from '@/components/job/job-card';
 import { JobFilters } from '@/components/job/job-filters';
 import { JobListSkeleton } from '@/components/shared/skeleton';
@@ -30,21 +34,19 @@ export default async function JobsPage({
   const skills = groupByCategory(await listSkills());
 
   return (
-    <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-10">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Jobs</h1>
-        <p className="mt-1 text-text-muted">
-          Software, web and automation work. No AI needed to find it — search and filters do the
-          job.
-        </p>
-      </header>
+    <main id="main" className="gutter mx-auto w-full max-w-5xl flex-1 py-10 sm:py-14">
+      <PageHeader
+        eyebrow="Browse"
+        title="Jobs"
+        subtitle="Software, web and automation work. No AI needed to find it — search and filters do the job."
+      />
 
       <JobFilters skills={skills} />
 
       <Suspense
         key={JSON.stringify(raw)}
         fallback={
-          <div className="mt-6">
+          <div className="mt-8">
             <JobListSkeleton />
           </div>
         }
@@ -62,10 +64,16 @@ async function JobResults({ params }: { params: ReturnType<typeof jobSearchParam
 
   if (jobs.length === 0) {
     return (
-      <div className="mt-6">
+      <div className="mt-8">
         <EmptyState
+          icon={SearchX}
           title="Nothing matches those filters"
           body="Try widening them — or clearing the search box. We'd rather show nothing than pad the list with jobs that don't fit."
+          action={
+            <Link href="/jobs" className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
+              Clear everything
+            </Link>
+          }
         />
       </div>
     );
@@ -73,23 +81,23 @@ async function JobResults({ params }: { params: ReturnType<typeof jobSearchParam
 
   return (
     <>
-      <p className="mt-6 text-sm text-text-subtle" aria-live="polite">
+      <p className="mt-8 mb-3 text-sm text-text-subtle" aria-live="polite">
         {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'}
         {nextCursor ? ' on this page' : ''}
       </p>
-      <div className="mt-2 overflow-hidden rounded-md border border-border-base">
+      <div className="overflow-hidden rounded-lg border border-border-base bg-surface-raised">
         {jobs.map((job) => (
           <JobCard key={job.id} job={job} saveable={saveable} saved={saved.has(job.id)} />
         ))}
       </div>
       {nextCursor && (
-        <div className="mt-5 text-center">
-          <a
+        <div className="mt-6 text-center">
+          <Link
             href={`/jobs?cursor=${nextCursor}`}
-            className="inline-flex h-10 items-center rounded-md border border-border-strong px-5 text-sm transition-colors duration-fast hover:bg-surface-sunken"
+            className={buttonStyles({ variant: 'secondary' })}
           >
             Load more
-          </a>
+          </Link>
         </div>
       )}
     </>

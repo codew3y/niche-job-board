@@ -333,6 +333,27 @@
   }
 }
 
+/*
+ * Links inside prose are underlined, not just coloured (WCAG 1.4.1). The previous file described
+ * this rule in a comment and never wrote it (DESIGN.md §1, A9). A utility rather than a base
+ * class, so it composes with variants — `[&_a]:prose-link` styles every link in a legal page.
+ * Standalone links that read as controls (nav, buttons, cards) are exempt, because they are not
+ * inside a text block.
+ */
+@utility prose-link {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in oklch, currentColor 40%, transparent);
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color var(--duration-fast) var(--ease-out-strong);
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+}
+
 /* The dark variant follows next-themes' attribute, not the OS media query, so the toggle wins. */
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
@@ -405,26 +426,6 @@
   :focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
-  }
-
-  /*
-   * Links inside prose are underlined, not just coloured (WCAG 1.4.1). The previous file
-   * described this rule in a comment and never wrote it (DESIGN.md §1, A9). A `.prose-link`
-   * class covers call sites that are links inside a sentence; standalone links that read as
-   * controls (nav, buttons, cards) are exempt, because they are not inside a text block.
-   */
-  .prose-link {
-    color: inherit;
-    text-decoration-line: underline;
-    text-decoration-thickness: 1px;
-    text-decoration-color: color-mix(in oklch, currentColor 40%, transparent);
-    text-underline-offset: 0.2em;
-    transition: text-decoration-color var(--duration-fast) var(--ease-out-strong);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .prose-link:hover {
-      text-decoration-color: currentColor;
-    }
   }
 
   /* <dialog> and base-ui popups inherit the theme rather than the UA's white. */

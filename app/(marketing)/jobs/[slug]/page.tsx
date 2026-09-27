@@ -1,10 +1,15 @@
+import { ArrowLeft, Lock } from 'lucide-react';
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
 import { jsonLdScript } from '@/lib/seo/json-ld';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { ExternalLink } from '@/components/shared/external-link';
+import { Skeleton } from '@/components/shared/skeleton';
+import { Avatar } from '@/components/ui/avatar';
+import { TagList } from '@/components/ui/badge';
 import { ENGAGEMENT_LABEL, LOCATION_LABEL, formatRange } from '@/components/shared/money';
 import { siteUrl } from '@/lib/env';
 import { jobPostingJsonLd } from '@/lib/seo/job-posting';
@@ -54,10 +59,40 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   const closed = job.status !== 'open';
   const expired = job.deadline ? new Date(job.deadline) < new Date() : false;
 
-  const applyState = await resolveApplyState(job.id, closed || expired);
+  const company = job.client_profiles?.company_name ?? 'A client';
+  const facts = [
+    budget
+      ? [
+          'Budget',
+          <span key="b" className="tabular-nums">
+            {budget}
+          </span>,
+        ]
+      : null,
+    ['Engagement', ENGAGEMENT_LABEL[job.engagement_type]],
+    ['Location', `${LOCATION_LABEL[job.location_type]}${job.location ? ` — ${job.location}` : ''}`],
+    job.experience_level
+      ? [
+          'Level',
+          <span key="l" className="capitalize">
+            {job.experience_level}
+          </span>,
+        ]
+      : null,
+    job.deadline
+      ? [
+          'Deadline',
+          new Date(job.deadline).toLocaleDateString('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          }),
+        ]
+      : null,
+  ].filter(Boolean) as [string, React.ReactNode][];
 
   return (
-    <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
+    <main id="main" className="gutter mx-auto w-full max-w-6xl flex-1 py-8 sm:py-12">
       <script
         type="application/ld+json"
         // Only emitted while the posting is genuinely open. Structured data for a job nobody
@@ -67,124 +102,160 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
         }}
       />
 
-      <nav aria-label="Breadcrumb" className="mb-6 text-sm">
-        <Link href="/jobs" className="text-text-muted hover:text-text">
-          ← All jobs
+      <nav aria-label="Breadcrumb" className="mb-8 text-sm">
+        <Link
+          href="/jobs"
+          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+        >
+          <ArrowLeft aria-hidden="true" size={15} /> All jobs
         </Link>
       </nav>
 
       {(closed || expired) && (
         <p
           role="status"
-          className="mb-6 rounded-md border border-border-strong bg-surface-sunken p-3 text-sm"
+          className="mb-8 flex gap-2.5 rounded-lg border border-border-strong bg-surface-sunken px-4 py-3 text-sm"
         >
-          {closed ? 'This job is closed.' : 'The deadline for this job has passed.'} It stays
-          visible so existing applicants keep their record of it.
+          <Lock aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-text-subtle" />
+          <span>
+            {closed ? 'This job is closed.' : 'The deadline for this job has passed.'} It stays
+            visible so existing applicants keep their record of it.
+          </span>
         </p>
       )}
 
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-balance">{job.title}</h1>
-        <p className="mt-2 text-text-muted">
-          {job.client_profiles?.company_name ?? 'A client'}
-          {job.client_profiles?.industry ? ` · ${job.client_profiles.industry}` : ''}
-        </p>
-
-        <dl className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-          {budget && (
-            <div>
-              <dt className="text-text-subtle">Budget</dt>
-              <dd className="font-medium tabular-nums">{budget}</dd>
+      {/*
+        ONE apply block, placed by the grid rather than rendered twice. DOM order is header →
+        facts → body, which is exactly the phone order (the thing a visitor came to do sits
+        above the brief). From lg the facts card moves to a sticky right column spanning both
+        rows. Rendering it twice would run the apply-state queries twice and give assistive tech
+        two copies of the same controls.
+      */}
+      <div className="grid gap-x-14 gap-y-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr]">
+        <div className="min-w-0 lg:col-start-1">
+          <header>
+            <div className="flex items-center gap-3">
+              <Avatar name={company} />
+              <p className="text-sm text-text-muted">
+                <span className="font-medium text-text">{company}</span>
+                {job.client_profiles?.industry ? ` · ${job.client_profiles.industry}` : ''}
+              </p>
             </div>
-          )}
-          <div>
-            <dt className="text-text-subtle">Engagement</dt>
-            <dd className="font-medium">{ENGAGEMENT_LABEL[job.engagement_type]}</dd>
+            <h1 className="mt-5 font-serif text-display-md text-balance">{job.title}</h1>
+          </header>
+        </div>
+
+        <aside aria-label="Job details" className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <div className="lg:sticky lg:top-[calc(var(--nav-height)+1.5rem)]">
+            <FactsCard facts={facts}>
+              <Suspense fallback={<Skeleton className="h-12 w-full rounded-full" />}>
+                <ApplyBlock job={job} closed={closed || expired} />
+              </Suspense>
+            </FactsCard>
           </div>
-          <div>
-            <dt className="text-text-subtle">Location</dt>
-            <dd className="font-medium">
-              {LOCATION_LABEL[job.location_type]}
-              {job.location ? ` — ${job.location}` : ''}
-            </dd>
-          </div>
-          {job.experience_level && (
-            <div>
-              <dt className="text-text-subtle">Level</dt>
-              <dd className="font-medium capitalize">{job.experience_level}</dd>
-            </div>
-          )}
-        </dl>
-      </header>
+        </aside>
 
-      <section className="mt-8">
-        <h2 className="sr-only">Description</h2>
-        <p className="whitespace-pre-line text-pretty leading-relaxed">{job.description}</p>
-        {job.requirements && (
-          <>
-            <h3 className="mt-6 font-medium">Requirements</h3>
-            <p className="mt-1 whitespace-pre-line text-text-muted text-pretty">
-              {job.requirements}
+        <div className="min-w-0 lg:col-start-1">
+          <section>
+            <h2 className="sr-only">Description</h2>
+            <p className="text-lg leading-relaxed whitespace-pre-line text-pretty">
+              {job.description}
             </p>
-          </>
-        )}
-      </section>
+            {job.requirements && (
+              <>
+                <h3 className="mt-10 text-lg font-semibold tracking-tight">Requirements</h3>
+                <p className="mt-2 leading-relaxed whitespace-pre-line text-text-muted text-pretty">
+                  {job.requirements}
+                </p>
+              </>
+            )}
+          </section>
 
-      {(required.length > 0 || niceToHave.length > 0) && (
-        <section className="mt-8">
-          <h2 className="font-medium">Skills</h2>
-          {required.length > 0 && (
-            <>
-              <p className="mt-2 text-sm text-text-subtle">Required</p>
-              <ul className="mt-1 flex flex-wrap gap-1.5">
-                {required.map((s) => (
-                  <li
-                    key={s.skills?.slug}
-                    className="rounded-full bg-accent-subtle px-2.5 py-0.5 text-sm"
-                  >
-                    {s.skills?.name}
-                  </li>
-                ))}
-              </ul>
-            </>
+          {(required.length > 0 || niceToHave.length > 0) && (
+            <section className="mt-10 border-t border-border-base pt-8">
+              <h2 className="text-lg font-semibold tracking-tight">Skills</h2>
+              {required.length > 0 && (
+                <>
+                  <p className="mt-4 text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+                    Required
+                  </p>
+                  <TagList
+                    className="mt-2"
+                    label="Required skills"
+                    tags={required.map((s) => ({ name: s.skills?.name ?? '', strong: true }))}
+                  />
+                </>
+              )}
+              {niceToHave.length > 0 && (
+                <>
+                  <p className="mt-5 text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+                    Nice to have
+                  </p>
+                  <TagList
+                    className="mt-2"
+                    label="Nice-to-have skills"
+                    tags={niceToHave.map((s) => ({ name: s.skills?.name ?? '' }))}
+                  />
+                </>
+              )}
+            </section>
           )}
-          {niceToHave.length > 0 && (
-            <>
-              <p className="mt-3 text-sm text-text-subtle">Nice to have</p>
-              <ul className="mt-1 flex flex-wrap gap-1.5">
-                {niceToHave.map((s) => (
-                  <li
-                    key={s.skills?.slug}
-                    className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-sm text-text-muted"
-                  >
-                    {s.skills?.name}
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </section>
-      )}
 
-      {job.client_profiles?.about && (
-        <section className="mt-8 rounded-md border border-border-base bg-surface-raised p-5">
-          <h2 className="font-medium">About {job.client_profiles.company_name}</h2>
-          <p className="mt-1.5 text-sm text-text-muted text-pretty">{job.client_profiles.about}</p>
-          {job.client_profiles.website && (
-            <p className="mt-2 text-sm">
-              <ExternalLink href={job.client_profiles.website} className="text-accent">
-                {job.client_profiles.website.replace(/^https:\/\//, '')}
-              </ExternalLink>
-            </p>
+          {job.client_profiles?.about && (
+            <section className="mt-10 rounded-lg border border-border-base bg-surface-raised p-6">
+              <h2 className="font-semibold tracking-tight">
+                About {job.client_profiles.company_name}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-text-muted text-pretty">
+                {job.client_profiles.about}
+              </p>
+              {job.client_profiles.website && (
+                <p className="mt-3 text-sm">
+                  <ExternalLink href={job.client_profiles.website} className="font-medium">
+                    {job.client_profiles.website.replace(/^https:\/\//, '')}
+                  </ExternalLink>
+                </p>
+              )}
+            </section>
           )}
-        </section>
-      )}
-
-      <div className="mt-8 border-t border-border-base pt-6">
-        <ApplySection state={applyState} jobId={job.id} jobTitle={job.title} slug={job.slug} />
+        </div>
       </div>
     </main>
   );
+}
+
+function FactsCard({
+  facts,
+  children,
+}: {
+  facts: [string, React.ReactNode][];
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-border-base bg-surface-raised p-5">
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-4 lg:grid-cols-1">
+        {facts.map(([term, value]) => (
+          <div key={term}>
+            <dt className="text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+              {term}
+            </dt>
+            <dd className="mt-1 font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="mt-6 border-t border-border-base pt-5">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * The apply control, streamed. It needs the viewer's profile and any existing application —
+ * several queries the rest of the page does not — so it resolves inside its own Suspense
+ * boundary, AFTER the page has passed its notFound() check (a missing job is still a real 404).
+ */
+async function ApplyBlock({ job, closed }: { job: Job; closed: boolean }) {
+  const applyState = await resolveApplyState(job.id, closed);
+  return <ApplySection state={applyState} jobId={job.id} jobTitle={job.title} slug={job.slug} />;
 }
 
 /**

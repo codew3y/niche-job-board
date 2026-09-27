@@ -2,7 +2,11 @@
 
 import { useId, useRef, useState } from 'react';
 
+import { ImagePlus } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
+import { controlStyles } from '@/components/ui/field';
+import { cn } from '@/lib/ui/cn';
 import { resizeImage, storagePath } from '@/lib/upload/resize';
 
 /**
@@ -135,8 +139,12 @@ export function ImageUpload({
             const file = e.dataTransfer.files[0];
             if (file) void accept(file);
           }}
-          className={`rounded-md border-2 border-dashed p-6 text-center transition-colors duration-fast
-            ${dragging ? 'border-accent bg-accent-subtle' : 'border-border-strong'}`}
+          className={cn(
+            'rounded-lg border-2 border-dashed p-6 text-center transition-colors duration-fast ease-out',
+            // A ring on the drop zone while its (visually hidden) file input has keyboard focus.
+            'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus',
+            dragging ? 'border-accent bg-accent-subtle' : 'border-border-strong',
+          )}
         >
           {/*
             A real <input type="file"> with a <label>, not a div with a click handler. The
@@ -154,10 +162,8 @@ export function ImageUpload({
               if (file) void accept(file);
             }}
           />
-          <label
-            htmlFor={inputId}
-            className="cursor-pointer text-sm font-medium text-accent underline underline-offset-2"
-          >
+          <ImagePlus aria-hidden="true" className="mx-auto mb-2 size-6 text-text-subtle" />
+          <label htmlFor={inputId} className="prose-link cursor-pointer text-sm font-medium">
             {label}
           </label>
           <p className="mt-1 text-sm text-text-muted">
@@ -167,14 +173,14 @@ export function ImageUpload({
       )}
 
       {stage === 'describing' && pending && (
-        <div className="space-y-3 rounded-md border border-border-base p-4">
+        <div className="space-y-3 rounded-lg border border-border-base p-4">
           <div className="flex gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element -- a blob: preview of a
                 local file, which next/image cannot take and does not need to optimise. */}
             <img
               src={pending.preview}
               alt=""
-              className="h-24 w-24 shrink-0 rounded-sm border border-border-base object-cover"
+              className="size-24 shrink-0 rounded-md border border-border-base object-cover"
             />
             <div className="min-w-0 flex-1 space-y-1.5">
               <label htmlFor={`${inputId}-alt`} className="block text-sm font-medium">
@@ -189,7 +195,7 @@ export function ImageUpload({
                 required
                 aria-describedby={`${inputId}-alt-hint`}
                 placeholder="The checkout screen, showing the saved-card step"
-                className="w-full rounded-md border border-border-strong bg-surface p-2 text-sm placeholder:text-text-subtle"
+                className={cn(controlStyles, 'border-control/70 px-3 py-2')}
               />
               <p id={`${inputId}-alt-hint`} className="text-xs text-text-muted">
                 Required. What someone would miss if the image did not load.
@@ -217,7 +223,11 @@ export function ImageUpload({
       {stage === 'uploading' && (
         <div>
           {/* A real progress element: it announces itself and works without CSS. */}
-          <progress value={progress} max={100} className="h-1 w-full">
+          <progress
+            value={progress}
+            max={100}
+            className="h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:bg-accent [&::-webkit-progress-bar]:bg-surface-sunken [&::-webkit-progress-value]:bg-accent"
+          >
             {progress}%
           </progress>
           <p aria-live="polite" className="mt-1 text-sm text-text-muted">

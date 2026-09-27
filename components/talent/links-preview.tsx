@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 
+import { controlStyles } from '@/components/ui/field';
+import { cn } from '@/lib/ui/cn';
+
 import { ExternalLink } from '@/components/shared/external-link';
 
 /**
@@ -50,7 +53,7 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
 
   return (
     <fieldset className="space-y-4">
-      <legend className="text-sm font-medium">Links</legend>
+      <legend className="text-lg font-semibold tracking-tight">Links</legend>
 
       {LABELS.map(({ key, label, hint }) => {
         const state = status(links[key]);
@@ -71,8 +74,13 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
               placeholder={hint}
               aria-invalid={state === 'not-https' || state === 'malformed'}
               aria-describedby={`link-${key}-status`}
-              className={`w-full rounded-md border bg-surface-raised p-3 placeholder:text-text-subtle
-                ${state === 'not-https' || state === 'malformed' ? 'border-danger' : 'border-border-strong'}`}
+              className={cn(
+                controlStyles,
+                'h-11 px-3.5',
+                state === 'not-https' || state === 'malformed'
+                  ? 'border-danger'
+                  : 'border-control/70 hover:border-control',
+              )}
             />
             <p
               id={`link-${key}-status`}
@@ -84,19 +92,21 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
         );
       })}
 
-      <div className="rounded-md border border-border-base bg-surface-sunken p-4">
-        <p className="text-sm font-medium">On your public profile</p>
+      <div className="rounded-lg bg-surface-sunken p-4">
+        <p className="text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+          On your public profile
+        </p>
         {anyValid ? (
           <p className="mt-2 flex flex-wrap gap-4 text-sm">
             {/* Rendered by the same component the real page uses, so what is shown here is
                 exactly what visitors get — external-link icon, new tab, rel and all. */}
-            <ExternalLink href={links.website.trim()} className="text-accent">
+            <ExternalLink href={links.website.trim()} className="font-medium">
               Portfolio
             </ExternalLink>
-            <ExternalLink href={links.github.trim()} className="text-accent">
+            <ExternalLink href={links.github.trim()} className="font-medium">
               GitHub
             </ExternalLink>
-            <ExternalLink href={links.linkedin.trim()} className="text-accent">
+            <ExternalLink href={links.linkedin.trim()} className="font-medium">
               LinkedIn
             </ExternalLink>
           </p>

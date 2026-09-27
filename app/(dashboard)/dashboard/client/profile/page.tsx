@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { CompanyForm } from '@/components/client/company-form';
+import { Card } from '@/components/ui/card';
 import { PageHeader } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
 
@@ -31,14 +32,16 @@ export default async function ClientProfilePage() {
   if (!company) notFound();
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-3xl space-y-8">
       <PageHeader
         title="Company profile"
         subtitle="What a developer sees before deciding whether to apply."
       />
-      <CompanyForm company={company} />
+      <Card className="p-5 sm:p-6">
+        <CompanyForm company={company} />
+      </Card>
 
-      <div className="mt-8 space-y-2 border-t border-border-base pt-6 text-sm text-text-muted">
+      <div className="space-y-2 text-sm text-text-muted">
         <p>
           Looking for your saved developers?{' '}
           <Link href="/dashboard/client/saved" className="prose-link font-medium">
@@ -48,9 +51,9 @@ export default async function ClientProfilePage() {
         </p>
         {/* /privacy tells people they can delete their account "from settings", so settings
             has to be reachable from the page they are most likely to be on when they go
-            looking. It was not reachable from anywhere. */}
+            looking. */}
         <p>
-          Roles, sign-in address and deleting your account are in{' '}
+          Roles, sign-in address, appearance and deleting your account are in{' '}
           <Link href="/dashboard/settings" className="prose-link font-medium">
             settings
           </Link>

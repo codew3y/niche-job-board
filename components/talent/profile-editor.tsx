@@ -1,12 +1,12 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
 
-import { Button } from '@/components/ui/button';
-import { Field } from '@/components/ui/field';
+import { Field, FormError, FormStatus, SelectField, TextareaField } from '@/components/ui/field';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { LinksPreview } from './links-preview';
 import { SkillPicker, type SkillOption } from '@/components/onboarding/skill-picker';
+import { CURRENCIES } from '@/components/onboarding/talent-forms';
 import { updateProfile, updateSkills } from '@/lib/actions/profile';
 import type { ActionResult } from '@/lib/actions/auth';
 
@@ -20,12 +20,17 @@ const AVAILABILITY = [
   ['unavailable', 'Not available'],
 ] as const;
 
+/**
+ * The profile form. Confirms inline ("Saved." beside the button) rather than with a toast: the
+ * form is long, the confirmation belongs next to the button that was pressed, and a toast in the
+ * corner as well would announce the same event twice.
+ */
 export function ProfileEditor({ profile }: { profile: Profile }) {
   const [state, action] = useActionState<ActionResult | null, FormData>(updateProfile, null);
   const fields = state?.ok === false ? state.fields : undefined;
 
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form action={action} className="space-y-6" noValidate>
       <Field
         label="Headline"
         name="headline"
@@ -34,24 +39,14 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
         errors={fields?.headline}
       />
 
-      <div className="space-y-1.5">
-        <label htmlFor="bio" className="block text-sm font-medium">
-          About your work
-        </label>
-        <textarea
-          id="bio"
-          name="bio"
-          rows={7}
-          defaultValue={str(profile, 'bio')}
-          aria-invalid={Boolean(fields?.bio)}
-          aria-describedby="bio-hint"
-          className={`w-full rounded-md border bg-surface-raised p-3
-            ${fields?.bio ? 'border-danger' : 'border-border-strong'}`}
-        />
-        <p id="bio-hint" className={`text-sm ${fields?.bio ? 'text-danger' : 'text-text-muted'}`}>
-          {fields?.bio?.[0] ?? 'At least 120 characters — this is the text matching reads.'}
-        </p>
-      </div>
+      <TextareaField
+        label="About your work"
+        name="bio"
+        rows={7}
+        defaultValue={str(profile, 'bio')}
+        errors={fields?.bio}
+        hint="At least 120 characters — this is the text matching reads."
+      />
 
       <LinksPreview
         initial={{
@@ -61,7 +56,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
         }}
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-3">
         <Field
           label="Rate from"
           name="hourlyRateMin"
@@ -75,47 +70,36 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
           defaultValue={str(profile, 'hourly_rate_max')}
           errors={fields?.hourlyRateMax}
         />
-        <div className="space-y-1.5">
-          <label htmlFor="currency" className="block text-sm font-medium">
-            Currency
-          </label>
-          <select
-            id="currency"
-            name="currency"
-            defaultValue={str(profile, 'currency') || 'USD'}
-            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
-          >
-            {['USD', 'EUR', 'GBP', 'CHF'].map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </div>
+        <SelectField
+          label="Currency"
+          name="currency"
+          defaultValue={str(profile, 'currency') || 'USD'}
+        >
+          {CURRENCIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </SelectField>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="space-y-1.5">
-          <label htmlFor="availability" className="block text-sm font-medium">
-            Availability
-          </label>
-          <select
-            id="availability"
-            name="availability"
-            defaultValue={str(profile, 'availability') || 'part_time'}
-            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
-          >
-            {AVAILABILITY.map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="grid gap-5 sm:grid-cols-3">
+        <SelectField
+          label="Availability"
+          name="availability"
+          defaultValue={str(profile, 'availability') || 'part_time'}
+        >
+          {AVAILABILITY.map(([v, l]) => (
+            <option key={v} value={v}>
+              {l}
+            </option>
+          ))}
+        </SelectField>
         <Field
           label="Years"
           name="yearsExperience"
           type="number"
+          inputMode="numeric"
           min={0}
           max={60}
           defaultValue={(profile.years_experience as number | null) ?? ''}
@@ -128,18 +112,12 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
         />
       </div>
 
-      {state?.ok === false && (
-        <p role="alert" className="rounded-sm bg-danger-subtle p-3 text-sm text-danger text-pretty">
-          {state.message}
-        </p>
-      )}
-      {state?.ok && (
-        <p role="status" className="text-sm text-success">
-          Saved.
-        </p>
-      )}
+      {state?.ok === false && <FormError>{state.message}</FormError>}
 
-      <SaveProfile />
+      <div className="flex flex-wrap items-center gap-4 border-t border-border-base pt-5">
+        <SubmitButton pendingLabel="Saving…">Save profile</SubmitButton>
+        {state?.ok && <FormStatus>Saved.</FormStatus>}
+      </div>
     </form>
   );
 }
@@ -148,36 +126,15 @@ export function SkillsEditor({ options, initial }: { options: SkillOption[]; ini
   const [state, action] = useActionState<ActionResult | null, FormData>(updateSkills, null);
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="space-y-5">
       <SkillPicker options={options} initial={initial} />
-      {state?.ok === false && (
-        <p role="alert" className="text-sm text-danger">
-          {state.message}
-        </p>
-      )}
-      {state?.ok && (
-        <p role="status" className="text-sm text-success">
-          Skills saved.
-        </p>
-      )}
-      <SaveSkills />
+      {state?.ok === false && <FormError>{state.message}</FormError>}
+      <div className="flex flex-wrap items-center gap-4 border-t border-border-base pt-5">
+        <SubmitButton variant="secondary" pendingLabel="Saving…">
+          Save skills
+        </SubmitButton>
+        {state?.ok && <FormStatus>Skills saved.</FormStatus>}
+      </div>
     </form>
-  );
-}
-
-function SaveProfile() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} aria-busy={pending}>
-      {pending ? 'Saving…' : 'Save profile'}
-    </Button>
-  );
-}
-function SaveSkills() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" variant="secondary" disabled={pending} aria-busy={pending}>
-      {pending ? 'Saving…' : 'Save skills'}
-    </Button>
   );
 }

@@ -62,12 +62,22 @@ for (const viewport of WIDTHS) {
         const culprits = await page.evaluate(() => {
           const limit = document.documentElement.clientWidth;
           const bad: string[] = [];
+          // Deliberately horizontally scrollable strips are fine — that is a choice. What that
+          // means precisely: the STRIP itself must fit the viewport (it is measured like any
+          // element), and its CHILDREN may extend past the edge, because scrolling to them is
+          // the point. This used to skip the strip and measure its children — the reverse — so
+          // a strip could overflow unnoticed while every strip's contents failed.
+          const insideScroller = (el: Element) => {
+            for (let a = el.parentElement; a && a !== document.body; a = a.parentElement) {
+              const x = getComputedStyle(a).overflowX;
+              if (x === 'auto' || x === 'scroll') return true;
+            }
+            return false;
+          };
           for (const el of document.querySelectorAll('body *')) {
             const rect = el.getBoundingClientRect();
             if (rect.width === 0 || rect.height === 0) continue;
-            // Deliberately horizontally scrollable strips are fine — that is a choice.
-            const style = getComputedStyle(el);
-            if (style.overflowX === 'auto' || style.overflowX === 'scroll') continue;
+            if (insideScroller(el)) continue;
             if (rect.right > limit + 1) {
               bad.push(
                 `${el.tagName.toLowerCase()}.${(el.className || '').toString().slice(0, 40)}`,

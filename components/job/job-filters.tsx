@@ -4,6 +4,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { ENGAGEMENT_LABEL, LOCATION_LABEL } from '@/components/shared/money';
+import { FilterSelect } from '@/components/shared/filter-select';
+import { SearchBar } from '@/components/shared/search-bar';
 import { SkillFilter } from '@/components/shared/skill-filter';
 import type { SkillOption } from '@/lib/services/skills';
 
@@ -13,6 +15,10 @@ import type { SkillOption } from '@/lib/services/skills';
  * State lives in the URL, not in React. That makes a filtered list shareable, bookmarkable,
  * and survivable across a refresh — and it means the server component does the filtering,
  * so there is no client-side data fetch to keep in sync.
+ *
+ * On phones the filter pills are one horizontally scrollable strip rather than three wrapped
+ * rows pushing the results below the fold. The strip is `overflow-x-auto` on purpose, which
+ * e2e/responsive.spec.ts treats as the deliberate choice it is.
  */
 export function JobFilters({ skills }: { skills: [string, SkillOption[]][] }) {
   const router = useRouter();
@@ -39,30 +45,21 @@ export function JobFilters({ skills }: { skills: [string, SkillOption[]][] }) {
 
   return (
     <search className="space-y-3">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const next = new URLSearchParams(params.toString());
-          if (q.trim()) next.set('q', q.trim());
-          else next.delete('q');
-          apply(next);
+      <SearchBar
+        id="job-search"
+        label="Search jobs"
+        value={q}
+        onChange={setQ}
+        onSubmit={() => set('q', q.trim())}
+        onClear={() => {
+          setQ('');
+          set('q', '');
         }}
-        role="search"
-      >
-        <label htmlFor="job-search" className="sr-only">
-          Search jobs
-        </label>
-        <input
-          id="job-search"
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search — try “Stripe”, “n8n”, “WooCommerce”"
-          className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3 placeholder:text-text-subtle"
-        />
-      </form>
+        placeholder="Search — try “Stripe”, “n8n”, “WooCommerce”"
+        pending={isPending}
+      />
 
-      <div className="flex flex-wrap gap-2">
+      <div className="-mx-(--gutter) flex gap-2 overflow-x-auto px-(--gutter) pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
         <SkillFilter
           skills={skills}
           value={params.get('skills') ?? ''}
@@ -103,7 +100,7 @@ export function JobFilters({ skills }: { skills: [string, SkillOption[]][] }) {
               setQ('');
               startTransition(() => router.push(pathname));
             }}
-            className="h-9 rounded-sm px-3 text-sm text-text-muted transition-colors duration-fast hover:bg-surface-sunken hover:text-text"
+            className="pressable h-10 shrink-0 rounded-full px-4 text-sm font-medium text-text-muted hover:bg-surface-sunken hover:text-text"
           >
             Clear filters
           </button>
@@ -130,24 +127,13 @@ function Select({
   onChange: (v: string) => void;
 }) {
   return (
-    <span className="inline-flex items-center">
-      <label className="sr-only" htmlFor={`filter-${label}`}>
-        {label}
-      </label>
-      <select
-        id={`filter-${label}`}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`h-9 rounded-sm border px-2.5 text-sm transition-colors duration-fast
-          ${value ? 'border-accent bg-accent-subtle' : 'border-border-strong bg-surface-raised'}`}
-      >
-        <option value="">{label}: any</option>
-        {Object.entries(options).map(([k, v]) => (
-          <option key={k} value={k}>
-            {v}
-          </option>
-        ))}
-      </select>
-    </span>
+    <FilterSelect id={`filter-${label}`} label={label} value={value} onChange={onChange}>
+      <option value="">{label}: any</option>
+      {Object.entries(options).map(([k, v]) => (
+        <option key={k} value={k}>
+          {v}
+        </option>
+      ))}
+    </FilterSelect>
   );
 }
