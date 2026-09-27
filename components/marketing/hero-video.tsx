@@ -143,7 +143,9 @@ export function HeroVideo({ poster, webm, mp4, label, className = '' }: Props) {
           playsInline
           autoPlay={!paused}
           preload="auto"
-          poster={poster}
+          // No `poster` attribute: the optimised <Image> below the video IS the poster, and the
+          // video stays invisible until it plays. A poster attribute as well downloaded the same
+          // frame a second time, unoptimised — 75 KB on the critical path for nothing (§6.2).
           // Set once, on the first real frame, and never unset: pausing should freeze the frame
           // the reader stopped on, not fade back to a poster from a different moment.
           onPlaying={() => setPlaying(true)}

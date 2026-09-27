@@ -6,26 +6,42 @@ import { Providers } from '@/components/providers';
 import './globals.css';
 
 /*
- * Three faces, all through next/font: self-hosted, subset, preloaded and `display: swap`, with
- * size-adjusted fallbacks so the swap does not shift layout.
+ * Three faces, all through next/font: self-hosted, subset, with size-adjusted fallbacks.
  *
  *   Geist          — every piece of UI and body text.
- *   Instrument Serif — display only: one title moment per screen (DESIGN.md §3.1). A single
- *                    weight plus italic, so it costs one small file, not a family.
+ *   Instrument Serif — display only: one title moment per screen (DESIGN.md §3.1). One weight,
+ *                    one style — a single small file.
  *   Geist Mono     — tech stacks and code-shaped metadata, sparingly.
  */
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'swap' });
+/*
+ * `display: 'optional'`, not 'swap' — measured, not assumed (DESIGN.md §6.2, J8). Under
+ * Lighthouse's slow-4G profile the fonts arrived ~3.5s in, and with `swap` the already-painted
+ * text re-rendered when they landed; Chrome records that re-render as a NEW, later Largest
+ * Contentful Paint. LCP was the logo, at 3.9s, on a page whose first paint was 0.9s.
+ *
+ * `optional` gives a font ~100ms: if it is there (a warm cache, any decent connection, and every
+ * page after the first) it is used from the first frame; if not, the metric-matched fallback is
+ * used for that page view and nothing swaps. A slow first visit sees a close-enough fallback; it
+ * never sees text jump.
+ *
+ * Geist Mono is not preloaded: it sets tech-stack labels below the fold, and a preload would
+ * compete with the two faces the first screen actually uses.
+ */
+const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'optional' });
 const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
   display: 'swap',
+  preload: false,
 });
 const serif = Instrument_Serif({
   variable: '--font-instrument-serif',
   weight: '400',
-  style: ['normal', 'italic'],
+  // Normal only. The italic file existed for one emphasised word, which already carries the
+  // accent colour; dropping it takes a font off the critical path (§6.2).
+  style: 'normal',
   subsets: ['latin'],
-  display: 'swap',
+  display: 'optional',
 });
 
 export const metadata: Metadata = {

@@ -2,7 +2,7 @@
 
 import { Drawer } from '@base-ui/react/drawer';
 import { X } from 'lucide-react';
-import type { ReactElement, ReactNode } from 'react';
+import type { KeyboardEvent, ReactElement, ReactNode } from 'react';
 
 import { cn } from '@/lib/ui/cn';
 
@@ -25,6 +25,38 @@ import { cn } from '@/lib/ui/cn';
  *     properties, so a drag and an entrance can never fight over one value.
  *   - Reduced motion: opacity only.
  */
+
+/** Everything a Tab key can land on. */
+const TABBABLE =
+  'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Keep Tab inside the modal.
+ *
+ * base-ui marks the page behind `aria-hidden` (so screen readers are confined), but in this build
+ * its trailing focus guard did not send focus back into the popup: a scripted keyboard pass
+ * tabbed from "Send application" straight out to the skip link and the header of a page the user
+ * could not see — a WCAG 2.4.3 failure (DESIGN.md §6.3). This wraps Tab at both ends explicitly.
+ * It is a guarantee, not a replacement: base-ui still owns Escape, scroll lock, initial focus and
+ * returning focus to the trigger. e2e/keyboard.spec.ts pins the behaviour.
+ */
+function containTab(e: KeyboardEvent<HTMLElement>) {
+  if (e.key !== 'Tab') return;
+  const items = [...e.currentTarget.querySelectorAll<HTMLElement>(TABBABLE)].filter(
+    (el) => el.offsetParent !== null || el.getClientRects().length > 0,
+  );
+  if (items.length === 0) return;
+  const first = items[0]!;
+  const last = items[items.length - 1]!;
+  const active = document.activeElement;
+  if (e.shiftKey && (active === first || !e.currentTarget.contains(active))) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && active === last) {
+    e.preventDefault();
+    first.focus();
+  }
+}
 
 type ModalProps = {
   /** The element that opens the modal — composed, so it keeps its own semantics and styles. */
@@ -63,6 +95,7 @@ export function Modal({
           />
           <Drawer.Viewport className="fixed inset-0 z-modal flex items-end justify-center sm:items-center sm:p-6">
             <Drawer.Popup
+              onKeyDown={containTab}
               className={cn(
                 'relative flex max-h-[92dvh] w-full flex-col overflow-hidden bg-surface-raised text-text shadow-lg outline-none',
                 // Phone: a sheet, rounded on top, padded for the home indicator.

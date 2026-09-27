@@ -34,7 +34,7 @@ export function AuthCard({
         <span className="font-serif text-3xl">TechSelect</span>
         <div>
           <p className="max-w-md font-serif text-display-md text-balance">
-            Hired for the work, <em className="opacity-70">not</em> the keywords.
+            Hired for the work, <em className="not-italic opacity-70">not</em> the keywords.
           </p>
           <p className="mt-6 max-w-sm text-sm opacity-70">
             A job board for software, web and automation work. Open to every developer; clients

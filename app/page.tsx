@@ -76,7 +76,7 @@ export default async function Home({
               A job board for software, web &amp; automation work
             </p>
             <h1 className="animate-rise mt-5 font-serif text-display-lg text-balance [animation-delay:60ms]">
-              Hired for the work, <em className="text-accent">not</em> the keywords.
+              Hired for the work, <em className="text-accent not-italic">not</em> the keywords.
             </h1>
             <p className="animate-rise mt-6 max-w-lg text-lg text-text-muted [animation-delay:120ms]">
               Matching reads the projects you describe and the brief a client writes, then says in
