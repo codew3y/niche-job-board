@@ -8,7 +8,22 @@ import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { signIn, signUp, type ActionResult } from '@/lib/actions/auth';
 
-export function EmailPasswordForm({ mode, next }: { mode: 'login' | 'signup'; next?: string }) {
+export function EmailPasswordForm({
+  mode,
+  next,
+  intent,
+}: {
+  mode: 'login' | 'signup';
+  next?: string;
+  /**
+   * Which role the visitor said they were on the landing page.
+   *
+   * A HINT carried through signup so the flow can skip /select-role, not a claim about
+   * anything. The role itself is created by onboarding under RLS; this only decides which
+   * screen comes next, so a forged value costs an unwanted onboarding step and nothing more.
+   */
+  intent?: 'talent' | 'client' | null;
+}) {
   const action = mode === 'signup' ? signUp : signIn;
   const [state, formAction] = useActionState<ActionResult | null, FormData>(action, null);
   const fields = state?.ok === false ? state.fields : undefined;
@@ -16,6 +31,7 @@ export function EmailPasswordForm({ mode, next }: { mode: 'login' | 'signup'; ne
   return (
     <form action={formAction} className="space-y-4" noValidate>
       {next && <input type="hidden" name="next" value={next} />}
+      {intent && <input type="hidden" name="intent" value={intent} />}
 
       {mode === 'signup' && (
         <Field

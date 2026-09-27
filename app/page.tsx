@@ -64,17 +64,24 @@ export default async function Home() {
             </>
           ) : (
             <>
+              {/*
+                The role is asked BEFORE the account, not after.
+                Previously this was one "Get started" button and the choice came on the far
+                side of signup — so someone deciding whether this product is for them had to
+                commit first and find out second. Asking here also lets the signup screen
+                speak to one audience instead of hedging.
+              */}
               <Link
-                href="/signup"
+                href="/signup?role=talent"
                 className="inline-flex h-11 items-center rounded-[--radius] bg-accent px-6 font-medium text-accent-text shadow-sm transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-accent-hover active:scale-[0.98]"
               >
-                Get started
+                I&rsquo;m looking for work
               </Link>
               <Link
-                href="/jobs"
+                href="/signup?role=client"
                 className="inline-flex h-11 items-center rounded-[--radius] border border-border-strong px-6 font-medium transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-surface-sunken active:scale-[0.98]"
               >
-                Browse without signing up
+                I&rsquo;m hiring
               </Link>
             </>
           )}
@@ -84,7 +91,11 @@ export default async function Home() {
             stop someone bouncing, and it is the whole of ADR-008 in one line. */}
         {!dashboard && (
           <p className="mt-5 text-sm text-text-subtle">
-            No approval queue and nothing to qualify for — publish a profile whenever you like.
+            No approval queue and nothing to qualify for. You can also{' '}
+            <Link href="/jobs" className="underline underline-offset-2">
+              browse without an account
+            </Link>
+            .
           </p>
         )}
       </div>

@@ -31,7 +31,30 @@ export async function GET(request: NextRequest) {
    */
   if (type !== 'recovery') await sendWelcomeOnce();
 
-  return NextResponse.redirect(
-    `${origin}${type === 'recovery' ? '/reset-password/confirm' : '/select-role'}`,
-  );
+  if (type === 'recovery') {
+    return NextResponse.redirect(`${origin}/reset-password/confirm`);
+  }
+
+  /**
+   * Honour the choice they already made.
+   *
+   * Someone who clicked "I'm looking for work" on the landing page has answered this
+   * question. Sending them to /select-role after confirming their email asks it again, which
+   * reads as the product not listening — and it is the exact step Upwork removes by asking
+   * first.
+   *
+   * Read from metadata, which is client-writable, and that is fine here: the worst a forged
+   * value can do is open the wrong onboarding screen. `/select-role` stays one link away, and
+   * the role itself is only created by onboarding under RLS.
+   */
+  const { data } = await supabase.auth.getUser();
+  const intent = data.user?.user_metadata?.intent;
+  const next =
+    intent === 'client'
+      ? '/onboarding/client/company'
+      : intent === 'talent'
+        ? '/onboarding/talent/basics'
+        : '/select-role';
+
+  return NextResponse.redirect(`${origin}${next}`);
 }

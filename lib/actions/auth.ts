@@ -50,12 +50,24 @@ export async function signUp(
     return { ok: false, message: 'Check the fields below.', fields: fieldErrors(parsed.error) };
   }
 
+  /**
+   * The role the visitor picked before signing up, carried in user metadata.
+   *
+   * It has to survive a round trip through email confirmation — the user leaves the browser
+   * entirely and comes back through a link — so it cannot live in a cookie or a form field.
+   * Metadata is client-writable, which is exactly why it is only ever used to choose the NEXT
+   * SCREEN. The role itself is created by onboarding under RLS, and `user_profiles` is the
+   * authority (lib/supabase/middleware.ts says the same thing about not trusting metadata).
+   */
+  const rawIntent = String(formData.get('intent') ?? '');
+  const intent = rawIntent === 'client' || rawIntent === 'talent' ? rawIntent : null;
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      data: { display_name: parsed.data.displayName },
+      data: { display_name: parsed.data.displayName, ...(intent ? { intent } : {}) },
       emailRedirectTo: `${siteUrl()}/auth/confirm`,
     },
   });

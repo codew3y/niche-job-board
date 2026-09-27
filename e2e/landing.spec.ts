@@ -11,10 +11,13 @@ import { canSeed, PASSWORD, seed, teardown, type Seeded } from './fixtures';
  */
 
 test.describe('signed out', () => {
-  test('offers signup and browsing, and says there is no bar to clear', async ({ page }) => {
+  test('offers both doors and browsing, and says there is no bar to clear', async ({ page }) => {
+    // The specific labels live in role-first.spec.ts; this asserts the shape — two ways in
+    // and a way to look around without choosing either.
     await page.goto('/');
-    await expect(page.getByRole('link', { name: /get started/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /browse without signing up/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /looking for work/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /hiring/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /browse without an account/i })).toBeVisible();
     // ADR-008 on the front page rather than discovered after signing up.
     await expect(page.getByText(/nothing to qualify for/i)).toBeVisible();
   });
