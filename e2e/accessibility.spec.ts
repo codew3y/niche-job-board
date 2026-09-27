@@ -32,6 +32,20 @@ async function scan(page: Page, path: string) {
   // Wait for the element every layout renders, rather than networkidle — a deployed page
   // behind a CDN keeps making requests and never goes idle.
   await page.locator('#main').first().waitFor({ state: 'attached', timeout: 15_000 });
+  /**
+   * Let entrance animations SETTLE before measuring. Contrast is a property of the page at rest:
+   * a heading halfway through a 500ms fade-in is transiently translucent, and axe measuring it
+   * mid-fade reports a colour the reader never sits and reads. Only finite animations are
+   * awaited — an infinite one (a skeleton pulse) would never resolve, and is not an entrance.
+   */
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => {})),
+    ),
+  );
   return new AxeBuilder({ page }).withTags(TAGS).analyze();
 }
 

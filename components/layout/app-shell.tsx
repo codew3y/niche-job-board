@@ -67,7 +67,9 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
         pinning it to the bottom of the screen.
       */}
       <header className="sticky top-0 z-sticky border-b border-border-base bg-surface pt-[env(safe-area-inset-top,0px)] sm:bg-surface/85 sm:backdrop-blur-md">
-        <div className="gutter mx-auto flex h-(--nav-height) max-w-6xl items-center gap-6">
+        {/* Wraps rather than forcing one line: at 200% text zoom a desktop-width window keeps its
+            desktop breakpoint while the text doubles, and a no-wrap row runs off screen. */}
+        <div className="gutter mx-auto flex min-h-(--nav-height) max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 py-2">
           {/*
             Inside the app the logo goes to the DASHBOARD, not the marketing page.
             It used to go to `/`, so a signed-in user clicking it landed on a page inviting
