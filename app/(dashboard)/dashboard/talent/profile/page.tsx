@@ -119,6 +119,17 @@ export default async function ProfilePage() {
         <h2 className="mb-4 font-medium">Skills</h2>
         <SkillsEditor options={skills ?? []} initial={(mySkills ?? []).map((s) => s.skill_id)} />
       </section>
+
+      {/* /privacy tells people they can delete their account "from settings", so settings has
+          to be reachable from the page they are most likely to be on when they go looking.
+          It was not reachable from anywhere. */}
+      <p className="border-t border-border-base pt-6 text-sm text-text-muted">
+        Roles, sign-in address and deleting your account are in{' '}
+        <Link href="/dashboard/settings" className="text-accent underline underline-offset-2">
+          settings
+        </Link>
+        .
+      </p>
     </div>
   );
 }

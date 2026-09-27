@@ -213,6 +213,10 @@ export async function teardown(seeded: Seeded) {
   // A teardown that fails has to say so, or the next run inherits the mess.
   for (const id of [seeded.talent.userId, seeded.client.userId]) {
     const { error } = await db.auth.admin.deleteUser(id);
-    if (error) console.error(`[e2e] TEARDOWN FAILED for ${id}: ${error.message}`);
+    // A fixture the test itself deleted is a success, not a failure — e2e/account.spec.ts
+    // deletes its own account through the UI, which is the whole point of that suite.
+    if (error && !/not.?found/i.test(error.message)) {
+      console.error(`[e2e] TEARDOWN FAILED for ${id}: ${error.message}`);
+    }
   }
 }

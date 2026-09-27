@@ -20,7 +20,16 @@ export const metadata: Metadata = {
  * and false of the one that exists now — anyone may list, and evidence helps rather than
  * admits.
  */
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
+  // Where a deleted account lands. Signing someone out and dropping them on a marketing page
+  // with no acknowledgement reads as a failure, not a completion — and this is the one action
+  // where "did that work?" cannot be answered by checking.
+  const deleted = (await searchParams).deleted === '1';
+
   // Cached per request, so the layout above and this page share one lookup rather than two.
   const profile = await getSessionProfile();
   const displayName = profile?.displayName ?? null;
@@ -37,6 +46,15 @@ export default async function Home() {
 
   return (
     <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-16 sm:py-24">
+      {deleted && (
+        <p
+          role="status"
+          className="mx-auto mb-10 max-w-xl rounded-[--radius] border border-border-base bg-surface-sunken p-4 text-center text-sm text-text-muted text-pretty"
+        >
+          Your account has been deleted. Anything you posted is gone; conversations you were part of
+          survive with your side removed, as the privacy policy sets out.
+        </p>
+      )}
       <div className="text-center">
         <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
           Work found by what you <span className="text-accent">actually do</span>

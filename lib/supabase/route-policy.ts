@@ -65,7 +65,15 @@ const PRE_ROLE_PREFIXES = [
   '/onboarding',
   '/auth',
   '/logout',
-  '/dashboard/settings/roles',
+  /**
+   * The whole of settings, not just /roles.
+   *
+   * Someone who signed up and abandoned onboarding has an account, a row in auth.users and an
+   * email address we hold — and under the old prefix they could not reach the page that
+   * deletes it. Being unable to leave until you finish signing up is the wrong shape for an
+   * erasure right, and it is the sort of trap a narrower prefix sets by accident.
+   */
+  '/dashboard/settings',
 ];
 
 /** Exported so tests assert against the real list rather than a copy that drifts. */

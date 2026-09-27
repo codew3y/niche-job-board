@@ -38,13 +38,25 @@ export default async function ClientProfilePage() {
       />
       <CompanyForm company={company} />
 
-      <p className="mt-8 border-t border-border-base pt-6 text-sm text-text-muted">
-        Looking for your saved developers?{' '}
-        <Link href="/dashboard/client/saved" className="text-accent underline underline-offset-2">
-          They&rsquo;re here
-        </Link>
-        .
-      </p>
+      <div className="mt-8 space-y-2 border-t border-border-base pt-6 text-sm text-text-muted">
+        <p>
+          Looking for your saved developers?{' '}
+          <Link href="/dashboard/client/saved" className="text-accent underline underline-offset-2">
+            They&rsquo;re here
+          </Link>
+          .
+        </p>
+        {/* /privacy tells people they can delete their account "from settings", so settings
+            has to be reachable from the page they are most likely to be on when they go
+            looking. It was not reachable from anywhere. */}
+        <p>
+          Roles, sign-in address and deleting your account are in{' '}
+          <Link href="/dashboard/settings" className="text-accent underline underline-offset-2">
+            settings
+          </Link>
+          .
+        </p>
+      </div>
     </div>
   );
 }
