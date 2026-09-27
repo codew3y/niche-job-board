@@ -61,7 +61,7 @@ export function TalentFilters({ skills }: { skills: [string, SkillOption[]][] })
           // The placeholder advertises the syntax the search actually supports now that it is
           // full-text rather than a substring match.
           placeholder="Search — try “Stripe integration”, or “react -native”"
-          className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3 placeholder:text-text-subtle"
+          className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3 placeholder:text-text-subtle"
         />
       </form>
 
@@ -80,7 +80,7 @@ export function TalentFilters({ skills }: { skills: [string, SkillOption[]][] })
             id="filter-availability"
             value={params.get('availability') ?? ''}
             onChange={(e) => set('availability', e.target.value)}
-            className={`h-9 rounded-[--radius-sm] border px-2.5 text-sm transition-colors duration-[--duration-fast]
+            className={`h-9 rounded-sm border px-2.5 text-sm transition-colors duration-fast
               ${params.get('availability') ? 'border-accent bg-accent-subtle' : 'border-border-strong bg-surface-raised'}`}
           >
             <option value="">Availability: any</option>
@@ -98,7 +98,7 @@ export function TalentFilters({ skills }: { skills: [string, SkillOption[]][] })
             id="filter-rate"
             value={params.get('rateMax') ?? ''}
             onChange={(e) => set('rateMax', e.target.value)}
-            className={`h-9 rounded-[--radius-sm] border px-2.5 text-sm transition-colors duration-[--duration-fast]
+            className={`h-9 rounded-sm border px-2.5 text-sm transition-colors duration-fast
               ${params.get('rateMax') ? 'border-accent bg-accent-subtle' : 'border-border-strong bg-surface-raised'}`}
           >
             <option value="">Rate: any</option>
@@ -116,7 +116,7 @@ export function TalentFilters({ skills }: { skills: [string, SkillOption[]][] })
               setQ('');
               startTransition(() => router.push(pathname));
             }}
-            className="h-9 rounded-[--radius-sm] px-3 text-sm text-text-muted transition-colors duration-[--duration-fast] hover:bg-surface-sunken hover:text-text"
+            className="h-9 rounded-sm px-3 text-sm text-text-muted transition-colors duration-fast hover:bg-surface-sunken hover:text-text"
           >
             Clear filters
           </button>

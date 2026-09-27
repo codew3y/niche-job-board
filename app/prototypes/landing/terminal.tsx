@@ -23,7 +23,7 @@ export function TerminalLanding() {
         .v-terminal :focus-visible { outline: 2px solid #c6f24e; outline-offset: 2px; }
       `}</style>
 
-      <header className="sticky top-0 z-(--z-nav) border-b border-white/10 bg-[#0b0d0c]/80 backdrop-blur-md">
+      <header className="sticky top-0 z-nav border-b border-white/10 bg-[#0b0d0c]/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4">
           <Link
             href="/"

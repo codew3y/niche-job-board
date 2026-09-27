@@ -65,7 +65,7 @@ export default async function SavedJobsPage() {
           }
         />
       ) : (
-        <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+        <ul className="divide-y divide-border-base rounded-md border border-border-base">
           {rows.map(({ jobs: job }) => {
             const budget = formatRange(
               job.budget_min,

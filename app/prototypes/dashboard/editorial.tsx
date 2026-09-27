@@ -7,7 +7,7 @@ export function EditorialDashboard() {
   return (
     <div className="proto v-editorial min-h-screen bg-[#f6f3ee] text-[#1b1a17]">
       <style>{`
-        .v-editorial .serif { font-family: var(--font-serif), Georgia, serif; font-weight: 400; }
+        .v-editorial .serif { font-family: var(--font-instrument-serif), Georgia, serif; font-weight: 400; }
         .v-editorial :focus-visible { outline: 2px solid #b83a0b; outline-offset: 3px; }
       `}</style>
 

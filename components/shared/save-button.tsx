@@ -28,7 +28,7 @@ export function SaveButton({
         type="submit"
         aria-pressed={saved}
         aria-label={saved ? `Remove ${label} from saved` : `Save ${label}`}
-        className={`inline-flex h-9 items-center gap-1.5 rounded-[--radius-sm] border px-3 text-sm transition-colors duration-[--duration-fast]
+        className={`inline-flex h-9 items-center gap-1.5 rounded-sm border px-3 text-sm transition-colors duration-fast
           ${saved ? 'border-accent bg-accent-subtle text-accent' : 'border-border-strong hover:bg-surface-sunken'}`}
       >
         <svg

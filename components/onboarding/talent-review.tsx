@@ -34,7 +34,7 @@ export function TalentReview({
     <div className="space-y-6">
       {/* The completeness checklist names exactly what is blocking publish, rather than
           disabling a button and leaving the user to guess (§7, docs/components.md). */}
-      <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+      <ul className="divide-y divide-border-base rounded-md border border-border-base">
         {checks.map((check) => (
           <li key={check.label} className="flex items-center justify-between gap-4 p-4">
             <span className="flex items-center gap-2.5">

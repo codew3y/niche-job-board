@@ -81,7 +81,7 @@ function ItemForm({ item, onDone }: { item: Item | null; onDone: () => void }) {
   }
 
   return (
-    <form action={action} className="space-y-4 rounded-[--radius] border border-border-strong p-5">
+    <form action={action} className="space-y-4 rounded-md border border-border-strong p-5">
       {item && <input type="hidden" name="itemId" value={item.id} />}
 
       <h3 className="font-medium">{item ? 'Edit project' : 'New project'}</h3>
@@ -105,7 +105,7 @@ function ItemForm({ item, onDone }: { item: Item | null; onDone: () => void }) {
           rows={3}
           defaultValue={item?.description ?? ''}
           aria-invalid={Boolean(fields?.description)}
-          className={`w-full rounded-[--radius] border bg-surface-raised p-3
+          className={`w-full rounded-md border bg-surface-raised p-3
             ${fields?.description ? 'border-danger' : 'border-border-strong'}`}
         />
         {fields?.description && <p className="text-sm text-danger">{fields.description[0]}</p>}
@@ -178,7 +178,7 @@ function ItemMedia({ item }: { item: Item }) {
   const media = [...(item.item_media ?? [])].sort((a, b) => a.sort_order - b.sort_order);
 
   return (
-    <div className="space-y-3 rounded-[--radius] border border-border-base p-5">
+    <div className="space-y-3 rounded-md border border-border-base p-5">
       <div>
         <h3 className="font-medium">Images</h3>
         <p className="mt-0.5 text-sm text-text-muted text-pretty">
@@ -193,7 +193,7 @@ function ItemMedia({ item }: { item: Item }) {
             <li key={m.id} className="space-y-1.5">
               {/* Two columns on phones, three from sm — a thumbnail grid, so the widths are
                   small and the savings from resizing are correspondingly large. */}
-              <div className="relative aspect-video w-full overflow-hidden rounded-[--radius-sm] border border-border-base">
+              <div className="relative aspect-video w-full overflow-hidden rounded-sm border border-border-base">
                 <Image
                   src={m.url}
                   alt={m.alt_text}

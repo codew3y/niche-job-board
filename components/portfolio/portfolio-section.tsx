@@ -40,7 +40,7 @@ export function PortfolioSection({
   if (!hasSite && !hasItems) {
     // Only ever visible to the owner, since the publish gate blocks this state going public.
     return isOwner ? (
-      <section className="rounded-[--radius] border border-dashed border-border-strong p-6 text-center">
+      <section className="rounded-md border border-dashed border-border-strong p-6 text-center">
         <p className="font-medium">No evidence yet</p>
         <p className="mx-auto mt-1 max-w-sm text-sm text-text-muted text-pretty">
           Link your portfolio site, or add two projects. Either unlocks publishing.
@@ -52,7 +52,7 @@ export function PortfolioSection({
   return (
     <div className="space-y-6">
       {hasSite && (
-        <section className="rounded-[--radius] border border-border-base bg-surface-raised p-5">
+        <section className="rounded-md border border-border-base bg-surface-raised p-5">
           <h2 className="font-medium">Portfolio site</h2>
           <p className="mt-1">
             <ExternalLink href={websiteUrl} className="text-accent">
@@ -74,7 +74,7 @@ export function PortfolioSection({
             {items.map((item) => (
               <li
                 key={item.id}
-                className="rounded-[--radius] border border-border-base bg-surface-raised p-5"
+                className="rounded-md border border-border-base bg-surface-raised p-5"
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                   <h3 className="font-medium">{item.title}</h3>
@@ -102,7 +102,7 @@ export function PortfolioSection({
                               360px slot, which is the state this page was already in with a
                               raw <img>. Lazy by default, so a profile carrying a dozen of
                               these below the fold costs nothing until it is scrolled to. */}
-                          <div className="relative aspect-video w-full overflow-hidden rounded-[--radius-sm] border border-border-base">
+                          <div className="relative aspect-video w-full overflow-hidden rounded-sm border border-border-base">
                             <Image
                               src={m.url}
                               alt={m.alt_text}

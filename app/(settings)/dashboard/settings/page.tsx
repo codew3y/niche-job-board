@@ -30,7 +30,7 @@ export default async function SettingsPage() {
           <Link
             key={href}
             href={href}
-            className="rounded-[--radius] border border-border-base p-4 transition-colors duration-[--duration-fast] hover:bg-surface-sunken"
+            className="rounded-md border border-border-base p-4 transition-colors duration-fast hover:bg-surface-sunken"
           >
             <span className="font-medium">{title}</span>
             <span className="mt-0.5 block text-sm text-text-muted text-pretty">{blurb}</span>

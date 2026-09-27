@@ -45,7 +45,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
           defaultValue={str(profile, 'bio')}
           aria-invalid={Boolean(fields?.bio)}
           aria-describedby="bio-hint"
-          className={`w-full rounded-[--radius] border bg-surface-raised p-3
+          className={`w-full rounded-md border bg-surface-raised p-3
             ${fields?.bio ? 'border-danger' : 'border-border-strong'}`}
         />
         <p id="bio-hint" className={`text-sm ${fields?.bio ? 'text-danger' : 'text-text-muted'}`}>
@@ -83,7 +83,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
             id="currency"
             name="currency"
             defaultValue={str(profile, 'currency') || 'USD'}
-            className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3"
+            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
           >
             {['USD', 'EUR', 'GBP', 'CHF'].map((c) => (
               <option key={c} value={c}>
@@ -103,7 +103,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
             id="availability"
             name="availability"
             defaultValue={str(profile, 'availability') || 'part_time'}
-            className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3"
+            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
           >
             {AVAILABILITY.map(([v, l]) => (
               <option key={v} value={v}>
@@ -129,10 +129,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
       </div>
 
       {state?.ok === false && (
-        <p
-          role="alert"
-          className="rounded-[--radius-sm] bg-danger-subtle p-3 text-sm text-danger text-pretty"
-        >
+        <p role="alert" className="rounded-sm bg-danger-subtle p-3 text-sm text-danger text-pretty">
           {state.message}
         </p>
       )}

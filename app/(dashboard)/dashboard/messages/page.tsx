@@ -43,12 +43,12 @@ export default async function MessagesPage() {
           }
         />
       ) : (
-        <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+        <ul className="divide-y divide-border-base rounded-md border border-border-base">
           {conversations.map((c) => (
             <li key={c.id}>
               <Link
                 href={`/dashboard/messages/${c.id}`}
-                className="flex items-start gap-3 p-4 transition-colors duration-[--duration-fast] hover:bg-surface-sunken"
+                className="flex items-start gap-3 p-4 transition-colors duration-fast hover:bg-surface-sunken"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">

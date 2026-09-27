@@ -1,194 +1,514 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens.
+ * TechSelect design tokens — the Editorial system (DESIGN.md §4).
  *
- * OKLCH rather than hex: lightness is perceptually uniform, so a 10% step looks like the same
- * step at every hue. That is what keeps hover and active states consistent across the accent
- * and the neutrals instead of needing hand-tuned one-offs.
+ * EVERY visual value in the product comes from here. Components use the semantic names below
+ * (`bg-surface`, `text-muted`, `rounded-lg`, `shadow-md`, `duration-fast`, `ease-out`), never a
+ * raw colour, pixel radius or millisecond value — so a theme change is an edit to this file and
+ * nothing else.
  *
- * Every colour is semantic (`--surface`, `--text-muted`) rather than named by appearance
- * (`--gray-200`). A token called `--gray-200` cannot be made darker in dark mode without
- * lying about its own name.
+ * WHY THE SYNTAX MATTERS HERE: the previous token file was correct and never applied. Its
+ * components wrote `rounded-[--radius]`, which Tailwind v4 compiles to `border-radius:--radius`
+ * — invalid CSS that browsers silently drop (DESIGN.md §1, A1). Tokens now reach Tailwind
+ * through `@theme`, which generates real utilities (`rounded-lg`), so there is no bracket
+ * syntax left to get wrong.
+ *
+ * Colour is OKLCH: lightness is perceptually uniform, so the same step reads as the same step at
+ * every hue, and dark-mode values are derived by moving L rather than hand-picking hex codes.
  */
 
+/* ───────────────────────────── Colour — light (paper) ───────────────────────────── */
 :root {
-  /* Warm neutrals — a touch of hue keeps large surfaces from reading as clinical grey. */
-  --surface: oklch(99% 0.004 95);
-  --surface-raised: oklch(100% 0 0);
-  --surface-sunken: oklch(96.5% 0.005 95);
-  --border: oklch(90% 0.006 95);
-  --border-strong: oklch(82% 0.008 95);
+  color-scheme: light;
 
-  --text: oklch(24% 0.012 95);
-  --text-muted: oklch(52% 0.011 95);
-  /*
-   * 4.5:1 against --surface, which is what AA requires for text under 18pt.
-   *
-   * This was 64%, which measured ~3.2:1 and failed axe on every page — the footer, the
-   * "N jobs" count and the image captions all use it. "Subtle" has to mean lower emphasis,
-   * not lower legibility: a shade nobody with imperfect vision can read is not a design
-   * choice, it is a page with missing text.
-   */
-  --text-subtle: oklch(55% 0.009 95);
+  /* Surfaces. Warm paper, never pure white: large white fields read clinical and glare. */
+  --surface: oklch(96.6% 0.007 80); /* the page */
+  --surface-raised: oklch(98.8% 0.004 85); /* cards, inputs, popovers */
+  --surface-sunken: oklch(93.6% 0.011 80); /* wells, table heads, skeletons */
+  --surface-inverse: oklch(21.5% 0.006 85); /* ink — primary buttons, the picker-free dark bits */
 
-  /* One accent. Restraint here is what makes the match score and status badges readable. */
-  --accent: oklch(52% 0.17 256);
-  --accent-hover: oklch(46% 0.17 256);
-  --accent-subtle: oklch(95% 0.03 256);
-  --accent-text: oklch(100% 0 0);
+  /* Lines. Hairlines are decoration; `--control` is a component boundary and must reach 3:1
+     against the page (WCAG 1.4.11), which a hairline never does. */
+  --border: oklch(89.5% 0.012 80);
+  --border-strong: oklch(82% 0.015 80);
+  --control: oklch(63% 0.016 80); /* 3.2:1 on --surface */
 
-  --success: oklch(52% 0.13 155);
-  --warning: oklch(62% 0.14 75);
-  --danger: oklch(53% 0.19 25);
-  --danger-subtle: oklch(96% 0.02 25);
+  /* Text. All three clear AA (4.5:1) on every surface — measured, DESIGN.md §4.1. */
+  --text: oklch(21.5% 0.006 85); /* 15.9:1 */
+  --text-muted: oklch(40% 0.012 80); /* 8.4:1 */
+  --text-subtle: oklch(50% 0.012 80); /* 5.4:1; 5.0:1 on sunken */
+  --text-inverse: oklch(96.6% 0.007 80);
 
-  --radius: 0.625rem;
-  --radius-sm: 0.375rem;
+  /* The one accent: vermilion. 5.4:1 on paper (measured), so it may carry small text. */
+  --accent: oklch(52% 0.17 38);
+  --accent-hover: oklch(46% 0.165 38);
+  --accent-subtle: oklch(94.5% 0.028 50);
+  --accent-text: oklch(99% 0.004 85); /* text ON the accent */
 
-  /* Shadows carry the elevation story. Two layers: a tight contact shadow plus a soft
-     ambient one, which is how real objects sit on a surface. */
-  --shadow-sm: 0 1px 2px oklch(24% 0.012 95 / 0.05), 0 1px 3px oklch(24% 0.012 95 / 0.06);
-  --shadow-md: 0 2px 4px oklch(24% 0.012 95 / 0.04), 0 4px 12px oklch(24% 0.012 95 / 0.08);
+  /* Status. Each has a text-safe foreground and a quiet background. */
+  --success: oklch(47% 0.1 152);
+  --success-subtle: oklch(94.5% 0.03 152);
+  --warning: oklch(50% 0.11 70);
+  --warning-subtle: oklch(95% 0.045 85);
+  --danger: oklch(51% 0.19 27);
+  --danger-subtle: oklch(95% 0.025 25);
 
-  /* ease-out, not ease-in-out. Motion that starts fast feels like a response to the user;
-     motion that eases in feels like the interface thinking about it first. */
-  --ease: cubic-bezier(0.32, 0.72, 0, 1);
-  --duration-fast: 120ms;
-  --duration: 180ms;
+  --focus: oklch(52% 0.17 38);
+  --scrim: oklch(15% 0.01 70 / 0.72); /* over photography */
+
+  /* On-media: controls laid over the hero video. Deliberately NOT redefined in dark mode —
+     footage is dark in both themes, so what sits on it must be the same in both. */
+  --media-surface: oklch(98.8% 0.004 85);
+  --media-text: oklch(21.5% 0.006 85);
+  --backdrop: oklch(18% 0.01 70 / 0.42); /* behind dialogs */
+
+  /* Elevation. Warm-tinted, two layers: a tight contact shadow and a soft ambient one — how a
+     sheet of paper actually sits on a desk. Editorial leans on rules first and shadows second,
+     so these are quiet. */
+  --elev-xs: 0 1px 2px oklch(21.5% 0.006 85 / 0.05);
+  --elev-sm: 0 1px 2px oklch(21.5% 0.006 85 / 0.05), 0 2px 8px -2px oklch(21.5% 0.006 85 / 0.06);
+  --elev-md: 0 2px 4px oklch(21.5% 0.006 85 / 0.04), 0 12px 32px -8px oklch(21.5% 0.006 85 / 0.14);
+  --elev-lg: 0 4px 8px oklch(21.5% 0.006 85 / 0.04), 0 24px 64px -12px oklch(21.5% 0.006 85 / 0.24);
 }
 
+/* ───────────────────────────── Colour — dark (ink) ───────────────────────────── */
+/*
+ * Declared twice on purpose. next-themes writes `data-theme` before first paint, so the
+ * attribute selector is what normally applies. The media-query copy is the fallback for a
+ * browser with JavaScript off: it still gets the OS preference instead of a white page at 2am.
+ */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --surface: oklch(17% 0.008 95);
-    --surface-raised: oklch(21% 0.009 95);
-    --surface-sunken: oklch(14% 0.007 95);
-    --border: oklch(28% 0.009 95);
-    --border-strong: oklch(36% 0.01 95);
-
-    --text: oklch(95% 0.006 95);
-    --text-muted: oklch(72% 0.009 95);
-    /* Same fix, other direction: lightened from 58%, which failed the same rule on dark. */
-    --text-subtle: oklch(66% 0.009 95);
-
-    --accent: oklch(70% 0.14 256);
-    --accent-hover: oklch(76% 0.14 256);
-    --accent-subtle: oklch(28% 0.05 256);
-    --accent-text: oklch(17% 0.008 95);
-
-    --success: oklch(70% 0.13 155);
-    --warning: oklch(76% 0.13 75);
-    --danger: oklch(68% 0.16 25);
+    color-scheme: dark;
+    --surface: oklch(17.2% 0.006 70);
+    --surface-raised: oklch(20.8% 0.007 70);
+    --surface-sunken: oklch(14.6% 0.005 70);
+    --surface-inverse: oklch(94% 0.01 80);
+    --border: oklch(28% 0.008 70);
+    --border-strong: oklch(35% 0.009 70);
+    --control: oklch(55% 0.01 70);
+    --text: oklch(94% 0.01 80);
+    --text-muted: oklch(79% 0.012 80);
+    --text-subtle: oklch(69% 0.012 80);
+    --text-inverse: oklch(17.2% 0.006 70);
+    --accent: oklch(71% 0.155 42);
+    --accent-hover: oklch(77% 0.14 46);
+    --accent-subtle: oklch(27% 0.055 40);
+    --accent-text: oklch(17.2% 0.006 70);
+    --success: oklch(74% 0.12 152);
+    --success-subtle: oklch(26% 0.04 152);
+    --warning: oklch(80% 0.12 80);
+    --warning-subtle: oklch(27% 0.045 80);
+    --danger: oklch(71% 0.16 27);
     --danger-subtle: oklch(26% 0.05 25);
-
-    --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.3), 0 1px 3px oklch(0% 0 0 / 0.25);
-    --shadow-md: 0 2px 4px oklch(0% 0 0 / 0.3), 0 4px 12px oklch(0% 0 0 / 0.35);
+    --focus: oklch(71% 0.155 42);
+    --scrim: oklch(12% 0.008 70 / 0.78);
+    --backdrop: oklch(8% 0.005 70 / 0.6);
+    --elev-xs: 0 1px 2px oklch(0% 0 0 / 0.4);
+    --elev-sm: 0 1px 2px oklch(0% 0 0 / 0.4), 0 2px 8px -2px oklch(0% 0 0 / 0.35);
+    --elev-md: 0 2px 4px oklch(0% 0 0 / 0.35), 0 12px 32px -8px oklch(0% 0 0 / 0.5);
+    --elev-lg: 0 4px 8px oklch(0% 0 0 / 0.35), 0 24px 64px -12px oklch(0% 0 0 / 0.6);
   }
 }
 
 :root[data-theme='dark'] {
-  --surface: oklch(17% 0.008 95);
-  --surface-raised: oklch(21% 0.009 95);
-  --surface-sunken: oklch(14% 0.007 95);
-  --border: oklch(28% 0.009 95);
-  --border-strong: oklch(36% 0.01 95);
-  --text: oklch(95% 0.006 95);
-  --text-muted: oklch(72% 0.009 95);
-  --text-subtle: oklch(66% 0.009 95);
-  --accent: oklch(70% 0.14 256);
-  --accent-hover: oklch(76% 0.14 256);
-  --accent-subtle: oklch(28% 0.05 256);
-  --accent-text: oklch(17% 0.008 95);
-  --success: oklch(70% 0.13 155);
-  --warning: oklch(76% 0.13 75);
-  --danger: oklch(68% 0.16 25);
+  color-scheme: dark;
+  --surface: oklch(17.2% 0.006 70);
+  --surface-raised: oklch(20.8% 0.007 70);
+  --surface-sunken: oklch(14.6% 0.005 70);
+  --surface-inverse: oklch(94% 0.01 80);
+  --border: oklch(28% 0.008 70);
+  --border-strong: oklch(35% 0.009 70);
+  --control: oklch(55% 0.01 70);
+  --text: oklch(94% 0.01 80);
+  --text-muted: oklch(79% 0.012 80);
+  --text-subtle: oklch(69% 0.012 80);
+  --text-inverse: oklch(17.2% 0.006 70);
+  --accent: oklch(71% 0.155 42);
+  --accent-hover: oklch(77% 0.14 46);
+  --accent-subtle: oklch(27% 0.055 40);
+  --accent-text: oklch(17.2% 0.006 70);
+  --success: oklch(74% 0.12 152);
+  --success-subtle: oklch(26% 0.04 152);
+  --warning: oklch(80% 0.12 80);
+  --warning-subtle: oklch(27% 0.045 80);
+  --danger: oklch(71% 0.16 27);
   --danger-subtle: oklch(26% 0.05 25);
-  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.3), 0 1px 3px oklch(0% 0 0 / 0.25);
-  --shadow-md: 0 2px 4px oklch(0% 0 0 / 0.3), 0 4px 12px oklch(0% 0 0 / 0.35);
+  --focus: oklch(71% 0.155 42);
+  --scrim: oklch(12% 0.008 70 / 0.78);
+  --backdrop: oklch(8% 0.005 70 / 0.6);
+  --elev-xs: 0 1px 2px oklch(0% 0 0 / 0.4);
+  --elev-sm: 0 1px 2px oklch(0% 0 0 / 0.4), 0 2px 8px -2px oklch(0% 0 0 / 0.35);
+  --elev-md: 0 2px 4px oklch(0% 0 0 / 0.35), 0 12px 32px -8px oklch(0% 0 0 / 0.5);
+  --elev-lg: 0 4px 8px oklch(0% 0 0 / 0.35), 0 24px 64px -12px oklch(0% 0 0 / 0.6);
 }
 
+/* ───────────────────────────── Motion, layering, layout ───────────────────────────── */
+:root {
+  /*
+   * Curves from the emil-design-eng skill. The built-in CSS easings are too weak to feel
+   * intentional. `ease-out` for anything entering or responding; `ease-in-out` for something
+   * already on screen moving; the drawer curve for sheets. There is no ease-in: motion that
+   * starts slowly reads as the interface hesitating.
+   */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer-curve: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Durations. UI stays under 300ms; exits are faster than entrances. */
+  --duration-instant: 100ms; /* press feedback */
+  --duration-fast: 150ms; /* hover, colour, tooltips */
+  --duration-base: 200ms; /* popovers, menus, tabs */
+  --duration-moderate: 280ms; /* dialogs and sheets entering */
+  --duration-exit: 160ms; /* anything leaving */
+  --duration-slow: 600ms; /* marketing only: the hero video fading in */
+
+  /* One scale for stacking, so no component invents `z-[9999]`. */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 20;
+  --z-nav: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-toast: 60;
+  --z-skip: 70;
+
+  /* Page gutter, widened on larger screens. Safe areas are added where edges meet glass. */
+  --gutter: 1rem;
+  --nav-height: 3.75rem;
+  --tabbar-height: 3.75rem;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --gutter: 1.5rem;
+  }
+}
+
+/* ───────────────────────────── Tailwind theme mapping ───────────────────────────── */
 @theme inline {
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-surface-sunken: var(--surface-sunken);
+  --color-surface-inverse: var(--surface-inverse);
   --color-border-base: var(--border);
   --color-border-strong: var(--border-strong);
+  --color-control: var(--control);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
   --color-text-subtle: var(--text-subtle);
+  --color-text-inverse: var(--text-inverse);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-subtle: var(--accent-subtle);
   --color-accent-text: var(--accent-text);
   --color-success: var(--success);
+  --color-success-subtle: var(--success-subtle);
   --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
   --color-danger: var(--danger);
   --color-danger-subtle: var(--danger-subtle);
+  --color-focus: var(--focus);
+  --color-scrim: var(--scrim);
+  --color-media-surface: var(--media-surface);
+  --color-media-text: var(--media-text);
+  --color-backdrop: var(--backdrop);
 
-  --radius-base: var(--radius);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --shadow-xs: var(--elev-xs);
+  --shadow-sm: var(--elev-sm);
+  --shadow-md: var(--elev-md);
+  --shadow-lg: var(--elev-lg);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
+
+  --ease-out: var(--ease-out-strong);
+  --ease-in-out: var(--ease-in-out-strong);
+  --ease-drawer: var(--ease-drawer-curve);
 }
 
-body {
-  background: var(--surface);
-  color: var(--text);
-  /* Fixes the "thin text on dark backgrounds" problem without disabling subpixel AA on light. */
-  -webkit-font-smoothing: antialiased;
+@theme {
+  /*
+   * Radius. Buttons and chips are pills — the Editorial signature, and a shape that reads as
+   * pressable at a glance. Inputs are softer than cards so a form never looks like a stack of
+   * cards. Tailwind's defaults are replaced, not extended: there is one scale.
+   */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  /*
+   * Type scale. 16px body, a 1.2-ish step for UI, and three FLUID display sizes for the serif,
+   * which is the only text that scales with the viewport: a 5.5rem headline on a laptop is
+   * 2.75rem on a phone without a breakpoint in sight.
+   */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.375rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.625rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-display-sm: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);
+  --text-display-sm--line-height: 1.05;
+  --text-display-sm--letter-spacing: -0.015em;
+  --text-display-md: clamp(2.25rem, 1.6rem + 2.8vw, 3.5rem);
+  --text-display-md--line-height: 1;
+  --text-display-md--letter-spacing: -0.02em;
+  --text-display-lg: clamp(2.75rem, 1.6rem + 5vw, 5.75rem);
+  --text-display-lg--line-height: 0.95;
+  --text-display-lg--letter-spacing: -0.025em;
+
+  --tracking-eyebrow: 0.16em;
+}
+
+/* Durations and z-index have no Tailwind namespace, so they get named utilities instead of
+   bracket syntax — `duration-fast`, `z-nav` — which cannot silently compile to nothing. */
+@utility duration-instant {
+  transition-duration: var(--duration-instant);
+}
+@utility duration-fast {
+  transition-duration: var(--duration-fast);
+}
+@utility duration-base {
+  transition-duration: var(--duration-base);
+}
+@utility duration-moderate {
+  transition-duration: var(--duration-moderate);
+}
+@utility duration-exit {
+  transition-duration: var(--duration-exit);
+}
+@utility duration-slow {
+  transition-duration: var(--duration-slow);
+}
+@utility z-raised {
+  z-index: var(--z-raised);
+}
+@utility z-sticky {
+  z-index: var(--z-sticky);
+}
+@utility z-nav {
+  z-index: var(--z-nav);
+}
+@utility z-overlay {
+  z-index: var(--z-overlay);
+}
+@utility z-modal {
+  z-index: var(--z-modal);
+}
+@utility z-toast {
+  z-index: var(--z-toast);
+}
+
+/* The page gutter, with the side safe areas added — a phone in landscape has a notch on one
+   side, and content under it cannot be read or tapped. */
+@utility gutter {
+  padding-inline: max(var(--gutter), env(safe-area-inset-left, 0px))
+    max(var(--gutter), env(safe-area-inset-right, 0px));
 }
 
 /*
- * A visible focus ring on every keyboard path is a Definition-of-Done item (§2), not a
- * preference. `:focus-visible` keeps it off mouse clicks so it does not read as noise.
+ * Press feedback on anything pressable. Scale is subtle (0.97) and on :active, not :hover, so it
+ * works on touch — and it answers at pointer-down, which is when a native button answers.
  */
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+@utility pressable {
+  transition-property: transform, background-color, border-color, color, box-shadow, opacity;
+  transition-duration: var(--duration-instant);
+  transition-timing-function: var(--ease-out-strong);
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    transform: scale(0.97);
+  }
+}
+
+/* The dark variant follows next-themes' attribute, not the OS media query, so the toggle wins. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ───────────────────────────── Base ───────────────────────────── */
+@layer base {
+  html {
+    /* The loudest "this is a website" tell on a phone. Every pressable has its own :active. */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: var(--surface);
+    color: var(--text);
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /*
+   * 16px minimum on every input. iOS zooms into anything smaller on focus and never zooms back
+   * out; the "fix" people reach for is disabling zoom, which is an accessibility failure. This
+   * is the real fix.
+   */
+  input,
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+
+  /* No double-tap-zoom wait on controls; no long-press text selection on a button's label. */
+  button,
+  a,
+  [role='button'],
+  [role='tab'],
+  summary,
+  label {
+    touch-action: manipulation;
+  }
+  button,
+  [role='button'],
+  [role='tab'] {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Headings balance, paragraphs avoid orphans — cheap, and the difference is visible. */
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p,
+  li,
+  dd,
+  blockquote {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--text);
+    color: var(--surface);
+  }
+
+  /*
+   * A visible focus ring on every keyboard path. `:focus-visible` keeps it off mouse clicks, so
+   * it never reads as noise — and it is never removed, only restyled.
+   */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /*
+   * Links inside prose are underlined, not just coloured (WCAG 1.4.1). The previous file
+   * described this rule in a comment and never wrote it (DESIGN.md §1, A9). A `.prose-link`
+   * class covers call sites that are links inside a sentence; standalone links that read as
+   * controls (nav, buttons, cards) are exempt, because they are not inside a text block.
+   */
+  .prose-link {
+    color: inherit;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in oklch, currentColor 40%, transparent);
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color var(--duration-fast) var(--ease-out-strong);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .prose-link:hover {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* <dialog> and base-ui popups inherit the theme rather than the UA's white. */
+  dialog {
+    color: inherit;
+  }
+}
+
+/* ───────────────────────────── Motion primitives ───────────────────────────── */
+/*
+ * Entrance for page content: rise and fade, once. Transform and opacity only. Used on the
+ * landing page and on first paint of empty states — never on lists that re-render, where an
+ * entrance on every navigation reads as lag (DESIGN.md §5).
+ */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@utility animate-rise {
+  animation: rise 520ms var(--ease-out-strong) both;
 }
 
 /*
- * prefers-reduced-motion is respected globally rather than per-component, so a component
- * added later cannot forget it. Motion is removed; state changes still happen instantly.
+ * Skeleton pulse: OPACITY, not a moving gradient. A shimmer animates background-position, which
+ * repaints every frame; a pulse is composited. Slow enough (1.6s) to read as "waiting", not as
+ * an alarm.
  */
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+@utility animate-skeleton {
+  animation: skeleton-pulse 1.6s var(--ease-in-out-strong) infinite;
+}
+
+/*
+ * Reduced motion means fewer and gentler animations, not zero (emil-design-eng). Movement is
+ * removed; opacity and colour changes that carry meaning stay, shortened. Set globally so a
+ * component added later cannot forget it.
+ */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  /* Entrances keep their fade and lose their travel. */
+  .animate-rise {
+    animation: fade-in 200ms ease both !important;
+  }
+  /* Press feedback is movement; the colour change on :active still says "pressed". */
+  .pressable:active {
+    transform: none !important;
+  }
+  /* Loops and shimmer stop — continuous motion is exactly what this setting asks to remove. */
+  .animate-pulse,
+  .animate-skeleton {
+    animation: none !important;
+  }
+  html {
     scroll-behavior: auto !important;
   }
+  /* Colour and opacity transitions are left alone on purpose. Components that MOVE on entry
+     (dialogs, sheets, toasts) switch to opacity-only with `motion-reduce:` in their own files,
+     because only they know which property is the travel. */
 }
 
 /* Skip link — the first thing a keyboard or screen-reader user meets. */
 .skip-link {
-  position: absolute;
-  left: 0.5rem;
-  top: -3rem;
-  z-index: 100;
-  padding: 0.5rem 0.875rem;
-  background: var(--accent);
-  color: var(--accent-text);
-  border-radius: var(--radius-sm);
-  transition: top var(--duration-fast) var(--ease);
+  position: fixed;
+  left: max(0.75rem, env(safe-area-inset-left, 0px));
+  top: 0.75rem;
+  z-index: var(--z-skip);
+  padding: 0.625rem 1rem;
+  border-radius: 9999px;
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+  font-weight: 500;
+  transform: translateY(-160%);
+  transition: transform var(--duration-base) var(--ease-out-strong);
 }
-.skip-link:focus {
-  top: 0.5rem;
+.skip-link:focus-visible {
+  transform: translateY(0);
 }
-
-/*
- * Links inside prose are underlined, not just coloured.
- *
- * WCAG 1.4.1: colour alone cannot be the only way to convey information, and a link in a
- * sentence is exactly that case — about 1 in 12 men cannot reliably distinguish the accent
- * blue from the body text around it. axe flagged this on /signup ("Already have an account?
- * Sign in"), and the same pattern was on twenty-six other links.
- *
- * `hover:underline` does not count: hover does not exist on touch, and a distinction you have
- * to discover is not a distinction.
- *
- * Standalone links that already read as controls — nav items, buttons, cards — are exempt,
- * because they are not inside a text block and an underline there is noise.
- */

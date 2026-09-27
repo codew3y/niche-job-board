@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Instrument_Serif } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import './prototype.css';
@@ -19,16 +18,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Only the Editorial direction uses a serif, and only here — it is not loaded by any
-// production route, so it costs the real pages nothing.
-const serif = Instrument_Serif({
-  weight: '400',
-  style: ['normal', 'italic'],
-  subsets: ['latin'],
-  variable: '--font-serif',
-  display: 'swap',
-});
-
 export default function PrototypesLayout({ children }: { children: ReactNode }) {
-  return <div className={`${serif.variable} contents`}>{children}</div>;
+  return <div className="contents">{children}</div>;
 }

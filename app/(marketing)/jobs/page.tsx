@@ -77,7 +77,7 @@ async function JobResults({ params }: { params: ReturnType<typeof jobSearchParam
         {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'}
         {nextCursor ? ' on this page' : ''}
       </p>
-      <div className="mt-2 overflow-hidden rounded-[--radius] border border-border-base">
+      <div className="mt-2 overflow-hidden rounded-md border border-border-base">
         {jobs.map((job) => (
           <JobCard key={job.id} job={job} saveable={saveable} saved={saved.has(job.id)} />
         ))}
@@ -86,7 +86,7 @@ async function JobResults({ params }: { params: ReturnType<typeof jobSearchParam
         <div className="mt-5 text-center">
           <a
             href={`/jobs?cursor=${nextCursor}`}
-            className="inline-flex h-10 items-center rounded-[--radius] border border-border-strong px-5 text-sm transition-colors duration-[--duration-fast] hover:bg-surface-sunken"
+            className="inline-flex h-10 items-center rounded-md border border-border-strong px-5 text-sm transition-colors duration-fast hover:bg-surface-sunken"
           >
             Load more
           </a>

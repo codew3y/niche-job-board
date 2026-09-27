@@ -27,7 +27,7 @@ export function DeleteAccount({ email }: { email: string }) {
       <button
         type="button"
         onClick={() => setArmed(true)}
-        className="rounded-[--radius] border border-danger px-4 py-2 text-sm font-medium text-danger transition-colors duration-[--duration-fast] hover:bg-danger-subtle"
+        className="rounded-md border border-danger px-4 py-2 text-sm font-medium text-danger transition-colors duration-fast hover:bg-danger-subtle"
       >
         Delete my account
       </button>
@@ -37,7 +37,7 @@ export function DeleteAccount({ email }: { email: string }) {
   return (
     <form action={action} className="space-y-4">
       {state?.ok === false && !errors && (
-        <p role="alert" className="rounded-[--radius-sm] bg-danger-subtle p-3 text-sm text-danger">
+        <p role="alert" className="rounded-sm bg-danger-subtle p-3 text-sm text-danger">
           {state.message}
         </p>
       )}
@@ -59,7 +59,7 @@ export function DeleteAccount({ email }: { email: string }) {
         <button
           type="button"
           onClick={() => setArmed(false)}
-          className="rounded-[--radius] px-4 py-2 text-sm text-text-muted hover:bg-surface-sunken hover:text-text"
+          className="rounded-md px-4 py-2 text-sm text-text-muted hover:bg-surface-sunken hover:text-text"
         >
           Cancel
         </button>
@@ -74,7 +74,7 @@ function Confirm() {
     <button
       type="submit"
       disabled={pending}
-      className="rounded-[--radius] bg-danger px-4 py-2 text-sm font-medium text-white transition-colors duration-[--duration-fast] hover:opacity-90 disabled:opacity-60"
+      className="rounded-md bg-danger px-4 py-2 text-sm font-medium text-white transition-colors duration-fast hover:opacity-90 disabled:opacity-60"
     >
       {pending ? 'Deleting…' : 'Delete my account permanently'}
     </button>

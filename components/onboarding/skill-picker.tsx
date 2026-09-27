@@ -65,7 +65,7 @@ export function SkillPicker({
                 <button
                   type="button"
                   onClick={() => setSelected((s) => s.filter((x) => x !== id))}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-accent-subtle px-3 py-1 text-sm transition-colors duration-[--duration-fast] hover:bg-border-base"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-accent-subtle px-3 py-1 text-sm transition-colors duration-fast hover:bg-border-base"
                 >
                   {skill?.name ?? id}
                   <span aria-hidden="true">×</span>
@@ -92,20 +92,20 @@ export function SkillPicker({
             : 'Search — try "n8n", "Golang", "WhatsApp"'
         }
         disabled={selected.length >= max}
-        className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3 placeholder:text-text-subtle"
+        className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3 placeholder:text-text-subtle"
       />
 
       {results.length > 0 && (
         <ul
           id="skill-results"
-          className="overflow-hidden rounded-[--radius] border border-border-base bg-surface-raised shadow-sm"
+          className="overflow-hidden rounded-md border border-border-base bg-surface-raised shadow-sm"
         >
           {results.map((o) => (
             <li key={o.id}>
               <button
                 type="button"
                 onClick={() => add(o.id)}
-                className="flex w-full items-baseline justify-between gap-3 px-3 py-2 text-left text-sm transition-colors duration-[--duration-fast] hover:bg-surface-sunken"
+                className="flex w-full items-baseline justify-between gap-3 px-3 py-2 text-left text-sm transition-colors duration-fast hover:bg-surface-sunken"
               >
                 <span>{o.name}</span>
                 <span className="text-xs text-text-subtle">{o.category}</span>

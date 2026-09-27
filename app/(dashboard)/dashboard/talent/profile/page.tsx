@@ -67,7 +67,7 @@ export default async function ProfilePage() {
           }
         />
 
-        <div className="space-y-4 rounded-[--radius] border border-border-base bg-surface-raised p-4">
+        <div className="space-y-4 rounded-md border border-border-base bg-surface-raised p-4">
           {/* The publish control comes FIRST and is never conditional. Putting advice above a
               button people are entitled to press reads as a gate even when it is not one. */}
           <form

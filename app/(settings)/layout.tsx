@@ -60,12 +60,12 @@ export default async function SettingsLayout({ children }: { children: ReactNode
           <div className="ml-auto flex items-center gap-2">
             <Link
               href="/select-role"
-              className="rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken hover:text-text"
+              className="rounded-sm px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken hover:text-text"
             >
               Finish setting up
             </Link>
             <form action={signOut}>
-              <button className="rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken hover:text-text">
+              <button className="rounded-sm px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken hover:text-text">
                 Sign out
               </button>
             </form>

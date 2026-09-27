@@ -38,7 +38,7 @@ export default async function ClientDashboard() {
       <section>
         <h2 className="mb-3 text-lg font-medium">Your jobs</h2>
         {jobs?.length ? (
-          <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+          <ul className="divide-y divide-border-base rounded-md border border-border-base">
             {jobs.map((job) => (
               <li key={job.id} className="flex items-center justify-between gap-4 p-4">
                 <span className="font-medium">{job.title}</span>

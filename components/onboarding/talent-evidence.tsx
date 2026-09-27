@@ -45,7 +45,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
   return (
     <div className="space-y-8">
       <div
-        className={`rounded-[--radius] border p-4 text-sm
+        className={`rounded-md border p-4 text-sm
           ${enough ? 'border-success/40 bg-success/5' : 'border-border-base bg-surface-sunken'}`}
       >
         {enough ? (
@@ -103,7 +103,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
         </div>
 
         {items.length > 0 && (
-          <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+          <ul className="divide-y divide-border-base rounded-md border border-border-base">
             {items.map((item) => (
               <li key={item.id} className="flex items-start justify-between gap-4 p-4">
                 <div className="min-w-0">
@@ -128,7 +128,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
 
         <form
           action={itemAction}
-          className="space-y-4 rounded-[--radius] border border-dashed border-border-strong p-4"
+          className="space-y-4 rounded-md border border-dashed border-border-strong p-4"
           noValidate
         >
           <Field
@@ -147,7 +147,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
               name="description"
               rows={3}
               aria-invalid={Boolean(itemFields?.description)}
-              className={`w-full rounded-[--radius] border bg-surface-raised p-3 placeholder:text-text-subtle
+              className={`w-full rounded-md border bg-surface-raised p-3 placeholder:text-text-subtle
                 ${itemFields?.description ? 'border-danger' : 'border-border-strong'}`}
               placeholder="Replaced a hand-rolled checkout with Stripe Checkout and webhook reconciliation."
             />

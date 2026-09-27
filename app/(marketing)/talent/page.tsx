@@ -65,7 +65,7 @@ async function TalentResults({ params }: { params: ReturnType<typeof talentSearc
       <p className="text-sm text-text-subtle" aria-live="polite">
         {talent.length} {talent.length === 1 ? 'developer' : 'developers'}
       </p>
-      <div className="mt-2 overflow-hidden rounded-[--radius] border border-border-base">
+      <div className="mt-2 overflow-hidden rounded-md border border-border-base">
         {talent.map((person) => (
           <TalentCard
             key={person.id}
@@ -79,7 +79,7 @@ async function TalentResults({ params }: { params: ReturnType<typeof talentSearc
         <div className="mt-5 text-center">
           <a
             href={`/talent?cursor=${nextCursor}`}
-            className="inline-flex h-10 items-center rounded-[--radius] border border-border-strong px-5 text-sm transition-colors duration-[--duration-fast] hover:bg-surface-sunken"
+            className="inline-flex h-10 items-center rounded-md border border-border-strong px-5 text-sm transition-colors duration-fast hover:bg-surface-sunken"
           >
             Load more
           </a>

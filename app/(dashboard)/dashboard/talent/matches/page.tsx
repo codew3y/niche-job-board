@@ -42,7 +42,7 @@ export default async function MatchesPage() {
       />
 
       {!profile.is_published && (
-        <p className="mb-6 rounded-[--radius] border border-warning/40 bg-warning/5 p-3 text-sm text-pretty">
+        <p className="mb-6 rounded-md border border-warning/40 bg-warning/5 p-3 text-sm text-pretty">
           Your profile is a draft, so clients cannot find you. Matching still runs, but nobody sees
           the result but you.{' '}
           <Link
@@ -92,7 +92,7 @@ export default async function MatchesPage() {
       )}
 
       {feed.state === 'ready' && (
-        <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+        <ul className="divide-y divide-border-base rounded-md border border-border-base">
           {feed.matches.map((match) => {
             const budget = formatRange(
               match.budgetMin,

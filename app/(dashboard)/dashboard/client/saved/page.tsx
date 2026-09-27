@@ -63,7 +63,7 @@ export default async function SavedTalentPage() {
           }
         />
       ) : (
-        <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+        <ul className="divide-y divide-border-base rounded-md border border-border-base">
           {rows.map(({ talent_profiles: p }) => {
             const rate = formatRange(p.hourly_rate_min, p.hourly_rate_max, p.currency, '/hr');
             return (

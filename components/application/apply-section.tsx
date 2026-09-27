@@ -51,7 +51,7 @@ export function ApplySection({
 
     case 'already-applied':
       return (
-        <div className="rounded-[--radius] border border-border-base bg-surface-sunken p-4">
+        <div className="rounded-md border border-border-base bg-surface-sunken p-4">
           <p className="font-medium">{STATUS_COPY[state.status] ?? state.status}</p>
           <p className="mt-1 text-sm">
             <Link
@@ -69,7 +69,7 @@ export function ApplySection({
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href={`/login?next=${encodeURIComponent(`/jobs/${slug}`)}`}
-            className="inline-flex h-11 items-center rounded-[--radius] bg-accent px-5 font-medium text-accent-text transition-colors duration-[--duration-fast] hover:bg-accent-hover"
+            className="inline-flex h-11 items-center rounded-md bg-accent px-5 font-medium text-accent-text transition-colors duration-fast hover:bg-accent-hover"
           >
             Sign in to apply
           </Link>
@@ -81,14 +81,14 @@ export function ApplySection({
 
     case 'no-profile':
       return (
-        <div className="rounded-[--radius] border border-border-base p-4">
+        <div className="rounded-md border border-border-base p-4">
           <p className="font-medium">You need a talent profile to apply</p>
           <p className="mt-1 text-sm text-text-muted text-pretty">
             Clients see the work behind an application, not just the note.
           </p>
           <Link
             href="/onboarding/talent/basics"
-            className="mt-3 inline-flex h-10 items-center rounded-[--radius] bg-accent px-4 text-sm font-medium text-accent-text"
+            className="mt-3 inline-flex h-10 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-text"
           >
             Create one
           </Link>
@@ -97,7 +97,7 @@ export function ApplySection({
 
     case 'unpublished':
       return (
-        <div className="rounded-[--radius] border border-warning/40 bg-warning/5 p-4">
+        <div className="rounded-md border border-warning/40 bg-warning/5 p-4">
           <p className="font-medium">Publish your profile first</p>
           <p className="mt-1 text-sm text-text-muted text-pretty">
             Otherwise the client receives your application but cannot see any of your work — which
@@ -105,7 +105,7 @@ export function ApplySection({
           </p>
           <Link
             href="/onboarding/talent/review"
-            className="mt-3 inline-flex h-10 items-center rounded-[--radius] bg-accent px-4 text-sm font-medium text-accent-text"
+            className="mt-3 inline-flex h-10 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-text"
           >
             Finish and publish
           </Link>

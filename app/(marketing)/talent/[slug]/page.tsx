@@ -105,7 +105,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
       {!p.is_published && isOwner && (
         <p
           role="status"
-          className="mb-6 rounded-[--radius] border border-warning/40 bg-warning/5 p-3 text-sm"
+          className="mb-6 rounded-md border border-warning/40 bg-warning/5 p-3 text-sm"
         >
           This is a draft — only you can see it.{' '}
           <Link

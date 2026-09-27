@@ -17,12 +17,12 @@ export function AuthCard({
       <div className="w-full max-w-sm">
         <Link
           href="/"
-          className="mb-8 block text-center text-sm font-semibold tracking-tight text-text-muted hover:text-text transition-colors duration-[--duration-fast]"
+          className="mb-8 block text-center text-sm font-semibold tracking-tight text-text-muted hover:text-text transition-colors duration-fast"
         >
           TechSelect
         </Link>
 
-        <div className="rounded-[--radius] border border-border-base bg-surface-raised p-6 shadow-sm">
+        <div className="rounded-md border border-border-base bg-surface-raised p-6 shadow-sm">
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
           {subtitle && <p className="mt-1.5 text-sm text-text-muted text-pretty">{subtitle}</p>}
           <div className="mt-6">{children}</div>

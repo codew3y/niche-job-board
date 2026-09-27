@@ -32,7 +32,7 @@ export function SkillFilter({
         id="filter-skill"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-9 max-w-[12rem] rounded-[--radius-sm] border px-2.5 text-sm transition-colors duration-[--duration-fast]
+        className={`h-9 max-w-[12rem] rounded-sm border px-2.5 text-sm transition-colors duration-fast
           ${value ? 'border-accent bg-accent-subtle' : 'border-border-strong bg-surface-raised'}`}
       >
         <option value="">Skill: any</option>

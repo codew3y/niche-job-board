@@ -77,7 +77,7 @@ export function JobForm({
           aria-invalid={Boolean(fields?.description)}
           aria-describedby="desc-hint"
           placeholder="The problem, what done looks like, and anything already tried."
-          className={`w-full rounded-[--radius] border bg-surface-raised p-3 placeholder:text-text-subtle
+          className={`w-full rounded-md border bg-surface-raised p-3 placeholder:text-text-subtle
             ${fields?.description ? 'border-danger' : 'border-border-strong'}`}
         />
         <p
@@ -98,7 +98,7 @@ export function JobForm({
           name="requirements"
           rows={3}
           defaultValue={str(job, 'requirements')}
-          className="w-full rounded-[--radius] border border-border-strong bg-surface-raised p-3"
+          className="w-full rounded-md border border-border-strong bg-surface-raised p-3"
         />
       </div>
 
@@ -120,7 +120,7 @@ export function JobForm({
                 defaultChecked={(str(job, 'engagement_type') || 'fixed') === value}
                 className="peer sr-only"
               />
-              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-[--duration-fast] peer-checked:border-accent peer-checked:bg-accent-subtle">
+              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-fast peer-checked:border-accent peer-checked:bg-accent-subtle">
                 {label}
               </span>
             </label>
@@ -152,7 +152,7 @@ export function JobForm({
             id="currency"
             name="currency"
             defaultValue={str(job, 'currency') || 'USD'}
-            className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3"
+            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
           >
             {['USD', 'EUR', 'GBP', 'CHF'].map((c) => (
               <option key={c} value={c}>
@@ -176,7 +176,7 @@ export function JobForm({
                 onChange={() => setLocationType(value)}
                 className="peer sr-only"
               />
-              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-[--duration-fast] peer-checked:border-accent peer-checked:bg-accent-subtle">
+              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-fast peer-checked:border-accent peer-checked:bg-accent-subtle">
                 {label}
               </span>
             </label>
@@ -205,7 +205,7 @@ export function JobForm({
             id="experienceLevel"
             name="experienceLevel"
             defaultValue={str(job, 'experience_level')}
-            className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3"
+            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
           >
             {LEVELS.map(([v, l]) => (
               <option key={v} value={v}>

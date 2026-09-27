@@ -35,13 +35,13 @@ export default async function MarketingLayout({ children }: { children: ReactNod
           <nav aria-label="Browse" className="flex items-center gap-1">
             <Link
               href="/jobs"
-              className="rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted transition-colors duration-[--duration-fast] hover:bg-surface-sunken hover:text-text"
+              className="rounded-sm px-3 py-1.5 text-sm text-text-muted transition-colors duration-fast hover:bg-surface-sunken hover:text-text"
             >
               Jobs
             </Link>
             <Link
               href="/talent"
-              className="rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted transition-colors duration-[--duration-fast] hover:bg-surface-sunken hover:text-text"
+              className="rounded-sm px-3 py-1.5 text-sm text-text-muted transition-colors duration-fast hover:bg-surface-sunken hover:text-text"
             >
               Developers
             </Link>
@@ -50,7 +50,7 @@ export default async function MarketingLayout({ children }: { children: ReactNod
             {dashboard ? (
               <Link
                 href={dashboard}
-                className="rounded-[--radius-sm] border border-border-strong px-3 py-1.5 transition-colors duration-[--duration-fast] hover:bg-surface-sunken"
+                className="rounded-sm border border-border-strong px-3 py-1.5 transition-colors duration-fast hover:bg-surface-sunken"
               >
                 Dashboard
               </Link>
@@ -58,13 +58,13 @@ export default async function MarketingLayout({ children }: { children: ReactNod
               <>
                 <Link
                   href="/login"
-                  className="rounded-[--radius-sm] px-3 py-1.5 text-text-muted hover:text-text"
+                  className="rounded-sm px-3 py-1.5 text-text-muted hover:text-text"
                 >
                   Sign in
                 </Link>
                 <Link
                   href="/signup"
-                  className="rounded-[--radius-sm] bg-accent px-3 py-1.5 font-medium text-accent-text transition-colors duration-[--duration-fast] hover:bg-accent-hover"
+                  className="rounded-sm bg-accent px-3 py-1.5 font-medium text-accent-text transition-colors duration-fast hover:bg-accent-hover"
                 >
                   Get started
                 </Link>

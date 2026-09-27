@@ -106,7 +106,7 @@ export default async function ApplicationsPage() {
         subtitle={`${rows.length} ${rows.length === 1 ? 'application' : 'applications'}.`}
       />
 
-      <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+      <ul className="divide-y divide-border-base rounded-md border border-border-base">
         {rows.map((row) => {
           const job = row.jobs;
           const budget = job

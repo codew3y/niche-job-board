@@ -64,14 +64,14 @@ export default async function ClientJobsPage() {
         <PageHeader title="Jobs" subtitle="Every brief you've written, published or not." />
         <Link
           href="/dashboard/client/jobs/new"
-          className="inline-flex h-10 items-center rounded-[--radius] bg-accent px-4 text-sm font-medium text-accent-text transition-colors duration-[--duration-fast] hover:bg-accent-hover"
+          className="inline-flex h-10 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-text transition-colors duration-fast hover:bg-accent-hover"
         >
           Post a job
         </Link>
       </div>
 
       {jobs?.length ? (
-        <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+        <ul className="divide-y divide-border-base rounded-md border border-border-base">
           {jobs.map((job) => {
             const n = applicationCount.get(job.id) ?? 0;
             const budget = formatRange(
@@ -104,7 +104,7 @@ export default async function ClientJobsPage() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link
                     href={`/dashboard/client/jobs/${job.id}/edit`}
-                    className="inline-flex h-9 items-center rounded-[--radius-sm] border border-border-strong px-3 text-sm transition-colors duration-[--duration-fast] hover:bg-surface-sunken"
+                    className="inline-flex h-9 items-center rounded-sm border border-border-strong px-3 text-sm transition-colors duration-fast hover:bg-surface-sunken"
                   >
                     Edit
                   </Link>

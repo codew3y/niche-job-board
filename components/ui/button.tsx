@@ -1,33 +1,61 @@
+import { cva, type VariantProps } from 'class-variance-authority';
 import type { ComponentProps } from 'react';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
+import { cn } from '@/lib/ui/cn';
 
-const base =
-  'inline-flex items-center justify-center gap-2 rounded-[--radius] font-medium ' +
-  // Name the properties. `transition-all` animates layout properties too, which is both
-  // slower and a source of jank nobody can find later.
-  'transition-[background-color,border-color,color,transform,box-shadow] ' +
-  'duration-[--duration-fast] ease-[--ease] ' +
-  // Buttons must feel pressed. Without this they read as images of buttons.
-  'active:scale-[0.98] ' +
-  'disabled:pointer-events-none disabled:opacity-50';
+/**
+ * The button. One component, one set of variants, and a `buttonStyles()` export so a <Link> can
+ * look like a button without being one — a link that navigates must stay a link, or the
+ * browser's own behaviour (open in new tab, the status bar URL, prefetch) disappears.
+ *
+ * SHAPE — a pill. It is the Editorial signature and it reads as pressable at a glance, which a
+ * rectangle beside rectangular cards does not.
+ *
+ * MOTION — `pressable`: scale(0.97) on :active, 100ms, strong ease-out. Answering on
+ * pointer-down is what makes a web button feel like a native one (mobile-native §5). Hover is
+ * colour only, and Tailwind v4's `hover:` is already gated to devices that can hover, so it never
+ * sticks after a tap.
+ *
+ * SIZES — `md` is 44px, the minimum comfortable touch target. `sm` (36px) is for dense rows on
+ * pointer devices and still clears WCAG 2.5.8's 24px floor.
+ */
+export const buttonStyles = cva(
+  [
+    'pressable inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-medium whitespace-nowrap',
+    'transition-[background-color,border-color,color,box-shadow,transform] duration-fast ease-out',
+    'disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50',
+    '[&_svg]:shrink-0',
+  ],
+  {
+    variants: {
+      variant: {
+        /** Ink on paper — the default action. Deliberately not the accent: see DESIGN.md §4.1. */
+        primary: 'bg-surface-inverse text-text-inverse shadow-xs hover:opacity-90',
+        /** The accent, for the ONE action a screen exists for (publish, apply, send). */
+        accent: 'bg-accent text-accent-text shadow-xs hover:bg-accent-hover',
+        secondary:
+          'border border-control/60 bg-surface-raised text-text hover:border-control hover:bg-surface-sunken',
+        ghost: 'text-text-muted hover:bg-surface-sunken hover:text-text',
+        danger: 'bg-danger text-accent-text shadow-xs hover:opacity-90',
+        /** A destructive action that is not the primary one — "Not a fit", "Delete". */
+        'danger-ghost': 'text-danger hover:bg-danger-subtle',
+      },
+      size: {
+        sm: 'h-9 px-3.5 text-sm [&_svg]:size-4',
+        md: 'h-11 px-5 text-[0.9375rem] [&_svg]:size-[1.125rem]',
+        lg: 'h-12 px-6 text-base [&_svg]:size-5',
+        icon: 'size-10 [&_svg]:size-[1.125rem]',
+        'icon-sm': 'size-9 [&_svg]:size-4',
+      },
+    },
+    defaultVariants: { variant: 'primary', size: 'md' },
+  },
+);
 
-const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-accent-text shadow-sm hover:bg-accent-hover',
-  secondary: 'border border-border-strong bg-surface-raised hover:bg-surface-sunken',
-  ghost: 'hover:bg-surface-sunken',
-  danger: 'bg-danger text-white hover:opacity-90',
-};
+export type ButtonProps = ComponentProps<'button'> & VariantProps<typeof buttonStyles>;
 
-const sizes = { sm: 'h-9 px-3 text-sm', md: 'h-11 px-5', lg: 'h-12 px-6 text-lg' };
-
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  className = '',
-  ...props
-}: ComponentProps<'button'> & { variant?: Variant; size?: keyof typeof sizes }) {
+export function Button({ variant, size, className, type = 'button', ...props }: ButtonProps) {
   return (
-    <button className={`${base} ${variants[variant]} ${sizes[size]} ${className}`} {...props} />
+    <button type={type} className={cn(buttonStyles({ variant, size }), className)} {...props} />
   );
 }

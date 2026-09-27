@@ -71,7 +71,7 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
               placeholder={hint}
               aria-invalid={state === 'not-https' || state === 'malformed'}
               aria-describedby={`link-${key}-status`}
-              className={`w-full rounded-[--radius] border bg-surface-raised p-3 placeholder:text-text-subtle
+              className={`w-full rounded-md border bg-surface-raised p-3 placeholder:text-text-subtle
                 ${state === 'not-https' || state === 'malformed' ? 'border-danger' : 'border-border-strong'}`}
             />
             <p
@@ -84,7 +84,7 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
         );
       })}
 
-      <div className="rounded-[--radius] border border-border-base bg-surface-sunken p-4">
+      <div className="rounded-md border border-border-base bg-surface-sunken p-4">
         <p className="text-sm font-medium">On your public profile</p>
         {anyValid ? (
           <p className="mt-2 flex flex-wrap gap-4 text-sm">

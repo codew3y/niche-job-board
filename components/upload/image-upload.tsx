@@ -135,7 +135,7 @@ export function ImageUpload({
             const file = e.dataTransfer.files[0];
             if (file) void accept(file);
           }}
-          className={`rounded-[--radius] border-2 border-dashed p-6 text-center transition-colors duration-[--duration-fast]
+          className={`rounded-md border-2 border-dashed p-6 text-center transition-colors duration-fast
             ${dragging ? 'border-accent bg-accent-subtle' : 'border-border-strong'}`}
         >
           {/*
@@ -167,14 +167,14 @@ export function ImageUpload({
       )}
 
       {stage === 'describing' && pending && (
-        <div className="space-y-3 rounded-[--radius] border border-border-base p-4">
+        <div className="space-y-3 rounded-md border border-border-base p-4">
           <div className="flex gap-4">
             {/* eslint-disable-next-line @next/next/no-img-element -- a blob: preview of a
                 local file, which next/image cannot take and does not need to optimise. */}
             <img
               src={pending.preview}
               alt=""
-              className="h-24 w-24 shrink-0 rounded-[--radius-sm] border border-border-base object-cover"
+              className="h-24 w-24 shrink-0 rounded-sm border border-border-base object-cover"
             />
             <div className="min-w-0 flex-1 space-y-1.5">
               <label htmlFor={`${inputId}-alt`} className="block text-sm font-medium">
@@ -189,7 +189,7 @@ export function ImageUpload({
                 required
                 aria-describedby={`${inputId}-alt-hint`}
                 placeholder="The checkout screen, showing the saved-card step"
-                className="w-full rounded-[--radius] border border-border-strong bg-surface p-2 text-sm placeholder:text-text-subtle"
+                className="w-full rounded-md border border-border-strong bg-surface p-2 text-sm placeholder:text-text-subtle"
               />
               <p id={`${inputId}-alt-hint`} className="text-xs text-text-muted">
                 Required. What someone would miss if the image did not load.

@@ -18,7 +18,7 @@ export function MessageList({ messages }: { messages: ThreadMessage[] }) {
       {messages.map((m) => (
         <li key={m.id} className={m.mine ? 'flex justify-end' : 'flex justify-start'}>
           <div
-            className={`max-w-[min(34rem,85%)] rounded-[--radius] px-4 py-2.5 ${
+            className={`max-w-[min(34rem,85%)] rounded-md px-4 py-2.5 ${
               m.redacted
                 ? 'border border-dashed border-border-strong text-text-subtle italic'
                 : m.mine

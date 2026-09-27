@@ -41,7 +41,7 @@ export function ContactDialog({
       <dialog
         ref={ref}
         aria-labelledby="contact-title"
-        className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-[--radius] border border-border-base bg-surface-raised p-0 text-text shadow-md backdrop:bg-black/40"
+        className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-md border border-border-base bg-surface-raised p-0 text-text shadow-md backdrop:bg-black/40"
       >
         <form action={action} className="space-y-4 p-6">
           <input type="hidden" name="talentId" value={talentId} />
@@ -66,7 +66,7 @@ export function ContactDialog({
                 id="jobId"
                 name="jobId"
                 defaultValue=""
-                className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface px-3"
+                className="h-11 w-full rounded-md border border-border-strong bg-surface px-3"
               >
                 <option value="">General enquiry</option>
                 {jobs.map((j) => (
@@ -91,7 +91,7 @@ export function ContactDialog({
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="What the project is, roughly what it pays, and why you're asking them specifically."
-              className={`w-full rounded-[--radius] border bg-surface p-3 placeholder:text-text-subtle ${
+              className={`w-full rounded-md border bg-surface p-3 placeholder:text-text-subtle ${
                 state?.ok === false && state.fields?.body ? 'border-danger' : 'border-border-strong'
               }`}
             />
@@ -101,10 +101,7 @@ export function ContactDialog({
           </div>
 
           {state?.ok === false && !state.fields && (
-            <p
-              role="alert"
-              className="rounded-[--radius-sm] bg-danger-subtle p-3 text-sm text-danger"
-            >
+            <p role="alert" className="rounded-sm bg-danger-subtle p-3 text-sm text-danger">
               {state.message}
               {state.message.includes('client profile') && (
                 <>

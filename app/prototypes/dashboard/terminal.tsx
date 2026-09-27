@@ -137,7 +137,7 @@ export function TerminalDashboard() {
 
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-(--z-nav) grid grid-cols-5 border-t border-white/10 bg-[#0b0d0c]/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-nav grid grid-cols-5 border-t border-white/10 bg-[#0b0d0c]/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
       >
         {NAV.map(([Icon, label, active]) => (
           <a

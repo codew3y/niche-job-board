@@ -40,10 +40,7 @@ export function CompanyForm({ company }: { company: Company }) {
   return (
     <form action={action} className="space-y-4">
       {state?.ok === false && (
-        <div
-          role="alert"
-          className="rounded-[--radius-sm] bg-danger-subtle p-3 text-sm text-danger"
-        >
+        <div role="alert" className="rounded-sm bg-danger-subtle p-3 text-sm text-danger">
           <p>{state.message}</p>
           {homeless.length > 0 && (
             <ul className="mt-1 list-disc pl-5">
@@ -91,7 +88,7 @@ export function CompanyForm({ company }: { company: Company }) {
           name="companySize"
           defaultValue={company.company_size ?? ''}
           aria-invalid={fields?.companySize ? true : undefined}
-          className={`h-11 w-full rounded-[--radius] border bg-surface-raised px-3 ${
+          className={`h-11 w-full rounded-md border bg-surface-raised px-3 ${
             fields?.companySize ? 'border-danger' : 'border-border-strong'
           }`}
         >
@@ -117,7 +114,7 @@ export function CompanyForm({ company }: { company: Company }) {
           maxLength={2000}
           aria-invalid={fields?.about ? true : undefined}
           placeholder="What you build and who for. A developer reads this before deciding whether to apply."
-          className={`w-full rounded-[--radius] border bg-surface-raised p-3 placeholder:text-text-subtle ${
+          className={`w-full rounded-md border bg-surface-raised p-3 placeholder:text-text-subtle ${
             fields?.about ? 'border-danger' : 'border-border-strong'
           }`}
         />

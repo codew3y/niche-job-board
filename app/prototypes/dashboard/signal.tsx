@@ -34,7 +34,7 @@ export function SignalDashboard() {
         .v-signal .card { background: #fff; border: 1px solid #e7e7ec; box-shadow: 0 1px 2px rgba(15,17,21,.04), 0 8px 24px -12px rgba(15,17,21,.08); }
       `}</style>
 
-      <header className="sticky top-0 z-(--z-nav) border-b border-[#e7e7ec] bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-nav border-b border-[#e7e7ec] bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
             <span className="grid size-7 place-items-center rounded-lg bg-[#3448e0] text-white">
@@ -164,7 +164,7 @@ export function SignalDashboard() {
 
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-(--z-nav) grid grid-cols-5 border-t border-[#e7e7ec] bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-nav grid grid-cols-5 border-t border-[#e7e7ec] bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl sm:hidden"
       >
         {NAV.map(([Icon, label], i) => (
           <a

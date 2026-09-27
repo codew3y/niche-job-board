@@ -38,7 +38,7 @@ export function RoleSettings({
         return (
           <li
             key={role}
-            className={`rounded-[--radius] border p-5 ${isActive ? 'border-accent' : 'border-border-base'}`}
+            className={`rounded-md border p-5 ${isActive ? 'border-accent' : 'border-border-base'}`}
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">

@@ -50,7 +50,7 @@ export function CompanyForm({ client }: { client: Row }) {
           rows={4}
           defaultValue={str(client, 'about')}
           placeholder="What the company does, and what you need help with."
-          className="w-full rounded-[--radius] border border-border-strong bg-surface-raised p-3 placeholder:text-text-subtle"
+          className="w-full rounded-md border border-border-strong bg-surface-raised p-3 placeholder:text-text-subtle"
         />
       </div>
       {state?.ok === false && !state.fields && (
@@ -112,7 +112,7 @@ export function FirstJobForm({
           aria-invalid={Boolean(fields?.description)}
           aria-describedby="desc-hint"
           placeholder="The problem, what done looks like, and anything that has already been tried."
-          className={`w-full rounded-[--radius] border bg-surface-raised p-3 placeholder:text-text-subtle
+          className={`w-full rounded-md border bg-surface-raised p-3 placeholder:text-text-subtle
             ${fields?.description ? 'border-danger' : 'border-border-strong'}`}
         />
         <p
@@ -141,7 +141,7 @@ export function FirstJobForm({
                 defaultChecked={(str(job, 'engagement_type') || 'fixed') === value}
                 className="peer sr-only"
               />
-              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-[--duration-fast] peer-checked:border-accent peer-checked:bg-accent-subtle">
+              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-fast peer-checked:border-accent peer-checked:bg-accent-subtle">
                 {label}
               </span>
             </label>
@@ -173,7 +173,7 @@ export function FirstJobForm({
             id="currency"
             name="currency"
             defaultValue={str(job, 'currency') || 'USD'}
-            className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3"
+            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
           >
             {['USD', 'EUR', 'GBP', 'CHF'].map((c) => (
               <option key={c} value={c}>
@@ -197,7 +197,7 @@ export function FirstJobForm({
                 onChange={() => setLocationType(value)}
                 className="peer sr-only"
               />
-              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-[--duration-fast] peer-checked:border-accent peer-checked:bg-accent-subtle">
+              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-fast peer-checked:border-accent peer-checked:bg-accent-subtle">
                 {label}
               </span>
             </label>
@@ -243,7 +243,7 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
 
   return (
     <div className="space-y-6">
-      <article className="rounded-[--radius] border border-border-base bg-surface-raised p-5">
+      <article className="rounded-md border border-border-base bg-surface-raised p-5">
         <h2 className="font-medium">{str(job, 'title')}</h2>
         <p className="mt-2 whitespace-pre-line text-sm text-text-muted">
           {str(job, 'description')}

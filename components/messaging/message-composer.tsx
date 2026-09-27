@@ -36,7 +36,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
         required
         maxLength={5000}
         placeholder="Write a message…"
-        className={`w-full rounded-[--radius] border bg-surface p-3 placeholder:text-text-subtle ${
+        className={`w-full rounded-md border bg-surface p-3 placeholder:text-text-subtle ${
           state?.ok === false ? 'border-danger' : 'border-border-strong'
         }`}
       />

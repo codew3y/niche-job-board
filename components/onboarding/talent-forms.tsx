@@ -40,7 +40,7 @@ export function TalentBasicsForm({ profile }: { profile: Profile }) {
           aria-invalid={Boolean(fields?.bio)}
           aria-describedby="bio-hint"
           placeholder="What do you build? What stack? What kind of client? Name a piece of work you're proud of."
-          className={`w-full rounded-[--radius] border bg-surface-raised p-3 placeholder:text-text-subtle
+          className={`w-full rounded-md border bg-surface-raised p-3 placeholder:text-text-subtle
             ${fields?.bio ? 'border-danger' : 'border-border-strong'}`}
         />
         {/* Said plainly because it is true and it changes behaviour: this text is what the
@@ -125,7 +125,7 @@ export function TalentSkillsForm({
             id="currency"
             name="currency"
             defaultValue={str(profile, 'currency') || 'USD'}
-            className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3"
+            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
           >
             {CURRENCIES.map((c) => (
               <option key={c} value={c}>
@@ -148,7 +148,7 @@ export function TalentSkillsForm({
                 defaultChecked={(str(profile, 'availability') || 'part_time') === value}
                 className="peer sr-only"
               />
-              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-[--duration-fast] peer-checked:border-accent peer-checked:bg-accent-subtle">
+              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-fast peer-checked:border-accent peer-checked:bg-accent-subtle">
                 {label}
               </span>
             </label>

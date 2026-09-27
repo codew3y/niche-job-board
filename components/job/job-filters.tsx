@@ -58,7 +58,7 @@ export function JobFilters({ skills }: { skills: [string, SkillOption[]][] }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search — try “Stripe”, “n8n”, “WooCommerce”"
-          className="h-11 w-full rounded-[--radius] border border-border-strong bg-surface-raised px-3 placeholder:text-text-subtle"
+          className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3 placeholder:text-text-subtle"
         />
       </form>
 
@@ -103,7 +103,7 @@ export function JobFilters({ skills }: { skills: [string, SkillOption[]][] }) {
               setQ('');
               startTransition(() => router.push(pathname));
             }}
-            className="h-9 rounded-[--radius-sm] px-3 text-sm text-text-muted transition-colors duration-[--duration-fast] hover:bg-surface-sunken hover:text-text"
+            className="h-9 rounded-sm px-3 text-sm text-text-muted transition-colors duration-fast hover:bg-surface-sunken hover:text-text"
           >
             Clear filters
           </button>
@@ -138,7 +138,7 @@ function Select({
         id={`filter-${label}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-9 rounded-[--radius-sm] border px-2.5 text-sm transition-colors duration-[--duration-fast]
+        className={`h-9 rounded-sm border px-2.5 text-sm transition-colors duration-fast
           ${value ? 'border-accent bg-accent-subtle' : 'border-border-strong bg-surface-raised'}`}
       >
         <option value="">{label}: any</option>

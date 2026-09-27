@@ -76,7 +76,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
       {(closed || expired) && (
         <p
           role="status"
-          className="mb-6 rounded-[--radius] border border-border-strong bg-surface-sunken p-3 text-sm"
+          className="mb-6 rounded-md border border-border-strong bg-surface-sunken p-3 text-sm"
         >
           {closed ? 'This job is closed.' : 'The deadline for this job has passed.'} It stays
           visible so existing applicants keep their record of it.
@@ -167,7 +167,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
       )}
 
       {job.client_profiles?.about && (
-        <section className="mt-8 rounded-[--radius] border border-border-base bg-surface-raised p-5">
+        <section className="mt-8 rounded-md border border-border-base bg-surface-raised p-5">
           <h2 className="font-medium">About {job.client_profiles.company_name}</h2>
           <p className="mt-1.5 text-sm text-text-muted text-pretty">{job.client_profiles.about}</p>
           {job.client_profiles.website && (

@@ -15,7 +15,7 @@ import type { CandidateMatch } from '@/lib/services/matches';
  */
 export function SuggestedList({ matches }: { matches: CandidateMatch[] }) {
   return (
-    <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+    <ul className="divide-y divide-border-base rounded-md border border-border-base">
       {matches.map((m) => (
         <li key={m.talentId} className="p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">

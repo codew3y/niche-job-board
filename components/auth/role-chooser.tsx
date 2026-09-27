@@ -33,8 +33,8 @@ export function RoleChooser() {
           return (
             <label
               key={role.value}
-              className={`block cursor-pointer rounded-[--radius] border p-4
-                transition-[border-color,background-color] duration-[--duration-fast] ease-[--ease]
+              className={`block cursor-pointer rounded-md border p-4
+                transition-[border-color,background-color] duration-fast ease-out
                 ${checked ? 'border-accent bg-accent-subtle' : 'border-border-strong hover:bg-surface-sunken'}`}
             >
               <input

@@ -65,7 +65,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
       </header>
 
       {thread.blocked && (
-        <p className="mt-4 rounded-[--radius-sm] bg-surface-sunken p-3 text-sm text-text-muted">
+        <p className="mt-4 rounded-sm bg-surface-sunken p-3 text-sm text-text-muted">
           You blocked {name}. Nothing moves in either direction while that stands — and they have
           not been told. Unblock to reopen the conversation.
         </p>
@@ -93,7 +93,7 @@ function MarkReadButton({ unread }: { unread: boolean }) {
   return (
     <button
       type="submit"
-      className="mb-3 self-start rounded-[--radius-sm] px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken"
+      className="mb-3 self-start rounded-sm px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken"
     >
       Mark as read
     </button>

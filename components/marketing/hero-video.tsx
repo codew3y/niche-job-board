@@ -149,7 +149,7 @@ export function HeroVideo({ poster, webm, mp4, label, className = '' }: Props) {
           onPlaying={() => setPlaying(true)}
           // Opacity only — the poster underneath is the same frame, so a fade reads as the
           // photograph starting to move rather than one image replacing another.
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-(--duration-slow) ease-(--ease-out) ${
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-slow ease-out ${
             playing ? 'opacity-100' : 'opacity-0'
           }`}
         >
@@ -167,7 +167,7 @@ export function HeroVideo({ poster, webm, mp4, label, className = '' }: Props) {
           // ("Play, toggle button, pressed").
           aria-pressed={paused}
           aria-label={`Pause background video: ${label}`}
-          className="pressable absolute right-4 bottom-4 z-(--z-raised) grid size-10 place-items-center rounded-full bg-black/45 text-white backdrop-blur-sm transition-[background-color,transform] duration-(--duration-fast) ease-(--ease-out) hover:bg-black/65 focus-visible:outline-white"
+          className="pressable absolute right-4 bottom-4 z-raised grid size-10 place-items-center rounded-full bg-media-text/50 text-media-surface backdrop-blur-sm transition-[background-color,transform] duration-fast ease-out hover:bg-media-text/70 focus-visible:outline-media-surface"
         >
           {paused ? <Play aria-hidden="true" size={16} /> : <Pause aria-hidden="true" size={16} />}
         </button>

@@ -29,7 +29,7 @@ export function JobCard({
     .slice(0, 5);
 
   return (
-    <article className="border-b border-border-base p-5 transition-colors duration-[--duration-fast] last:border-0 hover:bg-surface-sunken">
+    <article className="border-b border-border-base p-5 transition-colors duration-fast last:border-0 hover:bg-surface-sunken">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <h2 className="text-base font-medium">
           {/* The whole card is not a link: that would swallow the skill tags and make the

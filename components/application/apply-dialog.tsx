@@ -42,7 +42,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: string; jobTitle: stri
       <dialog
         ref={ref}
         aria-labelledby="apply-title"
-        className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-[--radius] border border-border-base bg-surface-raised p-0 text-text shadow-md backdrop:bg-black/40"
+        className="m-auto w-[min(32rem,calc(100vw-2rem))] rounded-md border border-border-base bg-surface-raised p-0 text-text shadow-md backdrop:bg-black/40"
       >
         <div className="p-6">
           <form action={action} className="space-y-4">
@@ -67,7 +67,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: string; jobTitle: stri
                 onChange={(e) => setNote(e.target.value)}
                 aria-describedby="coverNote-hint"
                 placeholder="Which part of this have you done before? Point at the project on your profile that proves it."
-                className={`w-full rounded-[--radius] border bg-surface p-3 placeholder:text-text-subtle
+                className={`w-full rounded-md border bg-surface p-3 placeholder:text-text-subtle
                     ${state?.ok === false && state.fields?.coverNote ? 'border-danger' : 'border-border-strong'}`}
               />
               <p
@@ -81,10 +81,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: string; jobTitle: stri
             </div>
 
             {state?.ok === false && !state.fields && (
-              <p
-                role="alert"
-                className="rounded-[--radius-sm] bg-danger-subtle p-3 text-sm text-danger"
-              >
+              <p role="alert" className="rounded-sm bg-danger-subtle p-3 text-sm text-danger">
                 {state.message}
                 {state.message.includes('Publish your profile') && (
                   <>

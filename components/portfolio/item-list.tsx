@@ -90,7 +90,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
               setDragIndex(null);
               setOverIndex(null);
             }}
-            className={`rounded-[--radius] border bg-surface-raised p-4 transition-colors duration-[--duration-fast]
+            className={`rounded-md border bg-surface-raised p-4 transition-colors duration-fast
               ${dragIndex === i ? 'opacity-50' : ''}
               ${overIndex === i && dragIndex !== i ? 'border-accent bg-accent-subtle' : 'border-border-base'}`}
           >
@@ -123,7 +123,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
                   onClick={() => move(i, -1)}
                   disabled={i === 0}
                   aria-label={`Move ${item.title} up`}
-                  className="grid h-8 w-8 place-items-center rounded-[--radius-sm] transition-colors duration-[--duration-fast] hover:bg-surface-sunken disabled:opacity-30"
+                  className="grid h-8 w-8 place-items-center rounded-sm transition-colors duration-fast hover:bg-surface-sunken disabled:opacity-30"
                 >
                   <span aria-hidden="true">↑</span>
                 </button>
@@ -132,7 +132,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
                   onClick={() => move(i, 1)}
                   disabled={i === order.length - 1}
                   aria-label={`Move ${item.title} down`}
-                  className="grid h-8 w-8 place-items-center rounded-[--radius-sm] transition-colors duration-[--duration-fast] hover:bg-surface-sunken disabled:opacity-30"
+                  className="grid h-8 w-8 place-items-center rounded-sm transition-colors duration-fast hover:bg-surface-sunken disabled:opacity-30"
                 >
                   <span aria-hidden="true">↓</span>
                 </button>

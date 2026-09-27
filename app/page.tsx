@@ -49,7 +49,7 @@ export default async function Home({
       {deleted && (
         <p
           role="status"
-          className="mx-auto mb-10 max-w-xl rounded-[--radius] border border-border-base bg-surface-sunken p-4 text-center text-sm text-text-muted text-pretty"
+          className="mx-auto mb-10 max-w-xl rounded-md border border-border-base bg-surface-sunken p-4 text-center text-sm text-text-muted text-pretty"
         >
           Your account has been deleted. Anything you posted is gone; conversations you were part of
           survive with your side removed, as the privacy policy sets out.
@@ -69,13 +69,13 @@ export default async function Home({
             <>
               <Link
                 href={dashboard}
-                className="inline-flex h-11 items-center rounded-[--radius] bg-accent px-6 font-medium text-accent-text shadow-sm transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-accent-hover active:scale-[0.98]"
+                className="inline-flex h-11 items-center rounded-md bg-accent px-6 font-medium text-accent-text shadow-sm transition-[background-color,transform] duration-fast ease-out hover:bg-accent-hover active:scale-[0.98]"
               >
                 {displayName ? `Continue as ${displayName.split(' ')[0]}` : 'Go to your dashboard'}
               </Link>
               <Link
                 href="/jobs"
-                className="inline-flex h-11 items-center rounded-[--radius] border border-border-strong px-6 font-medium transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-surface-sunken active:scale-[0.98]"
+                className="inline-flex h-11 items-center rounded-md border border-border-strong px-6 font-medium transition-[background-color,transform] duration-fast ease-out hover:bg-surface-sunken active:scale-[0.98]"
               >
                 Browse jobs
               </Link>
@@ -91,13 +91,13 @@ export default async function Home({
               */}
               <Link
                 href="/signup?role=talent"
-                className="inline-flex h-11 items-center rounded-[--radius] bg-accent px-6 font-medium text-accent-text shadow-sm transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-accent-hover active:scale-[0.98]"
+                className="inline-flex h-11 items-center rounded-md bg-accent px-6 font-medium text-accent-text shadow-sm transition-[background-color,transform] duration-fast ease-out hover:bg-accent-hover active:scale-[0.98]"
               >
                 I&rsquo;m looking for work
               </Link>
               <Link
                 href="/signup?role=client"
-                className="inline-flex h-11 items-center rounded-[--radius] border border-border-strong px-6 font-medium transition-[background-color,transform] duration-[--duration-fast] ease-[--ease] hover:bg-surface-sunken active:scale-[0.98]"
+                className="inline-flex h-11 items-center rounded-md border border-border-strong px-6 font-medium transition-[background-color,transform] duration-fast ease-out hover:bg-surface-sunken active:scale-[0.98]"
               >
                 I&rsquo;m hiring
               </Link>
@@ -133,7 +133,7 @@ export default async function Home({
             body: 'Clients see ranked candidates for a brief. Developers see briefs that fit what they have built.',
           },
         ].map((card) => (
-          <div key={card.title} className="rounded-[--radius] border border-border-base p-5">
+          <div key={card.title} className="rounded-md border border-border-base p-5">
             <h2 className="font-medium">{card.title}</h2>
             <p className="mt-1.5 text-sm text-text-muted text-pretty">{card.body}</p>
           </div>

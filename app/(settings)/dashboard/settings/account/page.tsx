@@ -29,7 +29,7 @@ export default async function AccountPage() {
         </p>
       </div>
 
-      <section className="space-y-4 rounded-[--radius] border border-danger/40 p-5">
+      <section className="space-y-4 rounded-md border border-danger/40 p-5">
         <div>
           <h2 className="font-medium text-danger">Delete your account</h2>
           {/* The same words as /privacy, on purpose. A deletion screen that describes the

@@ -48,7 +48,7 @@ const ACTION_LABEL: Record<string, string> = {
  */
 export function CandidateList({ candidates }: { candidates: Candidate[] }) {
   return (
-    <ul className="divide-y divide-border-base rounded-[--radius] border border-border-base">
+    <ul className="divide-y divide-border-base rounded-md border border-border-base">
       {candidates.map((c) => {
         const next = allowedStatusTransitions.client[
           c.status as keyof typeof allowedStatusTransitions.client

@@ -89,7 +89,7 @@ export function ReportDialog({
     <dialog
       ref={dialogRef}
       aria-labelledby="report-title"
-      className="m-auto w-[min(30rem,calc(100vw-2rem))] rounded-[--radius] border border-border-base bg-surface-raised p-0 text-text shadow-md backdrop:bg-black/40"
+      className="m-auto w-[min(30rem,calc(100vw-2rem))] rounded-md border border-border-base bg-surface-raised p-0 text-text shadow-md backdrop:bg-black/40"
     >
       <div className="p-6">
         {state?.ok ? (
@@ -135,7 +135,7 @@ export function ReportDialog({
                 required
                 maxLength={1000}
                 placeholder="Spam, abuse, a scam, something else — and anything we would need to see it."
-                className={`w-full rounded-[--radius] border bg-surface p-3 placeholder:text-text-subtle ${
+                className={`w-full rounded-md border bg-surface p-3 placeholder:text-text-subtle ${
                   state?.ok === false && state.fields?.reason
                     ? 'border-danger'
                     : 'border-border-strong'
