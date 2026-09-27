@@ -4,8 +4,25 @@ A job board for **software, web and automation work**. Anyone can list — show 
 Freelancers publish evidence of real work — an external portfolio, a GitHub, or in-app project
 write-ups — and matching is semantic in both directions rather than keyword-driven.
 
-> Status: **Phase 2 — Foundation & Auth.** The walking skeleton is up: auth, role selection,
-> onboarding and empty dashboards. See [`PROJECT.md`](./PROJECT.md) for the full plan.
+> Status: **Phase 5 — Audit, deploy & document.** The product is complete and deployed:
+> auth and onboarding, profiles and portfolios, job posting and applications, messaging,
+> and semantic matching in both directions. See [`PROJECT.md`](./PROJECT.md) for the plan and
+> what remains.
+
+## Screenshots
+
+Regenerate with `CAPTURE_SCREENSHOTS=1 npx playwright test e2e/screenshots.spec.ts`, which
+captures them from the real app against seeded data — so they cannot quietly stop matching what
+ships.
+
+| | |
+| --- | --- |
+| ![Landing page](./docs/screenshots/01-landing.png) | ![Browsing jobs](./docs/screenshots/02-browse-jobs.png) |
+| Asks which side you are on before asking for an account | Search and filters, no AI required |
+| ![Browsing developers](./docs/screenshots/03-browse-talent.png) | ![A public profile](./docs/screenshots/04-talent-profile.png) |
+| Everyone who wants to be listed is listed | Evidence of real work, judged by the client |
+| ![Developer dashboard](./docs/screenshots/05-dashboard.png) | |
+| The empty state is the honest one — nothing is padded | |
 
 ## Stack
 
@@ -66,7 +83,7 @@ Two GitHub Actions, both free-tier friendly:
 ### Tests
 
 ```bash
-npm test                      # everything (153)
+npm test                      # everything (477 unit + database)
 npm run test:unit             # no database needed
 npm run test:db               # RLS + deletion, needs a running database
 ```
@@ -79,12 +96,13 @@ database it measured.
 
 | Path                       | What lives there                                                                                            |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `lib/db/schema/`           | Drizzle schema — 20 tables, 40 RLS policies. **The source of truth**; `docs/schema.md` is generated from it |
+| `lib/db/schema/`           | Drizzle schema — 20 tables, 42 RLS policies. **The source of truth**; `docs/schema.md` is generated from it |
 | `lib/db/migrations/`       | Generated SQL plus hand-written triggers and grants                                                         |
 | `lib/schemas/`             | Zod schemas, shared by client forms and server actions                                                      |
 | `lib/actions/`             | Server actions. Order is always: auth → authz → validate → act → revalidate                                 |
 | `lib/seeds/skills.seed.ts` | The 126-skill taxonomy, with sources per row                                                                |
-| `lib/eval/`                | Hand-labelled match evaluation set for Phase 4                                                              |
+| `lib/eval/`                | Hand-labelled match evaluation set, plus the scoring CLI (`npm run eval`)                                   |
+| `lib/matching/`            | The matching pipeline: text, embeddings, retrieval, re-ranking, cache, budget                               |
 
 ## Things worth knowing before changing anything
 
@@ -104,7 +122,8 @@ database it measured.
 
 ## Documentation
 
-[`PROJECT.md`](./PROJECT.md) · [schema](./docs/schema.md) · [API surface](./docs/api.md) ·
+[`PROJECT.md`](./PROJECT.md) · [architecture](./docs/architecture.md) ·
+[matching](./docs/matching.md) · [schema](./docs/schema.md) · [API surface](./docs/api.md) ·
 [components](./docs/components.md) · [taxonomy](./docs/taxonomy.md) ·
 [eval set](./docs/eval-set.md) · [constraints](./docs/constraints.md) ·
-[ADRs](./docs/decisions/)
+[ADRs](./docs/decisions/) · [contributing](./CONTRIBUTING.md)

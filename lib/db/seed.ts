@@ -469,12 +469,26 @@ async function main() {
     // Only base-schema columns. GoTrue adds columns (email_confirmed_at, etc.) through its
     // own migrations, and this script must not care how far those have run — it seeds data
     // for browse and matching, not logins.
+    //
+    // The token columns are written as '' rather than left NULL, which looks like pedantry
+    // and is not. GoTrue is Go: it scans those columns into a plain `string`, and a NULL
+    // makes the whole request fail with
+    //
+    //   unable to fetch records: sql: Scan error on column index 3, name "confirmation_token":
+    //   converting NULL to string is unsupported
+    //
+    // That is a 500 on GET /admin/users for ANY page containing a seeded row — so the admin
+    // user list breaks as soon as the seed runs, from data this script wrote.
     const [row] = await db.execute<{ id: string }>(sql`
       insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
-                              created_at, updated_at, raw_app_meta_data)
+                              created_at, updated_at, raw_app_meta_data,
+                              confirmation_token, recovery_token, email_change,
+                              email_change_token_new, email_change_token_current,
+                              phone_change, phone_change_token, reauthentication_token)
       values (gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated',
               'authenticated', ${`${handle}@example.test`}, 'seed-not-a-real-password',
-              now(), now(), '{"seed":"techselect"}'::jsonb)
+              now(), now(), '{"seed":"techselect"}'::jsonb,
+              '', '', '', '', '', '', '', '')
       returning id`);
     const id = row!.id;
     await db.insert(userProfiles).values({ userId: id, displayName });

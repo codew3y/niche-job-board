@@ -60,6 +60,31 @@ export type Seeded = {
 };
 
 /**
+ * GoTrue's admin list endpoint 500s above a page size it does not document.
+ *
+ * `perPage: 200` returns `{ data: null, error: 500 Database error finding users }`, and the
+ * old `data?.users ?? []` turned that into an empty list — so `clearStrays()` reported nothing
+ * to clear, every run, while the database accumulated 94 fixture accounts and 26 fixture jobs.
+ * They then leaked into the screenshots taken off this database, which is how it was noticed.
+ *
+ * 50 is the largest page observed to work. Pagination past page 1 returns nothing here, so
+ * rather than trusting the page cursor this re-reads page 1 after each batch — deletions
+ * shrink the list, so the next batch surfaces on its own.
+ */
+const PAGE = 50;
+
+async function listStrays(db: ReturnType<typeof admin>) {
+  const { data, error } = await db.auth.admin.listUsers({ perPage: PAGE });
+  if (error) {
+    throw new Error(
+      `[e2e] could not list users to clear strays: ${error.message}. ` +
+        'Silently treating this as "nothing to clear" is what let 94 accounts accumulate.',
+    );
+  }
+  return data.users.filter((u) => u.email?.startsWith('e2e-'));
+}
+
+/**
  * Remove fixtures left by a run that died before its teardown.
  *
  * Without this the database accumulates identically-worded profiles, and assertions that match
@@ -68,10 +93,18 @@ export type Seeded = {
  */
 async function clearStrays() {
   const db = admin();
-  const { data } = await db.auth.admin.listUsers({ perPage: 200 });
-  const strays = (data?.users ?? []).filter((u) => u.email?.startsWith('e2e-'));
-  for (const u of strays) await db.auth.admin.deleteUser(u.id).catch(() => {});
-  if (strays.length) console.info(`[e2e] cleared ${strays.length} stray fixture account(s)`);
+  let cleared = 0;
+  // Bounded, so a delete that cannot succeed fails loudly instead of spinning forever.
+  for (let pass = 0; pass < 40; pass++) {
+    const strays = await listStrays(db);
+    if (strays.length === 0) break;
+    for (const u of strays) {
+      const { error } = await db.auth.admin.deleteUser(u.id);
+      if (error) throw new Error(`[e2e] could not delete stray ${u.email}: ${error.message}`);
+      cleared++;
+    }
+  }
+  if (cleared) console.info(`[e2e] cleared ${cleared} stray fixture account(s)`);
 }
 
 export async function seed(): Promise<Seeded> {
@@ -104,7 +137,13 @@ export async function seed(): Promise<Seeded> {
       user_id: talentUser.userId,
       slug,
       headline: 'Stripe and Postgres developer for subscription billing',
-      bio: 'I rebuild billing systems that have outgrown their first implementation. '.repeat(3),
+      // Three distinct sentences rather than one repeated three times. The old value read as
+      // a rendering bug in the browse list, which is where the README screenshots are taken.
+      bio:
+        'I rebuild billing systems that have outgrown their first implementation. ' +
+        'Usually that means moving homegrown subscription logic onto Stripe without losing ' +
+        'history, proration or the invoices people have already been sent. ' +
+        'Postgres, TypeScript, and a migration plan that can be rolled back.',
       is_published: true,
       accepts_messages: true,
       availability: 'part_time',
@@ -169,7 +208,11 @@ export async function teardown(seeded: Seeded) {
   const db = admin();
   // Deleting the auth user cascades to every public row it owns, which is the property
   // lib/db/deletion.test.ts asserts. Using it here means the teardown also exercises it.
+  // `deleteUser` RETURNS its error rather than throwing, so the old `.catch(() => {})` was
+  // never reached and never suppressed anything — it just looked like it had been considered.
+  // A teardown that fails has to say so, or the next run inherits the mess.
   for (const id of [seeded.talent.userId, seeded.client.userId]) {
-    await db.auth.admin.deleteUser(id).catch(() => {});
+    const { error } = await db.auth.admin.deleteUser(id);
+    if (error) console.error(`[e2e] TEARDOWN FAILED for ${id}: ${error.message}`);
   }
 }

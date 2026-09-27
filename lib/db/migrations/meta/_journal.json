@@ -134,6 +134,13 @@
       "when": 1790344028076,
       "tag": "0018_foreign_key_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790430428076,
+      "tag": "0019_function_search_path",
+      "breakpoints": true
     }
   ]
 }
