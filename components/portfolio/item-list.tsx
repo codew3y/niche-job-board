@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import { ArrowDown, ArrowUp, GripVertical, Pencil, Trash2 } from 'lucide-react';
 
@@ -44,9 +44,45 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
   /** Announced to screen readers after a move, since a visual reshuffle says nothing. */
   const [announcement, setAnnouncement] = useState('');
 
+  /**
+   * FLIP on reorder (DESIGN.md §5). Pressing "Move up" used to teleport the item, and the eye
+   * loses where it went — the textbook case for spatial-consistency motion. Before each reorder
+   * the rows' positions are recorded; after React commits the new order, each row that moved is
+   * played from its old position to its new one.
+   *
+   * WAAPI on `transform` only: composited, and interruptible — a second press mid-flight starts
+   * from wherever the row currently is (`getBoundingClientRect` includes the running transform).
+   * 220ms on the strong ease-in-out, because the row is already on screen and MOVING rather than
+   * entering. Skipped entirely under reduced motion: the reorder is then instant, and the live
+   * region still announces it.
+   */
+  const rows = useRef(new Map<string, HTMLLIElement>());
+  const before = useRef<Map<string, DOMRect> | null>(null);
+  const snapshot = () => {
+    before.current = new Map(
+      [...rows.current].map(([id, el]) => [id, el.getBoundingClientRect()] as const),
+    );
+  };
+  useLayoutEffect(() => {
+    const prev = before.current;
+    before.current = null;
+    if (!prev || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const [id, el] of rows.current) {
+      const was = prev.get(id);
+      if (!was) continue;
+      const dy = was.top - el.getBoundingClientRect().top;
+      if (Math.abs(dy) < 1) continue;
+      el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'translateY(0)' }], {
+        duration: 220,
+        easing: 'cubic-bezier(0.77, 0, 0.175, 1)',
+      });
+    }
+  }, [order]);
+
   const move = (index: number, delta: number) => {
     const target = index + delta;
     if (target < 0 || target >= order.length) return;
+    snapshot();
     const next = [...order];
     [next[index], next[target]] = [next[target]!, next[index]!];
     setOrder(next);
@@ -56,6 +92,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
   /** Drag lands on the same reordering path as the buttons — one implementation, two inputs. */
   const dropAt = (to: number) => {
     if (dragIndex === null || dragIndex === to) return;
+    snapshot();
     const next = [...order];
     const [moved] = next.splice(dragIndex, 1);
     next.splice(to, 0, moved!);
@@ -73,6 +110,10 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
         {order.map((item, i) => (
           <li
             key={item.id}
+            ref={(el) => {
+              if (el) rows.current.set(item.id, el);
+              else rows.current.delete(item.id);
+            }}
             draggable
             onDragStart={(e) => {
               setDragIndex(i);

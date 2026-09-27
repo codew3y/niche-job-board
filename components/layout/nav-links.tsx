@@ -54,6 +54,9 @@ export function NavLinks({ items, unread }: { items: NavItem[]; unread: number }
             aria-current={isActive ? 'page' : undefined}
             className={cn(
               'relative flex flex-col items-center justify-center gap-0.5 py-2 text-2xs font-medium select-none',
+              // Press feedback on the phone tab bar: an instant tint on pointer-down, not an
+              // animation — this is pressed tens of times a session (mobile-native §5).
+              'active:bg-surface-sunken sm:active:bg-transparent',
               'min-h-[var(--tabbar-height)] transition-colors duration-fast ease-out',
               isActive ? 'text-accent' : 'text-text-subtle hover:text-text',
               'sm:min-h-0 sm:flex-row sm:gap-2 sm:rounded-full sm:px-3.5 sm:py-2 sm:text-sm',
