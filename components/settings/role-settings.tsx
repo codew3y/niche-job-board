@@ -1,19 +1,25 @@
 'use client';
 
+import { Briefcase, Code2 } from 'lucide-react';
 import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
 
-import { Button } from '@/components/ui/button';
+import { ActionForm } from '@/components/ui/action-form';
+import { Badge } from '@/components/ui/badge';
+import { FormError } from '@/components/ui/field';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { addRole, switchRole, type ActionResult } from '@/lib/actions/auth';
+import { cn } from '@/lib/ui/cn';
 
 const COPY = {
   talent: {
-    title: 'Talent',
+    title: 'Developer',
+    icon: Code2,
     have: 'You can be matched to briefs and apply to jobs.',
     add: 'Build a profile around what you’ve shipped and get matched to briefs.',
   },
   client: {
     title: 'Client',
+    icon: Briefcase,
     have: 'You can post briefs and review ranked candidates.',
     add: 'Post a brief and see ranked candidates with the evidence behind each.',
   },
@@ -31,29 +37,42 @@ export function RoleSettings({
   const has = { talent: hasTalent, client: hasClient };
 
   return (
-    <ul className="space-y-3">
+    <ul className="grid gap-3 sm:grid-cols-2">
       {(['talent', 'client'] as const).map((role) => {
         const owned = has[role];
         const isActive = activeRole === role;
+        const { title, icon: Icon, have, add } = COPY[role];
         return (
           <li
             key={role}
-            className={`rounded-md border p-5 ${isActive ? 'border-accent' : 'border-border-base'}`}
+            className={cn(
+              'flex flex-col rounded-lg border bg-surface-raised p-5',
+              isActive ? 'border-surface-inverse' : 'border-border-base',
+            )}
           >
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className="flex items-center gap-2 font-medium">
-                  {COPY[role].title}
-                  {isActive && (
-                    <span className="rounded-full bg-accent-subtle px-2 py-0.5 text-xs font-normal">
-                      Currently viewing
-                    </span>
-                  )}
-                </p>
-                <p className="mt-1 text-sm text-text-muted text-pretty">
-                  {owned ? COPY[role].have : COPY[role].add}
-                </p>
-              </div>
+            <div className="flex items-start justify-between gap-3">
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'grid size-10 place-items-center rounded-full',
+                  isActive
+                    ? 'bg-surface-inverse text-text-inverse'
+                    : 'bg-surface-sunken text-text-subtle',
+                )}
+              >
+                <Icon size={18} />
+              </span>
+              {isActive ? (
+                <Badge tone="ink">Viewing now</Badge>
+              ) : owned ? (
+                <Badge tone="success">Set up</Badge>
+              ) : (
+                <Badge tone="outline">Not added</Badge>
+              )}
+            </div>
+            <p className="mt-4 font-semibold tracking-tight">{title}</p>
+            <p className="mt-1 flex-1 text-sm text-text-muted text-pretty">{owned ? have : add}</p>
+            <div className="mt-5">
               <RoleAction role={role} owned={owned} isActive={isActive} />
             </div>
           </li>
@@ -77,36 +96,24 @@ function RoleAction({
   if (isActive) return null;
 
   if (owned) {
-    // Already has it — this is just a context switch, so it uses switchRole and creates
-    // nothing.
+    // Already has it — a context switch, so it uses switchRole and creates nothing.
     return (
-      <form action={switchRole}>
+      <ActionForm action={switchRole}>
         <input type="hidden" name="role" value={role} />
-        <Button type="submit" variant="secondary" size="sm">
+        <SubmitButton variant="secondary" size="sm" pendingLabel="Switching…">
           Switch to {role}
-        </Button>
-      </form>
+        </SubmitButton>
+      </ActionForm>
     );
   }
 
   return (
-    <form action={action} className="shrink-0">
+    <form action={action} className="space-y-2">
       <input type="hidden" name="role" value={role} />
-      <Pending label={`Add ${role} profile`} />
-      {state?.ok === false && (
-        <p role="alert" className="mt-2 text-sm text-danger">
-          {state.message}
-        </p>
-      )}
+      <SubmitButton size="sm" pendingLabel="Setting up…">
+        Add {role} profile
+      </SubmitButton>
+      {state?.ok === false && <FormError>{state.message}</FormError>}
     </form>
-  );
-}
-
-function Pending({ label }: { label: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" size="sm" disabled={pending} aria-busy={pending}>
-      {pending ? 'Setting up…' : label}
-    </Button>
   );
 }

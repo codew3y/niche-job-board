@@ -1,7 +1,10 @@
+import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { RoleSettings } from '@/components/settings/role-settings';
+import { PageHeader } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Roles' };
@@ -27,13 +30,19 @@ export default async function RolesPage() {
   if (!profile) redirect('/select-role');
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Roles</h1>
-        <p className="mt-1 text-text-muted text-pretty">
-          One account, both sides. Adding a role never affects the one you already have.
-        </p>
-      </div>
+    <div className="max-w-3xl">
+      <nav aria-label="Breadcrumb" className="mb-5 text-sm">
+        <Link
+          href="/dashboard/settings"
+          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+        >
+          <ArrowLeft aria-hidden="true" size={15} /> Settings
+        </Link>
+      </nav>
+      <PageHeader
+        title="Roles"
+        subtitle="One account, both sides. Adding a role never affects the one you already have."
+      />
       <RoleSettings
         activeRole={profile.active_role}
         hasTalent={profile.has_talent}

@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import { AppShell, type ShellUser } from '@/components/layout/app-shell';
+import { buttonStyles } from '@/components/ui/button';
+import { SubmitButton } from '@/components/ui/submit-button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { signOut } from '@/lib/actions/auth';
 import { unreadCount } from '@/lib/services/messaging';
 import { createClient } from '@/lib/supabase/server';
@@ -51,28 +54,26 @@ export default async function SettingsLayout({ children }: { children: ReactNode
   // Mid-onboarding. No role means no dashboard to link to, so the nav would be five links
   // that all bounce. A header with a way back and a way out is the honest version.
   return (
-    <div className="flex min-h-full flex-col">
-      <header className="border-b border-border-base">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4">
-          <Link href="/" className="shrink-0 font-semibold tracking-tight">
+    <div className="flex min-h-dvh flex-col">
+      <header className="border-b border-border-base pt-[env(safe-area-inset-top,0px)]">
+        <div className="gutter mx-auto flex min-h-(--nav-height) max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 py-2">
+          <Link href="/" className="shrink-0 font-serif text-[1.625rem] leading-none">
             TechSelect
           </Link>
-          <div className="ml-auto flex items-center gap-2">
-            <Link
-              href="/select-role"
-              className="rounded-sm px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken hover:text-text"
-            >
+          <div className="ml-auto flex items-center gap-1">
+            <ThemeToggle />
+            <Link href="/select-role" className={buttonStyles({ variant: 'ghost', size: 'sm' })}>
               Finish setting up
             </Link>
             <form action={signOut}>
-              <button className="rounded-sm px-3 py-1.5 text-sm text-text-muted hover:bg-surface-sunken hover:text-text">
+              <SubmitButton variant="ghost" size="sm" pendingLabel="Signing out…">
                 Sign out
-              </button>
+              </SubmitButton>
             </form>
           </div>
         </div>
       </header>
-      <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
+      <main id="main" className="gutter mx-auto w-full max-w-6xl flex-1 py-8 sm:py-10">
         {children}
       </main>
     </div>

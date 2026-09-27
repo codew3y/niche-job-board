@@ -1,8 +1,10 @@
+import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { DeleteAccount } from '@/components/settings/delete-account';
+import { PageHeader } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Account' };
@@ -21,20 +23,37 @@ export default async function AccountPage() {
   if (!user?.email) redirect('/login');
 
   return (
-    <div className="max-w-2xl space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Account</h1>
-        <p className="mt-1 text-text-muted text-pretty">
-          Signed in as <span className="text-text">{user.email}</span>.
-        </p>
-      </div>
+    <div className="max-w-3xl space-y-8">
+      <nav aria-label="Breadcrumb" className="text-sm">
+        <Link
+          href="/dashboard/settings"
+          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+        >
+          <ArrowLeft aria-hidden="true" size={15} /> Settings
+        </Link>
+      </nav>
 
-      <section className="space-y-4 rounded-md border border-danger/40 p-5">
+      <PageHeader
+        className="mb-0"
+        title="Account"
+        subtitle={
+          <>
+            Signed in as <span className="font-medium text-text">{user.email}</span>.
+          </>
+        }
+      />
+
+      <section
+        aria-labelledby="delete-heading"
+        className="space-y-5 rounded-lg border border-danger/30 bg-surface-raised p-5 sm:p-6"
+      >
         <div>
-          <h2 className="font-medium text-danger">Delete your account</h2>
+          <h2 id="delete-heading" className="text-lg font-semibold tracking-tight text-danger">
+            Delete your account
+          </h2>
           {/* The same words as /privacy, on purpose. A deletion screen that describes the
               behaviour differently from the policy is how the two quietly diverge. */}
-          <p className="mt-1.5 text-sm text-text-muted text-pretty">
+          <p className="mt-2 text-sm text-text-muted text-pretty">
             Your profile, portfolio, uploads, job posts, applications, saved lists and blocks are
             removed. This cannot be undone.
           </p>
