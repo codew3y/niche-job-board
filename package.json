@@ -30,7 +30,8 @@
     "eval": "tsx --env-file-if-exists=.env lib/eval/eval-cli.mts",
     "embed:backfill": "tsx --env-file-if-exists=.env lib/matching/backfill.mts",
     "match:warm": "tsx --env-file-if-exists=.env lib/matching/warm-cli.mts",
-    "bench:match": "tsx --env-file-if-exists=.env lib/eval/latency.mts"
+    "bench:match": "tsx --env-file-if-exists=.env lib/eval/latency.mts",
+    "db:status": "tsx --env-file-if-exists=.env lib/db/migrate-status.ts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

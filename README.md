@@ -123,7 +123,8 @@ database it measured.
 ## Documentation
 
 [`PROJECT.md`](./PROJECT.md) · [architecture](./docs/architecture.md) ·
-[matching](./docs/matching.md) · [schema](./docs/schema.md) · [API surface](./docs/api.md) ·
+[matching](./docs/matching.md) · [deploying](./docs/deploy.md) ·
+[schema](./docs/schema.md) · [API surface](./docs/api.md) ·
 [components](./docs/components.md) · [taxonomy](./docs/taxonomy.md) ·
 [eval set](./docs/eval-set.md) · [constraints](./docs/constraints.md) ·
 [ADRs](./docs/decisions/) · [contributing](./CONTRIBUTING.md)
