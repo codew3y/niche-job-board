@@ -1,0 +1,70 @@
+/*
+ * Shared scaffolding for the prototype variants: the motion values every direction obeys
+ * (Emil's rules — ease-out on entrances, sub-300ms UI motion, transform/opacity only), and
+ * the press state. Each variant then defines its OWN palette and type under its own class,
+ * because the palette is exactly what the directions differ on.
+ */
+.proto {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --duration-fast: 140ms;
+  --duration: 200ms;
+  --duration-slow: 600ms;
+  --z-raised: 10;
+  --z-nav: 40;
+}
+
+.proto .pressable {
+  transition-property: transform, background-color, border-color, color, box-shadow, opacity;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out);
+}
+.proto .pressable:active {
+  transform: scale(0.97);
+}
+
+/* Entrance: rise and fade, once, on mount. Transform and opacity only. */
+@keyframes proto-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.proto .rise {
+  animation: proto-rise 520ms var(--ease-out) both;
+}
+.proto .rise-1 {
+  animation-delay: 60ms;
+}
+.proto .rise-2 {
+  animation-delay: 120ms;
+}
+.proto .rise-3 {
+  animation-delay: 180ms;
+}
+.proto .rise-4 {
+  animation-delay: 240ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proto .rise {
+    animation: proto-fade 200ms ease both;
+  }
+  @keyframes proto-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .proto .lift {
+    transition:
+      transform 200ms var(--ease-out),
+      box-shadow 200ms var(--ease-out),
+      border-color 200ms var(--ease-out);
+  }
+  .proto .lift:hover {
+    transform: translateY(-2px);
+  }
+}
