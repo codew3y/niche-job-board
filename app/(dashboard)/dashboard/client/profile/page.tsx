@@ -41,7 +41,7 @@ export default async function ClientProfilePage() {
       <div className="mt-8 space-y-2 border-t border-border-base pt-6 text-sm text-text-muted">
         <p>
           Looking for your saved developers?{' '}
-          <Link href="/dashboard/client/saved" className="text-accent underline underline-offset-2">
+          <Link href="/dashboard/client/saved" className="prose-link font-medium">
             They&rsquo;re here
           </Link>
           .
@@ -51,7 +51,7 @@ export default async function ClientProfilePage() {
             looking. It was not reachable from anywhere. */}
         <p>
           Roles, sign-in address and deleting your account are in{' '}
-          <Link href="/dashboard/settings" className="text-accent underline underline-offset-2">
+          <Link href="/dashboard/settings" className="prose-link font-medium">
             settings
           </Link>
           .

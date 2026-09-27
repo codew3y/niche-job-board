@@ -1,10 +1,12 @@
 'use client';
 
+import Link from 'next/link';
+import { MailCheck } from 'lucide-react';
 import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
 
-import { Button } from '@/components/ui/button';
-import { Field } from '@/components/ui/field';
+import { buttonStyles } from '@/components/ui/button';
+import { Field, FormError } from '@/components/ui/field';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { requestPasswordReset, updatePassword, type ActionResult } from '@/lib/actions/auth';
 
 export function ResetRequestForm() {
@@ -12,11 +14,12 @@ export function ResetRequestForm() {
 
   if (state?.ok) {
     return (
-      <div role="status" className="space-y-3">
-        <p className="font-medium">Check your email.</p>
+      <div role="status" className="rounded-lg border border-border-base bg-surface-raised p-5">
+        <MailCheck aria-hidden="true" className="size-6 text-success" />
+        <p className="mt-3 font-medium">Check your email.</p>
         {/* Deliberately says "if there's an account" — confirming whether an address is
             registered would turn this form into an account-enumeration oracle. */}
-        <p className="text-sm text-text-muted text-pretty">
+        <p className="mt-1 text-sm text-text-muted text-pretty">
           If there&rsquo;s an account for that address, a reset link is on its way. It expires in an
           hour and can only be used once.
         </p>
@@ -25,21 +28,21 @@ export function ResetRequestForm() {
   }
 
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form action={action} className="space-y-5" noValidate>
       <Field
         label="Email"
         name="email"
         type="email"
         inputMode="email"
         autoComplete="email"
+        autoCapitalize="none"
+        spellCheck={false}
         required
       />
-      {state?.ok === false && (
-        <p role="alert" className="text-sm text-danger">
-          {state.message}
-        </p>
-      )}
-      <SubmitButton idle="Send reset link" busy="Sending…" />
+      {state?.ok === false && <FormError>{state.message}</FormError>}
+      <SubmitButton size="lg" className="w-full" pendingLabel="Sending…">
+        Send reset link
+      </SubmitButton>
     </form>
   );
 }
@@ -52,15 +55,15 @@ export function SetPasswordForm() {
     return (
       <div role="status" className="space-y-4">
         <p className="font-medium">Password updated.</p>
-        <a href="/login" className="inline-block text-accent underline underline-offset-2">
+        <Link href="/login" className={buttonStyles({ className: 'w-full' })}>
           Sign in
-        </a>
+        </Link>
       </div>
     );
   }
 
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form action={action} className="space-y-5" noValidate>
       <Field
         label="New password"
         name="password"
@@ -78,21 +81,10 @@ export function SetPasswordForm() {
         required
         errors={fields?.confirmPassword}
       />
-      {state?.ok === false && !state.fields && (
-        <p role="alert" className="text-sm text-danger">
-          {state.message}
-        </p>
-      )}
-      <SubmitButton idle="Save password" busy="Saving…" />
+      {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
+      <SubmitButton size="lg" className="w-full" pendingLabel="Saving…">
+        Save password
+      </SubmitButton>
     </form>
-  );
-}
-
-function SubmitButton({ idle, busy }: { idle: string; busy: string }) {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" className="w-full" disabled={pending} aria-busy={pending}>
-      {pending ? busy : idle}
-    </Button>
   );
 }

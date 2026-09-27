@@ -39,10 +39,7 @@ export default async function PortfolioPage() {
           <>
             The projects clients read first.{' '}
             {profile.is_published && (
-              <Link
-                href={`/talent/${profile.slug}`}
-                className="text-accent underline underline-offset-2"
-              >
+              <Link href={`/talent/${profile.slug}`} className="prose-link font-medium">
                 See your public profile
               </Link>
             )}

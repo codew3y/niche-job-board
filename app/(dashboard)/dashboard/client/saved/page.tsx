@@ -57,7 +57,7 @@ export default async function SavedTalentPage() {
           title="Nothing saved yet"
           body="Bookmark a developer while browsing and they land here."
           action={
-            <Link href="/talent" className="text-accent underline underline-offset-2">
+            <Link href="/talent" className="prose-link font-medium">
               Browse developers
             </Link>
           }

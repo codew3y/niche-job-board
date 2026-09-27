@@ -38,7 +38,7 @@ export function SuggestedList({ matches }: { matches: CandidateMatch[] }) {
           )}
 
           <p className="mt-3 flex gap-4 text-sm">
-            <Link href={`/talent/${m.slug}`} className="text-accent underline underline-offset-2">
+            <Link href={`/talent/${m.slug}`} className="prose-link font-medium">
               See their work
             </Link>
             {m.websiteUrl && (

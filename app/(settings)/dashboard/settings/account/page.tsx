@@ -43,7 +43,7 @@ export default async function AccountPage() {
             your side tombstoned: your name is detached and your messages are replaced with a note
             saying the account was deleted. The other person keeps their own words and cannot
             recover yours. This is set out in the{' '}
-            <Link href="/privacy" className="text-accent underline underline-offset-2">
+            <Link href="/privacy" className="prose-link font-medium">
               privacy policy
             </Link>
             .

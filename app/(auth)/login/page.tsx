@@ -23,7 +23,7 @@ export default async function LoginPage({
       footer={
         <>
           New here?{' '}
-          <Link href="/signup" className="text-accent underline underline-offset-2">
+          <Link href="/signup" className="prose-link font-medium">
             Create an account
           </Link>
         </>

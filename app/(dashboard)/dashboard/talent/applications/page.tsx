@@ -90,7 +90,7 @@ export default async function ApplicationsPage() {
           title="No applications yet"
           body="Applications you send appear here, with every status change as it happens."
           action={
-            <Link href="/jobs" className="text-accent underline underline-offset-2">
+            <Link href="/jobs" className="prose-link font-medium">
               Browse jobs
             </Link>
           }

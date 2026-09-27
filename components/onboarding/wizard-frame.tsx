@@ -1,14 +1,22 @@
+import { Check } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { cn } from '@/lib/ui/cn';
 
 type Step = { slug: string; title: string; blurb: string };
 
 /**
- * Wizard chrome: a step rail plus the current step's form.
+ * Wizard chrome: a progress rail plus the current step's form.
  *
  * `done` is derived from saved data, not from a counter — see lib/onboarding/steps.ts. A
- * completed step stays clickable so someone can go back and fix a typo; a future step does
- * not, because its form would have nothing to build on.
+ * completed step stays clickable so someone can go back and fix a typo; a future step does not,
+ * because its form would have nothing to build on.
+ *
+ * On a phone the rail collapses to "Step 2 of 4" and a bar — four labelled dots do not fit at
+ * 320px without shrinking the labels past reading. The bar's width is a static style, not an
+ * animation: it changes once per step, on a page load, where motion would only delay the form.
  */
 export function WizardFrame({
   steps,
@@ -25,66 +33,109 @@ export function WizardFrame({
 }) {
   const index = steps.findIndex((s) => s.slug === current);
   const step = steps[index];
+  const progress = ((index + 1) / steps.length) * 100;
 
   return (
-    <main id="main" className="mx-auto w-full max-w-2xl flex-1 px-4 py-10">
-      <nav aria-label="Progress" className="mb-8">
-        <ol className="flex items-center gap-2">
-          {steps.map((s, i) => {
-            const isCurrent = s.slug === current;
-            const complete = done(s.slug);
-            const reachable = complete || i <= index;
-            const dot = (
-              <span
-                aria-hidden="true"
-                className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-medium
-                  ${isCurrent ? 'bg-accent text-accent-text' : complete ? 'bg-success text-white' : 'bg-surface-sunken text-text-subtle'}`}
-              >
-                {complete && !isCurrent ? '✓' : i + 1}
-              </span>
-            );
-            return (
-              <li key={s.slug} className="flex flex-1 items-center gap-2">
-                {reachable && !isCurrent ? (
-                  <Link href={`${basePath}/${s.slug}`} className="flex items-center gap-2">
-                    {dot}
-                    <span className="hidden text-sm text-text-muted sm:inline">{s.title}</span>
-                  </Link>
-                ) : (
-                  <span className="flex items-center gap-2">
-                    {dot}
+    <div className="flex min-h-dvh flex-col">
+      <header className="border-b border-border-base pt-[env(safe-area-inset-top,0px)]">
+        <div className="gutter mx-auto flex min-h-(--nav-height) max-w-3xl items-center justify-between gap-4 py-2">
+          <Link href="/" className="font-serif text-[1.625rem] leading-none">
+            TechSelect
+          </Link>
+          <div className="flex items-center gap-2">
+            {/* Said out loud, and near the top: it removes the "will I lose this?" hesitation
+                that makes people rush a long form. */}
+            <p className="hidden text-sm text-text-subtle sm:block">Saved as you go</p>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <main id="main" className="gutter mx-auto w-full max-w-3xl flex-1 py-8 sm:py-12">
+        <nav aria-label="Progress" className="mb-10">
+          <p className="mb-3 flex items-baseline justify-between text-sm sm:hidden">
+            <span className="font-medium">
+              Step {index + 1} of {steps.length}
+            </span>
+            <span className="text-text-subtle">Saved as you go</span>
+          </p>
+          <div
+            className="h-1 overflow-hidden rounded-full bg-surface-sunken sm:hidden"
+            aria-hidden="true"
+          >
+            <div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} />
+          </div>
+
+          <ol className="hidden grid-flow-col gap-3 sm:grid">
+            {steps.map((s, i) => {
+              const isCurrent = s.slug === current;
+              const complete = done(s.slug);
+              const reachable = complete || i <= index;
+              const body = (
+                <>
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'block h-1 rounded-full',
+                      isCurrent
+                        ? 'bg-accent'
+                        : complete
+                          ? 'bg-surface-inverse'
+                          : 'bg-surface-sunken',
+                    )}
+                  />
+                  <span className="mt-3 flex items-center gap-1.5 text-sm">
+                    {complete && !isCurrent ? (
+                      <Check aria-hidden="true" size={14} className="text-success" />
+                    ) : (
+                      <span aria-hidden="true" className="text-text-subtle tabular-nums">
+                        {i + 1}
+                      </span>
+                    )}
                     <span
-                      className={`hidden text-sm sm:inline ${isCurrent ? 'font-medium' : 'text-text-subtle'}`}
-                      aria-current={isCurrent ? 'step' : undefined}
+                      className={cn(
+                        isCurrent
+                          ? 'font-medium text-text'
+                          : complete
+                            ? 'text-text-muted group-hover:text-text'
+                            : 'text-text-subtle',
+                      )}
                     >
                       {s.title}
                     </span>
+                    <span className="sr-only">
+                      {isCurrent ? '(current step)' : complete ? '(complete)' : '(not started)'}
+                    </span>
                   </span>
-                )}
-                {i < steps.length - 1 && (
-                  <span className="h-px flex-1 bg-border-base" aria-hidden="true" />
-                )}
-              </li>
-            );
-          })}
-        </ol>
-        <p className="sr-only">
-          Step {index + 1} of {steps.length}: {step?.title}
-        </p>
-      </nav>
+                </>
+              );
+              return (
+                <li key={s.slug}>
+                  {reachable && !isCurrent ? (
+                    <Link href={`${basePath}/${s.slug}`} className="group block rounded-sm">
+                      {body}
+                    </Link>
+                  ) : (
+                    <span className="block" aria-current={isCurrent ? 'step' : undefined}>
+                      {body}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+          <p className="sr-only">
+            Step {index + 1} of {steps.length}: {step?.title}
+          </p>
+        </nav>
 
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">{step?.title}</h1>
-        <p className="mt-1 text-text-muted text-pretty">{step?.blurb}</p>
-      </header>
+        <header className="mb-8">
+          <h1 className="font-serif text-display-sm text-balance">{step?.title}</h1>
+          <p className="mt-2 max-w-xl text-text-muted text-pretty">{step?.blurb}</p>
+        </header>
 
-      {children}
-
-      {/* Saying this out loud removes the "will I lose this?" hesitation that makes people
-          rush a long form. */}
-      <p className="mt-6 text-center text-sm text-text-subtle">
-        Saved as you go — you can close this and come back.
-      </p>
-    </main>
+        {children}
+      </main>
+    </div>
   );
 }

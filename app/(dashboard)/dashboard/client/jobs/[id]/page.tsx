@@ -92,7 +92,7 @@ export default async function JobApplicationsPage({ params }: { params: Promise<
           <>
             {active.length} {active.length === 1 ? 'application' : 'applications'}
             {' · '}
-            <Link href={`/jobs/${job.slug}`} className="text-accent underline underline-offset-2">
+            <Link href={`/jobs/${job.slug}`} className="prose-link font-medium">
               View the public page
             </Link>
           </>

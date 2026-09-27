@@ -44,7 +44,7 @@ export default async function TalentDashboard() {
                   : `Add ${2 - profile.portfolio_item_count} more project${profile.portfolio_item_count === 1 ? '' : 's'}, or link your portfolio site.`
           }
           action={
-            <Link href="/talent/profile" className="text-accent underline underline-offset-2">
+            <Link href="/talent/profile" className="prose-link font-medium">
               Go to profile
             </Link>
           }
@@ -65,26 +65,17 @@ export default async function TalentDashboard() {
       <nav aria-label="Quick links" className="mt-10 border-t border-border-base pt-6">
         <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <li>
-            <Link
-              href="/dashboard/talent/matches"
-              className="text-accent underline underline-offset-2"
-            >
+            <Link href="/dashboard/talent/matches" className="prose-link font-medium">
               Your matches
             </Link>
           </li>
           <li>
-            <Link
-              href="/dashboard/talent/saved"
-              className="text-accent underline underline-offset-2"
-            >
+            <Link href="/dashboard/talent/saved" className="prose-link font-medium">
               Saved jobs
             </Link>
           </li>
           <li>
-            <Link
-              href="/dashboard/talent/portfolio"
-              className="text-accent underline underline-offset-2"
-            >
+            <Link href="/dashboard/talent/portfolio" className="prose-link font-medium">
               Portfolio
             </Link>
           </li>

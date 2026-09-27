@@ -1,5 +1,5 @@
+import { buttonStyles } from '@/components/ui/button';
 import { signInWithProvider } from '@/lib/actions/auth';
-import { Button } from '@/components/ui/button';
 
 /**
  * Google and GitHub sign-in (§3, §6).
@@ -11,21 +11,25 @@ import { Button } from '@/components/ui/button';
  */
 export function OAuthButtons({ next }: { next?: string }) {
   return (
-    <div className="space-y-2.5">
+    <div className="grid gap-2.5">
       {(['google', 'github'] as const).map((provider) => (
         <form key={provider} action={signInWithProvider}>
           <input type="hidden" name="provider" value={provider} />
           {next && <input type="hidden" name="next" value={next} />}
-          <Button type="submit" variant="secondary" className="w-full">
+          <button
+            type="submit"
+            className={buttonStyles({ variant: 'secondary', size: 'lg', className: 'w-full' })}
+          >
             {provider === 'google' ? <GoogleMark /> : <GitHubMark />}
             Continue with {provider === 'google' ? 'Google' : 'GitHub'}
-          </Button>
+          </button>
         </form>
       ))}
     </div>
   );
 }
 
+/* Brand marks keep their own colours: a Google "G" in the product's accent is not Google's. */
 function GoogleMark() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">

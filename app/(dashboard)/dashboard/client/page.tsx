@@ -51,7 +51,7 @@ export default async function ClientDashboard() {
             title="No jobs posted yet"
             body="Post a brief and we’ll rank candidates against the work they’ve actually shipped."
             action={
-              <Link href="/client/jobs/new" className="text-accent underline underline-offset-2">
+              <Link href="/client/jobs/new" className="prose-link font-medium">
                 Post a job
               </Link>
             }
@@ -65,18 +65,12 @@ export default async function ClientDashboard() {
       <nav aria-label="Quick links" className="mt-10 border-t border-border-base pt-6">
         <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <li>
-            <Link
-              href="/dashboard/client/saved"
-              className="text-accent underline underline-offset-2"
-            >
+            <Link href="/dashboard/client/saved" className="prose-link font-medium">
               Saved developers
             </Link>
           </li>
           <li>
-            <Link
-              href="/dashboard/client/jobs/new"
-              className="text-accent underline underline-offset-2"
-            >
+            <Link href="/dashboard/client/jobs/new" className="prose-link font-medium">
               Post a job
             </Link>
           </li>

@@ -22,7 +22,7 @@ export default async function ConfirmResetPage() {
         title="That link has expired"
         subtitle="Reset links are valid for one hour and can only be used once."
       >
-        <a href="/reset-password" className="text-accent underline underline-offset-2">
+        <a href="/reset-password" className="prose-link font-medium">
           Request a new one
         </a>
       </AuthCard>

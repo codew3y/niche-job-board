@@ -54,10 +54,7 @@ export default async function ProfilePage() {
             profile.is_published ? (
               <>
                 Live at{' '}
-                <Link
-                  href={`/talent/${profile.slug}`}
-                  className="text-accent underline underline-offset-2"
-                >
+                <Link href={`/talent/${profile.slug}`} className="prose-link font-medium">
                   /talent/{profile.slug}
                 </Link>
               </>
@@ -101,7 +98,7 @@ export default async function ProfilePage() {
               </ul>
               <Link
                 href="/dashboard/talent/portfolio"
-                className="mt-3 inline-block text-sm text-accent underline underline-offset-2"
+                className="prose-link mt-3 inline-block text-sm font-medium"
               >
                 Add a project
               </Link>
@@ -125,7 +122,7 @@ export default async function ProfilePage() {
           It was not reachable from anywhere. */}
       <p className="border-t border-border-base pt-6 text-sm text-text-muted">
         Roles, sign-in address and deleting your account are in{' '}
-        <Link href="/dashboard/settings" className="text-accent underline underline-offset-2">
+        <Link href="/dashboard/settings" className="prose-link font-medium">
           settings
         </Link>
         .

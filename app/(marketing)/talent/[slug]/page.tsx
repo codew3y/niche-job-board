@@ -108,10 +108,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
           className="mb-6 rounded-md border border-warning/40 bg-warning/5 p-3 text-sm"
         >
           This is a draft — only you can see it.{' '}
-          <Link
-            href="/onboarding/talent/review"
-            className="text-accent underline underline-offset-2"
-          >
+          <Link href="/onboarding/talent/review" className="prose-link font-medium">
             Finish and publish
           </Link>
         </p>

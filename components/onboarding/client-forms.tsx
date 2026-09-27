@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { useActionState, useState } from 'react';
 
-import { Field } from '@/components/ui/field';
+import { ChoiceChips, Field, FormError, SelectField, TextareaField } from '@/components/ui/field';
+import { SubmitButton } from '@/components/ui/submit-button';
 import { SkillPicker, type SkillOption } from './skill-picker';
-import { Submit } from './talent-forms';
+import { CURRENCIES, StepCard, Submit } from './talent-forms';
 import { publishFirstJob, saveCompany, saveFirstJob } from '@/lib/actions/onboarding';
 import type { ActionResult } from '@/lib/actions/auth';
 import type { ClientProgress } from '@/lib/onboarding/steps';
@@ -18,46 +19,45 @@ export function CompanyForm({ client }: { client: Row }) {
   const fields = state?.ok === false ? state.fields : undefined;
 
   return (
-    <form action={action} className="space-y-5" noValidate>
-      <Field
-        label="Company name"
-        name="companyName"
-        required
-        defaultValue={str(client, 'company_name')}
-        errors={fields?.companyName}
-      />
-      <Field
-        label="Website"
-        name="website"
-        type="url"
-        placeholder="https://yourcompany.com"
-        defaultValue={str(client, 'website')}
-        errors={fields?.website}
-      />
-      <Field
-        label="Industry"
-        name="industry"
-        placeholder="Logistics"
-        defaultValue={str(client, 'industry')}
-      />
-      <div className="space-y-1.5">
-        <label htmlFor="about" className="block text-sm font-medium">
-          About
-        </label>
-        <textarea
-          id="about"
+    <form action={action} className="space-y-6" noValidate>
+      <StepCard>
+        <Field
+          label="Company name"
+          name="companyName"
+          required
+          autoComplete="organization"
+          defaultValue={str(client, 'company_name')}
+          errors={fields?.companyName}
+        />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <Field
+            label="Website"
+            name="website"
+            type="url"
+            inputMode="url"
+            optional
+            placeholder="https://yourcompany.com"
+            defaultValue={str(client, 'website')}
+            errors={fields?.website}
+          />
+          <Field
+            label="Industry"
+            name="industry"
+            optional
+            placeholder="Logistics"
+            defaultValue={str(client, 'industry')}
+          />
+        </div>
+        <TextareaField
+          label="About"
           name="about"
           rows={4}
+          optional
           defaultValue={str(client, 'about')}
           placeholder="What the company does, and what you need help with."
-          className="w-full rounded-md border border-border-strong bg-surface-raised p-3 placeholder:text-text-subtle"
         />
-      </div>
-      {state?.ok === false && !state.fields && (
-        <p role="alert" className="text-sm text-danger">
-          {state.message}
-        </p>
-      )}
+      </StepCard>
+      {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
       <Submit label="Continue" />
     </form>
   );
@@ -85,126 +85,80 @@ export function FirstJobForm({
 }) {
   const [state, action] = useActionState<ActionResult | null, FormData>(saveFirstJob, null);
   const fields = state?.ok === false ? state.fields : undefined;
-  // Location is only required for hybrid/onsite, so the field appears when it becomes
-  // relevant rather than sitting there greyed out.
+  // Location is only required for hybrid/onsite, so the field appears when it becomes relevant
+  // rather than sitting there greyed out.
   const [locationType, setLocationType] = useState(str(job, 'location_type') || 'remote');
 
   return (
     <form action={action} className="space-y-6" noValidate>
-      <Field
-        label="Title"
-        name="title"
-        required
-        defaultValue={str(job, 'title')}
-        placeholder="Stripe and serverless payments integration"
-        errors={fields?.title}
-      />
-
-      <div className="space-y-1.5">
-        <label htmlFor="description" className="block text-sm font-medium">
-          What needs building?
-        </label>
-        <textarea
-          id="description"
+      <StepCard>
+        <Field
+          label="Title"
+          name="title"
+          required
+          defaultValue={str(job, 'title')}
+          placeholder="Stripe and serverless payments integration"
+          errors={fields?.title}
+        />
+        <TextareaField
+          label="What needs building?"
           name="description"
           rows={7}
           defaultValue={str(job, 'description')}
-          aria-invalid={Boolean(fields?.description)}
-          aria-describedby="desc-hint"
+          errors={fields?.description}
           placeholder="The problem, what done looks like, and anything that has already been tried."
-          className={`w-full rounded-md border bg-surface-raised p-3 placeholder:text-text-subtle
-            ${fields?.description ? 'border-danger' : 'border-border-strong'}`}
+          hint="At least 120 characters — a short brief gets poorly matched candidates."
         />
-        <p
-          id="desc-hint"
-          className={`text-sm ${fields?.description ? 'text-danger' : 'text-text-muted'}`}
-        >
-          {fields?.description?.[0] ??
-            'At least 120 characters — a short brief gets poorly matched candidates.'}
-        </p>
-      </div>
-
-      <div>
-        <SkillPicker options={options} initial={initial} max={20} />
-        {fields?.skills && <p className="mt-1 text-sm text-danger">{fields.skills[0]}</p>}
-      </div>
-
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium">Engagement</legend>
-        <div className="flex flex-wrap gap-2">
-          {ENGAGEMENTS.map(([value, label]) => (
-            <label key={value} className="cursor-pointer">
-              <input
-                type="radio"
-                name="engagementType"
-                value={value}
-                defaultChecked={(str(job, 'engagement_type') || 'fixed') === value}
-                className="peer sr-only"
-              />
-              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-fast peer-checked:border-accent peer-checked:bg-accent-subtle">
-                {label}
-              </span>
-            </label>
-          ))}
+        <div>
+          <SkillPicker options={options} initial={initial} max={20} />
+          {fields?.skills && <p className="mt-1.5 text-sm text-danger">{fields.skills[0]}</p>}
         </div>
-      </fieldset>
+      </StepCard>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field
-          label="Budget from"
-          name="budgetMin"
-          inputMode="decimal"
-          defaultValue={str(job, 'budget_min')}
-          placeholder="2000"
+      <StepCard>
+        <ChoiceChips
+          legend="Engagement"
+          name="engagementType"
+          options={ENGAGEMENTS}
+          defaultValue={str(job, 'engagement_type') || 'fixed'}
         />
-        <Field
-          label="Budget to"
-          name="budgetMax"
-          inputMode="decimal"
-          defaultValue={str(job, 'budget_max')}
-          placeholder="4000"
-          errors={fields?.budgetMax}
-        />
-        <div className="space-y-1.5">
-          <label htmlFor="currency" className="block text-sm font-medium">
-            Currency
-          </label>
-          <select
-            id="currency"
+        <div className="grid gap-5 sm:grid-cols-3">
+          <Field
+            label="Budget from"
+            name="budgetMin"
+            inputMode="decimal"
+            defaultValue={str(job, 'budget_min')}
+            placeholder="2000"
+          />
+          <Field
+            label="Budget to"
+            name="budgetMax"
+            inputMode="decimal"
+            defaultValue={str(job, 'budget_max')}
+            placeholder="4000"
+            errors={fields?.budgetMax}
+          />
+          <SelectField
+            label="Currency"
             name="currency"
             defaultValue={str(job, 'currency') || 'USD'}
-            className="h-11 w-full rounded-md border border-border-strong bg-surface-raised px-3"
           >
-            {['USD', 'EUR', 'GBP', 'CHF'].map((c) => (
+            {CURRENCIES.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
             ))}
-          </select>
+          </SelectField>
         </div>
-      </div>
-
-      <fieldset>
-        <legend className="mb-2 text-sm font-medium">Location</legend>
-        <div className="flex flex-wrap gap-2">
-          {LOCATIONS.map(([value, label]) => (
-            <label key={value} className="cursor-pointer">
-              <input
-                type="radio"
-                name="locationType"
-                value={value}
-                checked={locationType === value}
-                onChange={() => setLocationType(value)}
-                className="peer sr-only"
-              />
-              <span className="inline-block rounded-full border border-border-strong px-4 py-1.5 text-sm transition-colors duration-fast peer-checked:border-accent peer-checked:bg-accent-subtle">
-                {label}
-              </span>
-            </label>
-          ))}
-        </div>
-        {locationType !== 'remote' && (
-          <div className="mt-3">
+        <div className="space-y-4">
+          <ChoiceChips
+            legend="Location"
+            name="locationType"
+            options={LOCATIONS}
+            value={locationType}
+            onChange={setLocationType}
+          />
+          {locationType !== 'remote' && (
             <Field
               label="Where?"
               name="location"
@@ -212,15 +166,11 @@ export function FirstJobForm({
               placeholder="Zurich"
               errors={fields?.location}
             />
-          </div>
-        )}
-      </fieldset>
+          )}
+        </div>
+      </StepCard>
 
-      {state?.ok === false && !state.fields && (
-        <p role="alert" className="text-sm text-danger">
-          {state.message}
-        </p>
-      )}
+      {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
       <Submit label="Continue" />
     </form>
   );
@@ -233,7 +183,7 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
     return (
       <p className="text-text-muted">
         No draft yet —{' '}
-        <Link href="/onboarding/client/job" className="text-accent underline underline-offset-2">
+        <Link href="/onboarding/client/job" className="prose-link font-medium">
           write your brief
         </Link>
         .
@@ -242,25 +192,24 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
   }
 
   return (
-    <div className="space-y-6">
-      <article className="rounded-md border border-border-base bg-surface-raised p-5">
-        <h2 className="font-medium">{str(job, 'title')}</h2>
-        <p className="mt-2 whitespace-pre-line text-sm text-text-muted">
+    <div className="space-y-8">
+      <article className="rounded-lg border border-border-base bg-surface-raised p-5 sm:p-7">
+        <p className="text-xs font-medium tracking-eyebrow text-text-subtle uppercase">Preview</p>
+        <h2 className="mt-2 font-serif text-2xl">{str(job, 'title')}</h2>
+        <p className="mt-3 text-sm whitespace-pre-line text-text-muted">
           {str(job, 'description')}
         </p>
       </article>
 
       <form action={action} className="space-y-4">
-        <p className="text-text-muted text-pretty">
+        <p className="max-w-xl text-text-muted text-pretty">
           Publishing makes this brief public so developers can find and apply to it. You can close
           it at any time.
         </p>
-        {state?.ok === false && (
-          <p role="alert" className="text-sm text-danger">
-            {state.message}
-          </p>
-        )}
-        <Submit label="Publish this brief" />
+        {state?.ok === false && <FormError>{state.message}</FormError>}
+        <SubmitButton variant="accent" size="lg" pendingLabel="Publishing…">
+          Publish this brief
+        </SubmitButton>
       </form>
     </div>
   );

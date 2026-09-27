@@ -54,10 +54,7 @@ export function ApplySection({
         <div className="rounded-md border border-border-base bg-surface-sunken p-4">
           <p className="font-medium">{STATUS_COPY[state.status] ?? state.status}</p>
           <p className="mt-1 text-sm">
-            <Link
-              href="/dashboard/talent/applications"
-              className="text-accent underline underline-offset-2"
-            >
+            <Link href="/dashboard/talent/applications" className="prose-link font-medium">
               See all your applications
             </Link>
           </p>
@@ -116,7 +113,7 @@ export function ApplySection({
       return (
         <p className="text-sm text-text-muted">
           This is your job.{' '}
-          <Link href="/dashboard/client/jobs" className="text-accent underline underline-offset-2">
+          <Link href="/dashboard/client/jobs" className="prose-link font-medium">
             See applications
           </Link>
         </p>
@@ -126,10 +123,7 @@ export function ApplySection({
       return (
         <p className="text-sm text-text-muted text-pretty">
           You&rsquo;re signed in as a client. Add a talent profile from{' '}
-          <Link
-            href="/dashboard/settings/roles"
-            className="text-accent underline underline-offset-2"
-          >
+          <Link href="/dashboard/settings/roles" className="prose-link font-medium">
             settings
           </Link>{' '}
           if you want to apply to work too — one account holds both.

@@ -61,7 +61,7 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
           ) : (
             <>
               Live at{' '}
-              <Link href={`/jobs/${job.slug}`} className="text-accent underline underline-offset-2">
+              <Link href={`/jobs/${job.slug}`} className="prose-link font-medium">
                 /jobs/{job.slug}
               </Link>
             </>
