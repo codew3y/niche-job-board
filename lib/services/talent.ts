@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { rateFilters } from './rate-filter';
 import { createClient } from '../supabase/server';
 import { decodeCursor, encodeCursor } from './cursor';
 import type { TalentSearchParams } from '../schemas/search';
@@ -49,12 +50,8 @@ export async function listTalent(params: TalentSearchParams) {
     query = query.textSearch('search_vector', params.q, { type: 'websearch' });
   }
   if (params.availability) query = query.eq('availability', params.availability);
-  if (params.rateMin !== undefined) {
-    query = query.or(`hourly_rate_max.gte.${params.rateMin},hourly_rate_max.is.null`);
-  }
-  if (params.rateMax !== undefined) {
-    query = query.or(`hourly_rate_min.lte.${params.rateMax},hourly_rate_min.is.null`);
-  }
+  // Rates compare within one currency only; see lib/services/rate-filter.ts.
+  for (const filter of rateFilters(params)) query = query.or(filter);
 
   /**
    * Skill filtering over the curated taxonomy — the same 126-row seed, slugs and aliases that

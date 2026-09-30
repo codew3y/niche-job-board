@@ -10,6 +10,7 @@ import { FilterSelect } from '@/components/shared/filter-select';
 import { SearchBar } from '@/components/shared/search-bar';
 import { SkillFilter } from '@/components/shared/skill-filter';
 import type { BrowseType } from '@/lib/schemas/search';
+import { DEFAULT_RATE_CURRENCY, RATE_CURRENCIES } from '@/lib/services/rate-filter';
 import type { SkillOption } from '@/lib/services/skills';
 import { cn } from '@/lib/ui/cn';
 
@@ -20,7 +21,15 @@ const TYPES: [BrowseType, string][] = [
 ];
 
 /** Filters that only mean something for one type, dropped when the type changes. */
-const TYPE_ONLY = ['engagement', 'locationType', 'experience', 'sort', 'availability', 'rateMax'];
+const TYPE_ONLY = [
+  'engagement',
+  'locationType',
+  'experience',
+  'sort',
+  'availability',
+  'rateMax',
+  'currency',
+];
 
 /**
  * Browse filters. Jobs and developers used to be two pages with the same layout and the same
@@ -52,6 +61,10 @@ export function BrowseFilters({
     next.delete('cursor'); // a filter change invalidates the page position
     startTransition(() => router.push(`${pathname}?${next.toString()}`));
   };
+
+  // The rate filter compares within one currency (lib/services/rate-filter.ts). A rate with no
+  // currency in the URL is read as USD by the server, so the control shows USD too.
+  const rateCurrency = params.get('currency') ?? DEFAULT_RATE_CURRENCY;
 
   /** The type tabs are links, so they work before hydration and open in a new tab. */
   const typeHref = (t: BrowseType) => {
@@ -153,17 +166,29 @@ export function BrowseFilters({
               options={{ full_time: 'Full time', part_time: 'Part time', occasional: 'Occasional' }}
               onChange={(v) => set('availability', v)}
             />
-            {/* A single "up to": a client browsing has a ceiling, not a floor. */}
+            {/* A single "up to": a client browsing has a ceiling, not a floor. It applies in
+                the chosen currency only; rates are never converted (lib/services/rate-filter.ts).
+                USD is the default and reads as the un-highlighted "any" state, like the other
+                filters; choosing another currency highlights the control. */}
             <Select
               label="Rate"
               value={params.get('rateMax') ?? ''}
-              options={{
-                '40': 'Up to 40/hr',
-                '75': 'Up to 75/hr',
-                '120': 'Up to 120/hr',
-                '200': 'Up to 200/hr',
-              }}
+              options={Object.fromEntries(
+                ['40', '75', '120', '200'].map((n) => [n, `Up to ${n} ${rateCurrency}/hr`]),
+              )}
               onChange={(v) => set('rateMax', v)}
+            />
+            <Select
+              label="Rate currency"
+              value={params.get('currency') ?? ''}
+              anyLabel={`Rates in ${DEFAULT_RATE_CURRENCY}`}
+              options={Object.fromEntries(
+                RATE_CURRENCIES.filter((c) => c !== DEFAULT_RATE_CURRENCY).map((c) => [
+                  c,
+                  `Rates in ${c}`,
+                ]),
+              )}
+              onChange={(v) => set('currency', v)}
             />
           </>
         )}
@@ -198,15 +223,18 @@ function Select({
   value,
   options,
   onChange,
+  anyLabel,
 }: {
   label: string;
   value: string;
   options: Record<string, string>;
   onChange: (v: string) => void;
+  /** The label of the empty ("no filter") option. Defaults to "{label}: any". */
+  anyLabel?: string;
 }) {
   return (
     <FilterSelect id={`filter-${label}`} label={label} value={value} onChange={onChange}>
-      <option value="">{label}: any</option>
+      <option value="">{anyLabel ?? `${label}: any`}</option>
       {Object.entries(options).map(([k, v]) => (
         <option key={k} value={k}>
           {v}

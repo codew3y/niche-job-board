@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { RATE_CURRENCIES } from '../services/rate-filter';
 import { engagementType, experienceLevel, locationType } from './enums';
 import { paginationParams, trimmed } from './primitives';
 
@@ -36,6 +37,11 @@ export const talentSearchParams = paginationParams.extend({
   availability: z.enum(['full_time', 'part_time', 'occasional']).optional(),
   rateMin: z.coerce.number().min(0).optional(),
   rateMax: z.coerce.number().min(0).optional(),
+  /**
+   * The currency the rate filter applies in (lib/services/rate-filter.ts). An unknown value is
+   * dropped rather than failing the whole parse, which would silently clear every filter.
+   */
+  currency: z.enum(RATE_CURRENCIES).optional().catch(undefined),
 });
 
 /**
