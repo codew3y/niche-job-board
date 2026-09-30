@@ -12,8 +12,13 @@ import { cn } from '@/lib/ui/cn';
  * The profile menu, opened from the profile picture at the foot of the sidebar. It is the ONLY
  * route to the profile — there is no Profile nav item or header anywhere else.
  *
- * Items: View profile, Edit profile, Settings, the role switch (only when the account holds
+ * Items: View profile and Edit profile, Settings, the role switch (only when the account holds
  * both roles), Log out.
+ *
+ * View and Edit are two items only when they are two different pages. A developer's public
+ * profile (/talent/<slug>) and its editor are; a client's company has no public page, so its
+ * preview and its form share /dashboard/client/profile, and two items that open the same page
+ * read as a bug. There it is one item, "Company profile". Same for a developer with no slug yet.
  *
  * The role switch and log-out are server actions, so they stay real <form>s rendered OUTSIDE
  * the menu's portal; the menu items submit them through the `form` attribute. The forms work
@@ -42,6 +47,8 @@ export function AccountMenu({
   signOut: () => Promise<void>;
 }) {
   const other: Role = activeRole === 'talent' ? 'client' : 'talent';
+  // Compared without the #fragment: two anchors on one page are still one destination.
+  const onePage = profileHref.split('#')[0] === editProfileHref.split('#')[0];
   const hasBoth = hasTalent && hasClient;
 
   const item =
@@ -85,14 +92,23 @@ export function AccountMenu({
               </div>
               <Menu.Separator className="my-1 h-px bg-border-base" />
 
-              <Menu.LinkItem className={item} render={<Link href={profileHref} />}>
-                <UserRound aria-hidden="true" />
-                View profile
-              </Menu.LinkItem>
-              <Menu.LinkItem className={item} render={<Link href={editProfileHref} />}>
-                <Pencil aria-hidden="true" />
-                Edit profile
-              </Menu.LinkItem>
+              {onePage ? (
+                <Menu.LinkItem className={item} render={<Link href={editProfileHref} />}>
+                  <UserRound aria-hidden="true" />
+                  {activeRole === 'client' ? 'Company profile' : 'Profile'}
+                </Menu.LinkItem>
+              ) : (
+                <>
+                  <Menu.LinkItem className={item} render={<Link href={profileHref} />}>
+                    <UserRound aria-hidden="true" />
+                    View profile
+                  </Menu.LinkItem>
+                  <Menu.LinkItem className={item} render={<Link href={editProfileHref} />}>
+                    <Pencil aria-hidden="true" />
+                    Edit profile
+                  </Menu.LinkItem>
+                </>
+              )}
               <Menu.LinkItem className={item} render={<Link href="/dashboard/settings" />}>
                 <Settings aria-hidden="true" />
                 Settings

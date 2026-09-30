@@ -77,13 +77,28 @@ for (const [role, emailKey] of [
     await expect(page.getByRole('link', { name: /finances/i })).toHaveCount(0);
   });
 
-  test(`a ${role}'s profile menu has View profile, Edit profile, Settings and Log out`, async ({
+  // A developer has two profile pages (public and editor); a client's company has one page with
+  // the preview and the form, so it gets ONE item rather than two that open the same place.
+  const profileItems =
+    emailKey === 'talent' ? ['View profile', 'Edit profile'] : ['Company profile'];
+
+  test(`a ${role}'s profile menu has ${profileItems.join(', ')}, Settings and Log out`, async ({
     page,
   }) => {
     await signIn(page, data[emailKey].email);
     await page.getByRole('button', { name: /profile menu/i }).click();
-    for (const name of ['View profile', 'Edit profile', 'Settings', 'Log out']) {
+    for (const name of [...profileItems, 'Settings', 'Log out']) {
       await expect(page.getByRole('menuitem', { name })).toBeVisible();
+    }
+    if (emailKey === 'talent') {
+      // The two items must lead to two different pages.
+      const view = await page.getByRole('menuitem', { name: 'View profile' }).getAttribute('href');
+      const edit = await page.getByRole('menuitem', { name: 'Edit profile' }).getAttribute('href');
+      expect(view?.split('#')[0]).not.toBe(edit?.split('#')[0]);
+    } else {
+      await expect(page.getByRole('menuitem', { name: /view profile|edit profile/i })).toHaveCount(
+        0,
+      );
     }
     // Single-role fixture accounts: no switcher to offer.
     await expect(page.getByRole('menuitem', { name: /switch to/i })).toHaveCount(0);

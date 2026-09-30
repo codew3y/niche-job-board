@@ -45,7 +45,7 @@ export default async function ClientProfilePage() {
       />
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-start">
-        {/* "View profile" in the profile menu lands here: the company as it appears on a job
+        {/* "Company profile" in the profile menu lands here: the company as it appears on a job
             page. There is no separate public client page, so this is the honest preview. */}
         <section
           id="preview"
