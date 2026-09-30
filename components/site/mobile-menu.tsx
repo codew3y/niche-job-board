@@ -10,7 +10,7 @@ import { buttonStyles } from '@/components/ui/button';
 import { cn } from '@/lib/ui/cn';
 
 /**
- * The header on phones: the page links and the two auth buttons collapse behind one toggle.
+ * The header below `lg` (phones and tablets): the page links and the two auth buttons collapse behind one toggle.
  *
  * A disclosure (button + `aria-expanded` + `aria-controls`), not a modal: the panel pushes the
  * page down rather than trapping focus, so there is nothing to escape from. It closes when a
@@ -29,7 +29,7 @@ export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) 
   }, [open]);
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         aria-expanded={open}

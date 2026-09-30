@@ -19,7 +19,7 @@ export function SiteNavLinks() {
               href={href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'rounded-md px-3 py-2 text-sm transition-colors duration-fast ease-out',
+                'rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors duration-fast ease-out',
                 active
                   ? 'font-semibold text-text'
                   : 'text-text-muted hover:bg-surface-sunken hover:text-text',

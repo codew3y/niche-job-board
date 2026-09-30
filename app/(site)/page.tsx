@@ -149,7 +149,9 @@ export default async function Home({
 
       {/* ───────────── Closing band (restored) ───────────── */}
       <section className="mx-auto mb-20 max-w-6xl px-4 sm:px-6">
-        <div className="rounded-lg bg-surface-inverse px-6 py-14 text-center text-text-inverse sm:px-12">
+        {/* Inverse in light mode (ink band on paper). In dark mode "inverse" is near-white, which
+            glared as a white slab on a dark page — so there it becomes a raised dark panel. */}
+        <div className="rounded-lg border border-transparent bg-surface-inverse px-6 py-14 text-center text-text-inverse sm:px-12 dark:border-border-base dark:bg-surface-raised dark:text-text">
           <p className="mx-auto max-w-2xl text-display-sm text-balance">
             Show the work. Let the right people find it.
           </p>
@@ -164,7 +166,7 @@ export default async function Home({
               href="/signup?role=client"
               // Its own classes, not buttonStyles + overrides: `cn` does not merge utilities, so a
               // secondary button's background would fight a transparent one.
-              className="inline-flex h-12 items-center justify-center rounded-md border border-text-inverse/30 px-6 font-semibold text-text-inverse transition-colors duration-fast ease-out hover:border-text-inverse/60 hover:bg-text-inverse/10"
+              className="inline-flex h-12 items-center justify-center rounded-md border border-text-inverse/30 px-6 font-semibold text-text-inverse transition-colors duration-fast ease-out hover:border-text-inverse/60 hover:bg-text-inverse/10 dark:border-border-strong dark:text-text dark:hover:border-control dark:hover:bg-surface-sunken"
             >
               Post a brief
             </Link>
