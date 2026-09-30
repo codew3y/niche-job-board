@@ -24,7 +24,8 @@ export type Session = {
 };
 
 /**
- * Reachable without a session. Everything else sends a signed-out visitor to `/`.
+ * Reachable without a session. Everything else sends a signed-out visitor to the login, with
+ * `?next=` set to where they were headed.
  *
  * Public: the marketing site (Home, For Freelancers, For Clients, How It Works, About), the
  * auth screens and plumbing, the machine endpoints, the crawler files and the legal pages —

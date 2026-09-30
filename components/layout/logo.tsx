@@ -1,25 +1,24 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { WORDMARK } from './wordmark-path';
 import { cn } from '@/lib/ui/cn';
 
 /**
- * The techselect mark: a real photograph of a keycap, edited into a "select" key.
+ * The TechSelect logo: a shield with a lightning-bolt arrow, beside the TECHSELECT wordmark and
+ * the "Tech careers | Job board" line. Supplied by the owner as one raster lockup.
  *
- * SOURCE — "White computer keyboard showing white button" by Marcus Urbenz,
- * https://unsplash.com/photos/RrOkHOp4XOQ, Unsplash License (https://unsplash.com/license):
- * free to use and modify, commercially, without attribution. Credited anyway.
+ * FILES — cut from that one image (trimmed, never redrawn):
+ *   public/brand/logo-lockup.png       the full lockup, for light surfaces
+ *   public/brand/logo-lockup-dark.png  the same, with the navy "TECH" and the tagline turned
+ *                                      light so they read on dark surfaces; the blue stays
+ *   public/brand/logo-mark-128.png     the shield alone, for the collapsed app rail
+ *   app/icon.png, app/apple-icon.png   the shield as the browser-tab and iOS icons
  *
- * EDITS — cropped to the single key; its printed "Cut" legend removed by patching clean
- * keycap surface from the same photo over it; recoloured to the brand blue with a multiply
- * blend, which keeps the photo's real light and texture; a white check printed on the key
- * face; corners rounded. Files: public/brand/logo-mark-{128,512}.png, app/icon.png (browser
- * tab), app/apple-icon.png (iOS, unrounded — iOS applies its own mask).
- *
- * NOTE: the Unsplash License is non-exclusive, so this mark cannot be registered as a
- * trademark, and the source photo remains available to anyone.
+ * The source is 360px wide, so the lockup is kept at or below 180px wide in the UI to stay
+ * sharp on 2x screens.
  */
+const LOCKUP = { width: 360, height: 147 };
+
 export function LogoMark({ size = 28, className }: { size?: number; className?: string }) {
   return (
     <Image
@@ -32,24 +31,35 @@ export function LogoMark({ size = 28, className }: { size?: number; className?: 
   );
 }
 
-/** The wordmark, as outlines (see wordmark-path.ts). `currentColor`, so it follows the theme. */
-function Wordmark({ height }: { height: number }) {
+/**
+ * Both themes are rendered and CSS picks one (`dark:`), like the theme toggle: the right one
+ * shows on the first frame, with no flash while the theme resolves.
+ */
+function Lockup({ height }: { height: number }) {
+  const width = Math.round((LOCKUP.width / LOCKUP.height) * height);
   return (
-    <svg
-      height={height}
-      width={(WORDMARK.width / WORDMARK.height) * height}
-      viewBox={`0 0 ${WORDMARK.width} ${WORDMARK.height}`}
-      aria-hidden="true"
-      className="shrink-0"
-    >
-      <path d={WORDMARK.d} fill="currentColor" />
-    </svg>
+    <>
+      <Image
+        src="/brand/logo-lockup.png"
+        alt=""
+        width={width}
+        height={height}
+        className="shrink-0 dark:hidden"
+      />
+      <Image
+        src="/brand/logo-lockup-dark.png"
+        alt=""
+        width={width}
+        height={height}
+        className="hidden shrink-0 dark:block"
+      />
+    </>
   );
 }
 
 /**
- * The logo: mark + wordmark. Where it points is decided by the caller — the site header links
- * it to the home page, and inside the app it goes to /dashboard (`logoHref()`, lib/roles.ts).
+ * The logo. Where it points is decided by the caller — the site header links it to the home
+ * page, and inside the app it goes to /dashboard (`logoHref()`, lib/roles.ts).
  */
 export function Logo({
   href,
@@ -59,20 +69,17 @@ export function Logo({
 }: {
   href: string;
   className?: string;
-  /** Icon-rail form: the mark alone; the name is kept as the link's accessible name. */
+  /** Icon-rail form: the shield alone; the name is kept as the link's accessible name. */
   compact?: boolean;
   size?: 'md' | 'lg';
 }) {
-  const mark = size === 'lg' ? 36 : 28;
   return (
     <Link
       href={href}
-      aria-label="techselect — home"
-      className={cn('inline-flex items-center gap-2 text-text', className)}
+      aria-label="TechSelect — home"
+      className={cn('inline-flex items-center text-text', className)}
     >
-      <LogoMark size={compact ? 32 : mark} />
-      {/* Cap height matched to the mark: roughly 60% of its size reads as one lockup. */}
-      {!compact && <Wordmark height={size === 'lg' ? 22 : 17} />}
+      {compact ? <LogoMark size={32} /> : <Lockup height={size === 'lg' ? 64 : 48} />}
     </Link>
   );
 }
