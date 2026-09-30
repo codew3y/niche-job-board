@@ -1,39 +1,34 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { WORDMARK } from './wordmark-path';
 import { cn } from '@/lib/ui/cn';
 
 /**
- * The brand blue, fixed. Not `--accent`: the accent lightens in dark mode for text contrast,
- * and white glyphs on that lighter blue lost contrast. The mark is a brand asset, so it stays
- * one colour in both themes.
- */
-const BRAND = '#2f5bd8';
-
-/**
- * The techselect mark: a selection frame (four corner brackets) around a check — choosing,
- * from a set, the one that fits. Drawn on a 32-unit grid; readable from 16px (the browser tab,
- * app/icon.svg) up. The same artwork with the wordmark is /public/logo.svg.
+ * The techselect mark: a real photograph of a keycap, edited into a "select" key.
+ *
+ * SOURCE — "White computer keyboard showing white button" by Marcus Urbenz,
+ * https://unsplash.com/photos/RrOkHOp4XOQ, Unsplash License (https://unsplash.com/license):
+ * free to use and modify, commercially, without attribution. Credited anyway.
+ *
+ * EDITS — cropped to the single key; its printed "Cut" legend removed by patching clean
+ * keycap surface from the same photo over it; recoloured to the brand blue with a multiply
+ * blend, which keeps the photo's real light and texture; a white check printed on the key
+ * face; corners rounded. Files: public/brand/logo-mark-{128,512}.png, app/icon.png (browser
+ * tab), app/apple-icon.png (iOS, unrounded — iOS applies its own mask).
+ *
+ * NOTE: the Unsplash License is non-exclusive, so this mark cannot be registered as a
+ * trademark, and the source photo remains available to anyone.
  */
 export function LogoMark({ size = 28, className }: { size?: number; className?: string }) {
   return (
-    <svg
+    <Image
+      src="/brand/logo-mark-128.png"
+      alt=""
       width={size}
       height={size}
-      viewBox="0 0 32 32"
-      aria-hidden="true"
       className={cn('shrink-0', className)}
-    >
-      <rect width="32" height="32" rx="8" fill={BRAND} />
-      <path
-        d="M7 12V7h5M20 7h5v5M25 20v5h-5M12 25H7v-5M12.6 16.4l2.6 2.6 4.8-5.6"
-        fill="none"
-        stroke="white"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    />
   );
 }
 
