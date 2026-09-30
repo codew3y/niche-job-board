@@ -50,8 +50,11 @@ test.describe('signed out', () => {
     await page.goto('/');
     await expect(page.getByRole('banner').getByRole('link', { name: 'Log in' })).toBeHidden();
     await page.getByRole('button', { name: 'Open menu' }).click();
-    await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'For Clients' })).toBeVisible();
+    // Scoped to the header: the footer lists the same pages, so an unscoped "For Clients"
+    // matches two links and strict mode refuses to pick one.
+    const header = page.getByRole('banner');
+    await expect(header.getByRole('link', { name: 'Log in' })).toBeVisible();
+    await expect(header.getByRole('link', { name: 'For Clients' })).toBeVisible();
   });
 
   test('the home page has a hero figure and no login form', async ({ page }) => {
