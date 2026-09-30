@@ -52,8 +52,13 @@ export default async function Home({
 
       {/* ───────────── Hero (restored copy, static) ───────────── */}
       {/* Two columns that stretch to the same height: the video panel is as tall as the text
-          beside it, and wider than the text column, so it reads as landscape. */}
-      <section className="mx-auto grid max-w-6xl gap-10 px-4 pt-12 pb-12 sm:px-6 sm:pt-20 sm:pb-16 lg:grid-cols-[1fr_1.2fr] lg:items-stretch lg:gap-12">
+          beside it, and wider than the text column, so it reads as landscape.
+
+          The hero fills the first screen (viewport minus the 4rem header, its 1px border and any
+          notch inset) with its content centred, so the next section starts below the fold
+          instead of peeking in at the bottom. svh, not dvh: the height must not jump as a phone's
+          browser bar shows and hides. */}
+      <section className="mx-auto grid min-h-[calc(100svh-4rem-1px-env(safe-area-inset-top,0px))] max-w-6xl content-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1fr_1.2fr] lg:items-stretch lg:gap-12">
         <div>
           <p className="text-sm font-semibold text-accent">
             A job board for software, web &amp; automation work
