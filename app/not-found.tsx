@@ -2,7 +2,8 @@ import { Compass } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { Logo } from '@/components/layout/logo';
+import { SiteFooter } from '@/components/site/site-footer';
+import { SiteHeader } from '@/components/site/site-header';
 import { buttonStyles } from '@/components/ui/button';
 import { logoHref } from '@/lib/roles';
 import { getSessionUser } from '@/lib/supabase/session';
@@ -19,9 +20,7 @@ export default async function NotFound() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <div className="mx-auto w-full max-w-5xl px-4 pt-[max(1.25rem,env(safe-area-inset-top,0px))] sm:px-8">
-        <Logo href={home} />
-      </div>
+      <SiteHeader />
       <main
         id="main"
         className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-20 text-center"
@@ -44,6 +43,7 @@ export default async function NotFound() {
           </Link>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

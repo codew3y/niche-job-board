@@ -85,7 +85,7 @@ test('A PERSON CAN DELETE THEIR OWN ACCOUNT, and it is actually gone', async ({ 
 
   // Signed out, not merely redirected.
   await page.goto('/dashboard/talent');
-  await expect(page).toHaveURL(/\/\?next=/);
+  await expect(page).toHaveURL(/\/login\?next=/);
 
   // And the credentials no longer work, which is the difference between deleted and hidden.
   await page.goto('/login');

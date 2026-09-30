@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="168" height="32" viewBox="0 0 168 32" role="img" aria-label="techselect">
+  <!-- techselect logo: mark (code bracket + check on the accent square) and wordmark.
+       The React version lives in components/layout/logo.tsx; keep the two in step. -->
+  <g transform="translate(2 4) scale(1)">
+    <rect width="24" height="24" rx="6" fill="#2f5bd8"/>
+    <path d="M9.5 7.5 5 12l4.5 4.5" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m12 12.5 2.25 2.25L19 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="34" y="22.5" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="600" letter-spacing="-0.3" fill="#1a1a1a">techselect</text>
+</svg>

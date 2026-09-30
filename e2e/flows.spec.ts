@@ -166,6 +166,6 @@ test.describe('authorization holds across the flows', () => {
     page,
   }) => {
     await page.goto('/dashboard/messages');
-    await expect(page).toHaveURL(/\/\?next=%2Fdashboard%2Fmessages/);
+    await expect(page).toHaveURL(/\/login\?next=%2Fdashboard%2Fmessages/);
   });
 });

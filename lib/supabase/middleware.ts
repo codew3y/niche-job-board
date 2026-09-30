@@ -14,8 +14,8 @@ import { decideRoute, type Session } from './route-policy';
  *     `getUser()` — not `getSession()` — because only `getUser()` revalidates the token with
  *     the auth server; `getSession()` trusts whatever the cookie claims, which is forgeable.
  *
- *  2. **Gate routes.** Unauthenticated → / (the landing page is the login). No role yet →
- *     /select-role. Onboarding incomplete → resume at the saved step.
+ *  2. **Gate routes.** Unauthenticated → /login. No role yet → /select-role. Onboarding
+ *     incomplete → resume at the saved step.
  *
  * This is a convenience layer, NOT the authorization boundary. Middleware can be bypassed and
  * it never sees the data. RLS is what actually protects rows (lib/db/schema/*), and every

@@ -42,6 +42,7 @@ test.describe(() => {
     await page.screenshot(shot('01-landing'));
 
     // Browse is sign-in-only.
+    await page.goto('/login');
     await page.getByLabel(/email/i).fill(data.talent.email);
     await page.getByLabel(/password/i).fill(PASSWORD);
     await page.getByRole('button', { name: /sign in/i }).click();

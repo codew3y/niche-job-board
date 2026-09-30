@@ -23,7 +23,17 @@ const WIDTHS = [
 ];
 
 /** Every page reachable without a session. Authenticated pages are covered in flows.spec.ts. */
-const PUBLIC_PAGES = ['/', '/login', '/signup', '/privacy', '/terms'];
+const PUBLIC_PAGES = [
+  '/',
+  '/for-freelancers',
+  '/for-clients',
+  '/how-it-works',
+  '/about',
+  '/login',
+  '/signup',
+  '/privacy',
+  '/terms',
+];
 
 for (const viewport of WIDTHS) {
   test.describe(`at ${viewport.name}`, () => {
@@ -91,15 +101,16 @@ for (const viewport of WIDTHS) {
       });
     }
 
-    test('the login container is fully on screen', async ({ page }) => {
+    test('Log in is reachable from the header', async ({ page }) => {
       await page.goto('/');
-      const tab = page.getByRole('tab', { name: 'Log in' });
-      await expect(tab).toBeVisible();
-      const box = await tab.boundingBox();
-      // 36px is the height the tabs are designed at (h-9). Below ~32 a control becomes
-      // genuinely hard to hit on a touch screen.
+      // At phone widths it sits behind the menu toggle; from md it is in the header row.
+      const toggle = page.getByRole('button', { name: 'Open menu' });
+      if (await toggle.isVisible()) await toggle.click();
+      const login = page.getByRole('link', { name: 'Log in' }).filter({ visible: true }).first();
+      await expect(login).toBeVisible();
+      const box = await login.boundingBox();
+      // Below ~32px a control becomes genuinely hard to hit on a touch screen.
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(32);
-      expect((box?.x ?? -1) >= 0 && (box?.x ?? 0) + (box?.width ?? 0) <= viewport.width).toBe(true);
     });
   });
 }

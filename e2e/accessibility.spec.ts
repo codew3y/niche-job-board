@@ -10,7 +10,7 @@ test.afterAll(async () => {
 });
 async function signIn(page: Page) {
   data ??= await seed();
-  await page.goto('/');
+  await page.goto('/login');
   await page.getByLabel(/email/i).fill(data.talent.email);
   await page.getByLabel(/password/i).fill(PASSWORD);
   await page.getByRole('button', { name: /sign in/i }).click();
@@ -35,6 +35,10 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 /** Every route reachable without a session. Authenticated pages need fixtures; see below. */
 const PUBLIC_PAGES = [
   { path: '/', name: 'home' },
+  { path: '/for-freelancers', name: 'for freelancers' },
+  { path: '/for-clients', name: 'for clients' },
+  { path: '/how-it-works', name: 'how it works' },
+  { path: '/about', name: 'about' },
   { path: '/login', name: 'sign in' },
   { path: '/signup', name: 'sign up' },
   { path: '/privacy', name: 'privacy' },

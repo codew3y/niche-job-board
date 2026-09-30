@@ -9,32 +9,52 @@ const fresh: Session = { signedIn: true, hasChosen: false, hasRole: false, activ
 const done: Session = { signedIn: true, hasChosen: true, hasRole: true, activeRole: 'talent' };
 
 describe('signed out', () => {
-  it('lets the front door, the auth screens and the detail pages through', () => {
-    for (const p of ['/', '/login', '/signup', '/jobs/some-slug', '/talent/some-slug']) {
+  it('lets the site pages, the auth screens and the detail pages through', () => {
+    for (const p of [
+      '/',
+      '/for-freelancers',
+      '/for-clients',
+      '/how-it-works',
+      '/about',
+      '/login',
+      '/signup',
+      '/jobs/some-slug',
+      '/talent/some-slug',
+    ]) {
       expect(decideRoute(p, anon)).toBeNull();
     }
   });
 
-  it('sends private pages to the front door — the login — preserving where they were headed', () => {
+  it('sends private pages to the login, preserving where they were headed', () => {
     expect(decideRoute('/dashboard/talent/matches', anon)).toBe(
-      '/?next=%2Fdashboard%2Ftalent%2Fmatches',
+      '/login?next=%2Fdashboard%2Ftalent%2Fmatches',
     );
     expect(decideRoute('/dashboard/settings/roles', anon)).toBe(
-      '/?next=%2Fdashboard%2Fsettings%2Froles',
+      '/login?next=%2Fdashboard%2Fsettings%2Froles',
     );
   });
 
   it('keeps Browse behind sign-in', () => {
-    expect(decideRoute('/browse', anon)).toBe('/?next=%2Fbrowse');
-    expect(decideRoute('/dashboard', anon)).toBe('/?next=%2Fdashboard');
+    expect(decideRoute('/browse', anon)).toBe('/login?next=%2Fbrowse');
+    expect(decideRoute('/dashboard', anon)).toBe('/login?next=%2Fdashboard');
   });
 
   it('treats the old browse indexes as private — only their children are public', () => {
     // /jobs and /talent redirect to /browse in next.config.ts; if one ever reaches the proxy it
     // must not open browse to a signed-out visitor.
-    expect(decideRoute('/jobs', anon)).toBe('/?next=%2Fjobs');
-    expect(decideRoute('/talent', anon)).toBe('/?next=%2Ftalent');
-    expect(decideRoute('/jobs/', anon)).toBe('/?next=%2Fjobs%2F');
+    expect(decideRoute('/jobs', anon)).toBe('/login?next=%2Fjobs');
+    expect(decideRoute('/talent', anon)).toBe('/login?next=%2Ftalent');
+    expect(decideRoute('/jobs/', anon)).toBe('/login?next=%2Fjobs%2F');
+  });
+});
+
+describe('the site pages stay readable signed in', () => {
+  it('opens For Freelancers, For Clients, How It Works and About in every state', () => {
+    for (const session of [fresh, chosen, done]) {
+      for (const p of ['/for-freelancers', '/for-clients', '/how-it-works', '/about']) {
+        expect(decideRoute(p, session)).toBeNull();
+      }
+    }
   });
 });
 
@@ -184,9 +204,9 @@ describe('the legal pages', () => {
 });
 
 describe('the inbox is private', () => {
-  it('sends a signed-out visitor to the front door, keeping the thread they wanted', () => {
+  it('sends a signed-out visitor to the login, keeping the thread they wanted', () => {
     expect(decideRoute('/dashboard/messages/abc', anon)).toBe(
-      '/?next=%2Fdashboard%2Fmessages%2Fabc',
+      '/login?next=%2Fdashboard%2Fmessages%2Fabc',
     );
   });
 

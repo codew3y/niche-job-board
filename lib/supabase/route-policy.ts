@@ -26,13 +26,17 @@ export type Session = {
 /**
  * Reachable without a session. Everything else sends a signed-out visitor to `/`.
  *
- * The app is sign-in-first: the landing page is the login, and Browse lives behind it. What
- * stays public is what CANNOT work behind a login — the auth plumbing itself, the machine
- * endpoints, the crawler files and the legal pages — plus the job and profile DETAIL pages
- * (see PUBLIC_DETAIL_PREFIXES), so a shared link still opens.
+ * Public: the marketing site (Home, For Freelancers, For Clients, How It Works, About), the
+ * auth screens and plumbing, the machine endpoints, the crawler files and the legal pages —
+ * plus the job and profile DETAIL pages (see PUBLIC_DETAIL_PREFIXES), so a shared link still
+ * opens. Everything else, Browse included, requires sign-in.
  */
 const PUBLIC_PREFIXES = [
   '/',
+  '/for-freelancers',
+  '/for-clients',
+  '/how-it-works',
+  '/about',
   '/login',
   '/signup',
   '/verify',
@@ -133,8 +137,8 @@ export function decideRoute(path: string, session: Session): string | null {
   // signed-out visitors meant a user mid-onboarding was redirected away from public pages and
   // /api/health — and the keep-alive ping has no session at all.
   if (isPublic(path)) {
-    // The landing page IS the login, so a signed-in visitor has no reason to be on it. Sent
-    // straight to where /dashboard would send them — one hop, never two (see the loop test).
+    // A signed-in visitor's home is their dashboard, not the marketing page. Sent straight to
+    // where /dashboard would send them — one hop, never two (see the loop test).
     if (session.signedIn && path === '/') return appHome(session);
     // Someone fully onboarded has no reason to sit on the auth screens either.
     if (session.signedIn && session.hasRole && (path === '/login' || path === '/signup')) {
@@ -144,9 +148,9 @@ export function decideRoute(path: string, session: Session): string | null {
   }
 
   if (!session.signedIn) {
-    // To the front door — which is the login — carrying where they were headed, so signing in
-    // lands them there rather than on a dashboard they did not ask for.
-    return `/?next=${encodeURIComponent(path)}`;
+    // To the login, carrying where they were headed, so signing in lands them there rather
+    // than on a dashboard they did not ask for.
+    return `/login?next=${encodeURIComponent(path)}`;
   }
 
   if (matches(path, PRE_ROLE_PREFIXES)) {

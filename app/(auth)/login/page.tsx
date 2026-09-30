@@ -10,9 +10,9 @@ export const metadata: Metadata = { title: 'Sign in' };
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
   // Only accept a path. An absolute URL here would be an open redirect.
   const safeNext = next?.startsWith('/') && !next.startsWith('//') ? next : undefined;
 
@@ -29,6 +29,12 @@ export default async function LoginPage({
         </>
       }
     >
+      {/* OAuth failures redirect here with ?error= (app/auth/callback, lib/actions/auth.ts). */}
+      {error && (
+        <p role="alert" className="mb-5 text-sm text-danger text-pretty">
+          {error}
+        </p>
+      )}
       <OAuthButtons next={safeNext} />
       <OrDivider />
       <EmailPasswordForm mode="login" next={safeNext} />

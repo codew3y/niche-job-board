@@ -1,61 +1,95 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
 import { canSeed, PASSWORD, seed, teardown, type Seeded } from './fixtures';
 
 /**
- * The front door: a full-screen video, the wordmark, one line, and the login container. Nothing
- * else — and never for someone who is signed in.
+ * The public site: a static home page and four content pages, all under one header and footer,
+ * with Log in / Sign up in the header rather than on the page.
  */
 
+const SITE_PAGES = [
+  ['/', /hired for the work/i],
+  ['/for-freelancers', /get hired for what you have built/i],
+  ['/for-clients', /find developers by what they have shipped/i],
+  ['/how-it-works', /how techselect works/i],
+  ['/about', /shipped work is the profile/i],
+] as const;
+
 test.describe('signed out', () => {
-  test('shows the wordmark, a tagline and the login container — and nothing else', async ({
-    page,
-  }) => {
-    await page.goto('/');
-    await expect(page.getByRole('link', { name: /techselect/i })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Log in' })).toBeVisible();
-    await expect(page.getByRole('tab', { name: 'Sign up' })).toBeVisible();
-    await expect(page.getByLabel(/email/i)).toBeVisible();
+  for (const [path, heading] of SITE_PAGES) {
+    test(`${path} renders its page inside the shared header and footer`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
+      await expect(page.getByRole('link', { name: /techselect — home/i }).first()).toHaveAttribute(
+        'href',
+        '/',
+      );
+      await expect(page.getByRole('contentinfo')).toBeVisible();
+    });
+  }
 
-    // No navbar, no browse links, no dashboard content.
-    await expect(page.getByRole('navigation')).toHaveCount(0);
-    await expect(page.getByRole('link', { name: /^(jobs|developers|browse)/i })).toHaveCount(0);
+  test('the header has the page links and Log in / Sign up', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto('/');
+    const site = page.getByRole('navigation', { name: 'Site' });
+    for (const label of ['Home', 'For Freelancers', 'For Clients', 'How It Works', 'About']) {
+      await expect(site.getByRole('link', { name: label, exact: true })).toBeVisible();
+    }
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Log in' })).toHaveAttribute(
+      'href',
+      '/login',
+    );
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Sign up' })).toHaveAttribute(
+      'href',
+      '/signup',
+    );
   });
 
-  test('the background is a muted, non-looping slideshow with posters', async ({ page }) => {
+  test('on a phone the header collapses into a menu', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
-    // Mounted after idle, and only when motion is allowed (Playwright's default allows it).
-    const videos = page.locator('video');
-    await expect(videos.first()).toBeAttached({ timeout: 10_000 });
-    expect(await videos.count()).toBeGreaterThanOrEqual(2);
-    for (const video of await videos.all()) {
-      await expect(video).toHaveJSProperty('muted', true);
-      await expect(video).toHaveJSProperty('loop', false);
-      await expect(video).toHaveAttribute('poster', /\/videos\/.+-poster\.jpg$/);
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Log in' })).toBeHidden();
+    await page.getByRole('button', { name: 'Open menu' }).click();
+    await expect(page.getByRole('link', { name: 'Log in' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'For Clients' })).toBeVisible();
+  });
+
+  test('the home page has no video and no login form', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('video')).toHaveCount(0);
+    await expect(page.getByLabel(/password/i)).toHaveCount(0);
+  });
+
+  test('the category grid links every card to a Browse filter', async ({ page }) => {
+    await page.goto('/');
+    await expect(
+      page.getByRole('heading', { name: 'Find freelancers for every type of work' }),
+    ).toBeVisible();
+    const cards = page.locator('a[href^="/browse?type=developers&category="]');
+    await expect(cards).toHaveCount(10);
+  });
+
+  test('How It Works shows four illustrated steps with alt text', async ({ page }) => {
+    await page.goto('/how-it-works');
+    const images = page.locator('img[src*="how-it-works"], img[srcset*="how-it-works"]');
+    await expect(images).toHaveCount(4);
+    for (const img of await images.all()) {
+      await expect(img).toHaveAttribute('alt', /.{10,}/);
     }
   });
 
-  test('the clips are served, not redirected to the login', async ({ request }) => {
-    // The proxy matcher once skipped images but not video, so every clip 307'd to "/".
-    for (const path of ['/videos/code.mp4', '/videos/code.webm', '/videos/code-poster.jpg']) {
-      const response = await request.get(path, { maxRedirects: 0 });
-      expect(response.status(), path).toBe(200);
-    }
-  });
-
-  test('the Sign up tab switches the form to account creation', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('tab', { name: 'Sign up' }).click();
-    await expect(page.getByLabel(/your name/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: /create account/i })).toBeVisible();
-  });
-
-  test('a protected page sends a signed-out visitor to the front door, keeping the target', async ({
+  test('a protected page sends a signed-out visitor to the login, keeping the target', async ({
     page,
   }) => {
     await page.goto('/browse');
-    await expect(page).toHaveURL(/\/\?next=%2Fbrowse$/);
-    await expect(page.getByRole('tab', { name: 'Log in' })).toBeVisible();
+    await expect(page).toHaveURL(/\/login\?next=%2Fbrowse$/);
+  });
+
+  test('CARRIES NO PLACEHOLDER COPY', async ({ page }) => {
+    await page.goto('/');
+    const body = (await page.locator('body').innerText()).toLowerCase();
+    expect(body).not.toContain('lorem ipsum');
+    expect(body).not.toContain('walking skeleton');
   });
 });
 
@@ -70,38 +104,45 @@ test.describe('signed in', () => {
     if (data) await teardown(data);
   });
 
-  async function signIn(page: import('@playwright/test').Page) {
-    await page.goto('/');
+  async function signIn(page: Page) {
+    await page.goto('/login');
     await page.getByLabel(/email/i).fill(data.talent.email);
     await page.getByLabel(/password/i).fill(PASSWORD);
     await page.getByRole('button', { name: /sign in/i }).click();
     await page.waitForURL(/\/dashboard\//, { timeout: 20_000 });
   }
 
-  test('VISITING / REDIRECTS TO THE DASHBOARD — the landing page is never shown', async ({
-    page,
-  }) => {
+  test('VISITING / GOES TO THE DASHBOARD', async ({ page }) => {
     await signIn(page);
     await page.goto('/');
     await expect(page).toHaveURL(/\/dashboard\/talent$/);
   });
 
-  test('THE LOGO NEVER LANDS A SIGNED-IN USER ON /', async ({ page }) => {
+  test('the site header offers the dashboard, not Sign up', async ({ page }) => {
+    await signIn(page);
+    await page.goto('/about');
+    await expect(
+      page.getByRole('banner').getByRole('link', { name: /go to dashboard/i }),
+    ).toHaveCount(1);
+    await expect(page.getByRole('banner').getByRole('link', { name: 'Sign up' })).toHaveCount(0);
+  });
+
+  test('THE LOGO INSIDE THE APP NEVER LANDS A SIGNED-IN USER ON /', async ({ page }) => {
     await signIn(page);
     for (const path of ['/dashboard/talent/applications', '/browse', `/jobs/${data.job.slug}`]) {
       await page.goto(path);
-      const logo = page.getByRole('link', { name: /techselect/i }).first();
+      const logo = page.getByRole('link', { name: /techselect — home/i }).first();
       await expect(logo, `logo on ${path}`).toHaveAttribute('href', '/dashboard');
-      await logo.click();
-      await expect(page).toHaveURL(/\/dashboard\//);
     }
   });
 
-  test('LOGGING OUT RETURNS TO THE FRONT DOOR', async ({ page }) => {
+  test('LOGGING OUT RETURNS TO THE HOME PAGE', async ({ page }) => {
     await signIn(page);
     await page.getByRole('button', { name: /profile menu/i }).click();
     await page.getByRole('menuitem', { name: /log out/i }).click();
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByRole('tab', { name: 'Log in' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: /hired for the work/i }),
+    ).toBeVisible();
   });
 });
