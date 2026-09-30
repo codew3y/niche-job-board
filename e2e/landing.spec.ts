@@ -64,7 +64,9 @@ test.describe('signed out', () => {
     const video = page.locator('figure video');
     await expect(video).toBeAttached({ timeout: 10_000 });
     await expect(video).toHaveJSProperty('muted', true);
-    await expect(page.getByRole('button', { name: /pause background video/i })).toBeVisible();
+    // No caption and no pause control on the home page (owner's request).
+    await expect(page.getByRole('button', { name: /pause background video/i })).toHaveCount(0);
+    await expect(page.locator('figure figcaption')).toHaveCount(0);
     // Log in lives in the header now, not in the page.
     await expect(page.getByLabel(/password/i)).toHaveCount(0);
   });

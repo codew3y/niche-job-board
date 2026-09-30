@@ -45,6 +45,12 @@ type Props = {
   /** Describes the scene for the pause control's context; the media itself is decorative. */
   label: string;
   className?: string;
+  /**
+   * Show the pause control (default true). The home page turns it off at the owner's request.
+   * That trades away WCAG 2.2.2 (Pause, Stop, Hide) for auto-playing motion beside content;
+   * the video still never plays under prefers-reduced-motion, Save-Data or 2G.
+   */
+  controls?: boolean;
 };
 
 type Connection = { saveData?: boolean; effectiveType?: string };
@@ -70,7 +76,7 @@ function readPaused(): boolean {
   }
 }
 
-export function HeroVideo({ poster, webm, mp4, label, className = '' }: Props) {
+export function HeroVideo({ poster, webm, mp4, label, className = '', controls = true }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   // `null` = undecided (server render and first client render agree: poster only).
   const [enabled, setEnabled] = useState<boolean | null>(null);
@@ -83,7 +89,9 @@ export function HeroVideo({ poster, webm, mp4, label, className = '' }: Props) {
     // The remembered choice is read here, in the same callback that decides whether a video
     // exists at all — before the <video> mounts, so a reader who paused it never sees it play.
     const start = () => {
-      setPaused(readPaused());
+      // A remembered pause only applies while there is a control to undo it — otherwise a
+      // visitor who paused it on another page could never start it again.
+      setPaused(controls ? readPaused() : false);
       setEnabled(allowsMotion());
     };
     // Safari has no requestIdleCallback; a short timeout is the fallback there.
@@ -100,7 +108,7 @@ export function HeroVideo({ poster, webm, mp4, label, className = '' }: Props) {
       if (idle) window.cancelIdleCallback(handle);
       else window.clearTimeout(handle);
     };
-  }, []);
+  }, [controls]);
 
   // Play and pause follow both the reader's choice and visibility: a video scrolled out of
   // view is decoding frames nobody sees, which is battery spent for nothing.
@@ -161,7 +169,7 @@ export function HeroVideo({ poster, webm, mp4, label, className = '' }: Props) {
         </video>
       )}
 
-      {enabled && (
+      {enabled && controls && (
         <button
           type="button"
           onClick={toggle}

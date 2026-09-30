@@ -51,7 +51,9 @@ export default async function Home({
       )}
 
       {/* ───────────── Hero (restored copy, static) ───────────── */}
-      <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 pb-12 sm:px-6 sm:pt-20 sm:pb-16 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
+      {/* Two columns that stretch to the same height: the video panel is as tall as the text
+          beside it, and wider than the text column, so it reads as landscape. */}
+      <section className="mx-auto grid max-w-6xl gap-10 px-4 pt-12 pb-12 sm:px-6 sm:pt-20 sm:pb-16 lg:grid-cols-[1fr_1.2fr] lg:items-stretch lg:gap-12">
         <div>
           <p className="text-sm font-semibold text-accent">
             A job board for software, web &amp; automation work
@@ -82,21 +84,17 @@ export default async function Home({
 
         {/* The hero figure, restored from b9fe7d4: a looping clip of a developer at work, poster
             first (the LCP image), video mounted after idle and never under reduced motion,
-            Save-Data or 2G, with a pause control. Source and licence: hero-video.tsx. */}
-        <figure>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border-base bg-surface-sunken lg:aspect-[5/6]">
-            <HeroVideo
-              poster="/video/hero-poster.jpg"
-              webm="/video/hero.webm"
-              mp4="/video/hero.mp4"
-              label="a developer writing code at a laptop"
-            />
-            {/* A solid band rather than a gradient: it guarantees the caption's contrast over
-                whatever frame is showing (the footage is busy at the bottom). */}
-            <figcaption className="absolute inset-x-0 bottom-0 bg-black/55 px-5 py-3 pr-16 text-sm text-white">
-              The work itself, not a list of keywords about it.
-            </figcaption>
-          </div>
+            Save-Data or 2G. No caption and no pause control, at the owner's request. Source and
+            licence: hero-video.tsx. On phones it keeps a 16:9 box; from lg it fills the column
+            height, matching the text. */}
+        <figure className="relative aspect-video overflow-hidden rounded-lg border border-border-base bg-surface-sunken lg:aspect-auto lg:h-full lg:min-h-80">
+          <HeroVideo
+            poster="/video/hero-poster.jpg"
+            webm="/video/hero.webm"
+            mp4="/video/hero.mp4"
+            label="a developer writing code at a laptop"
+            controls={false}
+          />
         </figure>
       </section>
 
