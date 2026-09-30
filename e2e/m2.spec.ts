@@ -96,7 +96,9 @@ test('3 — the job is public, indexable, and findable by search', async ({ page
    * passed only because a local build is quiet. Waiting for the element that must appear is
    * both faster and a stronger claim.
    */
-  await page.goto('/jobs?q=subscription%20billing');
+  // The job page is public; searching for it happens in Browse, which is sign-in-only.
+  await signIn(page, data.talent.email);
+  await page.goto('/browse?type=jobs&q=subscription%20billing');
   await expect(page.locator(`a[href="/jobs/${data.job.slug}"]`)).toBeVisible({ timeout: 20_000 });
 });
 

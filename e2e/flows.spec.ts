@@ -48,7 +48,9 @@ test.describe('path 1 — a published profile is publicly visible', () => {
   });
 
   test('it appears in browse, and full-text search finds it', async ({ page }) => {
-    await page.goto('/talent?q=subscription%20billing');
+    // Browse is sign-in-only; the profile page itself stays public (the test above).
+    await signIn(page, data.client.email);
+    await page.goto('/browse?type=developers&q=subscription%20billing');
     await page.waitForLoadState('networkidle');
     // Scoped by href, not by text: every run seeds an identically-worded profile, so matching
     // on the headline resolves to several and fails strict mode for the wrong reason.
@@ -58,7 +60,8 @@ test.describe('path 1 — a published profile is publicly visible', () => {
   test('SEARCH MATCHES TERMS THAT ARE NOT ADJACENT — the ilike regression', async ({ page }) => {
     // "Postgres developer" spans the headline with other words between. A substring match
     // finds nothing here; this is the behaviour migration 0013 exists for.
-    await page.goto('/talent?q=postgres%20developer');
+    await signIn(page, data.client.email);
+    await page.goto('/browse?type=developers&q=postgres%20developer');
     await page.waitForLoadState('networkidle');
     await expect(page.locator(`a[href="/talent/${data.talent.slug}"]`)).toBeVisible();
   });
