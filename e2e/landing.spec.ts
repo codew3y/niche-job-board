@@ -54,9 +54,15 @@ test.describe('signed out', () => {
     await expect(page.getByRole('link', { name: 'For Clients' })).toBeVisible();
   });
 
-  test('the home page has no video and no login form', async ({ page }) => {
+  test('the home page has a hero figure and no login form', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('video')).toHaveCount(0);
+    // The hero figure: a poster image first, a muted looping clip once idle (motion allowed).
+    await expect(page.locator('figure img[src*="hero-poster"]')).toBeVisible();
+    const video = page.locator('figure video');
+    await expect(video).toBeAttached({ timeout: 10_000 });
+    await expect(video).toHaveJSProperty('muted', true);
+    await expect(page.getByRole('button', { name: /pause background video/i })).toBeVisible();
+    // Log in lives in the header now, not in the page.
     await expect(page.getByLabel(/password/i)).toHaveCount(0);
   });
 
