@@ -37,29 +37,37 @@ export function TalentReview({
     <div className="space-y-8">
       {/* The checklist names exactly what is missing, rather than disabling a button and leaving
           the user to guess (§7, docs/components.md). */}
-      <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
+      <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised shadow-xs">
         {checks.map((check) => (
-          <li key={check.label} className="flex items-center justify-between gap-4 px-5 py-4">
-            <span className="flex items-center gap-3">
+          <li
+            key={check.label}
+            className="flex items-center justify-between gap-4 px-4 py-3 sm:px-5"
+          >
+            <span className="flex min-w-0 items-center gap-3">
               <span
                 aria-hidden="true"
                 className={cn(
-                  'grid size-7 place-items-center rounded-full',
+                  'grid size-8 shrink-0 place-items-center rounded-md',
                   check.done
                     ? 'bg-success-subtle text-success'
-                    : 'bg-surface-sunken text-text-subtle',
+                    : 'border border-control text-text-subtle',
                 )}
               >
-                {check.done ? <Check size={15} /> : <CircleDashed size={15} />}
+                {check.done ? <Check size={16} strokeWidth={2.5} /> : <CircleDashed size={16} />}
               </span>
-              <span className={check.done ? 'text-text-muted' : 'font-semibold'}>
+              <span className={check.done ? 'text-text-muted' : 'font-semibold text-text'}>
                 {check.label}
               </span>
-              <span className="sr-only">{check.done ? 'complete' : 'still needed'}</span>
+              {!check.done && <span className="sr-only">(still needed)</span>}
             </span>
-            {!check.done && (
-              <Link href={check.fix} className="prose-link text-sm font-semibold">
-                Add
+            {check.done ? (
+              <span className="shrink-0 text-sm text-success">Done</span>
+            ) : (
+              <Link
+                href={check.fix}
+                className="inline-flex min-h-10 shrink-0 items-center rounded-md px-2 text-sm font-semibold text-link hover:underline"
+              >
+                Add<span className="sr-only"> {check.label.toLowerCase()}</span>
               </Link>
             )}
           </li>
@@ -73,12 +81,14 @@ export function TalentReview({
             time.
           </p>
           {state?.ok === false && <FormError>{state.message}</FormError>}
-          <SubmitButton variant="accent" size="lg" pendingLabel="Publishing…">
+          <SubmitButton size="lg" className="w-full sm:w-auto" pendingLabel="Publishing…">
             Publish my profile
           </SubmitButton>
         </form>
       ) : (
-        <p className="text-text-muted">Finish the items above and come back here to publish.</p>
+        <p className="rounded-lg bg-surface-sunken px-4 py-3 text-sm text-text-muted">
+          Finish the items above and come back here to publish.
+        </p>
       )}
 
       {!(profile?.website_url as string | null) && progress.hasEvidence && (

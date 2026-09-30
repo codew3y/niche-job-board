@@ -29,22 +29,23 @@ export const buttonStyles = cva(
     variants: {
       variant: {
         /** Ink on paper — the default action. Deliberately not the accent: see DESIGN.md §4.1. */
-        primary: 'bg-surface-inverse text-text-inverse shadow-xs hover:opacity-90',
+        primary:
+          'bg-primary text-primary-text shadow-xs hover:bg-primary-hover active:bg-primary-pressed',
         /** The accent, for the ONE action a screen exists for (publish, apply, send). */
         accent: 'bg-accent text-accent-text shadow-xs hover:bg-accent-hover',
         secondary:
-          'border border-control/60 bg-surface-raised text-text hover:border-control hover:bg-surface-sunken',
+          'border border-control bg-surface-raised text-text shadow-xs hover:bg-surface-sunken',
         ghost: 'text-text-muted hover:bg-surface-sunken hover:text-text',
-        danger: 'bg-danger text-accent-text shadow-xs hover:opacity-90',
+        danger: 'bg-danger text-primary-text shadow-xs hover:opacity-90',
         /** A destructive action that is not the primary one — "Not a fit", "Delete". */
         'danger-ghost': 'text-danger hover:bg-danger-subtle',
       },
       size: {
-        sm: 'h-9 px-3.5 text-sm [&_svg]:size-4',
+        sm: 'h-10 px-3.5 text-sm [&_svg]:size-4',
         md: 'h-11 px-5 text-[0.9375rem] [&_svg]:size-[1.125rem]',
         lg: 'h-12 px-6 text-base [&_svg]:size-5',
         icon: 'size-10 [&_svg]:size-[1.125rem]',
-        'icon-sm': 'size-9 [&_svg]:size-4',
+        'icon-sm': 'size-10 [&_svg]:size-4',
       },
     },
     defaultVariants: { variant: 'primary', size: 'md' },

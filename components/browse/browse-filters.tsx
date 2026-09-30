@@ -1,5 +1,6 @@
 'use client';
 
+import { X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -18,7 +19,7 @@ const TYPES: [BrowseType, string][] = [
   ['developers', 'Developers'],
 ];
 
-/** Filters that only mean something for one type — dropped when the type changes. */
+/** Filters that only mean something for one type, dropped when the type changes. */
 const TYPE_ONLY = ['engagement', 'locationType', 'experience', 'sort', 'availability', 'rateMax'];
 
 /**
@@ -66,6 +67,8 @@ export function BrowseFilters({
 
   return (
     <search className="space-y-4">
+      {/* Underline tabs: 40px tall so each is a comfortable tap target, and the active one is
+          marked by weight and a navy rule as well as colour. */}
       <nav aria-label="Show" className="flex gap-1 border-b border-border-base">
         {TYPES.map(([t, label]) => (
           <Link
@@ -73,10 +76,10 @@ export function BrowseFilters({
             href={typeHref(t)}
             aria-current={type === t ? 'page' : undefined}
             className={cn(
-              '-mb-px border-b-2 px-3 py-2 text-sm transition-colors duration-fast ease-out',
+              '-mb-px inline-flex h-10 items-center border-b-2 px-3 text-sm transition-colors duration-fast ease-out',
               type === t
-                ? 'border-text font-semibold text-text'
-                : 'border-transparent text-text-muted hover:text-text',
+                ? 'border-primary font-semibold text-text'
+                : 'border-transparent font-medium text-text-muted hover:border-border-strong hover:text-text',
             )}
           >
             {label}
@@ -98,11 +101,15 @@ export function BrowseFilters({
         pending={isPending}
       />
 
-      <div className="flex flex-wrap gap-2">
+      {/* Phone: a grid, so every filter is a full-width 40px cell and nothing scrolls sideways.
+          The app rail leaves ~264px at a 360px viewport, so one column there; two from a 416px
+          viewport; from sm one wrapping row, each control sized to its value. */}
+      <div className="grid grid-cols-1 gap-2 min-[26rem]:grid-cols-2 sm:flex sm:flex-wrap sm:items-center">
         <SkillFilter
           skills={skills}
           value={params.get('skills') ?? ''}
           onChange={(v) => set('skills', v)}
+          className="min-[26rem]:col-span-2"
         />
 
         {type === 'jobs' && (
@@ -170,8 +177,9 @@ export function BrowseFilters({
                 router.push(type === 'all' ? pathname : `${pathname}?type=${type}`),
               );
             }}
-            className="h-10 shrink-0 rounded-md px-3 text-sm text-text-muted hover:bg-surface-sunken hover:text-text"
+            className="pressable inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-semibold text-link hover:bg-surface-sunken min-[26rem]:col-span-2"
           >
+            <X aria-hidden="true" size={15} />
             Clear filters
           </button>
         )}

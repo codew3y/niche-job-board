@@ -14,7 +14,7 @@ import { startConversation } from '@/lib/actions/messaging';
 /**
  * "Message this developer", from a public profile.
  *
- * Only a client sees this, and only on a published profile that accepts messages — the same
+ * Only a client sees this, and only on a published profile that accepts messages: the same
  * three conditions the `conversations_insert_client` policy enforces. Hiding the button for
  * everyone else is courtesy; the policy is the rule.
  */
@@ -38,7 +38,7 @@ export function ContactDialog({
   return (
     <Modal
       trigger={
-        <Button variant="accent" size="lg">
+        <Button size="lg">
           <MessageSquare aria-hidden="true" />
           Message this developer
         </Button>
@@ -49,8 +49,8 @@ export function ContactDialog({
       <form action={action} className="space-y-5">
         <input type="hidden" name="talentId" value={talentId} />
         <p className="text-sm text-text-muted text-pretty">
-          They can reply, block you, or ignore it. Say what the work is and what it pays — those are
-          the two things that get an answer.
+          They can reply, block you, or ignore it. Say what the work is and what it pays: those two
+          things are what get an answer.
         </p>
 
         {jobs.length > 0 && (
@@ -91,9 +91,7 @@ export function ContactDialog({
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <ModalClose render={<Button variant="ghost">Cancel</Button>} />
-          <SubmitButton variant="accent" pendingLabel="Sending…">
-            Send message
-          </SubmitButton>
+          <SubmitButton pendingLabel="Sending…">Send message</SubmitButton>
         </div>
       </form>
     </Modal>

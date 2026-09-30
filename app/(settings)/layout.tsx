@@ -15,7 +15,7 @@ import { getSessionUser, getViewer } from '@/lib/supabase/session';
  * Settings has its own group because the dashboard's guard is wrong for it.
  *
  * `app/(dashboard)/layout.tsx` redirects anyone without a role profile to /select-role. That
- * is right for a dashboard — there is nothing to show — and wrong for settings, which is
+ * is right for a dashboard (there is nothing to show) and wrong for settings, which is
  * where /privacy sends people to DELETE their account. Someone who signed up and abandoned
  * onboarding has a real auth row and a real email address we hold, and under that guard they
  * could not reach the page that removes it. Being unable to leave until you finish signing up
@@ -41,21 +41,26 @@ export default async function SettingsLayout({ children }: { children: ReactNode
   // Mid-onboarding. No role means no dashboard to link to, so a sidebar would be links that
   // all bounce. A way back and a way out is the honest version.
   return (
-    <div className="flex min-h-dvh flex-col">
-      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 pt-[max(1.25rem,env(safe-area-inset-top,0px))] sm:px-8">
-        <Logo href={logoHref(true)} />
-        <div className="ml-auto flex items-center gap-1">
-          <Link href="/select-role" className={buttonStyles({ variant: 'ghost', size: 'sm' })}>
-            Finish setting up
-          </Link>
-          <form action={signOut}>
-            <SubmitButton variant="ghost" size="sm" pendingLabel="Logging out…">
-              Log out
-            </SubmitButton>
-          </form>
+    <div className="flex min-h-dvh flex-col bg-surface">
+      <header className="border-b border-border-base bg-surface-raised pt-[env(safe-area-inset-top,0px)]">
+        <div className="gutter mx-auto flex min-h-16 w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 py-2">
+          <Logo href={logoHref(true)} />
+          <div className="ml-auto flex items-center gap-1">
+            <Link
+              href="/select-role"
+              className={buttonStyles({ variant: 'secondary', size: 'sm', className: 'h-10' })}
+            >
+              Finish setting up
+            </Link>
+            <form action={signOut}>
+              <SubmitButton variant="ghost" size="sm" className="h-10" pendingLabel="Logging out…">
+                Log out
+              </SubmitButton>
+            </form>
+          </div>
         </div>
-      </div>
-      <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-8 sm:py-12">
+      </header>
+      <main id="main" className="gutter mx-auto w-full max-w-5xl flex-1 py-8 sm:py-12">
         {children}
       </main>
     </div>

@@ -1,27 +1,39 @@
 import Link from 'next/link';
 
 import { SITE_NAV } from './nav';
+import { CONTAINER } from './page-parts';
 import { Logo } from '@/components/layout/logo';
+import { cn } from '@/lib/ui/cn';
 
 /** The public site's footer: the same pages as the header, plus the legal pages. */
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border-base">
-      <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:grid-cols-[1fr_auto_auto] sm:px-6">
-        <div className="max-w-xs">
+    <footer className="border-t border-border-base bg-surface-raised">
+      {/* One column on phones; two link columns under the logo block from `sm`; all three in a
+          row from `lg`. Three columns at `sm` overflowed at 200% text zoom (e2e/accessibility). */}
+      <div
+        className={cn(
+          CONTAINER,
+          'grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1fr_auto_auto] lg:gap-16',
+        )}
+      >
+        <div className="max-w-xs sm:col-span-2 lg:col-span-1">
           <Logo href="/" />
           <p className="mt-3 text-sm text-text-muted text-pretty">
-            A job board for software, web and automation work. Open to every developer; clients
-            decide.
+            A job board for software, web and automation work. Open to every developer, and clients
+            make the call.
           </p>
         </div>
 
         <nav aria-label="Pages">
           <p className="text-sm font-semibold">Platform</p>
-          <ul className="mt-3 space-y-2 text-sm">
+          <ul className="mt-2 grid text-sm">
             {SITE_NAV.map(({ href, label }) => (
               <li key={href}>
-                <Link href={href} className="text-text-muted hover:text-text">
+                <Link
+                  href={href}
+                  className="inline-flex min-h-10 items-center text-text-muted hover:text-text"
+                >
                   {label}
                 </Link>
               </li>
@@ -31,14 +43,20 @@ export function SiteFooter() {
 
         <nav aria-label="Legal">
           <p className="text-sm font-semibold">Legal</p>
-          <ul className="mt-3 space-y-2 text-sm">
+          <ul className="mt-2 grid text-sm">
             <li>
-              <Link href="/privacy" className="text-text-muted hover:text-text">
+              <Link
+                href="/privacy"
+                className="inline-flex min-h-10 items-center text-text-muted hover:text-text"
+              >
                 Privacy
               </Link>
             </li>
             <li>
-              <Link href="/terms" className="text-text-muted hover:text-text">
+              <Link
+                href="/terms"
+                className="inline-flex min-h-10 items-center text-text-muted hover:text-text"
+              >
                 Terms
               </Link>
             </li>

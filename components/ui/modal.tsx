@@ -101,7 +101,7 @@ export function Modal({
                 // Phone: a sheet, rounded on top, padded for the home indicator.
                 'rounded-t-2xl border-t border-border-base pb-[env(safe-area-inset-bottom,0px)]',
                 // Desktop: a panel.
-                'sm:max-h-[min(44rem,calc(100dvh-3rem))] sm:rounded-xl sm:border sm:pb-0',
+                'sm:max-h-[min(44rem,calc(100dvh-3rem))] sm:rounded-lg sm:border sm:pb-0',
                 size === 'sm' ? 'sm:max-w-md' : 'sm:max-w-xl',
                 // The swipe owns `transform`; entrances use `translate`/`scale`.
                 '[transform:translateY(var(--drawer-swipe-movement-y,0px))] data-swiping:select-none',

@@ -29,7 +29,7 @@ export function DeleteAccount({ email }: { email: string }) {
     return (
       <Button
         variant="danger-ghost"
-        className="border border-danger/40"
+        className="w-full border border-danger sm:w-auto"
         onClick={() => setArmed(true)}
       >
         Delete my account
@@ -38,8 +38,8 @@ export function DeleteAccount({ email }: { email: string }) {
   }
 
   return (
-    <form action={action} className="animate-rise space-y-5 rounded-lg bg-danger-subtle p-5">
-      <p className="flex gap-2.5 text-sm text-danger">
+    <form action={action} className="animate-rise space-y-5 border-t border-border-base pt-5">
+      <p className="flex gap-3 rounded-md bg-danger-subtle px-3.5 py-3 text-sm font-medium text-danger">
         <TriangleAlert aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
         This cannot be undone. Type the email address you sign in with to confirm.
       </p>
@@ -56,10 +56,12 @@ export function DeleteAccount({ email }: { email: string }) {
         required
         errors={errors}
         placeholder={email}
+        // The field only exists because the reader just asked for it, so focus goes to it.
+        autoFocus
       />
 
-      <div className="flex flex-col-reverse gap-2 sm:flex-row">
-        <Button variant="ghost" onClick={() => setArmed(false)}>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button variant="secondary" onClick={() => setArmed(false)}>
           Cancel
         </Button>
         <SubmitButton variant="danger" pendingLabel="Deleting…">

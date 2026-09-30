@@ -28,11 +28,7 @@ export default async function NewJobPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader
-        eyebrow="New brief"
-        title="Post a job"
-        subtitle="Save it as a draft and come back, or publish now."
-      />
+      <PageHeader title="Post a job" subtitle="Save it as a draft and come back, or publish now." />
       <JobForm job={null} options={skills ?? []} initialSkills={[]} isPublished={false} />
     </div>
   );

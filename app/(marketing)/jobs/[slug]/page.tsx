@@ -46,7 +46,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   const job = (await getJobBySlug(slug)) as Job | null;
 
   // RLS already hides other people's drafts, so a miss here is genuinely "not found".
-  // 404 rather than 403 on a closed job too — a 403 confirms it exists (docs/api.md §4).
+  // 404 rather than 403 on a closed job too: a 403 confirms it exists (docs/api.md §4).
   if (!job || job.status === 'draft') notFound();
 
   const budget = formatRange(
@@ -71,7 +71,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
         ]
       : null,
     ['Engagement', ENGAGEMENT_LABEL[job.engagement_type]],
-    ['Location', `${LOCATION_LABEL[job.location_type]}${job.location ? ` — ${job.location}` : ''}`],
+    ['Location', `${LOCATION_LABEL[job.location_type]}${job.location ? `, ${job.location}` : ''}`],
     job.experience_level
       ? [
           'Level',
@@ -93,7 +93,10 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   ].filter(Boolean) as [string, React.ReactNode][];
 
   return (
-    <div className="mx-auto w-full flex-1 py-8 sm:py-12">
+    // A size container: this page renders inside the public site (up to 60rem of content) AND
+    // inside the app shell (a sidebar takes 15rem), so the two-column layout keys off the width
+    // it actually has, not the viewport. Below 48rem of content it is one column.
+    <div className="@container mx-auto w-full flex-1 py-8 sm:py-12">
       <script
         type="application/ld+json"
         // Only emitted while the posting is genuinely open. Structured data for a job nobody
@@ -103,10 +106,10 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
         }}
       />
 
-      <nav aria-label="Breadcrumb" className="mb-8 text-sm">
+      <nav aria-label="Breadcrumb" className="mb-6">
         <Link
           href="/browse?type=jobs"
-          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+          className="-ml-1 inline-flex min-h-10 items-center gap-1.5 rounded-md px-1 text-sm text-text-muted hover:text-text"
         >
           <ArrowLeft aria-hidden="true" size={15} /> All jobs
         </Link>
@@ -115,7 +118,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
       {(closed || expired) && (
         <p
           role="status"
-          className="mb-8 flex gap-2.5 rounded-lg border border-border-strong bg-surface-sunken px-4 py-3 text-sm"
+          className="mb-8 flex gap-2.5 rounded-md border border-border-strong bg-surface-sunken px-4 py-3 text-sm text-pretty"
         >
           <Lock aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-text-subtle" />
           <span>
@@ -126,28 +129,33 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
       )}
 
       {/*
-        ONE apply block, placed by the grid rather than rendered twice. DOM order is header →
-        facts → body, which is exactly the phone order (the thing a visitor came to do sits
-        above the brief). From lg the facts card moves to a sticky right column spanning both
-        rows. Rendering it twice would run the apply-state queries twice and give assistive tech
-        two copies of the same controls.
+        ONE apply block, placed by the grid rather than rendered twice. DOM order is header,
+        facts, body, which is exactly the one-column order (the thing a visitor came to do sits
+        above the brief). From 48rem of content the facts card moves to a sticky right column
+        spanning both rows. Rendering it twice would run the apply-state queries twice and give
+        assistive tech two copies of the same controls.
       */}
-      <div className="grid gap-x-14 gap-y-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr]">
-        <div className="min-w-0 lg:col-start-1">
+      <div className="grid grid-cols-1 gap-x-12 gap-y-8 @3xl:grid-cols-[minmax(0,1fr)_20rem] @3xl:grid-rows-[auto_1fr]">
+        <div className="min-w-0 @3xl:col-start-1">
           <header>
             <div className="flex items-center gap-3">
               <Avatar name={company} />
-              <p className="text-sm text-text-muted">
+              <p className="min-w-0 text-sm text-text-muted">
                 <span className="font-semibold text-text">{company}</span>
                 {job.client_profiles?.industry ? ` · ${job.client_profiles.industry}` : ''}
               </p>
             </div>
-            <h1 className="mt-5 font-semibold text-display-md text-balance">{job.title}</h1>
+            <h1 className="mt-5 font-semibold text-display-sm break-words text-balance sm:text-display-md">
+              {job.title}
+            </h1>
           </header>
         </div>
 
-        <aside aria-label="Job details" className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <div className="lg:sticky lg:top-8">
+        <aside
+          aria-label="Job details"
+          className="@3xl:col-start-2 @3xl:row-span-2 @3xl:row-start-1"
+        >
+          <div className="@3xl:sticky @3xl:top-8">
             <FactsCard facts={facts}>
               <Suspense fallback={<Skeleton className="h-12 w-full rounded-md" />}>
                 <ApplyBlock job={job} closed={closed || expired} />
@@ -156,16 +164,18 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
           </div>
         </aside>
 
-        <div className="min-w-0 lg:col-start-1">
-          <section>
-            <h2 className="sr-only">Description</h2>
-            <p className="text-lg leading-relaxed whitespace-pre-line text-pretty">
+        <div className="min-w-0 @3xl:col-start-1">
+          <section aria-labelledby="description-heading">
+            <h2 id="description-heading" className="sr-only">
+              Description
+            </h2>
+            <p className="max-w-[65ch] leading-relaxed whitespace-pre-line text-pretty sm:text-lg">
               {job.description}
             </p>
             {job.requirements && (
               <>
                 <h3 className="mt-10 text-lg font-semibold tracking-tight">Requirements</h3>
-                <p className="mt-2 leading-relaxed whitespace-pre-line text-text-muted text-pretty">
+                <p className="mt-2 max-w-[65ch] leading-relaxed whitespace-pre-line text-text-muted text-pretty">
                   {job.requirements}
                 </p>
               </>
@@ -173,13 +183,16 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
           </section>
 
           {(required.length > 0 || niceToHave.length > 0) && (
-            <section className="mt-10 border-t border-border-base pt-8">
-              <h2 className="text-lg font-semibold tracking-tight">Skills</h2>
+            <section
+              aria-labelledby="skills-heading"
+              className="mt-10 border-t border-border-base pt-8"
+            >
+              <h2 id="skills-heading" className="text-lg font-semibold tracking-tight">
+                Skills
+              </h2>
               {required.length > 0 && (
                 <>
-                  <p className="mt-4 text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
-                    Required
-                  </p>
+                  <h3 className="mt-4 text-sm font-semibold text-text-muted">Required</h3>
                   <TagList
                     className="mt-2"
                     label="Required skills"
@@ -189,9 +202,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
               )}
               {niceToHave.length > 0 && (
                 <>
-                  <p className="mt-5 text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
-                    Nice to have
-                  </p>
+                  <h3 className="mt-5 text-sm font-semibold text-text-muted">Nice to have</h3>
                   <TagList
                     className="mt-2"
                     label="Nice-to-have skills"
@@ -203,15 +214,21 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
           )}
 
           {job.client_profiles?.about && (
-            <section className="mt-10 rounded-lg border border-border-base bg-surface-raised p-6">
-              <h2 className="font-semibold tracking-tight">
-                About {job.client_profiles.company_name}
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-text-muted text-pretty">
+            <section
+              aria-labelledby="company-heading"
+              className="mt-10 border-t border-border-base pt-8"
+            >
+              <div className="flex items-center gap-3">
+                <Avatar name={company} />
+                <h2 id="company-heading" className="text-lg font-semibold tracking-tight">
+                  About {job.client_profiles.company_name}
+                </h2>
+              </div>
+              <p className="mt-4 max-w-[65ch] text-sm leading-relaxed whitespace-pre-line text-text-muted text-pretty">
                 {job.client_profiles.about}
               </p>
               {job.client_profiles.website && (
-                <p className="mt-3 text-sm">
+                <p className="mt-3 text-sm break-all">
                   <ExternalLink href={job.client_profiles.website} className="font-semibold">
                     {job.client_profiles.website.replace(/^https:\/\//, '')}
                   </ExternalLink>
@@ -225,6 +242,10 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   );
 }
 
+/**
+ * The one raised panel on the page: the terms at a glance and the apply control. It is a card
+ * because it is the action surface; everything else is document.
+ */
 function FactsCard({
   facts,
   children,
@@ -233,14 +254,13 @@ function FactsCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-border-base bg-surface-raised p-5">
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-4 lg:grid-cols-1">
+    <div className="rounded-lg border border-border-base bg-surface-raised p-5 shadow-sm">
+      {/* Phone: two columns. Mid-width single column layout: three. In the side column: one. */}
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-4 @xl:grid-cols-3 @3xl:grid-cols-1">
         {facts.map(([term, value]) => (
-          <div key={term}>
-            <dt className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
-              {term}
-            </dt>
-            <dd className="mt-1 font-semibold">{value}</dd>
+          <div key={term} className="min-w-0">
+            <dt className="text-sm text-text-subtle">{term}</dt>
+            <dd className="mt-0.5 font-semibold break-words">{value}</dd>
           </div>
         ))}
       </dl>

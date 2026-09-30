@@ -20,9 +20,17 @@ export const metadata: Metadata = { title: 'Dashboard' };
  * The client's home: their briefs, what has come in, and who fits.
  *
  * FIXED HERE (DESIGN.md §1, A3 and A5): the only action offered to a client with no jobs linked
- * to `/client/jobs/new`, which 404'd; and the jobs list was plain text — titles that could not
+ * to `/client/jobs/new`, which 404'd; and the jobs list was plain text, titles that could not
  * be clicked beside a raw lowercase status. "Top candidates", the reason a client opens this
  * page, was two clicks deep. It is now on the page, for the brief posted most recently.
+ *
+ * LOADING — no `loading.tsx` can sit above this page (it would wrap jobs/[id], which has a
+ * notFound(); see saved/loading.tsx). The heading renders from the one-row company lookup, and
+ * everything else streams behind a skeleton of the same shape. Top candidates stream again,
+ * separately, because the match cache is the slowest thing on the page.
+ *
+ * ONE PRIMARY ACTION: "Post a job" in the header. Empty states below point at it rather than
+ * repeating it.
  */
 export default async function ClientDashboard() {
   const supabase = await createClient();
@@ -35,6 +43,40 @@ export default async function ClientDashboard() {
     .select('id, company_name')
     .eq('user_id', user!.id)
     .maybeSingle();
+
+  return (
+    <div>
+      <PageHeader
+        eyebrow={client?.company_name ?? undefined}
+        title="Your hiring"
+        subtitle={
+          client?.company_name
+            ? 'Briefs you have posted, what has come in, and who fits.'
+            : 'Set up your company profile to start posting.'
+        }
+        actions={
+          client ? (
+            <Link href="/dashboard/client/jobs/new" className={buttonStyles()}>
+              <Plus aria-hidden="true" />
+              Post a job
+            </Link>
+          ) : (
+            <Link href="/onboarding/client/company" className={buttonStyles()}>
+              Set up company
+            </Link>
+          )
+        }
+      />
+
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardBody client={client} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function DashboardBody({ client }: { client: { id: string; company_name: string } | null }) {
+  const supabase = await createClient();
 
   const { data: jobs } = client
     ? await supabase
@@ -63,7 +105,7 @@ export default async function ClientDashboard() {
   const toReview = live.filter((a) => a.status === 'applied').length;
   const open = (jobs ?? []).filter((j) => j.status === 'open');
 
-  // Top candidates for the newest open brief — people who fit and have NOT applied, because
+  // Top candidates for the newest open brief: people who fit and have NOT applied, because
   // applicants already appear on that job's page and showing someone twice looks broken.
   const focus = open[0] ?? null;
   const applicantIds = focus
@@ -71,23 +113,8 @@ export default async function ClientDashboard() {
     : [];
 
   return (
-    <div>
-      <PageHeader
-        eyebrow={client?.company_name ?? 'Your company'}
-        title="Your hiring"
-        subtitle={
-          client?.company_name
-            ? 'Briefs you have posted, what has come in, and who fits.'
-            : 'Finish setting up your company profile to start posting.'
-        }
-        actions={
-          <Link href="/dashboard/client/jobs/new" className={buttonStyles({ variant: 'accent' })}>
-            <Plus aria-hidden="true" />
-            Post a job
-          </Link>
-        }
-      />
-
+    <>
+      {/* Phone: two by two. From lg: one row of four. */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
           label="Open jobs"
@@ -111,7 +138,8 @@ export default async function ClientDashboard() {
         />
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-start">
+      {/* One column until xl, where the content area is wide enough for two readable ones. */}
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:items-start">
         <Card>
           <CardHeader
             title="Your jobs"
@@ -119,9 +147,9 @@ export default async function ClientDashboard() {
               jobs?.length ? (
                 <Link
                   href="/dashboard/client/jobs"
-                  className="inline-flex items-center gap-1 text-sm font-semibold hover:underline"
+                  className="-my-2 inline-flex min-h-10 items-center gap-1 text-sm font-semibold text-link hover:underline"
                 >
-                  Manage <ArrowRight aria-hidden="true" size={14} />
+                  Manage jobs <ArrowRight aria-hidden="true" size={14} />
                 </Link>
               ) : null
             }
@@ -133,16 +161,16 @@ export default async function ClientDashboard() {
                 return (
                   <li
                     key={job.id}
-                    className="relative flex items-center justify-between gap-4 px-5 py-4 hover:bg-surface-sunken/50"
+                    className="relative flex items-center justify-between gap-4 px-5 py-3.5 transition-colors duration-fast ease-out last:rounded-b-lg hover:bg-surface-sunken/50"
                   >
                     <div className="min-w-0">
                       <Link
                         href={`/dashboard/client/jobs/${job.id}`}
-                        className="font-semibold after:absolute after:inset-0 hover:underline"
+                        className="block truncate font-semibold after:absolute after:inset-0 hover:underline"
                       >
                         {job.title}
                       </Link>
-                      <p className="mt-0.5 text-sm text-text-subtle">
+                      <p className="mt-0.5 text-sm text-text-subtle tabular-nums">
                         {n} {n === 1 ? 'application' : 'applications'}
                       </p>
                     </div>
@@ -157,11 +185,10 @@ export default async function ClientDashboard() {
                 className="border-0"
                 icon={Briefcase}
                 title="No jobs posted yet"
-                body="Post a brief and we’ll rank candidates against the work they’ve actually shipped."
-                action={
-                  <Link href="/dashboard/client/jobs/new" className={buttonStyles({ size: 'sm' })}>
-                    Post a job
-                  </Link>
+                body={
+                  client
+                    ? 'Use Post a job to write your first brief. We rank developers against the work they have actually shipped.'
+                    : 'Once your company profile is set up, you can post your first brief.'
                 }
               />
             </div>
@@ -177,33 +204,14 @@ export default async function ClientDashboard() {
               }
             />
             {!focus ? (
-              <p className="px-5 py-6 text-sm text-text-muted">
-                Publish a brief and the developers who fit it appear here — including people who
-                have not applied.
+              <p className="px-5 py-6 text-sm text-text-muted text-pretty">
+                Publish a brief and the developers who fit it appear here, including people who have
+                not applied.
               </p>
             ) : (
               // Streams in after the rest of the page: the dashboard never waits on the match
               // cache, and a skeleton holds the card's space so nothing shifts when it lands.
-              <Suspense
-                fallback={
-                  <div
-                    role="status"
-                    aria-busy="true"
-                    aria-label="Loading candidates"
-                    className="space-y-4 p-5"
-                  >
-                    {Array.from({ length: 3 }, (_, i) => (
-                      <div key={i} className="flex gap-3.5">
-                        <Skeleton className="size-10 rounded-full" />
-                        <div className="flex-1 space-y-2">
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-3 w-1/3" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                }
-              >
+              <Suspense fallback={<CandidatesSkeleton />}>
                 <TopCandidates jobId={focus.id} exclude={applicantIds} />
               </Suspense>
             )}
@@ -221,16 +229,16 @@ export default async function ClientDashboard() {
                 <Link
                   key={href}
                   href={href}
-                  className="group flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-fast ease-out first:rounded-t-lg last:rounded-b-lg hover:bg-surface-sunken/60"
+                  className="group flex min-h-14 items-center justify-between gap-3 px-5 py-3 transition-colors duration-fast ease-out first:rounded-t-lg last:rounded-b-lg hover:bg-surface-sunken/60"
                 >
-                  <span>
+                  <span className="min-w-0">
                     <span className="block text-sm font-semibold">{label}</span>
-                    <span className="block text-xs text-text-subtle">{hint}</span>
+                    <span className="block text-sm text-text-subtle">{hint}</span>
                   </span>
                   <ArrowRight
                     aria-hidden="true"
                     size={16}
-                    className="text-text-subtle transition-transform duration-fast ease-out group-hover:translate-x-0.5"
+                    className="shrink-0 text-text-subtle transition-transform duration-fast ease-out group-hover:translate-x-0.5"
                   />
                 </Link>
               ))}
@@ -238,7 +246,7 @@ export default async function ClientDashboard() {
           </nav>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -256,28 +264,91 @@ async function TopCandidates({ jobId, exclude }: { jobId: string; exclude: strin
   }
   if (suggested.state === 'pending') {
     return (
-      <p className="flex gap-2.5 px-5 py-6 text-sm text-text-muted">
-        <Hourglass aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-accent" />
-        Still matching this brief against every published profile. It lands within the hour —
-        nothing is wrong.
+      <p className="flex gap-2.5 px-5 py-6 text-sm text-text-muted text-pretty">
+        <Hourglass aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-link" />
+        Still matching this brief against every published profile. Results arrive within the hour.
       </p>
     );
   }
   if (suggested.state === 'too-sparse') {
     return (
-      <p className="px-5 py-6 text-sm text-text-muted">
-        Not enough in the brief to match on.{' '}
+      <p className="px-5 py-6 text-sm text-text-muted text-pretty">
+        There is not enough in the brief to match on yet.{' '}
         <Link href={`/dashboard/client/jobs/${jobId}/edit`} className="prose-link font-semibold">
           Add to the description
-        </Link>{' '}
-        — it is the same text a developer reads before applying.
+        </Link>
+        , which is also what developers read before applying.
       </p>
     );
   }
   return (
-    <p className="px-5 py-6 text-sm text-text-muted">
+    <p className="px-5 py-6 text-sm text-text-muted text-pretty">
       Nobody strong enough to suggest yet. We&rsquo;d rather show nothing than pad this with
       developers who don&rsquo;t fit.
     </p>
+  );
+}
+
+/** Avatar tile plus two lines, the shape of a CandidateMatchItem. */
+function CandidatesSkeleton() {
+  return (
+    <div role="status" aria-busy="true" aria-label="Loading candidates" className="space-y-4 p-5">
+      {Array.from({ length: 3 }, (_, i) => (
+        <div key={i} className="flex gap-3.5">
+          <Skeleton className="size-10 shrink-0 rounded-md" />
+          <div className="flex-1 space-y-2 pt-0.5">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Four stat tiles, then the jobs card beside the candidates card. */
+function DashboardSkeleton() {
+  return (
+    <div role="status" aria-busy="true" aria-label="Loading your dashboard">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, i) => (
+          <Skeleton key={i} className="h-[5.5rem] rounded-lg" />
+        ))}
+      </div>
+      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:items-start">
+        <div className="rounded-lg border border-border-base bg-surface-raised">
+          <div className="border-b border-border-base px-5 py-4">
+            <Skeleton className="h-5 w-24" />
+          </div>
+          <div className="divide-y divide-border-base">
+            {Array.from({ length: 4 }, (_, i) => (
+              <div key={i} className="flex items-center justify-between gap-4 px-5 py-3.5">
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/5" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+                <Skeleton className="h-6 w-14" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-lg border border-border-base bg-surface-raised">
+          <div className="border-b border-border-base px-5 py-4">
+            <Skeleton className="h-5 w-32" />
+          </div>
+          <div className="space-y-4 p-5">
+            {Array.from({ length: 3 }, (_, i) => (
+              <div key={i} className="flex gap-3.5">
+                <Skeleton className="size-10 shrink-0 rounded-md" />
+                <div className="flex-1 space-y-2 pt-0.5">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

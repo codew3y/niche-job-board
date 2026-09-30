@@ -10,7 +10,7 @@ import { cn } from '@/lib/ui/cn';
 const MAX = 10;
 
 /**
- * One or more links for a project — repo, live site, write-up. Each row posts as `link`, so the
+ * One or more links for a project: repo, live site, write-up. Each row posts as `link`, so the
  * server reads them with `formData.getAll('link')`. Blank rows are ignored on save.
  *
  * Rows get stable keys (not indexes), so removing the second of three does not shift the typed
@@ -31,8 +31,8 @@ export function LinkListInput({ initial = [], errors }: { initial?: string[]; er
 
   return (
     <fieldset className="space-y-2" aria-describedby={errors?.length ? `${uid}-error` : undefined}>
-      <legend className="mb-1.5 text-sm font-semibold">
-        Links <span className="font-normal text-text-subtle">(optional)</span>
+      <legend className="mb-1.5 text-sm font-semibold text-text">
+        Links <span className="ml-1 font-normal text-text-subtle">Optional</span>
       </legend>
 
       {rows.map((row, i) => (
@@ -58,7 +58,7 @@ export function LinkListInput({ initial = [], errors }: { initial?: string[]; er
             className={cn(
               controlStyles,
               'h-11 px-3.5',
-              errors?.length ? 'border-danger' : 'border-control/70 hover:border-control',
+              errors?.length ? 'border-danger' : 'border-control hover:border-text-subtle',
             )}
           />
           {rows.length > 1 && (
@@ -81,7 +81,7 @@ export function LinkListInput({ initial = [], errors }: { initial?: string[]; er
       ) : null}
 
       {rows.length < MAX && (
-        <Button variant="ghost" size="sm" onClick={add}>
+        <Button variant="ghost" size="sm" className="max-sm:h-10" onClick={add}>
           <Plus aria-hidden="true" />
           Add another link
         </Button>

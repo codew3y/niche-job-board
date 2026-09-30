@@ -5,17 +5,18 @@ type Event = { from_status: string | null; to_status: string; at: string };
 /**
  * The history of one application, both sides can see.
  *
- * Rows come from `application_events`, written by a SECURITY DEFINER trigger — the caller
+ * Rows come from `application_events`, written by a SECURITY DEFINER trigger. The caller
  * cannot write them, which is what makes this a record rather than a claim (migration 0001).
  *
  * Rendered as an ordered list because that is what it is: a sequence. Screen readers then
- * announce position and length for free. The latest step carries the accent dot.
+ * announce position and length for free. The marker on the latest step is semantic (it is the
+ * current state), and the step's label is also set in bold so the colour is never the only cue.
  */
 export function StatusTimeline({ events }: { events: Event[] }) {
   if (events.length === 0) return null;
 
   return (
-    <ol aria-label="Status history" className="mt-4 space-y-2 border-l border-border-strong pl-4">
+    <ol aria-label="Status history" className="mt-4 space-y-2.5 border-l border-border-strong pl-4">
       {events.map((e, i) => {
         const last = i === events.length - 1;
         return (
@@ -29,7 +30,7 @@ export function StatusTimeline({ events }: { events: Event[] }) {
                 last ? 'bg-accent' : 'bg-border-strong'
               }`}
             />
-            <span className={last ? 'font-semibold' : 'text-text-muted'}>
+            <span className={last ? 'font-semibold text-text' : 'text-text-muted'}>
               {e.from_status === null ? 'Applied' : `${STATUS_LABELS[e.to_status] ?? e.to_status}`}
             </span>
             <time dateTime={e.at} className="text-text-subtle tabular-nums">

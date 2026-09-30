@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MailCheck } from 'lucide-react';
+import { Check, MailCheck } from 'lucide-react';
 import { useActionState } from 'react';
 
 import { buttonStyles } from '@/components/ui/button';
@@ -14,15 +14,22 @@ export function ResetRequestForm() {
 
   if (state?.ok) {
     return (
-      <div role="status" className="rounded-lg border border-border-base bg-surface-raised p-5">
-        <MailCheck aria-hidden="true" className="size-6 text-success" />
-        <p className="mt-3 font-semibold">Check your email.</p>
-        {/* Deliberately says "if there's an account" — confirming whether an address is
-            registered would turn this form into an account-enumeration oracle. */}
-        <p className="mt-1 text-sm text-text-muted text-pretty">
-          If there&rsquo;s an account for that address, a reset link is on its way. It expires in an
-          hour and can only be used once.
-        </p>
+      <div role="status" className="flex gap-4 rounded-lg bg-success-subtle p-5">
+        <span
+          aria-hidden="true"
+          className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-raised text-success"
+        >
+          <MailCheck size={20} />
+        </span>
+        <div className="min-w-0">
+          <p className="font-semibold text-text">Check your email.</p>
+          {/* Deliberately says "if there's an account": confirming whether an address is
+              registered would turn this form into an account-enumeration oracle. */}
+          <p className="mt-1 text-sm text-text text-pretty">
+            If there&rsquo;s an account for that address, a reset link is on its way. It expires in
+            an hour and can only be used once.
+          </p>
+        </div>
       </div>
     );
   }
@@ -53,9 +60,17 @@ export function SetPasswordForm() {
 
   if (state?.ok) {
     return (
-      <div role="status" className="space-y-4">
-        <p className="font-semibold">Password updated.</p>
-        <Link href="/login" className={buttonStyles({ className: 'w-full' })}>
+      <div role="status" className="space-y-5">
+        <p className="flex items-center gap-3 font-semibold">
+          <span
+            aria-hidden="true"
+            className="grid size-10 shrink-0 place-items-center rounded-md bg-success-subtle text-success"
+          >
+            <Check size={20} />
+          </span>
+          Password updated.
+        </p>
+        <Link href="/login" className={buttonStyles({ size: 'lg', className: 'w-full' })}>
           Sign in
         </Link>
       </div>

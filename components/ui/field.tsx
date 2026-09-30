@@ -22,12 +22,12 @@ import { cn } from '@/lib/ui/cn';
 export const controlStyles = cn(
   'w-full rounded-md border bg-surface-raised text-text placeholder:text-text-subtle',
   'transition-[border-color,box-shadow] duration-fast ease-out',
-  'focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--color-accent-subtle)] focus-visible:outline-none',
+  'focus-visible:border-focus focus-visible:shadow-[0_0_0_3px_var(--color-accent-subtle)] focus-visible:outline-none',
   'disabled:cursor-not-allowed disabled:opacity-60',
 );
 
 const border = (invalid: boolean) =>
-  invalid ? 'border-danger' : 'border-control/70 hover:border-control';
+  invalid ? 'border-danger' : 'border-control hover:border-text-subtle';
 
 type ShellProps = {
   label: ReactNode;
@@ -261,8 +261,8 @@ export function ChoiceChips({
             key={v}
             className={cn(
               'pressable relative inline-flex h-10 cursor-pointer items-center rounded-md border px-4 text-sm select-none',
-              'border-control/60 bg-surface-raised text-text-muted hover:border-control hover:text-text',
-              'has-[:checked]:border-surface-inverse has-[:checked]:bg-surface-inverse has-[:checked]:text-text-inverse',
+              'border-control bg-surface-raised text-text-muted hover:bg-surface-sunken hover:text-text',
+              'has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-text',
               'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus',
             )}
           >

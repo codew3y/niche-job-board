@@ -66,8 +66,12 @@ export function EmailPasswordForm({
           hint={mode === 'signup' ? 'At least 12 characters. Length beats punctuation.' : undefined}
         />
         {mode === 'login' && (
-          <p className="mt-2 text-right text-sm">
-            <Link href="/reset-password" className="text-text-muted hover:text-text">
+          <p className="mt-1 flex justify-end text-sm">
+            {/* min-h-10: a 40px tap target, without making the line look like a button. */}
+            <Link
+              href="/reset-password"
+              className="inline-flex min-h-10 items-center rounded-md font-medium text-link hover:underline"
+            >
               Forgot your password?
             </Link>
           </p>
@@ -79,7 +83,11 @@ export function EmailPasswordForm({
 
       {/* The label changes rather than being replaced by a spinner: the user keeps the context of
           what they pressed. */}
-      <SubmitButton size="lg" className="w-full" pendingLabel="Working…">
+      <SubmitButton
+        size="lg"
+        className="w-full"
+        pendingLabel={mode === 'signup' ? 'Creating account…' : 'Signing in…'}
+      >
         {mode === 'signup' ? 'Create account' : 'Sign in'}
       </SubmitButton>
     </form>

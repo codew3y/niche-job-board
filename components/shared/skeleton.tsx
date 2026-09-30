@@ -12,12 +12,20 @@ export function Skeleton({ className = '' }: { className?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={cn('animate-skeleton rounded-sm bg-surface-sunken', className)}
+      // `cn` is plain clsx (no tailwind-merge), so a caller's radius would tie with the default
+      // one in the cascade. The default applies only when the caller names none.
+      className={cn(
+        'animate-skeleton bg-surface-sunken',
+        !/\brounded-/.test(className) && 'rounded-sm',
+        className,
+      )}
     />
   );
 }
 
-function Busy({
+/** The live region every skeleton sits in. Exported so a route's loading.tsx can compose its own
+ * shape from `Skeleton` blocks and still announce itself the same way. */
+export function Busy({
   label,
   children,
   className,
@@ -45,11 +53,69 @@ export function JobCardSkeleton() {
       <Skeleton className="h-4 w-1/3" />
       <Skeleton className="h-4 w-full" />
       <div className="flex gap-2 pt-1">
-        <Skeleton className="h-6 w-16 rounded-md" />
-        <Skeleton className="h-6 w-20 rounded-md" />
-        <Skeleton className="h-6 w-14 rounded-md" />
+        <Skeleton className="h-6 w-16" />
+        <Skeleton className="h-6 w-20" />
+        <Skeleton className="h-6 w-14" />
       </div>
     </div>
+  );
+}
+
+/** A developer row in Browse: avatar tile (from sm), headline + rate, facts, bio, tags + save. */
+export function TalentCardSkeleton() {
+  return (
+    <div className="flex gap-4 border-b border-border-base px-5 py-5 last:border-0 sm:px-6">
+      <Skeleton className="hidden size-10 shrink-0 rounded-md sm:block" />
+      <div className="min-w-0 flex-1 space-y-3">
+        <div className="flex justify-between gap-4">
+          <Skeleton className="h-5 w-3/5" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+        <Skeleton className="h-4 w-2/5" />
+        <Skeleton className="h-4 w-full" />
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-16" />
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-6 w-14" />
+          </div>
+          <Skeleton className="h-10 w-20 rounded-md" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The Browse results while they stream: the result count line, then the list panel in the
+ * shape of the type being loaded. The "All" view shows both sections, as the page will.
+ */
+export function BrowseResultsSkeleton({ type }: { type: 'all' | 'jobs' | 'developers' }) {
+  const list = (kind: 'jobs' | 'developers', rows: number) => (
+    <div className="overflow-hidden rounded-lg border border-border-base bg-surface-raised">
+      {Array.from({ length: rows }, (_, i) =>
+        kind === 'jobs' ? <JobCardSkeleton key={i} /> : <TalentCardSkeleton key={i} />,
+      )}
+    </div>
+  );
+  return (
+    <Busy label="Loading results">
+      {type === 'all' ? (
+        <div className="space-y-10">
+          {(['jobs', 'developers'] as const).map((kind) => (
+            <div key={kind}>
+              <Skeleton className="mb-3 h-5 w-28" />
+              {list(kind, 3)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          <Skeleton className="mb-3 h-4 w-24" />
+          {list(type, 5)}
+        </>
+      )}
+    </Busy>
   );
 }
 

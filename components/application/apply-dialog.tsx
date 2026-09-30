@@ -11,7 +11,7 @@ import { applyToJob } from '@/lib/actions/applications';
 import type { ActionResult } from '@/lib/actions/auth';
 
 /**
- * Apply to a job — in the shared Modal: a bottom sheet on phones, a centred panel on desktop.
+ * Apply to a job, in the shared Modal: a bottom sheet on phones, a centred panel on desktop.
  *
  * THIS COMPONENT DOES NOT RENDER THE CONFIRMATION, and must not try. `ApplySection` is a Server
  * Component: once the application row exists, the re-render takes the `already-applied` branch
@@ -28,7 +28,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: string; jobTitle: stri
   return (
     <Modal
       trigger={
-        <Button variant="accent" size="lg" className="w-full">
+        <Button size="lg" className="w-full">
           Apply for this job
         </Button>
       }
@@ -48,7 +48,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: string; jobTitle: stri
           placeholder="Which part of this have you done before? Point at the project on your profile that proves it."
           hint={
             <span className="tabular-nums">
-              {length}/40 characters minimum — a blank application reads as a bulk send.
+              {length} of 40 characters minimum. A short note reads as a bulk send.
             </span>
           }
         />
@@ -77,9 +77,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: string; jobTitle: stri
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <ModalClose render={<Button variant="ghost">Cancel</Button>} />
-          <SubmitButton variant="accent" pendingLabel="Sending…">
-            Send application
-          </SubmitButton>
+          <SubmitButton pendingLabel="Sending…">Send application</SubmitButton>
         </div>
       </form>
     </Modal>

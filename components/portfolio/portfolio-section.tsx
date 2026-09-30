@@ -1,9 +1,13 @@
-import { Globe } from 'lucide-react';
+import { FolderKanban, Globe } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import { ExternalLink } from '@/components/shared/external-link';
 import { MatchReason } from '@/components/matches/match-items';
 import { TagList } from '@/components/ui/badge';
+import { buttonStyles } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
+import { cn } from '@/lib/ui/cn';
 
 type Item = {
   id: string;
@@ -25,8 +29,8 @@ const linkLabel = (url: string) => url.replace(/^https:\/\/(www\.)?/i, '').repla
  *   site only  → a prominent link-out card
  *   items only → the projects
  *   both       → both, site first
- *   neither    → shown to the owner only, as a prompt; a visitor sees nothing rather than an
- *                empty box with an apology in it
+ *   neither    → shown to the owner only, as a prompt with the next step; a visitor sees
+ *                nothing rather than an empty box with an apology in it
  *
  * The site card says plainly that we do not read the linked site. That is the honest framing of
  * the §8 thin-profile trade-off: a URL is a link, not text we can match on.
@@ -45,12 +49,20 @@ export function PortfolioSection({
 
   if (!hasSite && !hasItems) {
     return isOwner ? (
-      <section className="rounded-lg border border-dashed border-border-strong p-8 text-center">
-        <p className="font-semibold">No work shown yet</p>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-text-muted text-pretty">
-          Link your portfolio site, or add a couple of projects. Either gives a client something to
-          judge.
-        </p>
+      <section aria-label="Your work">
+        <EmptyState
+          icon={FolderKanban}
+          title="No work shown yet"
+          body="Link your portfolio site, or add a couple of projects. Either gives a client something to judge."
+          action={
+            <Link
+              href="/dashboard/talent/profile#projects"
+              className={buttonStyles({ variant: 'secondary' })}
+            >
+              Add a project
+            </Link>
+          }
+        />
       </section>
     ) : null;
   }
@@ -58,7 +70,7 @@ export function PortfolioSection({
   return (
     <div className="space-y-8">
       {hasSite && (
-        <section className="flex items-start gap-4 rounded-lg border border-border-base bg-surface-raised p-5">
+        <section className="flex items-start gap-4 rounded-lg border border-border-base bg-surface-raised p-4 sm:p-5">
           <span
             aria-hidden="true"
             className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-sunken text-text-subtle"
@@ -67,13 +79,13 @@ export function PortfolioSection({
           </span>
           <div className="min-w-0">
             <h2 className="font-semibold tracking-tight">Portfolio site</h2>
-            <p className="mt-0.5 truncate">
+            <p className="mt-0.5 break-all">
               <ExternalLink href={websiteUrl} className="font-semibold">
                 {websiteUrl!.replace(/^https:\/\//, '')}
               </ExternalLink>
             </p>
-            <p className="mt-2 text-sm text-text-subtle text-pretty">
-              Hosted elsewhere — linked, never fetched, so it doesn&rsquo;t feed matching.
+            <p className="mt-2 text-sm text-text-muted text-pretty">
+              Hosted elsewhere. We link to it but never read it, so it does not feed matching.
             </p>
           </div>
         </section>
@@ -82,7 +94,10 @@ export function PortfolioSection({
       {hasItems && (
         <section>
           <h2 className="text-lg font-semibold tracking-tight">
-            {items.length} {items.length === 1 ? 'project' : 'projects'}
+            Projects{' '}
+            <span className="font-sans text-base font-medium text-text-muted tabular-nums">
+              {items.length}
+            </span>
           </h2>
           <ul className="mt-4 space-y-4">
             {items.map((item) => {
@@ -96,7 +111,10 @@ export function PortfolioSection({
                 >
                   {media.length > 0 && (
                     <ul
-                      className={`grid gap-px bg-border-base ${media.length > 1 ? 'sm:grid-cols-2' : ''}`}
+                      className={cn(
+                        'grid gap-px bg-border-base',
+                        media.length > 1 && 'sm:grid-cols-2',
+                      )}
                     >
                       {media.map((m) => (
                         <li key={m.id} className="relative aspect-video bg-surface-sunken">
@@ -119,12 +137,12 @@ export function PortfolioSection({
                     </ul>
                   )}
 
-                  <div className="p-5 sm:p-6">
+                  <div className="p-4 sm:p-6">
                     <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                       <h3 className="text-lg font-semibold leading-tight text-balance">
                         {item.title}
                       </h3>
-                      {item.role && <p className="text-sm text-text-subtle">{item.role}</p>}
+                      {item.role && <p className="text-sm text-text-muted">{item.role}</p>}
                     </div>
 
                     <p className="mt-2 text-text-muted text-pretty">{item.description}</p>
@@ -132,7 +150,9 @@ export function PortfolioSection({
                     {item.outcome && item.outcome !== item.description && (
                       // Outcome is the most persuasive field on a profile — what changed, not what
                       // was used — so it gets the same treatment as a match reason.
-                      <MatchReason className="mt-4">{item.outcome}</MatchReason>
+                      <MatchReason className="mt-4" label="Outcome">
+                        {item.outcome}
+                      </MatchReason>
                     )}
 
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3">

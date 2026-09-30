@@ -124,10 +124,10 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
         }}
       />
 
-      <nav aria-label="Breadcrumb" className="mb-8 text-sm">
+      <nav aria-label="Breadcrumb" className="mb-6 text-sm">
         <Link
           href="/browse?type=developers"
-          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+          className="-ml-1 inline-flex h-10 items-center gap-1.5 rounded-md px-1 font-medium text-text-muted hover:text-text"
         >
           <ArrowLeft aria-hidden="true" size={15} /> All developers
         </Link>
@@ -136,27 +136,28 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
       {!p.is_published && isOwner && (
         <p
           role="status"
-          className="mb-8 rounded-lg border border-warning/30 bg-warning-subtle px-4 py-3 text-sm"
+          className="mb-8 rounded-lg border border-warning/40 bg-warning-subtle px-4 py-3 text-sm text-text"
         >
-          This is a draft — only you can see it.{' '}
+          This is a draft. Only you can see it.{' '}
           <Link href="/onboarding/talent/review" className="prose-link font-semibold">
             Finish and publish
           </Link>
         </p>
       )}
 
-      {/* Same single-aside grid as the job page: header → facts → body in DOM order. */}
+      {/* Same single-aside grid as the job page: header → facts → body in DOM order. Below lg
+          it is one column, so the facts panel sits between the header and the bio. */}
       <div className="grid gap-x-14 gap-y-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr]">
         <header className="min-w-0 lg:col-start-1">
           <Avatar name={p.headline} size="lg" />
-          <h1 className="mt-5 text-display-md text-balance">{p.headline}</h1>
+          <h1 className="mt-5 text-display-sm text-balance sm:text-display-md">{p.headline}</h1>
           {hasLinks && (
             <p className="mt-4 flex gap-2">
               {/* Linked accounts as icons; the text name is kept for screen readers. */}
               <ExternalLink
                 href={p.github_url}
                 bare
-                className="grid size-9 place-items-center rounded-md border border-border-base text-text-muted hover:text-text"
+                className="pressable grid size-10 place-items-center rounded-md border border-control bg-surface-raised text-text-muted hover:bg-surface-sunken hover:text-text"
               >
                 <GitHubIcon />
                 <span className="sr-only">GitHub</span>
@@ -164,7 +165,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
               <ExternalLink
                 href={p.linkedin_url}
                 bare
-                className="grid size-9 place-items-center rounded-md border border-border-base text-text-muted hover:text-text"
+                className="pressable grid size-10 place-items-center rounded-md border border-control bg-surface-raised text-text-muted hover:bg-surface-sunken hover:text-text"
               >
                 <LinkedInIcon />
                 <span className="sr-only">LinkedIn</span>
@@ -174,14 +175,13 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
         </header>
 
         <aside aria-label="Profile details" className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <div className="rounded-lg border border-border-base bg-surface-raised p-5 lg:sticky lg:top-8">
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-4 lg:grid-cols-1">
+          {/* The one raised panel on the page: the facts a client decides on, and the action. */}
+          <div className="rounded-lg border border-border-base bg-surface-raised p-5 shadow-xs lg:sticky lg:top-8">
+            <dl className="grid grid-cols-1 gap-x-4 gap-y-4 min-[26rem]:grid-cols-2 lg:grid-cols-1">
               {facts.map(([term, value]) => (
-                <div key={term}>
-                  <dt className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
-                    {term}
-                  </dt>
-                  <dd className="mt-1 font-semibold">{value}</dd>
+                <div key={term} className="min-w-0">
+                  <dt className="text-sm text-text-muted">{term}</dt>
+                  <dd className="mt-0.5 font-semibold break-words text-text">{value}</dd>
                 </div>
               ))}
             </dl>
@@ -206,7 +206,9 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
         <div className="min-w-0 lg:col-start-1">
           <section>
             <h2 className="sr-only">About</h2>
-            <p className="text-lg leading-relaxed whitespace-pre-line text-pretty">{p.bio}</p>
+            <p className="max-w-prose text-lg leading-relaxed whitespace-pre-line text-text text-pretty">
+              {p.bio}
+            </p>
           </section>
 
           {p.talent_skills.length > 0 && (
@@ -229,15 +231,15 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
 
           {experience.length > 0 && (
             <section className="mt-10 border-t border-border-base pt-8">
-              <h2 className="text-lg font-semibold">Experience</h2>
+              <h2 className="text-lg font-semibold tracking-tight">Experience</h2>
               <ol className="mt-4 space-y-5">
                 {experience.map((e) => (
                   <li key={e.id}>
                     <p className="font-semibold">
                       {e.role} <span className="font-normal text-text-muted">· {e.company}</span>
                     </p>
-                    <p className="text-sm text-text-subtle">
-                      {formatMonth(e.start_date)} –{' '}
+                    <p className="text-sm text-text-muted tabular-nums">
+                      {formatMonth(e.start_date)} -{' '}
                       {e.end_date ? formatMonth(e.end_date) : 'Present'}
                     </p>
                     {e.description && (
@@ -253,13 +255,13 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
 
           {education.length > 0 && (
             <section className="mt-10 border-t border-border-base pt-8">
-              <h2 className="text-lg font-semibold">Education</h2>
+              <h2 className="text-lg font-semibold tracking-tight">Education</h2>
               <ul className="mt-4 space-y-4">
                 {education.map((e) => (
                   <li key={e.id}>
                     <p className="font-semibold">{e.school}</p>
-                    <p className="text-sm text-text-subtle">
-                      {[e.degree, [e.start_year, e.end_year].filter(Boolean).join(' – ')]
+                    <p className="text-sm text-text-muted tabular-nums">
+                      {[e.degree, [e.start_year, e.end_year].filter(Boolean).join(' - ')]
                         .filter(Boolean)
                         .join(' · ')}
                     </p>

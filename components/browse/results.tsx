@@ -1,4 +1,4 @@
-import { SearchX } from 'lucide-react';
+import { ArrowRight, SearchX } from 'lucide-react';
 import Link from 'next/link';
 
 import { JobCard } from '@/components/job/job-card';
@@ -16,7 +16,15 @@ import { listTalent } from '@/lib/services/talent';
  *
  * `query` is the current query string, so "Load more" keeps the filters. The old per-type pages
  * linked to `/jobs?cursor=…`, which dropped every filter on the second page.
+ *
+ * The list sits in one ruled panel (rows divided by hairlines), not a card per result: every row
+ * is the same kind of thing, so a shadow or border per row would add weight without hierarchy.
  */
+
+const LIST = 'overflow-hidden rounded-lg border border-border-base bg-surface-raised';
+const COUNT = 'mb-3 text-sm text-text-muted tabular-nums';
+const SEE_ALL =
+  'mt-3 inline-flex h-10 items-center gap-1 text-sm font-semibold text-link hover:underline';
 
 const moreHref = (query: URLSearchParams, cursor: string) => {
   const next = new URLSearchParams(query);
@@ -47,7 +55,9 @@ export async function JobResults({
 
   if (jobs.length === 0) {
     return preview ? (
-      <p className="text-sm text-text-muted">No jobs match.</p>
+      <p className="rounded-lg border border-dashed border-border-strong px-5 py-4 text-sm text-text-muted">
+        No jobs match these filters.
+      </p>
     ) : (
       <Empty kind="jobs" />
     );
@@ -56,19 +66,19 @@ export async function JobResults({
   return (
     <>
       {!preview && (
-        <p className="mb-3 text-sm text-text-subtle" aria-live="polite">
+        <p className={COUNT} aria-live="polite">
           {jobs.length} {jobs.length === 1 ? 'job' : 'jobs'}
           {nextCursor ? ' on this page' : ''}
         </p>
       )}
-      <div className="overflow-hidden rounded-lg border border-border-base">
+      <div className={LIST}>
         {jobs.map((job) => (
           <JobCard key={job.id} job={job} saveable={saveable} saved={saved.has(job.id)} />
         ))}
       </div>
       {preview && nextCursor && (
-        <Link href={seeAllHref(query, 'jobs')} className="prose-link mt-3 inline-block text-sm">
-          See all jobs
+        <Link href={seeAllHref(query, 'jobs')} className={SEE_ALL}>
+          See all jobs <ArrowRight aria-hidden="true" size={14} />
         </Link>
       )}
       {!preview && nextCursor && (
@@ -104,7 +114,9 @@ export async function TalentResults({
 
   if (talent.length === 0) {
     return preview ? (
-      <p className="text-sm text-text-muted">No developers match.</p>
+      <p className="rounded-lg border border-dashed border-border-strong px-5 py-4 text-sm text-text-muted">
+        No developers match these filters.
+      </p>
     ) : (
       <Empty kind="developers" />
     );
@@ -113,11 +125,11 @@ export async function TalentResults({
   return (
     <>
       {!preview && (
-        <p className="mb-3 text-sm text-text-subtle" aria-live="polite">
+        <p className={COUNT} aria-live="polite">
           {talent.length} {talent.length === 1 ? 'developer' : 'developers'}
         </p>
       )}
-      <div className="overflow-hidden rounded-lg border border-border-base">
+      <div className={LIST}>
         {talent.map((person) => (
           <TalentCard
             key={person.id}
@@ -128,11 +140,8 @@ export async function TalentResults({
         ))}
       </div>
       {preview && nextCursor && (
-        <Link
-          href={seeAllHref(query, 'developers')}
-          className="prose-link mt-3 inline-block text-sm"
-        >
-          See all developers
+        <Link href={seeAllHref(query, 'developers')} className={SEE_ALL}>
+          See all developers <ArrowRight aria-hidden="true" size={14} />
         </Link>
       )}
       {!preview && nextCursor && (
@@ -154,13 +163,10 @@ function Empty({ kind }: { kind: 'jobs' | 'developers' }) {
     <EmptyState
       icon={SearchX}
       title="Nothing matches those filters"
-      body="Try widening them, or clearing the search box."
+      body="Try a broader skill, drop a filter, or clear the search box."
       action={
-        <Link
-          href={`/browse?type=${kind}`}
-          className={buttonStyles({ variant: 'secondary', size: 'sm' })}
-        >
-          Clear everything
+        <Link href={`/browse?type=${kind}`} className={buttonStyles({ variant: 'secondary' })}>
+          Clear filters
         </Link>
       }
     />

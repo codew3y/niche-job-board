@@ -1,10 +1,11 @@
 'use client';
 
-import { Plus, X } from 'lucide-react';
+import { ChevronRight, FolderKanban, Plus, X } from 'lucide-react';
 import Image from 'next/image';
 import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Field, FormError, TextareaField } from '@/components/ui/field';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { ImageUpload } from '@/components/upload/image-upload';
@@ -45,12 +46,17 @@ export function PortfolioManager({ items }: { items: Item[] }) {
         />
       ) : (
         !adding && (
-          <div className="rounded-lg border border-dashed border-border-strong p-8 text-center">
-            <p className="font-semibold">No projects yet</p>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-text-muted text-pretty">
-              A project is what a client reads first — what it was, what you did, and what changed.
-            </p>
-          </div>
+          <EmptyState
+            icon={FolderKanban}
+            title="No projects yet"
+            body="A project is what a client reads first: what it was, what you did, and what changed."
+            action={
+              <Button variant="secondary" onClick={() => setAdding(true)}>
+                <Plus aria-hidden="true" />
+                Add a project
+              </Button>
+            }
+          />
         )
       )}
 
@@ -77,7 +83,8 @@ export function PortfolioManager({ items }: { items: Item[] }) {
       */}
       {editing && <ItemMedia item={editing} />}
 
-      {!adding && !editing && (
+      {/* With no projects, the empty state above carries this same button. */}
+      {!adding && !editing && items.length > 0 && (
         <Button variant="secondary" onClick={() => setAdding(true)}>
           <Plus aria-hidden="true" />
           Add a project
@@ -109,13 +116,21 @@ function ItemForm({
   return (
     <form
       action={action}
-      className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6"
+      className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 shadow-sm sm:p-6"
     >
       {item && <input type="hidden" name="itemId" value={item.id} />}
 
       <div className="flex items-center justify-between gap-4">
-        <h3 className="text-base font-semibold">{item ? 'Edit project' : 'New project'}</h3>
-        <Button variant="ghost" size="icon-sm" onClick={onDone} aria-label="Close without saving">
+        <h3 className="text-lg font-semibold tracking-tight">
+          {item ? 'Edit project' : 'New project'}
+        </h3>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="-mr-1 max-sm:size-10"
+          onClick={onDone}
+          aria-label="Close without saving"
+        >
           <X aria-hidden="true" />
         </Button>
       </div>
@@ -134,15 +149,20 @@ function ItemForm({
         rows={3}
         defaultValue={item?.description ?? ''}
         errors={fields?.description}
-        hint="What it was and what you did — at least 40 characters."
+        hint="What it was and what you did. At least 40 characters."
       />
 
       <LinkListInput initial={item?.links ?? []} errors={fields?.links} />
 
       {/* Optional extras. Kept because matching reads them (lib/matching/text.ts), folded away
           because the four fields above are the project. */}
-      <details className="group rounded-md border border-border-base px-4 py-3">
-        <summary className="cursor-pointer text-sm font-semibold select-none">
+      <details className="group rounded-md border border-border-base bg-surface px-4 py-3">
+        <summary className="flex min-h-6 cursor-pointer items-center gap-1.5 text-sm font-semibold text-text select-none">
+          <ChevronRight
+            aria-hidden="true"
+            size={16}
+            className="shrink-0 text-text-subtle transition-transform duration-fast ease-out group-open:rotate-90 motion-reduce:transition-none"
+          />
           More detail <span className="font-normal text-text-subtle">(helps matching)</span>
         </summary>
         <div className="mt-4 space-y-5">
@@ -179,7 +199,7 @@ function ItemForm({
 
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
 
-      <div className="flex gap-2 border-t border-border-base pt-5">
+      <div className="flex flex-wrap gap-2 border-t border-border-base pt-5">
         <SubmitButton pendingLabel="Saving…">Save project</SubmitButton>
         <Button variant="ghost" onClick={onDone}>
           Cancel
@@ -193,12 +213,12 @@ function ItemMedia({ item }: { item: Item }) {
   const media = [...(item.item_media ?? [])].sort((a, b) => a.sort_order - b.sort_order);
 
   return (
-    <div className="space-y-4 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6">
+    <div className="space-y-4 rounded-lg border border-border-base bg-surface-raised p-4 sm:p-6">
       <div>
-        <h3 className="text-base font-semibold">Photos</h3>
+        <h3 className="text-lg font-semibold tracking-tight">Photos</h3>
         <p className="mt-0.5 text-sm text-text-muted text-pretty">
-          Screenshots of the work. Every photo needs a short description — that is what someone
-          using a screen reader gets instead of the picture.
+          Screenshots of the work. Every photo needs a short description, because that is what
+          someone using a screen reader gets instead of the picture.
         </p>
       </div>
 
@@ -208,7 +228,7 @@ function ItemMedia({ item }: { item: Item }) {
             <li key={m.id} className="group relative">
               {/* A thumbnail grid: two columns on phones, three from sm — small widths, so the
                   savings from resizing are correspondingly large. */}
-              <div className="relative aspect-video w-full overflow-hidden rounded-md border border-border-base bg-surface-sunken">
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border-base bg-surface-sunken">
                 <Image
                   src={m.url}
                   alt={m.alt_text}
@@ -222,7 +242,7 @@ function ItemMedia({ item }: { item: Item }) {
                 <SubmitButton
                   variant="danger-ghost"
                   size="sm"
-                  className="h-7 px-2 text-xs"
+                  className="-ml-2 max-sm:h-10"
                   pendingLabel="Removing…"
                 >
                   Remove

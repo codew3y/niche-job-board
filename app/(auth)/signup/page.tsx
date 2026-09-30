@@ -30,7 +30,7 @@ export default async function SignupPage({
     talent: {
       title: 'Find work',
       subtitle:
-        'Publish a profile whenever you like — there is no bar to clear. Briefs that fit what you have built come to you.',
+        'Publish a profile whenever you like. There is no bar to clear, and briefs that fit what you have built come to you.',
     },
     client: {
       title: 'Hire developers',
@@ -45,12 +45,12 @@ export default async function SignupPage({
       subtitle={
         intent
           ? copy[intent].subtitle
-          : 'You can do both — adding the second role later takes a minute.'
+          : 'You can do both. Adding the second role later takes a minute.'
       }
       footer={
         <>
           Already have an account?{' '}
-          <Link href="/login" className="prose-link font-semibold">
+          <Link href="/login" className="font-semibold text-link underline underline-offset-4">
             Sign in
           </Link>
         </>

@@ -10,7 +10,7 @@ import { cn } from '@/lib/ui/cn';
 export function SiteNavLinks() {
   const pathname = usePathname();
   return (
-    <ul className="flex items-center gap-1">
+    <ul className="flex items-center gap-0.5">
       {SITE_NAV.map(({ href, label }) => {
         const active = pathname === href;
         return (
@@ -19,9 +19,10 @@ export function SiteNavLinks() {
               href={href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors duration-fast ease-out',
+                'inline-flex h-10 items-center rounded-md px-3 text-sm font-medium whitespace-nowrap transition-colors duration-fast ease-out',
+                // The current page is marked by weight AND a tinted fill, never colour alone.
                 active
-                  ? 'font-semibold text-text'
+                  ? 'bg-primary-subtle font-semibold text-primary'
                   : 'text-text-muted hover:bg-surface-sunken hover:text-text',
               )}
             >

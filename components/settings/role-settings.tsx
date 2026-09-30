@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { FormError } from '@/components/ui/field';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { addRole, switchRole, type ActionResult } from '@/lib/actions/auth';
+import { ROLE_NAME } from '@/lib/roles';
 import { cn } from '@/lib/ui/cn';
 
 const COPY = {
@@ -37,7 +38,7 @@ export function RoleSettings({
   const has = { talent: hasTalent, client: hasClient };
 
   return (
-    <ul className="grid gap-3 sm:grid-cols-2">
+    <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
       {(['talent', 'client'] as const).map((role) => {
         const owned = has[role];
         const isActive = activeRole === role;
@@ -47,7 +48,7 @@ export function RoleSettings({
             key={role}
             className={cn(
               'flex flex-col rounded-lg border bg-surface-raised p-5',
-              isActive ? 'border-surface-inverse' : 'border-border-base',
+              isActive ? 'border-primary shadow-sm' : 'border-border-base',
             )}
           >
             <div className="flex items-start justify-between gap-3">
@@ -55,9 +56,7 @@ export function RoleSettings({
                 aria-hidden="true"
                 className={cn(
                   'grid size-10 place-items-center rounded-md',
-                  isActive
-                    ? 'bg-surface-inverse text-text-inverse'
-                    : 'bg-surface-sunken text-text-subtle',
+                  isActive ? 'bg-primary text-primary-text' : 'bg-primary-subtle text-primary',
                 )}
               >
                 <Icon size={18} />
@@ -70,7 +69,7 @@ export function RoleSettings({
                 <Badge tone="outline">Not added</Badge>
               )}
             </div>
-            <p className="mt-4 font-semibold tracking-tight">{title}</p>
+            <h2 className="mt-4 font-semibold tracking-tight text-text">{title}</h2>
             <p className="mt-1 flex-1 text-sm text-text-muted text-pretty">{owned ? have : add}</p>
             <div className="mt-5">
               <RoleAction role={role} owned={owned} isActive={isActive} />
@@ -96,12 +95,12 @@ function RoleAction({
   if (isActive) return null;
 
   if (owned) {
-    // Already has it — a context switch, so it uses switchRole and creates nothing.
+    // Already has it: a context switch, so it uses switchRole and creates nothing.
     return (
       <ActionForm action={switchRole}>
         <input type="hidden" name="role" value={role} />
-        <SubmitButton variant="secondary" size="sm" pendingLabel="Switching…">
-          Switch to {role}
+        <SubmitButton variant="secondary" className="w-full sm:w-auto" pendingLabel="Switching…">
+          Switch to {ROLE_NAME[role]}
         </SubmitButton>
       </ActionForm>
     );
@@ -110,8 +109,8 @@ function RoleAction({
   return (
     <form action={action} className="space-y-2">
       <input type="hidden" name="role" value={role} />
-      <SubmitButton size="sm" pendingLabel="Setting up…">
-        Add {role} profile
+      <SubmitButton className="w-full sm:w-auto" pendingLabel="Setting up…">
+        Add {ROLE_NAME[role]} profile
       </SubmitButton>
       {state?.ok === false && <FormError>{state.message}</FormError>}
     </form>

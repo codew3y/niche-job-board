@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -11,13 +11,18 @@ type Step = { slug: string; title: string; blurb: string };
 /**
  * Wizard chrome: a progress rail plus the current step's form.
  *
- * `done` is derived from saved data, not from a counter — see lib/onboarding/steps.ts. A
+ * `done` is derived from saved data, not from a counter (see lib/onboarding/steps.ts). A
  * completed step stays clickable so someone can go back and fix a typo; a future step does not,
  * because its form would have nothing to build on.
  *
- * On a phone the rail collapses to "Step 2 of 4" and a bar — four labelled dots do not fit at
- * 320px without shrinking the labels past reading. The bar's width is a static style, not an
- * animation: it changes once per step, on a page load, where motion would only delay the form.
+ * ONE RAIL AT EVERY WIDTH. Each step is a segment with a numbered tile under it. On a phone the
+ * names are kept for screen readers only, because four names do not fit at 360px without
+ * shrinking past reading, and the current one is the page's h1 directly below; from `sm` up
+ * every name is visible. The state of a step is carried by shape and text as well as colour: a check
+ * for complete, a number otherwise, the bold name and `aria-current="step"` for the current one.
+ *
+ * Every reachable step is a real link, so the rail is keyboard navigable, and each link is at
+ * least 40px tall for touch. Nothing animates: the rail changes once per step, on a page load.
  */
 export function WizardFrame({
   steps,
@@ -34,35 +39,33 @@ export function WizardFrame({
 }) {
   const index = steps.findIndex((s) => s.slug === current);
   const step = steps[index];
-  const progress = ((index + 1) / steps.length) * 100;
+  const previous = index > 0 ? steps[index - 1] : undefined;
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <div className="gutter mx-auto flex w-full max-w-3xl items-center justify-between gap-4 pt-[max(1.25rem,env(safe-area-inset-top,0px))]">
-        {/* Onboarding is always signed in, so the logo goes to the app home — which sends an
-            unfinished account straight back here. */}
-        <Logo href={logoHref(true)} />
-        {/* Said out loud, and near the top: it removes the "will I lose this?" hesitation that
-            makes people rush a long form. */}
-        <p className="hidden text-sm text-text-subtle sm:block">Saved as you go</p>
-      </div>
+    <div className="flex min-h-dvh flex-col bg-surface">
+      <header className="border-b border-border-base bg-surface-raised">
+        <div className="gutter mx-auto flex min-h-16 w-full max-w-3xl items-center pt-[env(safe-area-inset-top,0px)]">
+          {/* Onboarding is always signed in, so the logo goes to the app home, which sends an
+              unfinished account straight back here. */}
+          <Logo href={logoHref(true)} />
+        </div>
+      </header>
 
       <main id="main" className="gutter mx-auto w-full max-w-3xl flex-1 py-8 sm:py-12">
-        <nav aria-label="Progress" className="mb-10">
-          <p className="mb-3 flex items-baseline justify-between text-sm sm:hidden">
-            <span className="font-semibold">
+        <nav aria-label="Onboarding progress" className="mb-10">
+          {/* Said out loud, and near the top: it removes the "will I lose this?" hesitation that
+              makes people rush a long form. */}
+          <p className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm">
+            <span className="font-semibold text-text">
               Step {index + 1} of {steps.length}
             </span>
             <span className="text-text-subtle">Saved as you go</span>
           </p>
-          <div
-            className="h-1 overflow-hidden rounded-full bg-surface-sunken sm:hidden"
-            aria-hidden="true"
-          >
-            <div className="h-full rounded-full bg-accent" style={{ width: `${progress}%` }} />
-          </div>
 
-          <ol className="hidden grid-flow-col gap-3 sm:grid">
+          <ol
+            className="grid gap-2 sm:gap-3"
+            style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
+          >
             {steps.map((s, i) => {
               const isCurrent = s.slug === current;
               const complete = done(s.slug);
@@ -72,24 +75,30 @@ export function WizardFrame({
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'block h-1 rounded-full',
-                      isCurrent
-                        ? 'bg-accent'
-                        : complete
-                          ? 'bg-surface-inverse'
-                          : 'bg-surface-sunken',
+                      'block h-1.5 rounded-sm',
+                      isCurrent ? 'bg-accent' : complete ? 'bg-primary' : 'bg-border-strong',
                     )}
                   />
-                  <span className="mt-3 flex items-center gap-1.5 text-sm">
-                    {complete && !isCurrent ? (
-                      <Check aria-hidden="true" size={14} className="text-success" />
-                    ) : (
-                      <span aria-hidden="true" className="text-text-subtle tabular-nums">
-                        {i + 1}
-                      </span>
-                    )}
+                  <span className="mt-2.5 flex min-w-0 items-center gap-2 text-sm">
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        'grid size-6 shrink-0 place-items-center rounded-md text-xs font-semibold tabular-nums',
+                        isCurrent
+                          ? 'bg-primary text-primary-text'
+                          : complete
+                            ? 'bg-success-subtle text-success'
+                            : 'border border-control text-text-subtle',
+                      )}
+                    >
+                      {complete && !isCurrent ? <Check size={14} strokeWidth={2.5} /> : i + 1}
+                    </span>
                     <span
                       className={cn(
+                        'min-w-0 truncate',
+                        // Phone: names stay for screen readers only. The current one is the h1
+                        // right below, so nothing is lost on screen.
+                        'max-sm:sr-only',
                         isCurrent
                           ? 'font-semibold text-text'
                           : complete
@@ -106,13 +115,19 @@ export function WizardFrame({
                 </>
               );
               return (
-                <li key={s.slug}>
+                <li key={s.slug} className="min-w-0">
                   {reachable && !isCurrent ? (
-                    <Link href={`${basePath}/${s.slug}`} className="group block rounded-sm">
+                    <Link
+                      href={`${basePath}/${s.slug}`}
+                      className="group block min-h-10 rounded-md pb-1"
+                    >
                       {body}
                     </Link>
                   ) : (
-                    <span className="block" aria-current={isCurrent ? 'step' : undefined}>
+                    <span
+                      className="block min-h-10 pb-1"
+                      aria-current={isCurrent ? 'step' : undefined}
+                    >
                       {body}
                     </span>
                   )}
@@ -120,13 +135,19 @@ export function WizardFrame({
               );
             })}
           </ol>
-          <p className="sr-only">
-            Step {index + 1} of {steps.length}: {step?.title}
-          </p>
         </nav>
 
         <header className="mb-8">
-          <h1 className="font-semibold text-display-sm text-balance">{step?.title}</h1>
+          {previous && (
+            <Link
+              href={`${basePath}/${previous.slug}`}
+              className="-ml-2 mb-3 inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-text-muted hover:bg-surface-sunken hover:text-text"
+            >
+              <ArrowLeft aria-hidden="true" size={16} />
+              Back to {previous.title}
+            </Link>
+          )}
+          <h1 className="font-display text-display-sm text-balance">{step?.title}</h1>
           <p className="mt-2 max-w-xl text-text-muted text-pretty">{step?.blurb}</p>
         </header>
 

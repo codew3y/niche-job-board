@@ -1,6 +1,6 @@
 'use client';
 
-import { Briefcase, Code2 } from 'lucide-react';
+import { Briefcase, Check, Code2 } from 'lucide-react';
 import { useActionState, useState } from 'react';
 
 import { FormError } from '@/components/ui/field';
@@ -38,12 +38,12 @@ export function RoleChooser() {
             <label
               key={value}
               className={cn(
-                'pressable flex cursor-pointer gap-4 rounded-lg border p-5 select-none',
+                'pressable flex cursor-pointer items-start gap-4 rounded-lg border p-5 select-none',
                 'transition-[border-color,background-color,box-shadow] duration-fast ease-out',
                 'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus',
                 checked
-                  ? 'border-surface-inverse bg-surface-raised shadow-sm'
-                  : 'border-border-base hover:border-border-strong',
+                  ? 'border-primary bg-primary-subtle shadow-xs'
+                  : 'border-control bg-surface-raised hover:border-border-strong hover:bg-surface-sunken',
               )}
             >
               <input
@@ -58,16 +58,24 @@ export function RoleChooser() {
                 aria-hidden="true"
                 className={cn(
                   'grid size-10 shrink-0 place-items-center rounded-md transition-colors duration-fast',
-                  checked
-                    ? 'bg-surface-inverse text-text-inverse'
-                    : 'bg-surface-sunken text-text-subtle',
+                  checked ? 'bg-primary text-primary-text' : 'bg-surface-sunken text-text-muted',
                 )}
               >
                 <Icon size={18} />
               </span>
-              <span>
-                <span className="block font-semibold">{title}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-semibold text-text">{title}</span>
                 <span className="mt-1 block text-sm text-text-muted text-pretty">{body}</span>
+              </span>
+              {/* The radio mark: the selection is shown by shape as well as colour. */}
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2',
+                  checked ? 'border-primary bg-primary text-primary-text' : 'border-control',
+                )}
+              >
+                {checked && <Check size={12} strokeWidth={3} />}
               </span>
             </label>
           );

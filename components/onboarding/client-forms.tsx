@@ -1,8 +1,12 @@
 'use client';
 
+import { FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useActionState, useState } from 'react';
 
+import { Badge } from '@/components/ui/badge';
+import { buttonStyles } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { ChoiceChips, Field, FormError, SelectField, TextareaField } from '@/components/ui/field';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { SkillPicker, type SkillOption } from './skill-picker';
@@ -29,7 +33,7 @@ export function CompanyForm({ client }: { client: Row }) {
           defaultValue={str(client, 'company_name')}
           errors={fields?.companyName}
         />
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Field
             label="Website"
             name="website"
@@ -107,12 +111,9 @@ export function FirstJobForm({
           defaultValue={str(job, 'description')}
           errors={fields?.description}
           placeholder="The problem, what done looks like, and anything that has already been tried."
-          hint="At least 120 characters — a short brief gets poorly matched candidates."
+          hint="At least 120 characters. A short brief gets poorly matched candidates."
         />
-        <div>
-          <SkillPicker options={options} initial={initial} max={20} />
-          {fields?.skills && <p className="mt-1.5 text-sm text-danger">{fields.skills[0]}</p>}
-        </div>
+        <SkillPicker options={options} initial={initial} max={20} errors={fields?.skills} />
       </StepCard>
 
       <StepCard>
@@ -122,7 +123,8 @@ export function FirstJobForm({
           options={ENGAGEMENTS}
           defaultValue={str(job, 'engagement_type') || 'fixed'}
         />
-        <div className="grid gap-5 sm:grid-cols-3">
+        {/* Phone: the two amounts side by side, the currency under them. */}
+        <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 sm:gap-x-5">
           <Field
             label="Budget from"
             name="budgetMin"
@@ -142,6 +144,7 @@ export function FirstJobForm({
             label="Currency"
             name="currency"
             defaultValue={str(job, 'currency') || 'USD'}
+            wrapperClassName="col-span-2 sm:col-span-1"
           >
             {CURRENCIES.map((c) => (
               <option key={c} value={c}>
@@ -181,21 +184,26 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
 
   if (!progress.hasJobDraft) {
     return (
-      <p className="text-text-muted">
-        No draft yet —{' '}
-        <Link href="/onboarding/client/job" className="prose-link font-semibold">
-          write your brief
-        </Link>
-        .
-      </p>
+      <EmptyState
+        icon={FileText}
+        title="No brief yet"
+        body="Write your first brief, then come back here to publish it."
+        action={
+          <Link href="/onboarding/client/job" className={buttonStyles()}>
+            Write your brief
+          </Link>
+        }
+      />
     );
   }
 
   return (
     <div className="space-y-8">
-      <article className="rounded-lg border border-border-base bg-surface-raised p-5 sm:p-7">
-        <p className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">Preview</p>
-        <h2 className="mt-2 font-semibold text-2xl">{str(job, 'title')}</h2>
+      <article className="rounded-lg border border-border-base bg-surface-raised p-5 shadow-xs sm:p-7">
+        <Badge tone="neutral">Preview</Badge>
+        <h2 className="mt-3 font-display text-2xl font-semibold text-balance">
+          {str(job, 'title')}
+        </h2>
         <p className="mt-3 text-sm whitespace-pre-line text-text-muted">
           {str(job, 'description')}
         </p>
@@ -207,7 +215,7 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
           it at any time.
         </p>
         {state?.ok === false && <FormError>{state.message}</FormError>}
-        <SubmitButton variant="accent" size="lg" pendingLabel="Publishing…">
+        <SubmitButton size="lg" className="w-full sm:w-auto" pendingLabel="Publishing…">
           Publish this brief
         </SubmitButton>
       </form>

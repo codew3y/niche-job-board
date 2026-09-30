@@ -20,7 +20,7 @@ test.describe('signed out', () => {
     test(`${path} renders its page inside the shared header and footer`, async ({ page }) => {
       await page.goto(path);
       await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible();
-      await expect(page.getByRole('link', { name: /techselect — home/i }).first()).toHaveAttribute(
+      await expect(page.getByRole('link', { name: /techselect home/i }).first()).toHaveAttribute(
         'href',
         '/',
       );
@@ -59,13 +59,11 @@ test.describe('signed out', () => {
 
   test('the home page has a hero figure and no login form', async ({ page }) => {
     await page.goto('/');
-    // The hero figure: a poster image first, a muted looping clip once idle (motion allowed).
-    await expect(page.locator('figure img[src*="hero-poster"]')).toBeVisible();
-    const video = page.locator('figure video');
-    await expect(video).toBeAttached({ timeout: 10_000 });
-    await expect(video).toHaveJSProperty('muted', true);
-    // No caption and no pause control on the home page (owner's request).
-    await expect(page.getByRole('button', { name: /pause background video/i })).toHaveCount(0);
+    // The hero figure: a still photo, described for screen readers. No video, no caption.
+    const photo = page.locator('figure img[src*="hero"]');
+    await expect(photo).toBeVisible();
+    await expect(photo).toHaveAttribute('alt', /developer/i);
+    await expect(page.locator('figure video')).toHaveCount(0);
     await expect(page.locator('figure figcaption')).toHaveCount(0);
     // Log in lives in the header now, not in the page.
     await expect(page.getByLabel(/password/i)).toHaveCount(0);
@@ -142,7 +140,7 @@ test.describe('signed in', () => {
     await signIn(page);
     for (const path of ['/dashboard/talent/applications', '/browse', `/jobs/${data.job.slug}`]) {
       await page.goto(path);
-      const logo = page.getByRole('link', { name: /techselect — home/i }).first();
+      const logo = page.getByRole('link', { name: /techselect home/i }).first();
       await expect(logo, `logo on ${path}`).toHaveAttribute('href', '/dashboard');
     }
   });

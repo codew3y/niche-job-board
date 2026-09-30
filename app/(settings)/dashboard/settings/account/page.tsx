@@ -27,9 +27,9 @@ export default async function AccountPage() {
       <nav aria-label="Breadcrumb" className="text-sm">
         <Link
           href="/dashboard/settings"
-          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+          className="-ml-2 inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 font-medium text-text-muted hover:bg-surface-sunken hover:text-text"
         >
-          <ArrowLeft aria-hidden="true" size={15} /> Settings
+          <ArrowLeft aria-hidden="true" size={16} /> Settings
         </Link>
       </nav>
 

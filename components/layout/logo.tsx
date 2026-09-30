@@ -26,6 +26,7 @@ export function LogoMark({ size = 28, className }: { size?: number; className?: 
       alt=""
       width={size}
       height={size}
+      draggable={false}
       className={cn('shrink-0', className)}
     />
   );
@@ -44,6 +45,7 @@ function Lockup({ height }: { height: number }) {
         alt=""
         width={width}
         height={height}
+        draggable={false}
         className="shrink-0 dark:hidden"
       />
       <Image
@@ -51,6 +53,7 @@ function Lockup({ height }: { height: number }) {
         alt=""
         width={width}
         height={height}
+        draggable={false}
         className="hidden shrink-0 dark:block"
       />
     </>
@@ -76,8 +79,13 @@ export function Logo({
   return (
     <Link
       href={href}
-      aria-label="TechSelect — home"
-      className={cn('inline-flex items-center text-text', className)}
+      aria-label="TechSelect home"
+      // The logo is a picture, never text: it cannot be selected or dragged out as an image
+      // (the owner could highlight it when drag-selecting across the header).
+      className={cn(
+        'inline-flex items-center text-text select-none [-webkit-touch-callout:none] [&_img]:pointer-events-none',
+        className,
+      )}
     >
       {compact ? <LogoMark size={32} /> : <Lockup height={size === 'lg' ? 64 : 48} />}
     </Link>

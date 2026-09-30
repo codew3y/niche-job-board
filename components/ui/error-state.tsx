@@ -38,8 +38,8 @@ export function ErrorState({
       </span>
       <h1 className="mt-5 font-semibold text-display-sm">Something went wrong</h1>
       <p className="mt-3 text-text-muted text-pretty">
-        This page failed to load. It is usually temporary — trying again tends to work. Nothing you
-        had saved is lost.
+        This page didn&rsquo;t load. It&rsquo;s usually temporary, so try again. Nothing you saved
+        is lost.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-2">
         <Button onClick={reset}>

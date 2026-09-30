@@ -52,7 +52,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
     <div className="min-h-dvh">
       <aside
         aria-label="App"
-        className="fixed inset-y-0 left-0 z-nav flex w-16 flex-col border-r border-border-base bg-surface pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] pl-[env(safe-area-inset-left,0px)] lg:w-60"
+        className="fixed inset-y-0 left-0 z-nav flex w-16 flex-col border-r border-border-base bg-surface-raised pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] pl-[env(safe-area-inset-left,0px)] lg:w-60"
       >
         <div className="flex h-10 items-center justify-center lg:justify-start lg:px-5">
           <Logo href={logoHref(true)} compact className="lg:hidden" />

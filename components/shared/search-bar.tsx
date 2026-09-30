@@ -7,7 +7,7 @@ import { cn } from '@/lib/ui/cn';
 
 /**
  * The browse search box. `enterkeyhint="search"` so a phone's return key says Search, and a
- * clear button once there is something to clear. The spinner is the one place a spinner is
+ * clear button (a 40px target) once there is something to clear. The spinner is the one place a spinner is
  * right: a query is running and there is no content shape to hold with a skeleton yet.
  */
 export function SearchBar({
@@ -64,7 +64,7 @@ export function SearchBar({
         placeholder={placeholder}
         className={cn(
           controlStyles,
-          'h-12 rounded-md border-control/70 pr-12 pl-11 hover:border-control [&::-webkit-search-cancel-button]:hidden',
+          'h-12 border-control pr-12 pl-11 hover:border-text-subtle [&::-webkit-search-cancel-button]:hidden',
         )}
       />
       {value && (
@@ -72,7 +72,7 @@ export function SearchBar({
           type="button"
           onClick={onClear}
           aria-label="Clear search"
-          className="pressable absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-text-subtle hover:bg-surface-sunken hover:text-text"
+          className="pressable absolute top-1/2 right-1 grid size-10 -translate-y-1/2 place-items-center rounded-md text-text-subtle hover:bg-surface-sunken hover:text-text"
         >
           <X aria-hidden="true" size={16} />
         </button>

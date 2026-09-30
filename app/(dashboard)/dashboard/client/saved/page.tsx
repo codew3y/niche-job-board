@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { buttonStyles } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
@@ -53,13 +54,13 @@ export default async function SavedTalentPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Saved developers" subtitle="Private to you — they are never told." />
+      <PageHeader title="Saved developers" subtitle="Private to you. They are never told." />
 
       {rows.length === 0 ? (
         <EmptyState
           icon={Bookmark}
           title="Nothing saved yet"
-          body="Bookmark a developer while browsing and they land here."
+          body="Save a developer while you browse and they land here."
           action={
             <Link href="/browse?type=developers" className={buttonStyles({ size: 'sm' })}>
               Browse developers
@@ -73,22 +74,24 @@ export default async function SavedTalentPage() {
             return (
               <li
                 key={p.id}
-                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+                className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-4 sm:flex-nowrap sm:px-5"
               >
-                <div className="flex min-w-0 items-center gap-3.5">
-                  <Avatar name={p.headline} />
+                <div className="flex min-w-0 flex-1 items-center gap-3.5">
+                  <Avatar name={p.headline} className="hidden sm:grid" />
                   <div className="min-w-0">
-                    <h2 className="font-semibold">
+                    <h2 className="font-semibold break-words">
                       <Link href={`/talent/${p.slug}`} className="hover:underline">
                         {p.headline}
                       </Link>
                     </h2>
-                    <p className="mt-0.5 text-sm text-text-subtle">
-                      {p.portfolio_item_count} project{p.portfolio_item_count === 1 ? '' : 's'}
-                      {rate ? <span className="tabular-nums"> · {rate}</span> : ''}
-                      {/* A profile can be unpublished after being saved — say so rather than
-                          linking to a 404. */}
-                      {!p.is_published ? ' · no longer public' : ''}
+                    <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-subtle tabular-nums">
+                      <span>
+                        {p.portfolio_item_count} project{p.portfolio_item_count === 1 ? '' : 's'}
+                        {rate ? <> · {rate}</> : null}
+                      </span>
+                      {/* A profile can be unpublished after being saved: say so rather than
+                          linking to a 404 without warning. */}
+                      {!p.is_published && <Badge tone="outline">No longer public</Badge>}
                     </p>
                   </div>
                 </div>

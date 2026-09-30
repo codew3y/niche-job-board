@@ -6,6 +6,7 @@ import {
   Circle,
   FolderKanban,
   Hourglass,
+  SearchX,
   Sparkles,
   Star,
 } from 'lucide-react';
@@ -13,6 +14,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { TalentMatchItem } from '@/components/matches/match-items';
+import { Badge } from '@/components/ui/badge';
 import { buttonStyles } from '@/components/ui/button';
 import { Card, CardHeader } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -25,15 +27,15 @@ import { createClient } from '@/lib/supabase/server';
 export const metadata: Metadata = { title: 'Dashboard' };
 
 /**
- * The developer's home — the direction's dashboard (DESIGN.md §3.1): the serif once, for the
- * greeting; a summary row; the matches list as the primary content; profile and shortcuts
- * beside it on wide screens.
+ * The developer's home (DESIGN.md §3.1): the display face once, for the greeting; a summary
+ * row; the matches list as the primary content; profile status and shortcuts beside it on wide
+ * screens and below it on a phone.
  *
  * TWO DEFECTS FIXED HERE (DESIGN.md §1, A2 and A4):
  *   - the "Matches" section was a hard-coded empty state, so a developer with ten strong matches
  *     was told they had none. It now reads the same `matchesForMe()` the matches page reads, and
  *     says the four different true things that feed can say;
- *   - the unpublished nudge linked to `/talent/profile` — a PUBLIC profile slug, which 404'd.
+ *   - the unpublished nudge linked to `/talent/profile`, a PUBLIC profile slug, which 404'd.
  *
  * Every number links to the page that explains it.
  */
@@ -70,7 +72,7 @@ export default async function TalentDashboard() {
   const shortlisted = statuses.filter((s) => s === 'shortlisted' || s === 'hired').length;
   const firstName = session?.displayName?.split(' ')[0];
 
-  // Mirrors the publish checklist and profileSuggestions() — named, specific, never a percentage
+  // Mirrors the publish checklist and profileSuggestions(): named, specific, never a percentage
   // that implies a grade.
   const checks = [
     {
@@ -85,24 +87,34 @@ export default async function TalentDashboard() {
     { label: 'Published', done: Boolean(profile?.is_published) },
   ];
 
+  const published = Boolean(profile?.is_published);
+  const todo = checks.filter((c) => !c.done).length;
+
   return (
     <div>
       <PageHeader
-        eyebrow={profile?.is_published ? 'Your profile is live' : 'Draft profile'}
         title={firstName ? `Welcome back, ${firstName}.` : 'Welcome back.'}
         subtitle={
-          profile?.is_published
-            ? 'Briefs that fit what you have shipped, and where your applications stand.'
+          published
+            ? 'Jobs that fit what you have shipped, and where your applications stand.'
             : 'Finish your profile and publish it to start getting matched.'
         }
         actions={
-          <Link href="/browse?type=jobs" className={buttonStyles({ variant: 'secondary' })}>
+          // The one primary on the page: browsing once the profile is live. While it is a
+          // draft, "Finish your profile" (in the profile panel) is the primary instead.
+          <Link
+            href="/browse?type=jobs"
+            className={buttonStyles({ variant: published ? 'primary' : 'secondary' })}
+          >
             Browse jobs
           </Link>
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {/* Below lg the app rail takes 4rem, so a 360px phone leaves ~264px of content: too
+          narrow for two tiles whose labels cannot wrap ("Applications"). One column there, a
+          2x2 grid from a 416px viewport, one row of four from lg. */}
+      <div className="grid grid-cols-1 gap-3 min-[26rem]:grid-cols-2 lg:grid-cols-4">
         <Stat
           label="Applications"
           value={active}
@@ -130,7 +142,9 @@ export default async function TalentDashboard() {
         />
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start">
+      {/* Phone and tablet: one column, matches first. From lg: matches beside a narrow aside. */}
+      <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:items-start lg:gap-6">
+        {/* The one card with a header on the page: matches are the primary content. */}
         <Card>
           <CardHeader
             title="Your matches"
@@ -139,9 +153,9 @@ export default async function TalentDashboard() {
               feed?.state === 'ready' ? (
                 <Link
                   href="/dashboard/talent/matches"
-                  className="inline-flex items-center gap-1 text-sm font-semibold hover:underline"
+                  className="inline-flex h-10 items-center gap-1 text-sm font-semibold text-link hover:underline"
                 >
-                  View all <ArrowRight aria-hidden="true" size={14} />
+                  See all <ArrowRight aria-hidden="true" size={14} />
                 </Link>
               ) : null
             }
@@ -152,10 +166,13 @@ export default async function TalentDashboard() {
                 className="border-0"
                 icon={Sparkles}
                 title="Not enough to match on yet"
-                body="Matching reads your bio and the projects you’ve added. A few sentences on what you build and one piece of work is usually enough to start."
+                body="Matching reads your bio and the projects you have added. A few sentences on what you build and one piece of work is usually enough to start."
                 action={
-                  <Link href="/dashboard/talent/profile" className={buttonStyles({ size: 'sm' })}>
-                    Fill in your profile
+                  <Link
+                    href="/dashboard/talent/profile#projects"
+                    className={buttonStyles({ variant: 'secondary' })}
+                  >
+                    Add a project
                   </Link>
                 }
               />
@@ -167,23 +184,16 @@ export default async function TalentDashboard() {
                 icon={Hourglass}
                 tone="pending"
                 title="Working out what fits"
-                body="Matches are calculated in the background and land here shortly — usually within the hour. Nothing is wrong; there is just nothing to show yet."
+                body="Matches are calculated in the background and usually land here within the hour. Nothing is wrong. There is just nothing to show yet."
               />
             </div>
           ) : feed.state === 'empty' ? (
             <div className="p-2">
               <EmptyState
                 className="border-0"
+                icon={SearchX}
                 title="No strong matches yet"
-                body="We’d rather show nothing than pad this with briefs that don’t fit. New jobs are posted regularly, and this updates on its own."
-                action={
-                  <Link
-                    href="/browse?type=jobs"
-                    className={buttonStyles({ variant: 'secondary', size: 'sm' })}
-                  >
-                    Browse everything
-                  </Link>
-                }
+                body="We would rather show nothing than pad this with jobs that do not fit. New jobs are posted regularly, and this list updates on its own."
               />
             </div>
           ) : (
@@ -195,16 +205,22 @@ export default async function TalentDashboard() {
           )}
         </Card>
 
-        <div className="space-y-6">
-          <Card className="p-5">
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 className="font-semibold tracking-tight">Your profile</h2>
-              {profile?.is_published && profile.slug && (
-                <Link href={`/talent/${profile.slug}`} className="prose-link text-sm">
-                  View public page
-                </Link>
-              )}
+        <div className="space-y-8">
+          <section
+            aria-labelledby="profile-status"
+            className="rounded-lg border border-border-base bg-surface-raised p-5"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+              <h2 id="profile-status" className="font-semibold tracking-tight">
+                Your profile
+              </h2>
+              <Badge tone={published ? 'success' : 'outline'}>{published ? 'Live' : 'Draft'}</Badge>
             </div>
+            <p className="mt-1 text-sm text-text-muted tabular-nums">
+              {todo === 0
+                ? 'Everything a client looks for is there.'
+                : `${todo} of ${checks.length} still to do.`}
+            </p>
             <ul className="mt-4 space-y-3 text-sm">
               {checks.map((c) => (
                 <li key={c.label} className="flex items-start gap-2.5">
@@ -221,28 +237,40 @@ export default async function TalentDashboard() {
                       className="mt-0.5 shrink-0 text-text-subtle"
                     />
                   )}
-                  <span className={c.done ? 'text-text-muted' : 'font-semibold'}>{c.label}</span>
+                  <span className={c.done ? 'text-text-muted' : 'font-semibold text-text'}>
+                    {c.label}
+                  </span>
                   <span className="sr-only">{c.done ? '(done)' : '(to do)'}</span>
                 </li>
               ))}
             </ul>
-            <Link
-              href="/dashboard/talent/profile"
-              className={buttonStyles({
-                variant: profile?.is_published ? 'secondary' : 'primary',
-                size: 'sm',
-                className: 'mt-5 w-full',
-              })}
-            >
-              {profile?.is_published ? 'Edit profile' : 'Finish your profile'}
-            </Link>
-          </Card>
+            <div className="mt-5 flex flex-col gap-2">
+              <Link
+                href="/dashboard/talent/profile"
+                className={buttonStyles({
+                  variant: published ? 'secondary' : 'primary',
+                  className: 'w-full',
+                })}
+              >
+                {published ? 'Edit profile' : 'Finish your profile'}
+              </Link>
+              {published && profile?.slug && (
+                <Link
+                  href={`/talent/${profile.slug}`}
+                  className="inline-flex h-10 items-center justify-center text-sm font-semibold text-link hover:underline"
+                >
+                  View public page
+                </Link>
+              )}
+            </div>
+          </section>
 
           {/* Matches and Saved left the top navigation when it was restructured around
               intentions rather than features. They are linked here instead, which is where
-              someone goes looking for them. */}
+              someone goes looking for them. A plain ruled list, not a card: these are links,
+              and a box would give them the weight of content. */}
           <nav aria-label="Quick links">
-            <Card className="divide-y divide-border-base">
+            <ul className="divide-y divide-border-base border-y border-border-base">
               {(
                 [
                   ['/dashboard/talent/matches', 'Your matches', 'Everything that fits, ranked'],
@@ -250,23 +278,24 @@ export default async function TalentDashboard() {
                   ['/dashboard/talent/portfolio', 'Portfolio', 'The projects clients read first'],
                 ] as const
               ).map(([href, label, hint]) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="group flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-fast ease-out first:rounded-t-lg last:rounded-b-lg hover:bg-surface-sunken/60"
-                >
-                  <span>
-                    <span className="block text-sm font-semibold">{label}</span>
-                    <span className="block text-xs text-text-subtle">{hint}</span>
-                  </span>
-                  <ArrowRight
-                    aria-hidden="true"
-                    size={16}
-                    className="text-text-subtle transition-transform duration-fast ease-out group-hover:translate-x-0.5"
-                  />
-                </Link>
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="group flex min-h-14 items-center justify-between gap-3 px-1 py-3 transition-colors duration-fast ease-out hover:bg-surface-sunken/60"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-text">{label}</span>
+                      <span className="block text-sm text-text-muted">{hint}</span>
+                    </span>
+                    <ArrowRight
+                      aria-hidden="true"
+                      size={16}
+                      className="shrink-0 text-text-subtle transition-transform duration-fast ease-out group-hover:translate-x-0.5 motion-reduce:transition-none"
+                    />
+                  </Link>
+                </li>
               ))}
-            </Card>
+            </ul>
           </nav>
         </div>
       </div>

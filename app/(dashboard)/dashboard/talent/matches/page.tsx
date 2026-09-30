@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: 'Matches' };
  * Briefs that fit what this developer has shipped.
  *
  * Reads the warm cache and never computes. Each state below says something different and
- * true — "not ready yet" is not the same as "nothing fits", and collapsing them into one
+ * true: "not ready yet" is not the same as "nothing fits", and collapsing them into one
  * empty state would tell someone their work matches nothing when the truth is the scheduler
  * has not reached them.
  */
@@ -40,18 +40,29 @@ export default async function MatchesPage() {
     <div className="max-w-3xl">
       <PageHeader
         title="Matches"
-        subtitle="Briefs that fit what you've shipped — ranked by how well, with the reason."
+        subtitle={
+          feed.state === 'ready' ? (
+            <span className="tabular-nums">
+              {feed.matches.length} {feed.matches.length === 1 ? 'job fits' : 'jobs fit'} what you
+              have shipped, best fit first, each with the reason.
+            </span>
+          ) : (
+            'Jobs that fit what you have shipped, best fit first, each with the reason.'
+          )
+        }
       />
 
       {!profile.is_published && (
         <p
           role="status"
-          className="mb-6 rounded-lg border border-warning/30 bg-warning-subtle px-4 py-3 text-sm text-pretty"
+          className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-warning/40 bg-warning-subtle px-4 py-3 text-sm text-text text-pretty"
         >
-          Your profile is a draft, so clients cannot find you. Matching still runs, but nobody sees
-          the result but you.{' '}
+          <span>
+            Your profile is a draft, so clients cannot find you. Matching still runs, but only you
+            see the results.
+          </span>
           <Link href="/dashboard/talent/profile" className="prose-link font-semibold">
-            Publish it
+            Publish your profile
           </Link>
         </p>
       )}
@@ -60,10 +71,10 @@ export default async function MatchesPage() {
         <EmptyState
           icon={Sparkles}
           title="Not enough to match on yet"
-          body="Matching reads your bio and the projects you've added. There isn't enough there yet to tell a client anything — a few sentences on what you build, and one piece of work, is usually enough to start."
+          body="Matching reads your bio and the projects you have added, and there is not enough there yet to tell a client anything. A few sentences on what you build and one piece of work is usually enough to start."
           action={
-            <Link href="/dashboard/talent/profile" className={buttonStyles({ size: 'sm' })}>
-              Fill in your profile
+            <Link href="/dashboard/talent/profile" className={buttonStyles()}>
+              Finish your profile
             </Link>
           }
         />
@@ -74,13 +85,10 @@ export default async function MatchesPage() {
           icon={Hourglass}
           tone="pending"
           title="Working out what fits"
-          body="Matches are calculated in the background and land here shortly — usually within the hour. Nothing is wrong; there is just nothing to show yet."
+          body="Matches are calculated in the background and usually land here within the hour. Nothing is wrong. There is just nothing to show yet."
           action={
-            <Link
-              href="/browse?type=jobs"
-              className={buttonStyles({ variant: 'secondary', size: 'sm' })}
-            >
-              Browse jobs meanwhile
+            <Link href="/browse?type=jobs" className={buttonStyles({ variant: 'secondary' })}>
+              Browse jobs
             </Link>
           }
         />
@@ -91,13 +99,10 @@ export default async function MatchesPage() {
         <EmptyState
           icon={SearchX}
           title="No strong matches yet"
-          body="We'd rather show nothing than pad this with briefs that don't fit. New jobs are posted regularly, and this updates on its own."
+          body="We would rather show nothing than pad this with jobs that do not fit. New jobs are posted regularly, and this list updates on its own."
           action={
-            <Link
-              href="/browse?type=jobs"
-              className={buttonStyles({ variant: 'secondary', size: 'sm' })}
-            >
-              Browse everything
+            <Link href="/browse?type=jobs" className={buttonStyles({ variant: 'secondary' })}>
+              Browse jobs
             </Link>
           }
         />

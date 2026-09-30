@@ -14,7 +14,7 @@ export type SkillOption = { id: string; name: string; category: string; aliases:
  * Free text is deliberately impossible: every tag resolves to a taxonomy row, which is what
  * keeps filters and matching clean (PROJECT.md §4.6). Search also matches ALIASES, so a client
  * typing "WhatsApp chatbot" finds `WhatsApp Business API` and someone typing "Golang" finds
- * `Go` — that alias bridge is the whole point of the taxonomy's alias policy.
+ * `Go`. That alias bridge is the whole point of the taxonomy's alias policy.
  *
  * A REAL COMBOBOX (WAI-ARIA 1.2). It was labelled `role="combobox"` before and behaved as a text
  * box followed by loose buttons: no arrow keys, and every result was its own tab stop. Now focus
@@ -29,14 +29,19 @@ export function SkillPicker({
   initial = [],
   name = 'skillId',
   max = 30,
+  errors,
 }: {
   options: SkillOption[];
   initial?: string[];
   name?: string;
   max?: number;
+  /** A field error from the server action, shown below the input and wired to it. */
+  errors?: string[];
 }) {
   const uid = useId();
   const listId = `${uid}-results`;
+  const errorId = `${uid}-error`;
+  const invalid = Boolean(errors?.length);
   const [selected, setSelected] = useState<string[]>(initial);
   const [query, setQuery] = useState('');
   const [highlight, setHighlight] = useState(0);
@@ -58,6 +63,7 @@ export function SkillPicker({
 
   const full = selected.length >= max;
   const open = results.length > 0;
+  const noMatch = query.trim().length > 0 && !open && !full;
   const active = open ? Math.min(highlight, results.length - 1) : -1;
 
   const add = (id: string) => {
@@ -94,29 +100,30 @@ export function SkillPicker({
   };
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {selected.map((id) => (
         <input key={id} type="hidden" name={name} value={id} />
       ))}
 
-      <label htmlFor={`${uid}-input`} className="block text-sm font-semibold">
+      <label htmlFor={`${uid}-input`} className="block text-sm font-semibold text-text">
         Skills
       </label>
 
       {selected.length > 0 && (
-        <ul aria-label="Selected skills" className="flex flex-wrap gap-1.5">
+        <ul aria-label="Selected skills" className="flex flex-wrap gap-2 pb-1">
           {selected.map((id) => {
             const skill = byId.get(id);
             return (
               <li key={id}>
+                {/* 32px to look at, 40px to tap: the ::after extends the hit area into the gap. */}
                 <button
                   type="button"
                   onClick={() => remove(id)}
-                  className="pressable inline-flex h-8 items-center gap-1.5 rounded-md bg-surface-inverse pr-2 pl-3 text-sm text-text-inverse hover:opacity-85"
+                  className="pressable relative inline-flex h-8 items-center gap-1.5 rounded-sm border border-transparent bg-primary-subtle pr-2 pl-3 text-sm font-medium text-primary after:absolute after:inset-x-0 after:-inset-y-1 hover:border-primary"
                 >
                   {skill?.name ?? id}
-                  <X aria-hidden="true" size={14} className="opacity-70" />
-                  <span className="sr-only">— remove</span>
+                  <X aria-hidden="true" size={14} />
+                  <span className="sr-only">(remove)</span>
                 </button>
               </li>
             );
@@ -138,7 +145,8 @@ export function SkillPicker({
           aria-controls={listId}
           aria-autocomplete="list"
           aria-activedescendant={active >= 0 ? `${uid}-opt-${active}` : undefined}
-          aria-describedby={`${uid}-count`}
+          aria-invalid={invalid}
+          aria-describedby={invalid ? `${errorId} ${uid}-count` : `${uid}-count`}
           autoComplete="off"
           autoCapitalize="none"
           spellCheck={false}
@@ -149,11 +157,13 @@ export function SkillPicker({
             setHighlight(0);
           }}
           onKeyDown={onKeyDown}
-          placeholder={
-            full ? `That's the maximum of ${max}` : 'Search — try "n8n", "Golang", "WhatsApp"'
-          }
+          placeholder={full ? `That's the maximum of ${max}` : 'Try "n8n", "Golang" or "WhatsApp"'}
           disabled={full}
-          className={cn(controlStyles, 'h-11 border-control/70 pr-3.5 pl-10 hover:border-control')}
+          className={cn(
+            controlStyles,
+            'h-11 pr-3.5 pl-10',
+            invalid ? 'border-danger' : 'border-control hover:border-text-subtle',
+          )}
         />
 
         {open && (
@@ -177,11 +187,11 @@ export function SkillPicker({
                 }}
                 onMouseEnter={() => setHighlight(i)}
                 className={cn(
-                  'flex cursor-pointer items-baseline justify-between gap-3 rounded-md px-3 py-2.5 text-sm',
+                  'flex min-h-10 cursor-pointer items-center justify-between gap-3 rounded-md px-3 py-2 text-sm text-text',
                   i === active ? 'bg-surface-sunken' : '',
                 )}
               >
-                <span>{o.name}</span>
+                <span className="min-w-0">{o.name}</span>
                 <span className="shrink-0 text-xs text-text-subtle">{o.category}</span>
               </li>
             ))}
@@ -189,11 +199,22 @@ export function SkillPicker({
         )}
       </div>
 
+      {invalid && (
+        <p id={errorId} className="text-sm text-danger">
+          {errors![0]}
+        </p>
+      )}
+      {/* The empty result, said rather than shown as a list that silently did not open. */}
+      {noMatch && (
+        <p className="text-sm text-text-muted">
+          No skill matches &ldquo;{query.trim()}&rdquo;. Try another name for it.
+        </p>
+      )}
       <p id={`${uid}-count`} className="text-sm text-text-subtle">
-        {selected.length}/{max} · pick the ones you would actually take work in.
+        {selected.length} of {max} selected. Pick the ones you would actually take work in.
       </p>
       <p aria-live="polite" className="sr-only">
-        {announcement}
+        {noMatch ? 'No matching skills.' : announcement}
       </p>
     </div>
   );

@@ -42,7 +42,7 @@ export function NavLinks({ items, unread }: { items: NavItem[]; unread: number }
               'relative flex h-10 items-center justify-center gap-3 rounded-md text-sm transition-colors duration-fast ease-out lg:justify-start lg:px-3',
               '[&_svg]:size-[1.125rem] [&_svg]:shrink-0',
               isActive
-                ? 'bg-surface-sunken font-semibold text-text'
+                ? 'bg-primary-subtle font-semibold text-primary'
                 : 'text-text-muted hover:bg-surface-sunken hover:text-text',
             )}
           >

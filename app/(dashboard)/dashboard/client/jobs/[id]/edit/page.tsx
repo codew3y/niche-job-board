@@ -49,10 +49,10 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="max-w-3xl">
-      <nav aria-label="Breadcrumb" className="mb-5 text-sm">
+      <nav aria-label="Breadcrumb" className="mb-4">
         <Link
           href="/dashboard/client/jobs"
-          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+          className="-ml-1 inline-flex min-h-10 items-center gap-1.5 rounded-md px-1 text-sm text-text-muted hover:text-text"
         >
           <ArrowLeft aria-hidden="true" size={15} /> All jobs
         </Link>
@@ -61,11 +61,11 @@ export default async function EditJobPage({ params }: { params: Promise<{ id: st
         title="Edit job"
         subtitle={
           job.status === 'draft' ? (
-            'Still a draft — nobody can see it yet.'
+            'Still a draft. Nobody can see it yet.'
           ) : (
             <>
               Live at{' '}
-              <Link href={`/jobs/${job.slug}`} className="prose-link font-semibold">
+              <Link href={`/jobs/${job.slug}`} className="prose-link font-mono text-sm break-all">
                 /jobs/{job.slug}
               </Link>
             </>

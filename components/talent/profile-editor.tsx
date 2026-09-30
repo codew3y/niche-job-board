@@ -37,7 +37,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
         required
         defaultValue={str(profile, 'headline')}
         errors={fields?.headline}
-        placeholder="Full-stack developer — Next.js and Stripe"
+        placeholder="Full-stack developer, Next.js and Stripe"
       />
 
       <div className="grid gap-5 sm:grid-cols-[1fr_8rem]">
@@ -71,7 +71,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
         rows={7}
         defaultValue={str(profile, 'bio')}
         errors={fields?.bio}
-        hint="At least 120 characters — this is the text matching reads."
+        hint="At least 120 characters. This is the text matching reads."
       />
 
       <LinksPreview
@@ -95,7 +95,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
           ))}
         </SelectField>
         <Field
-          label="Years"
+          label="Years of experience"
           name="yearsExperience"
           type="number"
           inputMode="numeric"
@@ -114,7 +114,14 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
       {state?.ok === false && <FormError>{state.message}</FormError>}
 
       <div className="flex flex-wrap items-center gap-4 border-t border-border-base pt-5">
-        <SubmitButton pendingLabel="Saving…">Save profile</SubmitButton>
+        {/* Primary once the profile is live. While it is a draft, Publish (above) is the page's
+            one primary action, so this steps down to secondary. */}
+        <SubmitButton
+          variant={profile.is_published ? 'primary' : 'secondary'}
+          pendingLabel="Saving…"
+        >
+          Save profile
+        </SubmitButton>
         {state?.ok && <FormStatus>Saved.</FormStatus>}
       </div>
     </form>

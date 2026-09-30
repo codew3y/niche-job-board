@@ -20,7 +20,7 @@ const INLINE = new Set(['companyName', 'website', 'industry', 'about']);
 /**
  * Editing the company a client posts under.
  *
- * The company name is the only identity a client has here — it appears on every job card,
+ * The company name is the only identity a client has here: it appears on every job card,
  * every public job page and in the other party's inbox.
  */
 export function CompanyForm({ company }: { company: Company }) {
@@ -39,7 +39,7 @@ export function CompanyForm({ company }: { company: Company }) {
         <FormError>
           {state.message}
           {homeless.length > 0 && (
-            <ul className="mt-1 list-disc pl-5">
+            <ul className="mt-1.5 list-disc space-y-0.5 pl-5">
               {homeless.map(([key, messages]) => (
                 <li key={key}>{messages[0]}</li>
               ))}
@@ -58,7 +58,7 @@ export function CompanyForm({ company }: { company: Company }) {
         hint="Shown on every job you post."
       />
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field
           label="Website"
           name="website"

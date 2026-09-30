@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: 'Roles' };
 /**
  * Add the second role to an existing account (§6, DoD "dual-role gate").
  *
- * Roles are separate profile tables linked to one auth user, never a column on the user —
+ * Roles are separate profile tables linked to one auth user, never a column on the user,
  * which is exactly what makes this page a small feature rather than a data migration.
  */
 export default async function RolesPage() {
@@ -31,12 +31,12 @@ export default async function RolesPage() {
 
   return (
     <div className="max-w-3xl">
-      <nav aria-label="Breadcrumb" className="mb-5 text-sm">
+      <nav aria-label="Breadcrumb" className="mb-4 text-sm">
         <Link
           href="/dashboard/settings"
-          className="inline-flex items-center gap-1 text-text-muted hover:text-text"
+          className="-ml-2 inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 font-medium text-text-muted hover:bg-surface-sunken hover:text-text"
         >
-          <ArrowLeft aria-hidden="true" size={15} /> Settings
+          <ArrowLeft aria-hidden="true" size={16} /> Settings
         </Link>
       </nav>
       <PageHeader

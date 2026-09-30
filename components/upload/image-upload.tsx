@@ -4,7 +4,7 @@ import { useId, useRef, useState } from 'react';
 
 import { ImagePlus } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button, buttonStyles } from '@/components/ui/button';
 import { controlStyles } from '@/components/ui/field';
 import { cn } from '@/lib/ui/cn';
 import { PROJECT_MEDIA_BUCKET } from '@/lib/schemas/upload';
@@ -23,7 +23,7 @@ import { resizeImage, storagePath } from '@/lib/upload/resize';
  * no security.
  *
  * ALT TEXT IS COLLECTED BEFORE THE UPLOAD, not after. `item_media.alt_text` is NOT NULL and
- * that is deliberate (§9) — an "add alt text later" flow produces images with no alt text,
+ * that is deliberate (§9): an "add alt text later" flow produces images with no alt text,
  * because nobody comes back. The file is chosen, described, and only then sent.
  */
 
@@ -144,10 +144,10 @@ export function ImageUpload({
             if (file) void accept(file);
           }}
           className={cn(
-            'rounded-lg border-2 border-dashed p-6 text-center transition-colors duration-fast ease-out',
+            'rounded-lg border-2 border-dashed p-5 text-center transition-colors duration-fast ease-out sm:p-6',
             // A ring on the drop zone while its (visually hidden) file input has keyboard focus.
             'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus',
-            dragging ? 'border-accent bg-accent-subtle' : 'border-border-strong',
+            dragging ? 'border-accent bg-accent-subtle' : 'border-border-strong bg-surface-raised',
           )}
         >
           {/*
@@ -166,29 +166,44 @@ export function ImageUpload({
               if (file) void accept(file);
             }}
           />
-          <ImagePlus aria-hidden="true" className="mx-auto mb-2 size-6 text-text-subtle" />
-          <label htmlFor={inputId} className="prose-link cursor-pointer text-sm font-semibold">
+          <span
+            aria-hidden="true"
+            className="mx-auto mb-3 grid size-10 place-items-center rounded-md bg-primary-subtle text-primary"
+          >
+            <ImagePlus size={20} />
+          </span>
+          {/* Styled as a button, and still the file input's label: that is what makes the zone
+              keyboard-reachable and what a screen reader announces. */}
+          <label
+            htmlFor={inputId}
+            className={buttonStyles({
+              variant: 'secondary',
+              size: 'sm',
+              className: 'h-10 cursor-pointer',
+            })}
+          >
             {label}
           </label>
-          <p className="mt-1 text-sm text-text-muted">
-            or drop one here — JPEG, PNG, WebP or AVIF, resized automatically
+          <p className="mt-2 text-sm text-text-muted text-pretty">
+            Or drop one here. JPEG, PNG, WebP or AVIF, resized automatically.
           </p>
         </div>
       )}
 
       {stage === 'describing' && pending && (
-        <div className="space-y-3 rounded-lg border border-border-base p-4">
-          <div className="flex gap-4">
+        <div className="space-y-4 rounded-lg border border-border-base bg-surface-raised p-4">
+          {/* Phone: the preview above the description, so the field keeps its full width. */}
+          <div className="flex flex-col gap-4 sm:flex-row">
             {/* eslint-disable-next-line @next/next/no-img-element -- a blob: preview of a
                 local file, which next/image cannot take and does not need to optimise. */}
             <img
               src={pending.preview}
               alt=""
-              className="size-24 shrink-0 rounded-md border border-border-base object-cover"
+              className="aspect-video w-full shrink-0 rounded-lg border border-border-base object-cover sm:aspect-square sm:size-24 sm:rounded-md"
             />
             <div className="min-w-0 flex-1 space-y-1.5">
-              <label htmlFor={`${inputId}-alt`} className="block text-sm font-semibold">
-                Describe this image <span className="text-danger">*</span>
+              <label htmlFor={`${inputId}-alt`} className="block text-sm font-semibold text-text">
+                Describe this image
               </label>
               <textarea
                 id={`${inputId}-alt`}
@@ -197,27 +212,33 @@ export function ImageUpload({
                 rows={2}
                 maxLength={300}
                 required
-                aria-describedby={`${inputId}-alt-hint`}
+                aria-invalid={Boolean(message)}
+                aria-describedby={message ? `${inputId}-alt-error` : `${inputId}-alt-hint`}
                 placeholder="The checkout screen, showing the saved-card step"
-                className={cn(controlStyles, 'border-control/70 px-3 py-2')}
+                className={cn(
+                  controlStyles,
+                  'min-h-20 px-3.5 py-2.5 leading-relaxed',
+                  message ? 'border-danger' : 'border-control hover:border-text-subtle',
+                )}
               />
-              <p id={`${inputId}-alt-hint`} className="text-xs text-text-muted">
-                Required. What someone would miss if the image did not load.
-              </p>
+              {/* The error replaces the hint, as in every other field (components/ui/field). */}
+              {message ? (
+                <p id={`${inputId}-alt-error`} role="alert" className="text-sm text-danger">
+                  {message}
+                </p>
+              ) : (
+                <p id={`${inputId}-alt-hint`} className="text-sm text-text-subtle">
+                  Required. What someone would miss if the image did not load.
+                </p>
+              )}
             </div>
           </div>
 
-          {message && (
-            <p role="alert" className="text-sm text-danger">
-              {message}
-            </p>
-          )}
-
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={reset}>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <Button type="button" variant="secondary" size="sm" className="h-10" onClick={reset}>
               Cancel
             </Button>
-            <Button type="button" size="sm" onClick={() => void upload()}>
+            <Button type="button" size="sm" className="h-10" onClick={() => void upload()}>
               Add image
             </Button>
           </div>
@@ -230,7 +251,8 @@ export function ImageUpload({
           <progress
             value={progress}
             max={100}
-            className="h-1.5 w-full appearance-none overflow-hidden rounded-full [&::-moz-progress-bar]:bg-accent [&::-webkit-progress-bar]:bg-surface-sunken [&::-webkit-progress-value]:bg-accent"
+            aria-label="Upload progress"
+            className="h-1.5 w-full appearance-none overflow-hidden rounded-sm [&::-moz-progress-bar]:bg-accent [&::-webkit-progress-bar]:bg-surface-sunken [&::-webkit-progress-value]:bg-accent"
           >
             {progress}%
           </progress>
@@ -243,7 +265,11 @@ export function ImageUpload({
       {stage === 'error' && (
         <p role="alert" className="text-sm text-danger">
           {message}{' '}
-          <button type="button" onClick={reset} className="underline">
+          <button
+            type="button"
+            onClick={reset}
+            className="inline-flex min-h-10 items-center rounded-md font-semibold underline underline-offset-4"
+          >
             Try again
           </button>
         </p>

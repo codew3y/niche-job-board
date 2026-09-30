@@ -19,7 +19,7 @@ type Item = {
 };
 
 /**
- * Reorderable project list — drag OR buttons, with the buttons as the primary mechanism.
+ * Reorderable project list: drag OR buttons, with the buttons as the primary mechanism.
  *
  * The plan flags drag-reorder as the component most likely to skip its keyboard alternative
  * (§9, docs/components.md), so this was built keyboard-first and drag was added afterwards.
@@ -136,7 +136,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
               setOverIndex(null);
             }}
             className={cn(
-              'rounded-lg border bg-surface-raised p-4 transition-[border-color,background-color,opacity] duration-fast ease-out sm:p-5',
+              'rounded-lg border bg-surface-raised p-4 shadow-xs transition-[border-color,background-color,opacity] duration-fast ease-out sm:p-5',
               dragIndex === i && 'opacity-50',
               overIndex === i && dragIndex !== i
                 ? 'border-accent bg-accent-subtle'
@@ -158,16 +158,19 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
                 <GripVertical size={18} />
               </span>
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold">{item.title}</h3>
-                <p className="mt-0.5 line-clamp-2 text-sm text-text-muted">{item.description}</p>
+                <h3 className="font-semibold text-balance text-text">{item.title}</h3>
+                <p className="mt-0.5 line-clamp-2 text-sm text-text-muted text-pretty">
+                  {item.description}
+                </p>
                 {item.tech_stack.length > 0 && (
-                  <p className="mt-1.5 text-xs text-text-subtle">{item.tech_stack.join(' · ')}</p>
+                  <p className="mt-1.5 text-sm text-text-subtle">{item.tech_stack.join(', ')}</p>
                 )}
               </div>
-              <div className="flex shrink-0 items-center gap-0.5">
+              <div className="-mt-1 -mr-1 flex shrink-0 items-center gap-0.5">
                 <Button
                   variant="ghost"
                   size="icon-sm"
+                  className="max-sm:size-10"
                   onClick={() => move(i, -1)}
                   disabled={i === 0}
                   aria-label={`Move ${item.title} up`}
@@ -177,6 +180,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
                 <Button
                   variant="ghost"
                   size="icon-sm"
+                  className="max-sm:size-10"
                   onClick={() => move(i, 1)}
                   disabled={i === order.length - 1}
                   aria-label={`Move ${item.title} down`}
@@ -186,14 +190,24 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
               </div>
             </div>
 
-            <div className="mt-3 flex gap-1 border-t border-border-base pt-3">
-              <Button variant="ghost" size="sm" onClick={() => onEdit(item.id)}>
+            <div className="mt-3 -mb-1 flex gap-1 border-t border-border-base pt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="max-sm:h-10"
+                onClick={() => onEdit(item.id)}
+              >
                 <Pencil aria-hidden="true" />
                 Edit
               </Button>
               <form action={deleteItem}>
                 <input type="hidden" name="itemId" value={item.id} />
-                <SubmitButton variant="danger-ghost" size="sm" pendingLabel="Deleting…">
+                <SubmitButton
+                  variant="danger-ghost"
+                  size="sm"
+                  className="max-sm:h-10"
+                  pendingLabel="Deleting…"
+                >
                   <Trash2 aria-hidden="true" />
                   Delete
                 </SubmitButton>
@@ -217,13 +231,13 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
           {order.map((item) => (
             <input key={item.id} type="hidden" name="itemId" value={item.id} />
           ))}
-          <span role="status" className="mr-auto text-sm text-text-muted">
-            Order changed
+          <span role="status" className="mr-auto text-sm font-medium text-text">
+            Order changed. Save to keep it.
           </span>
-          <Button variant="ghost" size="sm" onClick={() => setOrder(items)}>
+          <Button variant="ghost" size="sm" className="max-sm:h-10" onClick={() => setOrder(items)}>
             Reset
           </Button>
-          <SubmitButton size="sm" pendingLabel="Saving…">
+          <SubmitButton size="sm" className="max-sm:h-10" pendingLabel="Saving…">
             Save order
           </SubmitButton>
         </form>

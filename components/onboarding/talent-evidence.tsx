@@ -3,6 +3,7 @@
 import { CheckCircle2, Info } from 'lucide-react';
 import { useActionState } from 'react';
 
+import { TagList } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Field, FormError, TextareaField } from '@/components/ui/field';
 import { SubmitButton } from '@/components/ui/submit-button';
@@ -21,7 +22,7 @@ type Profile = Record<string, unknown> | null;
 const str = (p: Profile, k: string) => (p?.[k] as string | null) ?? '';
 
 /**
- * The evidence step — the heart of ADR-004.
+ * The evidence step: the heart of ADR-004.
  *
  * Two routes to the same place: link an external site, or add projects here. Both are shown at
  * once rather than making the user choose a path up front, because many developers have a site
@@ -50,26 +51,26 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
     <div className="space-y-10">
       <div
         className={cn(
-          'flex gap-3 rounded-lg border p-4 text-sm',
-          enough ? 'border-success/30 bg-success-subtle' : 'border-border-base bg-surface-sunken',
+          'flex gap-3 rounded-lg border p-4 text-sm text-text',
+          enough ? 'border-success/30 bg-success-subtle' : 'border-info/30 bg-info-subtle',
         )}
       >
         {enough ? (
           <CheckCircle2 aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-success" />
         ) : (
-          <Info aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-text-subtle" />
+          <Info aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-info" />
         )}
         {enough ? (
           <p>
             <strong className="font-semibold">You have what you need to publish.</strong>{' '}
             {hasSite && items.length === 0
-              ? 'Adding two or three projects here would still improve your matches — we can read these, but we never fetch your site.'
+              ? 'Adding two or three projects here would still improve your matches. We can read these, but we never fetch your site.'
               : 'Add more projects any time.'}
           </p>
         ) : (
           <p>
             Link your portfolio site <strong className="font-semibold">or</strong> add two projects
-            below — either gives a client something to judge.{' '}
+            below. Either gives a client something to judge.{' '}
             {items.length === 1 && 'One more project will do it.'}
           </p>
         )}
@@ -87,7 +88,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
             defaultValue={str(profile, 'website_url')}
             errors={linkFields?.websiteUrl}
           />
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <Field
               label="GitHub"
               name="githubUrl"
@@ -115,26 +116,29 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
         <div>
           <h2 className="text-lg font-semibold tracking-tight">Projects</h2>
           <p className="mt-1 text-sm text-text-muted text-pretty">
-            These are what matching reads most closely — what you did and what changed because of it
-            matters more than the stack list.
+            Matching reads these most closely. What you did, and what changed because of it, matters
+            more than the stack list.
           </p>
         </div>
 
         {items.length > 0 && (
-          <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
+          <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised shadow-xs">
             {items.map((item) => (
-              <li key={item.id} className="flex items-start justify-between gap-4 p-4">
+              <li key={item.id} className="flex items-start justify-between gap-4 p-4 sm:p-5">
                 <div className="min-w-0">
-                  <p className="font-semibold">{item.title}</p>
+                  <p className="font-semibold text-text">{item.title}</p>
                   <p className="mt-0.5 line-clamp-2 text-sm text-text-muted">{item.description}</p>
-                  {item.tech_stack.length > 0 && (
-                    <p className="mt-1.5 text-xs text-text-subtle">{item.tech_stack.join(' · ')}</p>
-                  )}
+                  <TagList
+                    className="mt-2.5"
+                    label={`Tech stack for ${item.title}`}
+                    tags={item.tech_stack.map((name) => ({ name }))}
+                  />
                 </div>
-                <form action={deletePortfolioItem}>
+                <form action={deletePortfolioItem} className="shrink-0">
                   <input type="hidden" name="id" value={item.id} />
-                  <Button type="submit" variant="danger-ghost" size="sm">
+                  <Button type="submit" variant="danger-ghost" size="sm" className="h-10">
                     Remove
+                    <span className="sr-only"> {item.title}</span>
                   </Button>
                 </form>
               </li>
@@ -144,10 +148,10 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
 
         <form
           action={itemAction}
-          className="space-y-5 rounded-lg border border-dashed border-border-strong p-5 sm:p-7"
+          className="space-y-5 rounded-lg border border-dashed border-border-strong bg-surface-raised/50 p-5 sm:p-7"
           noValidate
         >
-          <p className="text-sm font-semibold text-text-muted">Add a project</p>
+          <h3 className="font-semibold text-text">Add a project</h3>
           <Field
             label="Project title"
             name="title"
@@ -180,7 +184,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
           {itemState?.ok === false && !itemState.fields && (
             <FormError>{itemState.message}</FormError>
           )}
-          <SubmitButton variant="secondary" pendingLabel="Adding…">
+          <SubmitButton variant="secondary" className="w-full sm:w-auto" pendingLabel="Adding…">
             Add project
           </SubmitButton>
         </form>

@@ -4,6 +4,9 @@
  * The currency is always shown. This project spans CHF, EUR, GBP and USD, and §7 is explicit
  * that entities and currencies must never be conflated — a bare "2,000–4,000" is ambiguous
  * in a way that matters to someone deciding whether to apply.
+ *
+ * Ranges use a plain hyphen, never an en dash: the copy rules ban both dash characters from
+ * anything a visitor reads.
  */
 export function formatRange(
   min: string | number | null,
@@ -22,7 +25,7 @@ export function formatRange(
       maximumFractionDigits: 0,
     }).format(n);
 
-  if (lo !== null && hi !== null) return `${fmt(lo)}–${fmt(hi)}${suffix}`;
+  if (lo !== null && hi !== null) return `${fmt(lo)}-${fmt(hi)}${suffix}`;
   if (lo !== null) return `From ${fmt(lo)}${suffix}`;
   return `Up to ${fmt(hi!)}${suffix}`;
 }

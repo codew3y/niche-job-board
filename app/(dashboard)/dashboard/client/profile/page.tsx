@@ -6,7 +6,7 @@ import { CompanyForm } from '@/components/client/company-form';
 import { ExternalLink } from '@/components/shared/external-link';
 import { Avatar } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
-import { PageHeader } from '@/components/ui/page-header';
+import { PageHeader, SectionHeading } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Company profile' };
@@ -17,6 +17,10 @@ export const metadata: Metadata = { title: 'Company profile' };
  * This page did not exist: the name could be set once during onboarding and never changed,
  * while appearing on every job post. "Profile" in the navigation had nowhere to point for a
  * client, which is why the nav had none.
+ *
+ * Two parts: the preview (a card, because it stands for a thing that appears elsewhere) and the
+ * form (plain, on the page). Phone: stacked, preview first. From lg: the form on the left and
+ * the preview beside it, sticky, so an edit and its result are on screen together.
  */
 export default async function ClientProfilePage() {
   const supabase = await createClient();
@@ -34,59 +38,78 @@ export default async function ClientProfilePage() {
   if (!company) notFound();
 
   return (
-    <div className="max-w-3xl space-y-8">
+    <div>
       <PageHeader
         title="Company profile"
         subtitle="What a developer sees before deciding whether to apply."
       />
-      {/* "View profile" in the profile menu lands here: the company as it appears on a job
-          page. There is no separate public client page, so this is the honest preview. */}
-      <Card id="preview" className="scroll-mt-8 p-5 sm:p-6">
-        <p className="text-sm text-text-subtle">How developers see you</p>
-        <div className="mt-3 flex items-start gap-4">
-          <Avatar name={company.company_name} />
-          <div className="min-w-0">
-            <p className="font-semibold">{company.company_name}</p>
-            {(company.industry || company.website) && (
-              <p className="text-sm text-text-subtle">
-                {company.industry}
-                {company.industry && company.website ? ' · ' : ''}
-                <ExternalLink href={company.website}>
-                  {company.website?.replace(/^https:\/\//, '')}
+
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-start">
+        {/* "View profile" in the profile menu lands here: the company as it appears on a job
+            page. There is no separate public client page, so this is the honest preview. */}
+        <section
+          id="preview"
+          aria-labelledby="preview-heading"
+          className="scroll-mt-8 lg:sticky lg:top-8 lg:col-start-2 lg:row-start-1"
+        >
+          <h2 id="preview-heading" className="mb-3 text-sm font-semibold text-text-muted">
+            How developers see you
+          </h2>
+          <Card className="p-5">
+            <div className="flex items-center gap-3">
+              <Avatar name={company.company_name} />
+              <div className="min-w-0">
+                <p className="font-semibold break-words">{company.company_name}</p>
+                {company.industry && <p className="text-sm text-text-subtle">{company.industry}</p>}
+              </div>
+            </div>
+            {company.about ? (
+              <p className="mt-4 text-sm leading-relaxed whitespace-pre-line text-text-muted text-pretty">
+                {company.about}
+              </p>
+            ) : (
+              <p className="mt-4 text-sm text-text-subtle text-pretty">
+                No description yet. Developers see only your name until you add one.
+              </p>
+            )}
+            {company.website && (
+              <p className="mt-3 text-sm break-all">
+                <ExternalLink href={company.website} className="font-semibold">
+                  {company.website.replace(/^https:\/\//, '')}
                 </ExternalLink>
               </p>
             )}
-            {company.about && (
-              <p className="mt-2 whitespace-pre-line text-text-muted text-pretty">
-                {company.about}
-              </p>
-            )}
+          </Card>
+        </section>
+
+        <section
+          id="edit"
+          aria-labelledby="edit-heading"
+          className="scroll-mt-8 lg:col-start-1 lg:row-start-1"
+        >
+          <SectionHeading id="edit-heading" title="Details" />
+          <CompanyForm company={company} />
+
+          <div className="mt-10 space-y-2 border-t border-border-base pt-6 text-sm text-text-muted">
+            <p>
+              Looking for your saved developers?{' '}
+              <Link href="/dashboard/client/saved" className="prose-link font-semibold">
+                They&rsquo;re here
+              </Link>
+              .
+            </p>
+            {/* /privacy tells people they can delete their account "from settings", so settings
+                has to be reachable from the page they are most likely to be on when they go
+                looking. */}
+            <p>
+              Roles, sign-in address, appearance and deleting your account are in{' '}
+              <Link href="/dashboard/settings" className="prose-link font-semibold">
+                settings
+              </Link>
+              .
+            </p>
           </div>
-        </div>
-      </Card>
-
-      <Card id="edit" className="scroll-mt-8 p-5 sm:p-6">
-        <CompanyForm company={company} />
-      </Card>
-
-      <div className="space-y-2 text-sm text-text-muted">
-        <p>
-          Looking for your saved developers?{' '}
-          <Link href="/dashboard/client/saved" className="prose-link font-semibold">
-            They&rsquo;re here
-          </Link>
-          .
-        </p>
-        {/* /privacy tells people they can delete their account "from settings", so settings
-            has to be reachable from the page they are most likely to be on when they go
-            looking. */}
-        <p>
-          Roles, sign-in address, appearance and deleting your account are in{' '}
-          <Link href="/dashboard/settings" className="prose-link font-semibold">
-            settings
-          </Link>
-          .
-        </p>
+        </section>
       </div>
     </div>
   );

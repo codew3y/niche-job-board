@@ -1,7 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { FeatureGrid, NumberedSteps, PageCta, PageIntro } from '@/components/site/page-parts';
+import {
+  FeatureBento,
+  FeatureList,
+  NumberedSteps,
+  PageCta,
+  PageIntro,
+} from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
 
 export const metadata: Metadata = {
@@ -12,14 +18,17 @@ export const metadata: Metadata = {
 };
 
 /**
- * For Freelancers. The three steps are restored verbatim from the "For developers" column of the
- * old landing page (b9fe7d4). Everything else describes what the product actually does today —
- * see the profile editor (app/(dashboard)/dashboard/talent/profile) and ADR-008.
+ * For Freelancers. The three steps come from the "For developers" column of the old landing
+ * page (b9fe7d4). Everything else describes what the product actually does today: see the
+ * profile editor (app/(dashboard)/dashboard/talent/profile) and ADR-008.
+ *
+ * Five sections, five layout families: split intro with a photograph, numbered list, bento,
+ * side-heading list, closing panel. One eyebrow (the intro).
  */
 const STEPS = [
   [
     'Describe what you built',
-    'A headline, a bio and a couple of projects — or just a link to your site.',
+    'A headline, a bio and a couple of projects. Or just a link to your site.',
   ],
   ['Get briefs that fit', 'Ranked against the work you have shipped, each with the reason.'],
   ['Apply with the evidence', 'Clients see the projects behind your note, not a keyword score.'],
@@ -32,7 +41,7 @@ const PROFILE = [
   },
   {
     title: 'Projects',
-    body: 'Each project gets a title, a short description, as many links as it needs — repo, live site, write-up — and photos with descriptions for screen-reader users.',
+    body: 'Each project gets a title, a short description, as many links as it needs (repo, live site, write-up) and photos with descriptions for screen-reader users.',
   },
   {
     title: 'Skills from one shared list',
@@ -44,7 +53,7 @@ const PROFILE = [
   },
   {
     title: 'Portfolio site and linked accounts',
-    body: 'Link your own site, GitHub and LinkedIn. They appear as links on your profile — linked, never scraped.',
+    body: 'Link your own site, GitHub and LinkedIn. They appear as links on your profile. We link to them and never scrape them.',
   },
   {
     title: 'Publish whenever you like',
@@ -59,7 +68,7 @@ const MATCHING = [
   },
   {
     title: 'Your own score, and a reason',
-    body: 'On your matches you see how well each brief fits you and one sentence explaining why — including where it falls short.',
+    body: 'On your matches you see how well each brief fits you and one sentence explaining why, including where it falls short.',
   },
   {
     title: 'Apply, track, message',
@@ -73,29 +82,31 @@ export default function ForFreelancersPage() {
       <PageIntro
         eyebrow="For freelancers"
         title="Get hired for what you have built"
-        lead="techselect is a job board for software, web and automation work. Your profile is the work itself — projects, links and photos — and matching reads it to find briefs that actually fit."
+        lead="Your profile is the work itself: projects, links and photos. Matching reads it to find briefs that fit."
+        image={{
+          src: '/images/how-it-works/02-build-profile.jpg',
+          alt: 'A hand typing on a laptop showing code, beside a mug and a potted plant',
+        }}
       >
         <Link href="/signup?role=talent" className={buttonStyles({ size: 'lg' })}>
-          Create your profile
+          Create a profile
         </Link>
-        <Link href="/how-it-works" className="prose-link font-semibold">
+        <Link href="/how-it-works" className={buttonStyles({ variant: 'secondary', size: 'lg' })}>
           How it works
         </Link>
       </PageIntro>
 
-      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <h2 className="text-display-sm">Three steps</h2>
-        <div className="mt-6 max-w-3xl">
-          <NumberedSteps steps={STEPS} />
-        </div>
-      </section>
-
-      <FeatureGrid heading="What goes into a profile" items={PROFILE} />
-      <FeatureGrid heading="How you get matched" items={MATCHING} />
+      <NumberedSteps heading="Three steps to your first match" steps={STEPS} />
+      <FeatureBento heading="What goes into a profile" items={PROFILE} />
+      <FeatureList
+        heading="How you get matched"
+        lead="Matching reads what you wrote about your work, not a list of keywords."
+        items={MATCHING}
+      />
 
       <PageCta
         title="No fees and nothing to qualify for. Start with a title and one project."
-        primary={{ href: '/signup?role=talent', label: 'Sign up as a freelancer' }}
+        primary={{ href: '/signup?role=talent', label: 'Create a profile' }}
         secondary={{ href: '/for-clients', label: 'Hiring instead?' }}
       />
     </>

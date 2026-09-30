@@ -7,7 +7,7 @@ import { StatusBadge } from '@/components/application/status-badge';
 import { StatusTimeline } from '@/components/application/status-timeline';
 import { ActionForm } from '@/components/ui/action-form';
 import { buttonStyles } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
@@ -63,7 +63,7 @@ export default async function ApplicationsPage() {
 
   const rows = (data ?? []) as unknown as Row[];
 
-  // One query for every timeline rather than one per row — the N+1 the plan says to keep
+  // One query for every timeline rather than one per row: the N+1 the plan says to keep
   // out of the codebase rather than audit back out in Phase 5.
   const { data: events } = rows.length
     ? await supabase
@@ -89,13 +89,13 @@ export default async function ApplicationsPage() {
   if (rows.length === 0) {
     return (
       <div className="max-w-3xl">
-        <PageHeader title="Applications" subtitle="Where each one stands." />
+        <PageHeader title="Applications" subtitle="Where each application stands." />
         <EmptyState
           icon={Send}
           title="No applications yet"
           body="Applications you send appear here, with every status change as it happens."
           action={
-            <Link href="/browse?type=jobs" className={buttonStyles({ size: 'sm' })}>
+            <Link href="/browse?type=jobs" className={buttonStyles()}>
               Browse jobs
             </Link>
           }
@@ -108,10 +108,17 @@ export default async function ApplicationsPage() {
     <div className="max-w-3xl">
       <PageHeader
         title="Applications"
-        subtitle={`${rows.length} ${rows.length === 1 ? 'application' : 'applications'} — every status change, as it happens.`}
+        subtitle={
+          <span className="tabular-nums">
+            {rows.length} {rows.length === 1 ? 'application' : 'applications'}, with every status
+            change as it happens.
+          </span>
+        }
       />
 
-      <ul className="space-y-3">
+      {/* One ruled panel, a row per application: they are the same kind of thing, so a card
+          each would add weight without adding hierarchy. */}
+      <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
         {rows.map((row) => {
           const job = row.jobs;
           const budget = job
@@ -127,47 +134,55 @@ export default async function ApplicationsPage() {
               row.status as keyof typeof allowedStatusTransitions.talent
             ] as readonly string[]
           ).includes('withdrawn');
+          const closed = Boolean(job && job.status !== 'open');
 
           return (
-            <li key={row.id}>
-              <Card className="p-5">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="font-semibold text-balance">
-                      {job ? (
-                        <Link href={`/jobs/${job.slug}`} className="hover:underline">
-                          {job.title}
-                        </Link>
-                      ) : (
-                        'This job was removed'
-                      )}
-                    </h2>
-                    <p className="mt-0.5 text-sm text-text-subtle">
-                      {job?.client_profiles?.company_name ?? 'A client'}
-                      {budget ? <span className="tabular-nums"> · {budget}</span> : ''}
-                      {job && job.status !== 'open' ? ' · job closed' : ''}
-                    </p>
-                  </div>
-                  <StatusBadge status={row.status} />
+            <li key={row.id} className="px-4 py-5 sm:px-5">
+              <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+                <div className="min-w-0">
+                  <h2 className="font-semibold text-balance">
+                    {job ? (
+                      <Link href={`/jobs/${job.slug}`} className="hover:underline">
+                        {job.title}
+                      </Link>
+                    ) : (
+                      'This job was removed'
+                    )}
+                  </h2>
+                  <p className="mt-0.5 text-sm font-medium text-text">
+                    {job?.client_profiles?.company_name ?? 'A client'}
+                  </p>
+                  {(budget || closed) && (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-muted">
+                      {budget && <span className="tabular-nums">{budget}</span>}
+                      {closed && <Badge tone="outline">Job closed</Badge>}
+                    </div>
+                  )}
                 </div>
+                <StatusBadge status={row.status} />
+              </div>
 
-                <StatusTimeline events={byApplication.get(row.id) ?? []} />
+              <StatusTimeline events={byApplication.get(row.id) ?? []} />
 
-                {canWithdraw && (
-                  // Only offered while the outcome is still open — the transition table says a
-                  // rejected or hired application cannot be withdrawn.
-                  <ActionForm
-                    action={withdrawApplication}
-                    success="Application withdrawn"
-                    className="mt-4 border-t border-border-base pt-3"
+              {canWithdraw && (
+                // Only offered while the outcome is still open: the transition table says a
+                // rejected or hired application cannot be withdrawn.
+                <ActionForm
+                  action={withdrawApplication}
+                  success="Application withdrawn"
+                  className="mt-4 flex justify-end border-t border-border-base pt-3"
+                >
+                  <input type="hidden" name="applicationId" value={row.id} />
+                  <SubmitButton
+                    variant="danger-ghost"
+                    size="sm"
+                    className="max-sm:h-10"
+                    pendingLabel="Withdrawing…"
                   >
-                    <input type="hidden" name="applicationId" value={row.id} />
-                    <SubmitButton variant="ghost" size="sm" pendingLabel="Withdrawing…">
-                      Withdraw
-                    </SubmitButton>
-                  </ActionForm>
-                )}
-              </Card>
+                    Withdraw
+                  </SubmitButton>
+                </ActionForm>
+              )}
             </li>
           );
         })}

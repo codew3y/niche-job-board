@@ -31,7 +31,9 @@ export function EmptyState({
     <div
       className={cn(
         'rounded-lg border border-dashed px-6 py-12 text-center',
-        tone === 'pending' ? 'border-accent/35 bg-accent-subtle/40' : 'border-border-strong',
+        tone === 'pending'
+          ? 'border-accent/40 bg-accent-subtle/50'
+          : 'border-border-strong bg-surface-raised/40',
         className,
       )}
     >
@@ -41,14 +43,14 @@ export function EmptyState({
           className={cn(
             'mx-auto mb-4 grid size-11 place-items-center rounded-md',
             tone === 'pending'
-              ? 'bg-accent-subtle text-accent'
+              ? 'bg-accent-subtle text-link'
               : 'bg-surface-sunken text-text-subtle',
           )}
         >
           <Icon size={20} />
         </span>
       )}
-      <p className="font-semibold text-2xl">{title}</p>
+      <p className="font-display text-2xl font-semibold tracking-tight">{title}</p>
       <div className="mx-auto mt-2 max-w-md text-sm text-text-muted text-pretty">{body}</div>
       {action && <div className="mt-6 flex flex-wrap justify-center gap-2">{action}</div>}
     </div>

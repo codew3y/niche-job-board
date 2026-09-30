@@ -29,11 +29,11 @@ export function Avatar({
     <span
       aria-hidden="true"
       className={cn(
-        'grid shrink-0 place-items-center rounded-full font-semibold select-none',
+        'grid shrink-0 place-items-center rounded-md font-semibold select-none',
         size === 'sm' && 'size-8 text-xs',
         size === 'md' && 'size-10 text-sm',
         size === 'lg' && 'size-14 text-lg',
-        'border border-border-base bg-surface-sunken text-text-muted',
+        'bg-primary-subtle text-primary',
         className,
       )}
     >

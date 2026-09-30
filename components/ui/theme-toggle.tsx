@@ -71,7 +71,7 @@ export function ThemeChoice() {
             className={cn(
               'pressable flex cursor-pointer flex-col items-center gap-2 rounded-lg border px-3 py-4 text-sm select-none',
               'border-border-base bg-surface-raised text-text-muted hover:border-border-strong',
-              'has-[:checked]:border-surface-inverse has-[:checked]:text-text',
+              'has-[:checked]:border-primary has-[:checked]:bg-primary-subtle has-[:checked]:text-text',
               'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus',
             )}
           >

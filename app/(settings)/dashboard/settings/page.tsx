@@ -1,4 +1,4 @@
-import { ArrowRight, UserRoundCog, Users } from 'lucide-react';
+import { ChevronRight, UserRoundCog, Users } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: 'Settings' };
 
 /**
  * The settings index. /privacy points people at "settings" in the abstract; this is the page
- * that word means. Appearance lives here inline — it is one control, and a page of its own would
+ * that word means. Appearance lives here inline: it is one control, and a page of its own would
  * be a click for nothing.
  */
 export default async function SettingsPage() {
@@ -31,29 +31,29 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-3xl space-y-10">
-      <PageHeader title="Settings" />
+      <PageHeader className="mb-0" title="Settings" />
 
-      <nav aria-label="Settings">
-        <Card className="divide-y divide-border-base">
+      <nav aria-label="Settings sections">
+        <Card className="divide-y divide-border-base overflow-hidden">
           {items.map(([href, title, blurb, Icon]) => (
             <Link
               key={href}
               href={href}
-              className="group flex items-center gap-4 px-5 py-4 transition-colors duration-fast ease-out first:rounded-t-lg last:rounded-b-lg hover:bg-surface-sunken/60"
+              className="group flex min-h-16 items-center gap-4 px-4 py-4 transition-colors duration-fast ease-out hover:bg-surface-sunken focus-visible:-outline-offset-2 sm:px-5"
             >
               <span
                 aria-hidden="true"
-                className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-sunken text-text-subtle"
+                className="grid size-10 shrink-0 place-items-center rounded-md bg-primary-subtle text-primary"
               >
                 <Icon size={18} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block font-semibold">{title}</span>
+                <span className="block font-semibold text-text">{title}</span>
                 <span className="block text-sm text-text-muted text-pretty">{blurb}</span>
               </span>
-              <ArrowRight
+              <ChevronRight
                 aria-hidden="true"
-                size={16}
+                size={18}
                 className="shrink-0 text-text-subtle transition-transform duration-fast ease-out group-hover:translate-x-0.5"
               />
             </Link>

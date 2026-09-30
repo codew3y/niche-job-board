@@ -16,7 +16,7 @@ export const CURRENCIES = ['USD', 'EUR', 'GBP', 'CHF'] as const;
 /** The step's form body: fields in a card, the action row below it. */
 export function StepCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="space-y-6 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-7">
+    <div className="space-y-6 rounded-lg border border-border-base bg-surface-raised p-5 shadow-xs sm:p-7">
       {children}
     </div>
   );
@@ -48,10 +48,10 @@ export function TalentBasicsForm({ profile }: { profile: Profile }) {
           defaultValue={str(profile, 'bio')}
           errors={fields?.bio}
           placeholder="What do you build? What stack? What kind of client? Name a piece of work you're proud of."
-          hint="At least 120 characters — this is the text matching actually reads."
+          hint="At least 120 characters. This is the text matching actually reads."
         />
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Field
             label="Years of experience"
             name="yearsExperience"
@@ -101,8 +101,8 @@ export function TalentSkillsForm({
       <StepCard>
         <SkillPicker options={options} initial={initial} />
 
-        <div className="grid gap-5 sm:grid-cols-[1fr_8rem]">
-          {/* One rate, stored as min = max — the same as the profile editor. */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_8rem]">
+          {/* One rate, stored as min = max: the same as the profile editor. */}
           <Field
             label="Hourly rate"
             name="hourlyRate"
@@ -139,10 +139,13 @@ export function TalentSkillsForm({
   );
 }
 
+/** The step's one forward action. Full width on a phone, where it is the thumb's target. */
 export function Submit({ label }: { label: string }) {
   return (
-    <SubmitButton size="lg" className="w-full sm:w-auto" pendingLabel="Saving…">
-      {label}
-    </SubmitButton>
+    <div className="flex justify-end">
+      <SubmitButton size="lg" className="w-full sm:w-auto sm:min-w-40" pendingLabel="Saving…">
+        {label}
+      </SubmitButton>
+    </div>
   );
 }

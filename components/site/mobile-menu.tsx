@@ -36,7 +36,7 @@ export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) 
         aria-controls={panelId}
         aria-label={open ? 'Close menu' : 'Open menu'}
         onClick={() => setOpen((v) => !v)}
-        className="grid size-10 place-items-center rounded-md text-text-muted hover:bg-surface-sunken hover:text-text"
+        className="pressable grid size-10 place-items-center rounded-md text-text-muted hover:bg-surface-sunken hover:text-text"
       >
         {open ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
       </button>
@@ -44,7 +44,7 @@ export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) 
       <div
         id={panelId}
         hidden={!open}
-        className="absolute inset-x-0 top-full border-b border-border-base bg-surface px-4 pb-5"
+        className="gutter absolute inset-x-0 top-full border-b border-border-base bg-surface pb-5 shadow-md"
       >
         <nav aria-label="Site">
           <ul className="flex flex-col py-2">
@@ -55,8 +55,10 @@ export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) 
                   onClick={() => setOpen(false)}
                   aria-current={pathname === href ? 'page' : undefined}
                   className={cn(
-                    'block rounded-md px-3 py-2.5',
-                    pathname === href ? 'font-semibold text-text' : 'text-text-muted',
+                    'flex min-h-11 items-center rounded-md px-3 font-medium',
+                    pathname === href
+                      ? 'bg-primary-subtle font-semibold text-primary'
+                      : 'text-text-muted hover:bg-surface-sunken hover:text-text',
                   )}
                 >
                   {label}
@@ -65,7 +67,7 @@ export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) 
             ))}
           </ul>
         </nav>
-        <div className="grid gap-2 border-t border-border-base pt-4">
+        <div className="grid gap-2 border-t border-border-base pt-4 sm:grid-cols-2">
           {dashboardHref ? (
             <Link
               href={dashboardHref}

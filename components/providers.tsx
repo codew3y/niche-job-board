@@ -47,10 +47,12 @@ function ThemedToaster() {
             '!rounded-lg !border !border-border-base !bg-surface-raised !text-text !shadow-lg !font-sans',
           title: '!font-semibold',
           description: '!text-text-muted',
-          actionButton: '!rounded-md !bg-surface-inverse !text-text-inverse',
+          actionButton: '!rounded-md !bg-primary !text-primary-text',
           cancelButton: '!rounded-md !bg-surface-sunken !text-text',
           success: '[&_[data-icon]]:!text-success',
           error: '[&_[data-icon]]:!text-danger',
+          warning: '[&_[data-icon]]:!text-warning',
+          info: '[&_[data-icon]]:!text-info',
         },
       }}
     />

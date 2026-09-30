@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { Badge } from '@/components/ui/badge';
 import { buttonStyles } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PageHeader } from '@/components/ui/page-header';
@@ -54,50 +55,60 @@ export default async function SavedJobsPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Saved jobs" subtitle="Private to you — clients are never told." />
+      <PageHeader title="Saved jobs" subtitle="Private to you. Clients are never told." />
 
       {rows.length === 0 ? (
         <EmptyState
           icon={Bookmark}
           title="Nothing saved yet"
-          body="Bookmark a job while browsing and it lands here."
+          body="Save a job while browsing and it lands here, so you can come back to it."
           action={
-            <Link href="/browse?type=jobs" className={buttonStyles({ size: 'sm' })}>
+            <Link href="/browse?type=jobs" className={buttonStyles()}>
               Browse jobs
             </Link>
           }
         />
       ) : (
-        <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
-          {rows.map(({ jobs: job }) => {
-            const budget = formatRange(
-              job.budget_min,
-              job.budget_max,
-              job.currency,
-              job.engagement_type === 'hourly' ? '/hr' : '',
-            );
-            return (
-              <li
-                key={job.id}
-                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
-              >
-                <div className="min-w-0">
-                  <h2 className="font-semibold">
-                    <Link href={`/jobs/${job.slug}`} className="hover:underline">
-                      {job.title}
-                    </Link>
-                  </h2>
-                  <p className="mt-0.5 text-sm text-text-subtle">
-                    {job.client_profiles?.company_name ?? 'A client'}
-                    {budget ? <span className="tabular-nums"> · {budget}</span> : ''}
-                    {job.status !== 'open' ? ' · closed' : ''}
-                  </p>
-                </div>
-                <SaveButton kind="job" id={job.id} saved label={job.title} />
-              </li>
-            );
-          })}
-        </ul>
+        <>
+          <p className="mb-3 text-sm text-text-muted tabular-nums">
+            {rows.length} saved {rows.length === 1 ? 'job' : 'jobs'}
+          </p>
+          <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
+            {rows.map(({ jobs: job }) => {
+              const budget = formatRange(
+                job.budget_min,
+                job.budget_max,
+                job.currency,
+                job.engagement_type === 'hourly' ? '/hr' : '',
+              );
+              const closed = job.status !== 'open';
+              return (
+                <li
+                  key={job.id}
+                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-4 sm:px-5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <h2 className="font-semibold text-balance">
+                      <Link href={`/jobs/${job.slug}`} className="hover:underline">
+                        {job.title}
+                      </Link>
+                    </h2>
+                    <p className="mt-0.5 text-sm font-medium text-text">
+                      {job.client_profiles?.company_name ?? 'A client'}
+                    </p>
+                    {(budget || closed) && (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-muted">
+                        {budget && <span className="tabular-nums">{budget}</span>}
+                        {closed && <Badge tone="outline">Closed</Badge>}
+                      </div>
+                    )}
+                  </div>
+                  <SaveButton kind="job" id={job.id} saved label={job.title} />
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
     </div>
   );

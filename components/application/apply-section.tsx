@@ -1,7 +1,8 @@
-import { CheckCircle2, CircleAlert, Lock } from 'lucide-react';
+import { ArrowRight, CheckCircle2, CircleAlert, Clock, Lock, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 
 import { buttonStyles } from '@/components/ui/button';
+import { cn } from '@/lib/ui/cn';
 import { ApplyDialog } from './apply-dialog';
 
 /**
@@ -21,17 +22,34 @@ export type ApplyState =
   | { kind: 'closed' };
 
 /**
- * This is the confirmation after applying, not just a status readout — ApplyDialog cannot show
+ * This is the confirmation after applying, not just a status readout. ApplyDialog cannot show
  * one (see its comment), so the `applied` line reads as a completed action.
+ *
+ * The tone follows the status map in components/job/job-status-badge.tsx: success for sent and
+ * hired, info for moving forward, a quiet neutral for everything else. "Not taken forward" is
+ * never shown in an alarm colour.
  */
-const STATUS_COPY: Record<string, string> = {
-  applied: 'Application sent — waiting on the client.',
-  viewed: 'The client has opened your application.',
-  shortlisted: "You've been shortlisted.",
-  rejected: 'Not taken forward this time.',
-  hired: 'You got it.',
-  withdrawn: 'You withdrew this application.',
+const STATUS: Record<
+  string,
+  { copy: string; tone: 'success' | 'info' | 'neutral'; icon: LucideIcon }
+> = {
+  applied: {
+    copy: 'Application sent. Waiting on the client.',
+    tone: 'success',
+    icon: CheckCircle2,
+  },
+  viewed: { copy: 'The client has opened your application.', tone: 'neutral', icon: Clock },
+  shortlisted: { copy: "You've been shortlisted.", tone: 'info', icon: CheckCircle2 },
+  rejected: { copy: 'Not taken forward this time.', tone: 'neutral', icon: CircleAlert },
+  hired: { copy: 'You got it.', tone: 'success', icon: CheckCircle2 },
+  withdrawn: { copy: 'You withdrew this application.', tone: 'neutral', icon: CircleAlert },
 };
+
+const TONE_BOX = {
+  success: 'bg-success-subtle text-success',
+  info: 'bg-info-subtle text-info',
+  neutral: 'bg-surface-sunken text-text',
+} as const;
 
 export function ApplySection({
   state,
@@ -48,21 +66,29 @@ export function ApplySection({
     case 'can-apply':
       return <ApplyDialog jobId={jobId} jobTitle={jobTitle} />;
 
-    case 'already-applied':
+    case 'already-applied': {
+      const s = STATUS[state.status] ?? {
+        copy: state.status,
+        tone: 'neutral' as const,
+        icon: Clock,
+      };
+      const Icon = s.icon;
       return (
-        <div role="status" className="rounded-lg bg-success-subtle p-4">
-          <p className="flex items-start gap-2 font-semibold text-success">
-            <CheckCircle2 aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
-            {STATUS_COPY[state.status] ?? state.status}
+        <div role="status" className={cn('rounded-md p-4', TONE_BOX[s.tone])}>
+          <p className="flex items-start gap-2 font-semibold">
+            <Icon aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
+            {s.copy}
           </p>
           <Link
             href="/dashboard/talent/applications"
-            className="prose-link mt-2 inline-block text-sm"
+            className="prose-link mt-1 inline-flex min-h-10 items-center gap-1 text-sm font-semibold"
           >
             See all your applications
+            <ArrowRight aria-hidden="true" size={14} />
           </Link>
         </div>
       );
+    }
 
     case 'signed-out':
       return (
@@ -71,7 +97,7 @@ export function ApplySection({
               dumping them on a dashboard. */}
           <Link
             href={`/login?next=${encodeURIComponent(`/jobs/${slug}`)}`}
-            className={buttonStyles({ variant: 'accent', size: 'lg', className: 'w-full' })}
+            className={buttonStyles({ size: 'lg', className: 'w-full' })}
           >
             Sign in to apply
           </Link>
@@ -90,26 +116,29 @@ export function ApplySection({
             </strong>
             Clients see the work behind an application, not just the note.
           </p>
-          <Link href="/onboarding/talent/basics" className={buttonStyles({ className: 'w-full' })}>
-            Create one
+          <Link
+            href="/onboarding/talent/basics"
+            className={buttonStyles({ size: 'lg', className: 'w-full' })}
+          >
+            Create a profile
           </Link>
         </div>
       );
 
     case 'unpublished':
       return (
-        <div className="space-y-3 rounded-lg bg-warning-subtle p-4">
+        <div className="space-y-3 rounded-md bg-warning-subtle p-4">
           <p className="text-sm text-pretty">
             <strong className="flex items-center gap-1.5 font-semibold text-warning">
-              <CircleAlert aria-hidden="true" size={16} />
+              <CircleAlert aria-hidden="true" size={16} className="shrink-0" />
               Publish your profile first
             </strong>
-            <span className="mt-1 block text-text-muted">
-              Otherwise the client receives your application but cannot see any of your work — the
-              one thing that would make them say yes.
+            <span className="mt-1 block text-text">
+              Otherwise the client gets your application but cannot see your work, which is what
+              they decide on.
             </span>
           </p>
-          <Link href="/onboarding/talent/review" className={buttonStyles({ size: 'sm' })}>
+          <Link href="/onboarding/talent/review" className={buttonStyles({ className: 'w-full' })}>
             Finish and publish
           </Link>
         </div>
@@ -132,7 +161,7 @@ export function ApplySection({
       return (
         <p className="text-sm text-text-muted text-pretty">
           You&rsquo;re viewing as a client. To apply, switch to your developer profile from the
-          profile menu — or add one in{' '}
+          profile menu, or add one in{' '}
           <Link href="/dashboard/settings/roles" className="prose-link font-semibold">
             settings
           </Link>
@@ -143,7 +172,7 @@ export function ApplySection({
     case 'closed':
       return (
         <p className="flex items-center gap-2 text-sm text-text-muted">
-          <Lock aria-hidden="true" size={15} />
+          <Lock aria-hidden="true" size={15} className="shrink-0" />
           No longer accepting applications.
         </p>
       );

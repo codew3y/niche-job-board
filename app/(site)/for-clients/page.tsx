@@ -1,7 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { FeatureGrid, NumberedSteps, PageCta, PageIntro } from '@/components/site/page-parts';
+import {
+  FeatureBento,
+  FeatureList,
+  NumberedSteps,
+  PageCta,
+  PageIntro,
+} from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
 
 export const metadata: Metadata = {
@@ -12,14 +18,17 @@ export const metadata: Metadata = {
 };
 
 /**
- * For Clients. The three steps are restored verbatim from the "For clients" column of the old
- * landing page (b9fe7d4). The rest describes the job form, the candidate list (ADR-007 D2:
+ * For Clients. The three steps come from the "For clients" column of the old landing page
+ * (b9fe7d4). The rest describes the job form, the candidate list (ADR-007 D2:
  * order and reason, never a number on a person) and the terms (no fee, no payments).
+ *
+ * Five sections, five layout families: split intro with a photograph, numbered list,
+ * side-heading list, bento, closing panel. One eyebrow (the intro).
  */
 const STEPS = [
   ['Write the brief', 'What needs building and what done looks like. Matching reads it closely.'],
   ['See who fits', 'Applicants ordered by fit, plus developers who fit and have not applied yet.'],
-  ['Decide for yourself', 'An order and a sentence of reasoning — never a number on a person.'],
+  ['Decide for yourself', 'An order and a sentence of reasoning, never a number on a person.'],
 ] as const;
 
 const POSTING = [
@@ -33,14 +42,14 @@ const POSTING = [
   },
   {
     title: 'Your company profile',
-    body: 'The company name, website and a short description appear on every job you post — the context a developer reads before applying.',
+    body: 'The company name, website and a short description appear on every job you post. It is the context a developer reads before applying.',
   },
 ] as const;
 
 const FINDING = [
   {
     title: 'Candidates in order, with a reason',
-    body: 'Applicants are ranked against your brief, and each carries one sentence saying why they fit. You see the order and the reasoning — never a numeric score.',
+    body: 'Applicants are ranked against your brief, and each carries one sentence saying why they fit. You see the order and the reasoning, never a numeric score.',
   },
   {
     title: 'Suggested developers',
@@ -60,7 +69,7 @@ const FINDING = [
   },
   {
     title: 'No fees, no middleman',
-    body: 'techselect takes no fee and handles no payments. Terms, rates and contracts are agreed directly between you and the developer.',
+    body: 'TechSelect takes no fee and handles no payments. Terms, rates and contracts are agreed directly between you and the developer.',
   },
 ] as const;
 
@@ -70,29 +79,31 @@ export default function ForClientsPage() {
       <PageIntro
         eyebrow="For clients"
         title="Find developers by what they have shipped"
-        lead="Post a brief for software, web or automation work. Matching reads what you need and the projects developers describe, and shows you who fits — and why."
+        lead="Post a brief for software, web or automation work. See who fits, in order, and why."
+        image={{
+          src: '/images/how-it-works/04-start-working.jpg',
+          alt: 'Two developers working at computer monitors in a bright office',
+        }}
       >
         <Link href="/signup?role=client" className={buttonStyles({ size: 'lg' })}>
           Post a brief
         </Link>
-        <Link href="/how-it-works" className="prose-link font-semibold">
+        <Link href="/how-it-works" className={buttonStyles({ variant: 'secondary', size: 'lg' })}>
           How it works
         </Link>
       </PageIntro>
 
-      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <h2 className="text-display-sm">Three steps</h2>
-        <div className="mt-6 max-w-3xl">
-          <NumberedSteps steps={STEPS} />
-        </div>
-      </section>
-
-      <FeatureGrid heading="Posting a job" items={POSTING} />
-      <FeatureGrid heading="Finding the right person" items={FINDING} />
+      <NumberedSteps heading="Three steps to a shortlist" steps={STEPS} />
+      <FeatureList
+        heading="Posting a job"
+        lead="A job is a brief you can draft, publish, edit and close whenever you need to."
+        items={POSTING}
+      />
+      <FeatureBento heading="Finding the right person" items={FINDING} />
 
       <PageCta
         title="Write the brief once. See who fits, in order, with a reason for each."
-        primary={{ href: '/signup?role=client', label: 'Sign up as a client' }}
+        primary={{ href: '/signup?role=client', label: 'Post a brief' }}
         secondary={{ href: '/for-freelancers', label: 'Looking for work instead?' }}
       />
     </>

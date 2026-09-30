@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { AuthCard } from '@/components/auth/auth-card';
 import { SetPasswordForm } from '@/components/auth/password-forms';
+import { buttonStyles } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Set a new password' };
@@ -22,9 +24,9 @@ export default async function ConfirmResetPage() {
         title="That link has expired"
         subtitle="Reset links are valid for one hour and can only be used once."
       >
-        <a href="/reset-password" className="prose-link font-semibold">
-          Request a new one
-        </a>
+        <Link href="/reset-password" className={buttonStyles({ size: 'lg', className: 'w-full' })}>
+          Request a new link
+        </Link>
       </AuthCard>
     );
   }
@@ -35,7 +37,7 @@ export default async function ConfirmResetPage() {
       subtitle={
         hasPassword
           ? 'Pick something you have not used elsewhere.'
-          : 'You signed up with Google or GitHub, so you do not have a password yet. Adding one gives you a second way in — those buttons keep working either way.'
+          : 'You signed up with Google or GitHub, so you do not have a password yet. Adding one gives you a second way in. Those buttons keep working either way.'
       }
     >
       <SetPasswordForm />

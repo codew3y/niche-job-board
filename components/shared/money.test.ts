@@ -8,8 +8,8 @@ import { formatRange } from './money';
  */
 describe('formatRange', () => {
   it('shows a full range with its currency', () => {
-    expect(formatRange('2000', '4000', 'USD')).toBe('$2,000–$4,000');
-    expect(formatRange('2000', '4000', 'EUR')).toBe('€2,000–€4,000');
+    expect(formatRange('2000', '4000', 'USD')).toBe('$2,000-$4,000');
+    expect(formatRange('2000', '4000', 'EUR')).toBe('€2,000-€4,000');
     expect(formatRange('2000', '4000', 'CHF')).toContain('2,000');
   });
 
@@ -31,10 +31,10 @@ describe('formatRange', () => {
   });
 
   it('appends the unit suffix for hourly work', () => {
-    expect(formatRange('50', '90', 'USD', '/hr')).toBe('$50–$90/hr');
+    expect(formatRange('50', '90', 'USD', '/hr')).toBe('$50-$90/hr');
   });
 
   it('drops fractional pence — budgets are not priced to the cent', () => {
-    expect(formatRange('1999.99', '4000.49', 'USD')).toBe('$2,000–$4,000');
+    expect(formatRange('1999.99', '4000.49', 'USD')).toBe('$2,000-$4,000');
   });
 });

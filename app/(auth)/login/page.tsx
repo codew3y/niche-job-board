@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { AuthCard, OrDivider } from '@/components/auth/auth-card';
 import { OAuthButtons } from '@/components/auth/oauth-buttons';
 import { EmailPasswordForm } from '@/components/auth/email-password-form';
+import { FormError } from '@/components/ui/field';
 
 export const metadata: Metadata = { title: 'Sign in' };
 
@@ -23,7 +24,7 @@ export default async function LoginPage({
       footer={
         <>
           New here?{' '}
-          <Link href="/signup" className="prose-link font-semibold">
+          <Link href="/signup" className="font-semibold text-link underline underline-offset-4">
             Create an account
           </Link>
         </>
@@ -31,9 +32,9 @@ export default async function LoginPage({
     >
       {/* OAuth failures redirect here with ?error= (app/auth/callback, lib/actions/auth.ts). */}
       {error && (
-        <p role="alert" className="mb-5 text-sm text-danger text-pretty">
-          {error}
-        </p>
+        <div className="mb-6">
+          <FormError>{error}</FormError>
+        </div>
       )}
       <OAuthButtons next={safeNext} />
       <OrDivider />

@@ -44,7 +44,7 @@ function status(value: string): 'empty' | 'ok' | 'not-https' | 'malformed' {
 
 const MESSAGE: Record<string, string> = {
   'not-https': 'Needs to be https://. An http:// link will be refused when you save.',
-  malformed: 'Not a full link yet — include https:// at the start.',
+  malformed: 'Not a full link yet. Include https:// at the start.',
 };
 
 export function LinksPreview({ initial }: { initial: LinkState }) {
@@ -79,7 +79,7 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
                 'h-11 px-3.5',
                 state === 'not-https' || state === 'malformed'
                   ? 'border-danger'
-                  : 'border-control/70 hover:border-control',
+                  : 'border-control hover:border-text-subtle',
               )}
             />
             <p
@@ -93,11 +93,9 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
       })}
 
       <div className="rounded-lg bg-surface-sunken p-4">
-        <p className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
-          On your public profile
-        </p>
+        <p className="text-sm font-semibold text-text-muted">On your public profile</p>
         {anyValid ? (
-          <p className="mt-2 flex flex-wrap gap-4 text-sm">
+          <p className="mt-2 flex flex-wrap gap-x-5 gap-y-2 text-sm">
             {/* Rendered by the same component the real page uses, so what is shown here is
                 exactly what visitors get — external-link icon, new tab, rel and all. */}
             <ExternalLink href={links.website.trim()} className="font-semibold">
@@ -112,7 +110,7 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
           </p>
         ) : (
           <p className="mt-2 text-sm text-text-muted text-pretty">
-            Nothing yet. Links are optional — a profile publishes without them — but they are the
+            Nothing yet. Links are optional (a profile publishes without them), but they are the
             quickest way to give a client something to look at.
           </p>
         )}

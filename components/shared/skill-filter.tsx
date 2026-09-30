@@ -8,7 +8,7 @@ import type { SkillOption } from '@/lib/services/skills';
  *
  * A single select rather than a multi-select: 126 options across 10 categories is already at
  * the limit of what a plain control can carry, and a multi-select of that size needs a
- * combobox with search, keyboard handling and a token list — which is its own piece of work
+ * combobox with search, keyboard handling and a token list, which is its own piece of work
  * rather than a checkbox on this one.
  *
  * The URL parameter is a comma-separated list either way, so multiple skills are already
@@ -19,10 +19,12 @@ export function SkillFilter({
   skills,
   value,
   onChange,
+  className,
 }: {
   skills: [string, SkillOption[]][];
   value: string;
   onChange: (slug: string) => void;
+  className?: string;
 }) {
   return (
     <FilterSelect
@@ -30,7 +32,7 @@ export function SkillFilter({
       label="Skill"
       value={value}
       onChange={onChange}
-      className="max-w-[14rem]"
+      className={className}
     >
       <option value="">Skill: any</option>
       {skills.map(([category, options]) => (
