@@ -95,7 +95,7 @@ export default async function ApplicationsPage() {
           title="No applications yet"
           body="Applications you send appear here, with every status change as it happens."
           action={
-            <Link href="/jobs" className={buttonStyles({ size: 'sm' })}>
+            <Link href="/browse?type=jobs" className={buttonStyles({ size: 'sm' })}>
               Browse jobs
             </Link>
           }
@@ -133,7 +133,7 @@ export default async function ApplicationsPage() {
               <Card className="p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="font-medium text-balance">
+                    <h2 className="font-semibold text-balance">
                       {job ? (
                         <Link href={`/jobs/${job.slug}`} className="hover:underline">
                           {job.title}

@@ -101,21 +101,16 @@ export function TalentSkillsForm({
       <StepCard>
         <SkillPicker options={options} initial={initial} />
 
-        <div className="grid gap-5 sm:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-[1fr_8rem]">
+          {/* One rate, stored as min = max — the same as the profile editor. */}
           <Field
-            label="Rate from"
-            name="hourlyRateMin"
+            label="Hourly rate"
+            name="hourlyRate"
             inputMode="decimal"
-            defaultValue={str(profile, 'hourly_rate_min')}
-            placeholder="60"
-          />
-          <Field
-            label="Rate to"
-            name="hourlyRateMax"
-            inputMode="decimal"
-            defaultValue={str(profile, 'hourly_rate_max')}
-            placeholder="110"
-            errors={fields?.hourlyRateMax}
+            optional
+            defaultValue={str(profile, 'hourly_rate_min') || str(profile, 'hourly_rate_max')}
+            placeholder="85"
+            errors={fields?.hourlyRate}
           />
           <SelectField
             label="Currency"

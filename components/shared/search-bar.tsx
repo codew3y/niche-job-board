@@ -64,7 +64,7 @@ export function SearchBar({
         placeholder={placeholder}
         className={cn(
           controlStyles,
-          'h-12 rounded-full border-control/70 pr-12 pl-11 hover:border-control [&::-webkit-search-cancel-button]:hidden',
+          'h-12 rounded-md border-control/70 pr-12 pl-11 hover:border-control [&::-webkit-search-cancel-button]:hidden',
         )}
       />
       {value && (
@@ -72,7 +72,7 @@ export function SearchBar({
           type="button"
           onClick={onClear}
           aria-label="Clear search"
-          className="pressable absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-text-subtle hover:bg-surface-sunken hover:text-text"
+          className="pressable absolute top-1/2 right-2 grid size-8 -translate-y-1/2 place-items-center rounded-md text-text-subtle hover:bg-surface-sunken hover:text-text"
         >
           <X aria-hidden="true" size={16} />
         </button>

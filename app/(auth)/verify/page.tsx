@@ -12,7 +12,7 @@ export default function VerifyPage() {
     >
       <p className="text-sm text-text-muted">
         Nothing arrived? Check spam, or{' '}
-        <a href="/signup" className="prose-link font-medium">
+        <a href="/signup" className="prose-link font-semibold">
           try again
         </a>
         . Signing in with Google or GitHub skips this step entirely.

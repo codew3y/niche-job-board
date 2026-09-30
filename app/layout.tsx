@@ -1,46 +1,23 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Providers } from '@/components/providers';
 import './globals.css';
 
 /*
- * Three faces, all through next/font: self-hosted, subset, with size-adjusted fallbacks.
+ * One face: Inter, through next/font (self-hosted, subset, with a size-adjusted fallback), in
+ * exactly two weights — 400 for text, 600 for emphasis and headings. No display or mono faces.
  *
- *   Geist          — every piece of UI and body text.
- *   Instrument Serif — display only: one title moment per screen (DESIGN.md §3.1). One weight,
- *                    one style — a single small file.
- *   Geist Mono     — tech stacks and code-shaped metadata, sparingly.
+ * `display: 'optional'`, not 'swap' — measured on this site (DESIGN.md §6.2): with `swap`, text
+ * that painted in the fallback re-rendered when the font landed and Chrome counted that as a
+ * new, later LCP. `optional` uses the font if it arrives within ~100ms and otherwise keeps the
+ * metric-matched fallback for that page view, so text never jumps.
  */
-/*
- * `display: 'optional'`, not 'swap' — measured, not assumed (DESIGN.md §6.2, J8). Under
- * Lighthouse's slow-4G profile the fonts arrived ~3.5s in, and with `swap` the already-painted
- * text re-rendered when they landed; Chrome records that re-render as a NEW, later Largest
- * Contentful Paint. LCP was the logo, at 3.9s, on a page whose first paint was 0.9s.
- *
- * `optional` gives a font ~100ms: if it is there (a warm cache, any decent connection, and every
- * page after the first) it is used from the first frame; if not, the metric-matched fallback is
- * used for that page view and nothing swaps. A slow first visit sees a close-enough fallback; it
- * never sees text jump.
- *
- * Geist Mono is not preloaded: it sets tech-stack labels below the fold, and a preload would
- * compete with the two faces the first screen actually uses.
- */
-const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'], display: 'optional' });
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const inter = Inter({
+  variable: '--font-inter',
   subsets: ['latin'],
-  display: 'swap',
-  preload: false,
-});
-const serif = Instrument_Serif({
-  variable: '--font-instrument-serif',
-  weight: '400',
-  // Normal only. The italic file existed for one emphasised word, which already carries the
-  // accent colour; dropping it takes a font off the critical path (§6.2).
-  style: 'normal',
-  subsets: ['latin'],
+  weight: ['400', '600'],
   display: 'optional',
 });
 
@@ -69,10 +46,10 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
   interactiveWidget: 'resizes-content',
   themeColor: [
-    // Exact sRGB of --surface in each theme (converted from the OKLCH tokens), so the status
-    // bar and the header are one continuous colour.
-    { media: '(prefers-color-scheme: light)', color: '#f6f3ef' },
-    { media: '(prefers-color-scheme: dark)', color: '#120f0d' },
+    // The page background in each theme (--surface), so the status bar and the page are one
+    // continuous colour.
+    { media: '(prefers-color-scheme: light)', color: '#fafafa' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a0a' },
   ],
   colorScheme: 'light dark',
 };
@@ -81,11 +58,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // suppressHydrationWarning: next-themes sets data-theme on <html> before React hydrates.
     // It applies to this element only — it does not hide mismatches anywhere else.
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${serif.variable} h-full`}
-    >
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} h-full`}>
       <body className="flex min-h-full flex-col font-sans">
         {/* First tab stop on every page — a §9 requirement, not an extra. */}
         <a href="#main" className="skip-link">

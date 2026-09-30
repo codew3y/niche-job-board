@@ -3,17 +3,11 @@ import { expect, test, type Page } from '@playwright/test';
 import { canSeed, PASSWORD, seed, teardown, type Seeded } from './fixtures';
 
 /**
- * The navigation names intentions, not features.
+ * The sidebar: four destinations per role, one shared Browse, and the profile ONLY in the
+ * profile menu at the foot of the sidebar.
  *
- * Owner request, modelled on Upwork: Home, Search, Jobs, Messages, Profile — the same five
- * for both roles, each pointing at whatever it means for that role. The previous nav named
- * features ("Matches", "Applications", "Saved"), which required already knowing the product
- * in order to navigate it.
- *
- * These tests also pin the two items deliberately ABSENT. Contracts and Finances are on
- * Upwork and not here, because this product handles no agreements and no money — the terms
- * page says so — and a nav item leading to an explanation of its own non-existence is worse
- * than no item.
+ * These tests also pin the items deliberately ABSENT: Profile as a nav item (it lives in the
+ * menu), and Contracts / Finances — this product handles no agreements and no money.
  */
 
 test.skip(!canSeed, 'needs SUPABASE_SERVICE_ROLE_KEY to create accounts');
@@ -45,17 +39,15 @@ async function signIn(page: Page, email: string) {
 const EXPECTED = {
   talent: [
     ['Home', '/dashboard/talent'],
-    ['Search', '/jobs'],
-    ['Jobs', '/dashboard/talent/applications'],
+    ['Browse', '/browse'],
+    ['Applications', '/dashboard/talent/applications'],
     ['Messages', '/dashboard/messages'],
-    ['Profile', '/dashboard/talent/profile'],
   ],
   client: [
     ['Home', '/dashboard/client'],
-    ['Search', '/talent'],
-    ['Jobs', '/dashboard/client/jobs'],
+    ['Browse', '/browse'],
+    ['My jobs', '/dashboard/client/jobs'],
     ['Messages', '/dashboard/messages'],
-    ['Profile', '/dashboard/client/profile'],
   ],
 } as const;
 
@@ -63,7 +55,7 @@ for (const [role, emailKey] of [
   ['developer', 'talent'],
   ['client', 'client'],
 ] as const) {
-  test(`a ${role} sees all five destinations, pointing at their own side`, async ({ page }) => {
+  test(`a ${role} sees all four destinations, pointing at their own side`, async ({ page }) => {
     await signIn(page, data[emailKey].email);
     const nav = page.getByRole('navigation', { name: 'Main' }).first();
     for (const [label, href] of EXPECTED[emailKey]) {
@@ -76,11 +68,25 @@ for (const [role, emailKey] of [
     }
   });
 
-  test(`a ${role} sees no Contracts or Finances`, async ({ page }) => {
-    // Absent on purpose, and asserted so nobody adds a dead link later.
+  test(`a ${role} sees no Profile, Contracts or Finances in the nav`, async ({ page }) => {
+    // Absent on purpose, and asserted so nobody adds one back.
     await signIn(page, data[emailKey].email);
+    const nav = page.getByRole('navigation', { name: 'Main' }).first();
+    await expect(nav.getByRole('link', { name: /profile/i })).toHaveCount(0);
     await expect(page.getByRole('link', { name: /contracts/i })).toHaveCount(0);
     await expect(page.getByRole('link', { name: /finances/i })).toHaveCount(0);
+  });
+
+  test(`a ${role}'s profile menu has View profile, Edit profile, Settings and Log out`, async ({
+    page,
+  }) => {
+    await signIn(page, data[emailKey].email);
+    await page.getByRole('button', { name: /profile menu/i }).click();
+    for (const name of ['View profile', 'Edit profile', 'Settings', 'Log out']) {
+      await expect(page.getByRole('menuitem', { name })).toBeVisible();
+    }
+    // Single-role fixture accounts: no switcher to offer.
+    await expect(page.getByRole('menuitem', { name: /switch to/i })).toHaveCount(0);
   });
 
   test(`EVERY ${role} NAV DESTINATION RESOLVES — no link points at a 404`, async ({ page }) => {
@@ -91,7 +97,7 @@ for (const [role, emailKey] of [
       .evaluateAll((els) =>
         els.map((e) => (e as HTMLAnchorElement).getAttribute('href')).filter(Boolean),
       );
-    expect(hrefs.length).toBeGreaterThanOrEqual(5);
+    expect(hrefs.length).toBeGreaterThanOrEqual(4);
     for (const href of hrefs) {
       const response = await page.goto(href as string);
       expect(response?.status(), `${href} returned ${response?.status()}`).toBeLessThan(400);
@@ -121,4 +127,53 @@ test('matches and saved stay reachable after leaving the nav', async ({ page }) 
   const quick = page.getByRole('navigation', { name: 'Quick links' });
   await expect(quick.getByRole('link', { name: /matches/i })).toBeVisible();
   await expect(quick.getByRole('link', { name: /saved/i })).toBeVisible();
+});
+
+/**
+ * THE ROLE BUG: Browse and the dashboard must agree about who is looking. Both now read
+ * user_profiles.active_role; before, Browse inferred the role from which profiles existed.
+ */
+test('Browse renders the developer view for a developer', async ({ page }) => {
+  await signIn(page, data.talent.email);
+  await page.goto('/browse?type=jobs');
+  // A developer saves jobs.
+  await expect(page.getByRole('button', { name: /^save /i }).first()).toBeVisible({
+    timeout: 20_000,
+  });
+  await page.goto('/browse?type=developers');
+  await expect(page.locator('a[href^="/talent/"]').first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('button', { name: /^save /i })).toHaveCount(0);
+});
+
+test('Browse renders the client view for a client', async ({ page }) => {
+  await signIn(page, data.client.email);
+  await page.goto('/browse?type=developers');
+  // A client saves developers, never jobs.
+  await expect(page.getByRole('button', { name: /^save /i }).first()).toBeVisible({
+    timeout: 20_000,
+  });
+  await page.goto('/browse?type=jobs');
+  await expect(page.locator('a[href^="/jobs/"]').first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('button', { name: /^save /i })).toHaveCount(0);
+});
+
+test('Browse has one page for both types, with the new copy', async ({ page }) => {
+  await signIn(page, data.client.email);
+  await page.goto('/browse');
+  const show = page.getByRole('navigation', { name: 'Show' });
+  for (const label of ['All', 'Jobs', 'Developers']) {
+    await expect(show.getByRole('link', { name: label, exact: true })).toBeVisible();
+  }
+  await expect(
+    page.getByText('Everyone who wants to be listed is listed. Judge them on what you see.'),
+  ).toBeVisible();
+  await expect(page.getByPlaceholder('Search by skill, title, or name…')).toBeVisible();
+});
+
+test('the old browse URLs land on Browse with the type set', async ({ page }) => {
+  await signIn(page, data.client.email);
+  await page.goto('/jobs');
+  await expect(page).toHaveURL(/\/browse\?type=jobs/);
+  await page.goto('/talent');
+  await expect(page).toHaveURL(/\/browse\?type=developers/);
 });

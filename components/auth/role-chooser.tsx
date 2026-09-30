@@ -57,7 +57,7 @@ export function RoleChooser() {
               <span
                 aria-hidden="true"
                 className={cn(
-                  'grid size-10 shrink-0 place-items-center rounded-full transition-colors duration-fast',
+                  'grid size-10 shrink-0 place-items-center rounded-md transition-colors duration-fast',
                   checked
                     ? 'bg-surface-inverse text-text-inverse'
                     : 'bg-surface-sunken text-text-subtle',
@@ -66,7 +66,7 @@ export function RoleChooser() {
                 <Icon size={18} />
               </span>
               <span>
-                <span className="block font-medium">{title}</span>
+                <span className="block font-semibold">{title}</span>
                 <span className="mt-1 block text-sm text-text-muted text-pretty">{body}</span>
               </span>
             </label>

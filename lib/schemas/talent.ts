@@ -77,8 +77,8 @@ export const portfolioItemInput = z
     /** What changed because of the work. This is the field that makes an entry credible. */
     outcome: richText(500, 'Outcome').nullable().optional(),
     techStack: z.array(trimmed.min(1).max(60)).max(20, 'Twenty technologies at most.').default([]),
-    repoUrl: optionalHttpsUrl,
-    liveUrl: optionalHttpsUrl,
+    /** Any number of links — repo, live site, write-up. https only, ten at most (migration 0020). */
+    links: z.array(httpsUrl).max(10, 'Ten links at most.').default([]),
     coverImageUrl: optionalHttpsUrl,
     startedAt: z.coerce.date().nullable().optional(),
     endedAt: z.coerce.date().nullable().optional(),
@@ -150,6 +150,68 @@ export const itemMediaInput = z.object({
     .max(300, 'Keep alt text under 300 characters.'),
   sortOrder: z.coerce.number().int().min(0).default(0),
 });
+
+/**
+ * The profile form as edited on /dashboard/talent/profile. One hourly rate, not a range: it is
+ * stored in both hourly_rate_min and hourly_rate_max, so browse filtering and the rate display
+ * (which already collapse an equal pair to one number) are unchanged.
+ */
+export const profileDetailsInput = z.object({
+  headline: trimmed.min(3, 'Give your profile a title — even just what you do.').max(120),
+  bio: richText(4000, 'Bio').default(''),
+  hourlyRate: optionalMoney,
+  currency: currency.default('USD'),
+  availability: availability.default('part_time'),
+  yearsExperience: z.coerce.number().int().min(0).max(60).nullable().optional(),
+  timezone: trimmed.max(64).nullable().optional(),
+  websiteUrl: optionalHttpsUrl,
+  githubUrl: optionalHttpsUrl,
+  linkedinUrl: optionalHttpsUrl,
+});
+
+/** `<input type="month">` posts "YYYY-MM"; the column is a date, so it becomes the 1st. */
+const monthDate = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Pick a month.')
+  .transform((v) => (v.length === 7 ? `${v}-01` : v));
+
+export const experienceInput = z
+  .object({
+    role: trimmed.min(2, 'What was your role?').max(120),
+    company: trimmed.min(1, 'Where was it?').max(120),
+    startDate: monthDate,
+    /** Blank = still there. */
+    endDate: z
+      .union([monthDate, z.literal('')])
+      .optional()
+      .transform((v) => (v ? v : null)),
+    description: richText(2000, 'Description').default(''),
+  })
+  .refine((v) => !v.endDate || v.startDate <= v.endDate, {
+    path: ['endDate'],
+    message: 'End cannot be before the start.',
+  });
+
+const optionalYear = z
+  .union([
+    z.coerce.number().int().min(1950, 'After 1950.').max(2100, 'Before 2100.'),
+    z.literal(''),
+  ])
+  .optional()
+  .transform((v) => (v === '' || v === undefined ? null : v));
+
+export const educationInput = z
+  .object({
+    school: trimmed.min(2, 'Which school?').max(160),
+    degree: richText(160, 'Degree').default(''),
+    startYear: optionalYear,
+    endYear: optionalYear,
+  })
+  .refine((v) => v.startYear === null || v.endYear === null || v.startYear <= v.endYear, {
+    path: ['endYear'],
+    message: 'End year cannot be before the start year.',
+  });
 
 export type TalentProfileInput = z.infer<typeof talentProfileInput>;
 export type PortfolioItemInput = z.infer<typeof portfolioItemInput>;

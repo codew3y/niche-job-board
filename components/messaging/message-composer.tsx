@@ -34,7 +34,7 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
     <form
       ref={formRef}
       action={action}
-      className="sticky bottom-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px))] -mx-(--gutter) border-t border-border-base bg-surface/95 px-(--gutter) pt-3 pb-3 backdrop-blur-md sm:bottom-0 sm:mx-0 sm:rounded-lg sm:border sm:bg-surface-raised sm:p-3"
+      className="sticky bottom-[env(safe-area-inset-bottom,0px)] -mx-(--gutter) border-t border-border-base bg-surface/95 px-(--gutter) pt-3 pb-3 backdrop-blur-md sm:bottom-0 sm:mx-0 sm:rounded-lg sm:border sm:bg-surface-raised sm:p-3"
     >
       <input type="hidden" name="conversationId" value={conversationId} />
       <label htmlFor="body" className="sr-only">

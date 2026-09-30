@@ -190,7 +190,7 @@ export function JobForm({
 
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
 
-      <div className="sticky bottom-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px)+0.75rem)] z-sticky flex flex-wrap items-center justify-end gap-3 rounded-lg border border-border-base bg-surface-raised/95 p-3 shadow-md backdrop-blur-md sm:bottom-4">
+      <div className="sticky bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] z-sticky flex flex-wrap items-center justify-end gap-3 rounded-lg border border-border-base bg-surface-raised/95 p-3 shadow-md backdrop-blur-md sm:bottom-4">
         <p className="mr-auto hidden text-sm text-text-subtle sm:block">
           {isPublished ? 'Changes go live when you save.' : 'Drafts are private until you publish.'}
         </p>

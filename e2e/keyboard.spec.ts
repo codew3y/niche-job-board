@@ -57,9 +57,9 @@ test('A MODAL KEEPS FOCUS — Tab never escapes to the page behind it', async ({
   await expect(page.locator(':focus')).toHaveText(/apply for this job/i);
 });
 
-test('the account menu is operable from the keyboard', async ({ page }) => {
+test('the profile menu is operable from the keyboard', async ({ page }) => {
   await signIn(page, data.talent.email);
-  const trigger = page.getByRole('button', { name: /^account:/i });
+  const trigger = page.getByRole('button', { name: /^profile menu:/i });
   await trigger.focus();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('menu')).toBeVisible();

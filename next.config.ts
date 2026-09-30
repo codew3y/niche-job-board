@@ -36,6 +36,21 @@ const isLocalSupabase =
   /^(127\.|0\.0\.0\.0$|localhost$|::1$|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(hostname);
 
 const nextConfig: NextConfig = {
+  /**
+   * The two browse indexes became one page with a type filter (/browse). Old links, bookmarks
+   * and search results keep working; the query string is passed through, so a filtered /jobs
+   * link lands on the same filtered list. Only the exact index paths — /jobs/<slug> and
+   * /talent/<slug> are the public detail pages and are untouched.
+   *
+   * Not permanent (307): browse is sign-in-only now, and a permanent redirect would be cached by
+   * browsers against a decision that may still change.
+   */
+  async redirects() {
+    return [
+      { source: '/jobs', destination: '/browse?type=jobs', permanent: false },
+      { source: '/talent', destination: '/browse?type=developers', permanent: false },
+    ];
+  },
   images: {
     // AVIF first, WebP for everything that cannot take it. Both are roughly half the bytes of
     // the JPEG/PNG originals at the same quality.

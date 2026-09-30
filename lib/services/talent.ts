@@ -110,9 +110,11 @@ export async function getTalentBySlug(slug: string) {
        availability, years_experience, timezone, website_url, github_url, linkedin_url,
        portfolio_item_count, is_published, accepts_messages, updated_at,
        talent_skills ( proficiency, years, skills ( name, slug, category ) ),
-       portfolio_items ( id, title, description, role, outcome, tech_stack, repo_url,
-                         live_url, cover_image_url, sort_order,
-                         item_media ( id, url, alt_text, sort_order ) )`,
+       portfolio_items ( id, title, description, role, outcome, tech_stack, links,
+                         cover_image_url, sort_order,
+                         item_media ( id, url, alt_text, sort_order ) ),
+       talent_experience ( id, role, company, start_date, end_date, description, sort_order ),
+       talent_education ( id, school, degree, start_year, end_year, sort_order )`,
     )
     .eq('slug', slug)
     .maybeSingle();
@@ -159,12 +161,32 @@ export type TalentProfileDetail = {
     role: string | null;
     outcome: string | null;
     tech_stack: string[];
-    repo_url: string | null;
-    live_url: string | null;
+    links: string[];
     cover_image_url: string | null;
     sort_order: number;
     item_media: { id: string; url: string; alt_text: string; sort_order: number }[];
   }[];
+  talent_experience: ExperienceRow[];
+  talent_education: EducationRow[];
+};
+
+export type ExperienceRow = {
+  id: string;
+  role: string;
+  company: string;
+  start_date: string;
+  end_date: string | null;
+  description: string;
+  sort_order: number;
+};
+
+export type EducationRow = {
+  id: string;
+  school: string;
+  degree: string;
+  start_year: number | null;
+  end_year: number | null;
+  sort_order: number;
 };
 
 export const AVAILABILITY_LABEL: Record<string, string> = {

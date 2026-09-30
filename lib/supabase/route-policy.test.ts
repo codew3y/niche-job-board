@@ -9,19 +9,57 @@ const fresh: Session = { signedIn: true, hasChosen: false, hasRole: false, activ
 const done: Session = { signedIn: true, hasChosen: true, hasRole: true, activeRole: 'talent' };
 
 describe('signed out', () => {
-  it('lets public pages through', () => {
-    for (const p of ['/', '/jobs', '/jobs/some-slug', '/talent', '/login', '/signup']) {
+  it('lets the front door, the auth screens and the detail pages through', () => {
+    for (const p of ['/', '/login', '/signup', '/jobs/some-slug', '/talent/some-slug']) {
       expect(decideRoute(p, anon)).toBeNull();
     }
   });
 
-  it('sends private pages to login, preserving where they were headed', () => {
+  it('sends private pages to the front door — the login — preserving where they were headed', () => {
     expect(decideRoute('/dashboard/talent/matches', anon)).toBe(
-      '/login?next=%2Fdashboard%2Ftalent%2Fmatches',
+      '/?next=%2Fdashboard%2Ftalent%2Fmatches',
     );
     expect(decideRoute('/dashboard/settings/roles', anon)).toBe(
-      '/login?next=%2Fdashboard%2Fsettings%2Froles',
+      '/?next=%2Fdashboard%2Fsettings%2Froles',
     );
+  });
+
+  it('keeps Browse behind sign-in', () => {
+    expect(decideRoute('/browse', anon)).toBe('/?next=%2Fbrowse');
+    expect(decideRoute('/dashboard', anon)).toBe('/?next=%2Fdashboard');
+  });
+
+  it('treats the old browse indexes as private — only their children are public', () => {
+    // /jobs and /talent redirect to /browse in next.config.ts; if one ever reaches the proxy it
+    // must not open browse to a signed-out visitor.
+    expect(decideRoute('/jobs', anon)).toBe('/?next=%2Fjobs');
+    expect(decideRoute('/talent', anon)).toBe('/?next=%2Ftalent');
+    expect(decideRoute('/jobs/', anon)).toBe('/?next=%2Fjobs%2F');
+  });
+});
+
+describe('the logo and the front door, signed in', () => {
+  // The logo points at /dashboard when signed in. Neither it nor a visit to / may ever leave a
+  // signed-in user on the landing page.
+  it('sends a signed-in visitor on / to their dashboard, by ACTIVE role, in one hop', () => {
+    expect(decideRoute('/', done)).toBe('/dashboard/talent');
+    expect(decideRoute('/', { ...done, activeRole: 'client' })).toBe('/dashboard/client');
+  });
+
+  it('sends an unfinished account on / to wherever it has to go first', () => {
+    expect(decideRoute('/', fresh)).toBe('/select-role');
+    expect(decideRoute('/', chosen)).toBe('/onboarding/talent/basics');
+  });
+
+  it('resolves /dashboard to the active role', () => {
+    expect(decideRoute('/dashboard', done)).toBe('/dashboard/talent');
+    expect(decideRoute('/dashboard', { ...done, activeRole: 'client' })).toBe('/dashboard/client');
+    expect(decideRoute('/dashboard', chosenClient)).toBe('/onboarding/client/company');
+  });
+
+  it('opens Browse to anyone fully onboarded, in either role', () => {
+    expect(decideRoute('/browse', done)).toBeNull();
+    expect(decideRoute('/browse', { ...done, activeRole: 'client' })).toBeNull();
   });
 });
 
@@ -35,12 +73,11 @@ describe('the health endpoint', () => {
     }
   });
 
-  it('so are the public browse pages, even mid-onboarding', () => {
-    // Browsing is not a privilege earned by finishing a wizard.
+  it('so are the job and developer detail pages, in every state', () => {
+    // A shared link must open whoever follows it, signed in or not, finished or not.
     for (const session of [anon, fresh, chosen, done]) {
-      expect(decideRoute('/jobs', session)).toBeNull();
-      expect(decideRoute('/talent', session)).toBeNull();
-      expect(decideRoute('/', session)).toBeNull();
+      expect(decideRoute('/jobs/some-slug', session)).toBeNull();
+      expect(decideRoute('/talent/some-slug', session)).toBeNull();
     }
   });
 });
@@ -78,8 +115,11 @@ describe('mid-onboarding — the redirect loop this file exists to prevent', () 
       '/dashboard/client',
       '/dashboard/settings/roles',
       '/login',
-      '/talent',
-      '/jobs',
+      '/',
+      '/dashboard',
+      '/browse',
+      '/talent/some-slug',
+      '/jobs/some-slug',
     ];
     for (const session of [anon, fresh, chosen, chosenClient, done]) {
       for (const path of paths) {
@@ -114,8 +154,8 @@ describe('fully onboarded', () => {
     expect(decideRoute('/login', { ...done, activeRole: 'client' })).toBe('/dashboard/client');
   });
 
-  it('still allows public browsing', () => {
-    expect(decideRoute('/jobs', done)).toBeNull();
+  it('still opens the public detail pages', () => {
+    expect(decideRoute('/jobs/some-slug', done)).toBeNull();
   });
 
   it('opens the shared inbox for either role', () => {
@@ -144,9 +184,9 @@ describe('the legal pages', () => {
 });
 
 describe('the inbox is private', () => {
-  it('sends a signed-out visitor to login, keeping the thread they wanted', () => {
+  it('sends a signed-out visitor to the front door, keeping the thread they wanted', () => {
     expect(decideRoute('/dashboard/messages/abc', anon)).toBe(
-      '/login?next=%2Fdashboard%2Fmessages%2Fabc',
+      '/?next=%2Fdashboard%2Fmessages%2Fabc',
     );
   });
 

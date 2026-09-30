@@ -99,7 +99,7 @@ export function SkillPicker({
         <input key={id} type="hidden" name={name} value={id} />
       ))}
 
-      <label htmlFor={`${uid}-input`} className="block text-sm font-medium">
+      <label htmlFor={`${uid}-input`} className="block text-sm font-semibold">
         Skills
       </label>
 
@@ -112,7 +112,7 @@ export function SkillPicker({
                 <button
                   type="button"
                   onClick={() => remove(id)}
-                  className="pressable inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-inverse pr-2 pl-3 text-sm text-text-inverse hover:opacity-85"
+                  className="pressable inline-flex h-8 items-center gap-1.5 rounded-md bg-surface-inverse pr-2 pl-3 text-sm text-text-inverse hover:opacity-85"
                 >
                   {skill?.name ?? id}
                   <X aria-hidden="true" size={14} className="opacity-70" />

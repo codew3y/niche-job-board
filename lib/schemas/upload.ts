@@ -7,6 +7,10 @@ import { z } from 'zod';
  * client-supplied `type` alone — both are trivially spoofed. The server re-checks the magic
  * bytes; this schema is the cheap first gate.
  */
+/** Where project photos go. `media` (migration 0011) still holds photos uploaded before 0020. */
+export const PROJECT_MEDIA_BUCKET = 'project-media';
+export const STORAGE_BUCKETS = [PROJECT_MEDIA_BUCKET, 'media'] as const;
+
 export const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 

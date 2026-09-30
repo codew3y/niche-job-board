@@ -24,7 +24,7 @@ export async function toggleSavedJob(formData: FormData): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=${encodeURIComponent('/jobs')}`);
+  if (!user) redirect(`/login?next=${encodeURIComponent('/browse?type=jobs')}`);
 
   const { data: profile } = await supabase
     .from('talent_profiles')
@@ -58,7 +58,7 @@ export async function toggleSavedTalent(formData: FormData): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=${encodeURIComponent('/talent')}`);
+  if (!user) redirect(`/login?next=${encodeURIComponent('/browse?type=developers')}`);
 
   const { data: client } = await supabase
     .from('client_profiles')
@@ -85,5 +85,5 @@ export async function toggleSavedTalent(formData: FormData): Promise<void> {
   }
 
   revalidatePath('/dashboard/client/saved');
-  revalidatePath('/talent');
+  revalidatePath('/browse');
 }

@@ -1,3 +1,5 @@
+import { dashboardPath } from '../roles';
+
 /**
  * Route gating, as a pure function.
  *
@@ -21,30 +23,38 @@ export type Session = {
   activeRole: 'talent' | 'client' | null;
 };
 
+/**
+ * Reachable without a session. Everything else sends a signed-out visitor to `/`.
+ *
+ * The app is sign-in-first: the landing page is the login, and Browse lives behind it. What
+ * stays public is what CANNOT work behind a login — the auth plumbing itself, the machine
+ * endpoints, the crawler files and the legal pages — plus the job and profile DETAIL pages
+ * (see PUBLIC_DETAIL_PREFIXES), so a shared link still opens.
+ */
 const PUBLIC_PREFIXES = [
   '/',
-  '/jobs',
-  '/talent',
   '/login',
   '/signup',
   '/verify',
   '/reset-password',
   // Linked from Google's OAuth consent screen, which is shown to people who are BY DEFINITION
-  // not signed in yet. Bouncing those links to /login would make the consent screen point at
+  // not signed in yet. Bouncing those links to a login would make the consent screen point at
   // a wall, and a privacy policy you must authenticate to read is not a published one.
   '/privacy',
   '/terms',
   /**
    * Crawler-facing and must never redirect. A crawler that asks for /robots.txt and is handed
-   * a 307 to /login learns nothing about what it may crawl, and a sitemap behind a redirect
-   * indexes zero pages.
+   * a 307 learns nothing about what it may crawl, and a sitemap behind a redirect indexes zero
+   * pages.
    *
    * Added after exactly that happened — the same omission as /privacy and /terms a day
-   * earlier, which is why e2e/public-routes.spec.ts now derives its list from this array
-   * rather than keeping a second copy to forget.
+   * earlier, which is why e2e/public-routes.spec.ts derives its list from this array rather
+   * than keeping a second copy to forget.
    */
   '/robots.txt',
   '/sitemap.xml',
+  // OAuth and email-link landings: the visitor arrives here WITHOUT a session and leaves with
+  // one. Gating them would make signing in impossible.
   '/auth/callback',
   '/auth/confirm',
   // Must be public, and must stay public: the keep-alive pings it, and a redirect here
@@ -58,6 +68,13 @@ const PUBLIC_PREFIXES = [
    */
   '/api/match/warm',
 ];
+
+/**
+ * Public for their CHILDREN only: /jobs/some-slug and /talent/some-slug open for anyone, while
+ * /jobs and /talent themselves are the old browse indexes (now redirects to /browse, which is
+ * private). A job link shared in a chat, and the JobPosting data Google reads, keep working.
+ */
+const PUBLIC_DETAIL_PREFIXES = ['/jobs', '/talent'];
 
 /** Reachable before the role profile exists — onboarding must be here, see above. */
 const PRE_ROLE_PREFIXES = [
@@ -78,12 +95,14 @@ const PRE_ROLE_PREFIXES = [
 
 /** Exported so tests assert against the real list rather than a copy that drifts. */
 export const PUBLIC_ROUTES = PUBLIC_PREFIXES;
+export const PUBLIC_DETAIL_ROUTES = PUBLIC_DETAIL_PREFIXES;
 
 const matches = (path: string, prefixes: string[]) =>
   prefixes.some((p) => path === p || (p !== '/' && path.startsWith(`${p}/`)) || path === p);
 
 const isPublic = (path: string) =>
-  PUBLIC_PREFIXES.some((p) => path === p || (p !== '/' && path.startsWith(`${p}/`)));
+  PUBLIC_PREFIXES.some((p) => path === p || (p !== '/' && path.startsWith(`${p}/`))) ||
+  PUBLIC_DETAIL_PREFIXES.some((p) => path.startsWith(`${p}/`) && path.length > p.length + 1);
 
 const firstStep = (role: 'talent' | 'client' | null) =>
   role === 'client' ? '/onboarding/client/company' : '/onboarding/talent/basics';
@@ -95,17 +114,29 @@ const firstStep = (role: 'talent' | 'client' | null) =>
  * affect the URL, so a dashboard at /talent would collide with it — two pages resolving to
  * one path. Namespacing the private side keeps the public URLs free for Phase 3.
  */
-const dashboard = (role: 'talent' | 'client' | null) =>
-  role === 'client' ? '/dashboard/client' : '/dashboard/talent';
+const dashboard = dashboardPath;
+
+/**
+ * What `/dashboard` resolves to for this session: the active role's dashboard, or wherever an
+ * unfinished account has to go first.
+ */
+const appHome = (session: Session) =>
+  session.hasRole
+    ? dashboard(session.activeRole)
+    : session.hasChosen
+      ? firstStep(session.activeRole)
+      : '/select-role';
 
 /** Where this request should go, or null to let it through. */
 export function decideRoute(path: string, session: Session): string | null {
   // Public paths are public for EVERYONE, signed in or not. Checking this only for
-  // signed-out visitors meant a user mid-onboarding was redirected away from /jobs, /talent
-  // and /api/health — browsing is not a privilege you earn by finishing a wizard, and the
-  // keep-alive ping has no session at all.
+  // signed-out visitors meant a user mid-onboarding was redirected away from public pages and
+  // /api/health — and the keep-alive ping has no session at all.
   if (isPublic(path)) {
-    // The one exception: someone fully onboarded has no reason to sit on the auth screens.
+    // The landing page IS the login, so a signed-in visitor has no reason to be on it. Sent
+    // straight to where /dashboard would send them — one hop, never two (see the loop test).
+    if (session.signedIn && path === '/') return appHome(session);
+    // Someone fully onboarded has no reason to sit on the auth screens either.
     if (session.signedIn && session.hasRole && (path === '/login' || path === '/signup')) {
       return dashboard(session.activeRole);
     }
@@ -113,7 +144,9 @@ export function decideRoute(path: string, session: Session): string | null {
   }
 
   if (!session.signedIn) {
-    return `/login?next=${encodeURIComponent(path)}`;
+    // To the front door — which is the login — carrying where they were headed, so signing in
+    // lands them there rather than on a dashboard they did not ask for.
+    return `/?next=${encodeURIComponent(path)}`;
   }
 
   if (matches(path, PRE_ROLE_PREFIXES)) {
@@ -126,6 +159,10 @@ export function decideRoute(path: string, session: Session): string | null {
     // Mid-onboarding resumes where they were; otherwise they still have to choose.
     return session.hasChosen ? firstStep(session.activeRole) : '/select-role';
   }
+
+  // The app home. Resolved HERE rather than by a page, so /dashboard never renders an empty
+  // frame before bouncing — the role comes from user_profiles, read once by the proxy.
+  if (path === '/dashboard') return dashboard(session.activeRole);
 
   return null;
 }

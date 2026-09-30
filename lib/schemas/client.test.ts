@@ -1,20 +1,17 @@
 import { describe, expect, it } from 'vitest';
 
-import { clientProfileInput, companySizes } from './client';
+import { clientProfileInput } from './client';
 
 /**
- * The company form posts strings, and a `<select>` with no choice made posts "".
- *
- * `companySize` was `z.enum([...]).optional()`, which rejects "" — so every save from an
- * untouched form failed validation, and since the field had no error slot the page showed
- * nothing at all. The button worked; the save never happened. These tests are the form's
+ * The company form posts strings, and blank optional fields post "". These tests are the form's
  * actual payload, not its ideal one.
+ *
+ * `companySize` was removed from the form, the schema and the table (migration 0020).
  */
 const post = (over: Record<string, unknown> = {}) => ({
   companyName: 'Acme',
   website: '',
   industry: '',
-  companySize: '',
   about: '',
   ...over,
 });
@@ -29,18 +26,11 @@ describe('clientProfileInput', () => {
     const r = clientProfileInput.parse(post());
     expect(r.website).toBeNull();
     expect(r.industry).toBeNull();
-    expect(r.companySize).toBeNull();
   });
 
-  it('keeps every size the picker offers', () => {
-    for (const size of companySizes) {
-      expect(clientProfileInput.safeParse(post({ companySize: size })).success).toBe(true);
-    }
-  });
-
-  it('still rejects a size that is not on the list', () => {
-    const r = clientProfileInput.safeParse(post({ companySize: 'enormous' }));
-    expect(r.success).toBe(false);
+  it('no longer knows about company size — a stale field is dropped, not stored', () => {
+    const r = clientProfileInput.parse(post({ companySize: '11-50' }));
+    expect(r).not.toHaveProperty('companySize');
   });
 
   it('still requires a company name — it is on every job this client posts', () => {

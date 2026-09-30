@@ -38,7 +38,7 @@ export function FilterSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={cn(
-          'h-10 appearance-none rounded-full border pr-9 pl-4 text-sm font-medium transition-colors duration-fast ease-out',
+          'h-10 appearance-none rounded-md border pr-9 pl-4 text-sm font-semibold transition-colors duration-fast ease-out',
           active
             ? 'border-surface-inverse bg-surface-inverse text-text-inverse'
             : 'border-control/60 bg-surface-raised text-text-muted hover:border-control hover:text-text',

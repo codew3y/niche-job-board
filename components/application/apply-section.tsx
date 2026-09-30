@@ -51,7 +51,7 @@ export function ApplySection({
     case 'already-applied':
       return (
         <div role="status" className="rounded-lg bg-success-subtle p-4">
-          <p className="flex items-start gap-2 font-medium text-success">
+          <p className="flex items-start gap-2 font-semibold text-success">
             <CheckCircle2 aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
             {STATUS_COPY[state.status] ?? state.status}
           </p>
@@ -85,7 +85,7 @@ export function ApplySection({
       return (
         <div className="space-y-3">
           <p className="text-sm text-text-muted text-pretty">
-            <strong className="block font-medium text-text">
+            <strong className="block font-semibold text-text">
               You need a talent profile to apply
             </strong>
             Clients see the work behind an application, not just the note.
@@ -100,7 +100,7 @@ export function ApplySection({
       return (
         <div className="space-y-3 rounded-lg bg-warning-subtle p-4">
           <p className="text-sm text-pretty">
-            <strong className="flex items-center gap-1.5 font-medium text-warning">
+            <strong className="flex items-center gap-1.5 font-semibold text-warning">
               <CircleAlert aria-hidden="true" size={16} />
               Publish your profile first
             </strong>
@@ -131,11 +131,12 @@ export function ApplySection({
     case 'is-client':
       return (
         <p className="text-sm text-text-muted text-pretty">
-          You&rsquo;re signed in as a client. Add a talent profile from{' '}
-          <Link href="/dashboard/settings/roles" className="prose-link font-medium">
+          You&rsquo;re viewing as a client. To apply, switch to your developer profile from the
+          profile menu — or add one in{' '}
+          <Link href="/dashboard/settings/roles" className="prose-link font-semibold">
             settings
-          </Link>{' '}
-          if you want to apply to work too — one account holds both.
+          </Link>
+          . One account holds both.
         </p>
       );
 

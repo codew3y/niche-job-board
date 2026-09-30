@@ -68,7 +68,7 @@ export function FieldShell({
     <div className={cn('space-y-1.5', className)}>
       <label
         htmlFor={fieldId}
-        className={cn('block text-sm font-medium text-text', srOnlyLabel && 'sr-only')}
+        className={cn('block text-sm font-semibold text-text', srOnlyLabel && 'sr-only')}
       >
         {label}
         {optional && <span className="ml-1.5 font-normal text-text-subtle">Optional</span>}
@@ -254,13 +254,13 @@ export function ChoiceChips({
 }) {
   return (
     <fieldset>
-      <legend className="mb-2 text-sm font-medium">{legend}</legend>
+      <legend className="mb-2 text-sm font-semibold">{legend}</legend>
       <div className="flex flex-wrap gap-2">
         {options.map(([v, l]) => (
           <label
             key={v}
             className={cn(
-              'pressable relative inline-flex h-10 cursor-pointer items-center rounded-full border px-4 text-sm select-none',
+              'pressable relative inline-flex h-10 cursor-pointer items-center rounded-md border px-4 text-sm select-none',
               'border-control/60 bg-surface-raised text-text-muted hover:border-control hover:text-text',
               'has-[:checked]:border-surface-inverse has-[:checked]:bg-surface-inverse has-[:checked]:text-text-inverse',
               'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus',

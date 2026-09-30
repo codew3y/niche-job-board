@@ -1,6 +1,22 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
+import { canSeed, PASSWORD, seed, teardown, type Seeded } from './fixtures';
+
+/** Browse is behind sign-in, so its checks seed an account (skipped without the service key). */
+let data: Seeded | undefined;
+test.afterAll(async () => {
+  if (data) await teardown(data);
+});
+async function signIn(page: Page) {
+  data ??= await seed();
+  await page.goto('/');
+  await page.getByLabel(/email/i).fill(data.talent.email);
+  await page.getByLabel(/password/i).fill(PASSWORD);
+  await page.getByRole('button', { name: /sign in/i }).click();
+  await page.waitForURL(/\/dashboard\//, { timeout: 20_000 });
+}
+
 /**
  * Automated accessibility checks on every public route.
  *
@@ -19,8 +35,6 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 /** Every route reachable without a session. Authenticated pages need fixtures; see below. */
 const PUBLIC_PAGES = [
   { path: '/', name: 'home' },
-  { path: '/jobs', name: 'job browse' },
-  { path: '/talent', name: 'developer browse' },
   { path: '/login', name: 'sign in' },
   { path: '/signup', name: 'sign up' },
   { path: '/privacy', name: 'privacy' },
@@ -93,7 +107,7 @@ test.describe('structure that axe checks but is easy to get wrong', () => {
   test('the skip link is the first focusable element', async ({ page }) => {
     // §9 calls this a requirement, not an extra. It is the only way a keyboard user gets past
     // the nav without tabbing through it on every page.
-    await page.goto('/jobs');
+    await page.goto('/privacy');
     await page.keyboard.press('Tab');
     const focused = await page.evaluate(() => ({
       text: document.activeElement?.textContent?.trim(),
@@ -104,7 +118,9 @@ test.describe('structure that axe checks but is easy to get wrong', () => {
   });
 
   test('filter controls are reachable and operable by keyboard alone', async ({ page }) => {
-    await page.goto('/jobs');
+    test.skip(!canSeed, 'Browse is sign-in-only; needs SUPABASE_SERVICE_ROLE_KEY');
+    await signIn(page);
+    await page.goto('/browse?type=jobs');
     const skill = page.locator('#filter-skill');
     await skill.focus();
     await expect(skill).toBeFocused();
@@ -113,8 +129,10 @@ test.describe('structure that axe checks but is easy to get wrong', () => {
   });
 
   test('THE SEARCH INPUT HAS A LABEL, even though it is visually hidden', async ({ page }) => {
-    await page.goto('/jobs');
-    const search = page.locator('#job-search');
+    test.skip(!canSeed, 'Browse is sign-in-only; needs SUPABASE_SERVICE_ROLE_KEY');
+    await signIn(page);
+    await page.goto('/browse');
+    const search = page.locator('#browse-search');
     const labelled = await search.evaluate((el) => {
       const id = el.getAttribute('id');
       return Boolean(

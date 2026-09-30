@@ -47,7 +47,7 @@ export function TalentMatchItem({ match }: { match: TalentMatch }) {
     <li className="relative px-5 py-5 transition-colors duration-fast ease-out hover:bg-surface-sunken/50">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h3 className="font-medium text-balance">
+          <h3 className="font-semibold text-balance">
             {/* The title link covers the row (after:inset-0), so the whole row is one target
                 without nesting interactive elements inside a link. */}
             <Link
@@ -102,7 +102,7 @@ export function CandidateMatchItem({ match }: { match: CandidateMatch }) {
       <div className="flex items-start gap-3.5">
         <Avatar name={match.headline} />
         <div className="min-w-0 flex-1">
-          <h3 className="font-medium text-balance">
+          <h3 className="font-semibold text-balance">
             <Link href={`/talent/${match.slug}`} className="hover:underline">
               {match.headline}
             </Link>
@@ -110,7 +110,7 @@ export function CandidateMatchItem({ match }: { match: CandidateMatch }) {
           <p className="mt-0.5 text-sm text-text-subtle">{evidence}</p>
           {match.reason && <MatchReason className="mt-3">{match.reason}</MatchReason>}
           <p className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-            <Link href={`/talent/${match.slug}`} className="prose-link font-medium">
+            <Link href={`/talent/${match.slug}`} className="prose-link font-semibold">
               See their work
             </Link>
             {match.websiteUrl && (

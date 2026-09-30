@@ -1,78 +1,77 @@
 @import 'tailwindcss';
 
 /*
- * TechSelect design tokens — the Editorial system (DESIGN.md §4).
+ * TechSelect design tokens — minimal.
  *
  * EVERY visual value in the product comes from here. Components use the semantic names below
- * (`bg-surface`, `text-muted`, `rounded-lg`, `shadow-md`, `duration-fast`, `ease-out`), never a
- * raw colour, pixel radius or millisecond value — so a theme change is an edit to this file and
- * nothing else.
+ * (`bg-surface`, `text-muted`, `rounded-lg`, `border-border-base`, `duration-fast`), never a raw
+ * colour, pixel radius or millisecond value — so a theme change is an edit to this file only.
  *
- * WHY THE SYNTAX MATTERS HERE: the previous token file was correct and never applied. Its
- * components wrote `rounded-[--radius]`, which Tailwind v4 compiles to `border-radius:--radius`
- * — invalid CSS that browsers silently drop (DESIGN.md §1, A1). Tokens now reach Tailwind
- * through `@theme`, which generates real utilities (`rounded-lg`), so there is no bracket
- * syntax left to get wrong.
+ * The system, in four rules:
+ *   - Neutral: near-white and near-black with true greys between (zero chroma), plus ONE accent.
+ *     Status colours (success / warning / danger) are functional, not decorative.
+ *   - Lines, not depth: 1px borders or none. Shadows exist only for floating layers (menus,
+ *     dialogs) and are faint.
+ *   - Subtle radius: 6–8px on everything rectangular. Circles only for avatars and dots.
+ *   - One face, two weights: Inter 400 and 600 (app/layout.tsx), 16px base, line-height 1.5.
  *
- * Colour is OKLCH: lightness is perceptually uniform, so the same step reads as the same step at
- * every hue, and dark-mode values are derived by moving L rather than hand-picking hex codes.
+ * Tokens reach Tailwind through `@theme`, which generates real utilities (`rounded-lg`), so
+ * there is no bracket syntax to get wrong. Colour is OKLCH so light and dark are the same scale
+ * read from opposite ends.
  */
 
-/* ───────────────────────────── Colour — light (paper) ───────────────────────────── */
+/* ───────────────────────────── Colour — light ───────────────────────────── */
 :root {
   color-scheme: light;
 
-  /* Surfaces. Warm paper, never pure white: large white fields read clinical and glare. */
-  --surface: oklch(96.6% 0.007 80); /* the page */
-  --surface-raised: oklch(98.8% 0.004 85); /* cards, inputs, popovers */
-  --surface-sunken: oklch(93.6% 0.011 80); /* wells, table heads, skeletons */
-  --surface-inverse: oklch(21.5% 0.006 85); /* ink — primary buttons, the picker-free dark bits */
+  /* Surfaces */
+  --surface: oklch(98.5% 0 0); /* #fafafa — the page */
+  --surface-raised: oklch(100% 0 0); /* cards, inputs, popovers */
+  --surface-sunken: oklch(96.5% 0 0); /* wells, hover rows, skeletons */
+  --surface-inverse: oklch(18% 0 0); /* near-black — primary buttons */
 
-  /* Lines. Hairlines are decoration; `--control` is a component boundary and must reach 3:1
-     against the page (WCAG 1.4.11), which a hairline never does. */
-  --border: oklch(89.5% 0.012 80);
-  --border-strong: oklch(82% 0.015 80);
-  --control: oklch(63% 0.016 80); /* 3.2:1 on --surface */
+  /* Lines. `--control` is a component boundary and must reach 3:1 against the page
+     (WCAG 1.4.11), which a hairline never does. */
+  --border: oklch(91.5% 0 0);
+  --border-strong: oklch(85% 0 0);
+  --control: oklch(62% 0 0);
 
-  /* Text. All three clear AA (4.5:1) on every surface — measured, DESIGN.md §4.1. */
-  --text: oklch(21.5% 0.006 85); /* 15.9:1 */
-  --text-muted: oklch(40% 0.012 80); /* 8.4:1 */
-  --text-subtle: oklch(50% 0.012 80); /* 5.4:1; 5.0:1 on sunken */
-  --text-inverse: oklch(96.6% 0.007 80);
+  /* Text — all clear AA (4.5:1) on every surface. */
+  --text: oklch(18% 0 0);
+  --text-muted: oklch(40% 0 0);
+  --text-subtle: oklch(50% 0 0);
+  --text-inverse: oklch(98.5% 0 0);
 
-  /* The one accent: vermilion. 5.4:1 on paper (measured), so it may carry small text. */
-  --accent: oklch(52% 0.17 38);
-  --accent-hover: oklch(46% 0.165 38);
-  --accent-subtle: oklch(94.5% 0.028 50);
-  --accent-text: oklch(99% 0.004 85); /* text ON the accent */
+  /* The one accent: blue. ~5.6:1 on white, so it may carry small text. */
+  --accent: oklch(52% 0.19 262);
+  --accent-hover: oklch(46% 0.19 262);
+  --accent-subtle: oklch(95.5% 0.025 262);
+  --accent-text: oklch(100% 0 0); /* text ON the accent */
 
   /* Status. Each has a text-safe foreground and a quiet background. */
-  --success: oklch(47% 0.1 152);
-  --success-subtle: oklch(94.5% 0.03 152);
+  --success: oklch(47% 0.11 152);
+  --success-subtle: oklch(95.5% 0.03 152);
   --warning: oklch(50% 0.11 70);
-  --warning-subtle: oklch(95% 0.045 85);
-  --danger: oklch(51% 0.19 27);
-  --danger-subtle: oklch(95% 0.025 25);
+  --warning-subtle: oklch(96% 0.04 85);
+  --danger: oklch(52% 0.19 27);
+  --danger-subtle: oklch(96% 0.025 25);
 
-  --focus: oklch(52% 0.17 38);
-  --scrim: oklch(15% 0.01 70 / 0.72); /* over photography */
+  --focus: oklch(52% 0.19 262);
+  --scrim: oklch(0% 0 0 / 0.6); /* over photography */
 
-  /* On-media: controls laid over the hero video. Deliberately NOT redefined in dark mode —
-     footage is dark in both themes, so what sits on it must be the same in both. */
-  --media-surface: oklch(98.8% 0.004 85);
-  --media-text: oklch(21.5% 0.006 85);
-  --backdrop: oklch(18% 0.01 70 / 0.42); /* behind dialogs */
+  /* On-media: controls laid over video. Not redefined in dark mode — footage is dark in both. */
+  --media-surface: oklch(100% 0 0);
+  --media-text: oklch(18% 0 0);
+  --backdrop: oklch(0% 0 0 / 0.4); /* behind dialogs */
 
-  /* Elevation. Warm-tinted, two layers: a tight contact shadow and a soft ambient one — how a
-     sheet of paper actually sits on a desk. Editorial leans on rules first and shadows second,
-     so these are quiet. */
-  --elev-xs: 0 1px 2px oklch(21.5% 0.006 85 / 0.05);
-  --elev-sm: 0 1px 2px oklch(21.5% 0.006 85 / 0.05), 0 2px 8px -2px oklch(21.5% 0.006 85 / 0.06);
-  --elev-md: 0 2px 4px oklch(21.5% 0.006 85 / 0.04), 0 12px 32px -8px oklch(21.5% 0.006 85 / 0.14);
-  --elev-lg: 0 4px 8px oklch(21.5% 0.006 85 / 0.04), 0 24px 64px -12px oklch(21.5% 0.006 85 / 0.24);
+  /* Elevation — floating layers only, and faint. Everything in the page flow uses a border. */
+  --elev-xs: 0 0 #0000;
+  --elev-sm: 0 0 #0000;
+  --elev-md: 0 4px 16px oklch(0% 0 0 / 0.06);
+  --elev-lg: 0 8px 24px oklch(0% 0 0 / 0.08);
 }
 
-/* ───────────────────────────── Colour — dark (ink) ───────────────────────────── */
+/* ───────────────────────────── Colour — dark ───────────────────────────── */
 /*
  * Declared twice on purpose. next-themes writes `data-theme` before first paint, so the
  * attribute selector is what normally applies. The media-query copy is the fallback for a
@@ -81,67 +80,63 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --surface: oklch(17.2% 0.006 70);
-    --surface-raised: oklch(20.8% 0.007 70);
-    --surface-sunken: oklch(14.6% 0.005 70);
-    --surface-inverse: oklch(94% 0.01 80);
-    --border: oklch(28% 0.008 70);
-    --border-strong: oklch(35% 0.009 70);
-    --control: oklch(55% 0.01 70);
-    --text: oklch(94% 0.01 80);
-    --text-muted: oklch(79% 0.012 80);
-    --text-subtle: oklch(69% 0.012 80);
-    --text-inverse: oklch(17.2% 0.006 70);
-    --accent: oklch(71% 0.155 42);
-    --accent-hover: oklch(77% 0.14 46);
-    --accent-subtle: oklch(27% 0.055 40);
-    --accent-text: oklch(17.2% 0.006 70);
+    --surface: oklch(14.5% 0 0);
+    --surface-raised: oklch(18% 0 0);
+    --surface-sunken: oklch(21% 0 0);
+    --surface-inverse: oklch(96% 0 0);
+    --border: oklch(27% 0 0);
+    --border-strong: oklch(34% 0 0);
+    --control: oklch(55% 0 0);
+    --text: oklch(96% 0 0);
+    --text-muted: oklch(78% 0 0);
+    --text-subtle: oklch(68% 0 0);
+    --text-inverse: oklch(14.5% 0 0);
+    --accent: oklch(72% 0.14 262);
+    --accent-hover: oklch(78% 0.12 262);
+    --accent-subtle: oklch(26% 0.06 262);
+    --accent-text: oklch(14.5% 0 0);
     --success: oklch(74% 0.12 152);
     --success-subtle: oklch(26% 0.04 152);
     --warning: oklch(80% 0.12 80);
     --warning-subtle: oklch(27% 0.045 80);
     --danger: oklch(71% 0.16 27);
     --danger-subtle: oklch(26% 0.05 25);
-    --focus: oklch(71% 0.155 42);
-    --scrim: oklch(12% 0.008 70 / 0.78);
-    --backdrop: oklch(8% 0.005 70 / 0.6);
-    --elev-xs: 0 1px 2px oklch(0% 0 0 / 0.4);
-    --elev-sm: 0 1px 2px oklch(0% 0 0 / 0.4), 0 2px 8px -2px oklch(0% 0 0 / 0.35);
-    --elev-md: 0 2px 4px oklch(0% 0 0 / 0.35), 0 12px 32px -8px oklch(0% 0 0 / 0.5);
-    --elev-lg: 0 4px 8px oklch(0% 0 0 / 0.35), 0 24px 64px -12px oklch(0% 0 0 / 0.6);
+    --focus: oklch(72% 0.14 262);
+    --scrim: oklch(0% 0 0 / 0.7);
+    --backdrop: oklch(0% 0 0 / 0.6);
+    --elev-md: 0 4px 16px oklch(0% 0 0 / 0.4);
+    --elev-lg: 0 8px 24px oklch(0% 0 0 / 0.5);
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --surface: oklch(17.2% 0.006 70);
-  --surface-raised: oklch(20.8% 0.007 70);
-  --surface-sunken: oklch(14.6% 0.005 70);
-  --surface-inverse: oklch(94% 0.01 80);
-  --border: oklch(28% 0.008 70);
-  --border-strong: oklch(35% 0.009 70);
-  --control: oklch(55% 0.01 70);
-  --text: oklch(94% 0.01 80);
-  --text-muted: oklch(79% 0.012 80);
-  --text-subtle: oklch(69% 0.012 80);
-  --text-inverse: oklch(17.2% 0.006 70);
-  --accent: oklch(71% 0.155 42);
-  --accent-hover: oklch(77% 0.14 46);
-  --accent-subtle: oklch(27% 0.055 40);
-  --accent-text: oklch(17.2% 0.006 70);
+  --surface: oklch(14.5% 0 0);
+  --surface-raised: oklch(18% 0 0);
+  --surface-sunken: oklch(21% 0 0);
+  --surface-inverse: oklch(96% 0 0);
+  --border: oklch(27% 0 0);
+  --border-strong: oklch(34% 0 0);
+  --control: oklch(55% 0 0);
+  --text: oklch(96% 0 0);
+  --text-muted: oklch(78% 0 0);
+  --text-subtle: oklch(68% 0 0);
+  --text-inverse: oklch(14.5% 0 0);
+  --accent: oklch(72% 0.14 262);
+  --accent-hover: oklch(78% 0.12 262);
+  --accent-subtle: oklch(26% 0.06 262);
+  --accent-text: oklch(14.5% 0 0);
   --success: oklch(74% 0.12 152);
   --success-subtle: oklch(26% 0.04 152);
   --warning: oklch(80% 0.12 80);
   --warning-subtle: oklch(27% 0.045 80);
   --danger: oklch(71% 0.16 27);
   --danger-subtle: oklch(26% 0.05 25);
-  --focus: oklch(71% 0.155 42);
-  --scrim: oklch(12% 0.008 70 / 0.78);
-  --backdrop: oklch(8% 0.005 70 / 0.6);
-  --elev-xs: 0 1px 2px oklch(0% 0 0 / 0.4);
-  --elev-sm: 0 1px 2px oklch(0% 0 0 / 0.4), 0 2px 8px -2px oklch(0% 0 0 / 0.35);
-  --elev-md: 0 2px 4px oklch(0% 0 0 / 0.35), 0 12px 32px -8px oklch(0% 0 0 / 0.5);
-  --elev-lg: 0 4px 8px oklch(0% 0 0 / 0.35), 0 24px 64px -12px oklch(0% 0 0 / 0.6);
+  --focus: oklch(72% 0.14 262);
+  --scrim: oklch(0% 0 0 / 0.7);
+  --backdrop: oklch(0% 0 0 / 0.6);
+  --elev-md: 0 4px 16px oklch(0% 0 0 / 0.4);
+  --elev-lg: 0 8px 24px oklch(0% 0 0 / 0.5);
 }
 
 /* ───────────────────────────── Motion, layering, layout ───────────────────────────── */
@@ -176,8 +171,6 @@
 
   /* Page gutter, widened on larger screens. Safe areas are added where edges meet glass. */
   --gutter: 1rem;
-  --nav-height: 3.75rem;
-  --tabbar-height: 3.75rem;
 }
 
 @media (min-width: 40rem) {
@@ -220,9 +213,18 @@
   --shadow-md: var(--elev-md);
   --shadow-lg: var(--elev-lg);
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
+  /* One family. `font-serif` and `font-mono` are mapped to it too, so nothing can reach for a
+     second face by accident — including the archived prototypes under /prototypes. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Two weights only. `medium` and `bold` resolve to the 600 face, so a stray utility can never
+     request a third weight that was never loaded (and would be synthesised). */
+  --font-weight-normal: 400;
+  --font-weight-medium: 600;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 600;
 
   --ease-out: var(--ease-out-strong);
   --ease-in-out: var(--ease-in-out-strong);
@@ -231,45 +233,46 @@
 
 @theme {
   /*
-   * Radius. Buttons and chips are pills — the Editorial signature, and a shape that reads as
-   * pressable at a glance. Inputs are softer than cards so a form never looks like a stack of
-   * cards. Tailwind's defaults are replaced, not extended: there is one scale.
+   * Radius — subtle, 6–8px. Small controls 6px, cards and panels 8px. The larger steps are kept
+   * as names so existing markup still compiles, but they cap at 8px: there is one look.
    */
   --radius-xs: 0.25rem;
   --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.5rem;
 
   /*
-   * Type scale. 16px body, a 1.2-ish step for UI, and three FLUID display sizes for the serif,
-   * which is the only text that scales with the viewport: a 5.5rem headline on a laptop is
-   * 2.75rem on a phone without a breakpoint in sight.
+   * Type scale. 16px base, line-height 1.5 throughout body sizes; headings are 600 and tighter.
+   * No fluid display sizes — a minimal system does not need a headline that shouts.
    */
   --text-2xs: 0.6875rem;
-  --text-2xs--line-height: 1rem;
+  --text-2xs--line-height: 1.5;
   --text-xs: 0.75rem;
-  --text-xs--line-height: 1.125rem;
+  --text-xs--line-height: 1.5;
   --text-sm: 0.875rem;
-  --text-sm--line-height: 1.375rem;
+  --text-sm--line-height: 1.5;
   --text-base: 1rem;
-  --text-base--line-height: 1.625rem;
+  --text-base--line-height: 1.5;
   --text-lg: 1.125rem;
-  --text-lg--line-height: 1.75rem;
+  --text-lg--line-height: 1.5;
   --text-xl: 1.25rem;
-  --text-xl--line-height: 1.75rem;
+  --text-xl--line-height: 1.4;
   --text-2xl: 1.5rem;
-  --text-2xl--line-height: 2rem;
-  --text-display-sm: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);
-  --text-display-sm--line-height: 1.05;
-  --text-display-sm--letter-spacing: -0.015em;
-  --text-display-md: clamp(2.25rem, 1.6rem + 2.8vw, 3.5rem);
-  --text-display-md--line-height: 1;
-  --text-display-md--letter-spacing: -0.02em;
-  --text-display-lg: clamp(2.75rem, 1.6rem + 5vw, 5.75rem);
-  --text-display-lg--line-height: 0.95;
-  --text-display-lg--letter-spacing: -0.025em;
+  --text-2xl--line-height: 1.3;
+  --text-display-sm: 1.75rem;
+  --text-display-sm--line-height: 1.25;
+  --text-display-sm--letter-spacing: -0.01em;
+  --text-display-sm--font-weight: 600;
+  --text-display-md: 2.25rem;
+  --text-display-md--line-height: 1.2;
+  --text-display-md--letter-spacing: -0.015em;
+  --text-display-md--font-weight: 600;
+  --text-display-lg: 3rem;
+  --text-display-lg--line-height: 1.1;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 600;
 
   --tracking-eyebrow: 0.16em;
 }
@@ -366,10 +369,16 @@
     text-rendering: optimizeLegibility;
   }
 
+  html {
+    font-size: 100%; /* 16px base — the browser default, never overridden */
+  }
+
   body {
     background: var(--surface);
     color: var(--text);
-    font-feature-settings: 'ss01', 'cv11';
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -503,10 +512,10 @@
   top: 0.75rem;
   z-index: var(--z-skip);
   padding: 0.625rem 1rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-md);
   background: var(--surface-inverse);
   color: var(--text-inverse);
-  font-weight: 500;
+  font-weight: 600;
   transform: translateY(-160%);
   transition: transform var(--duration-base) var(--ease-out-strong);
 }

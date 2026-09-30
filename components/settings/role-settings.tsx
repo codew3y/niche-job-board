@@ -54,7 +54,7 @@ export function RoleSettings({
               <span
                 aria-hidden="true"
                 className={cn(
-                  'grid size-10 place-items-center rounded-full',
+                  'grid size-10 place-items-center rounded-md',
                   isActive
                     ? 'bg-surface-inverse text-text-inverse'
                     : 'bg-surface-sunken text-text-subtle',

@@ -81,7 +81,7 @@ export async function startConversation(
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=${encodeURIComponent('/talent')}`);
+  if (!user) redirect(`/login?next=${encodeURIComponent('/browse?type=developers')}`);
 
   const { data: client } = await supabase
     .from('client_profiles')

@@ -141,6 +141,13 @@
       "when": 1790430428076,
       "tag": "0019_function_search_path",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790516828076,
+      "tag": "0020_profile_sections",
+      "breakpoints": true
     }
   ]
 }

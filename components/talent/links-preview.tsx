@@ -27,7 +27,7 @@ import { ExternalLink } from '@/components/shared/external-link';
 type LinkState = { website: string; github: string; linkedin: string };
 
 const LABELS: { key: keyof LinkState; label: string; hint: string }[] = [
-  { key: 'website', label: 'Portfolio site', hint: 'https://yourname.dev' },
+  { key: 'website', label: 'Portfolio website', hint: 'https://yourname.dev' },
   { key: 'github', label: 'GitHub', hint: 'https://github.com/yourname' },
   { key: 'linkedin', label: 'LinkedIn', hint: 'https://linkedin.com/in/yourname' },
 ];
@@ -53,13 +53,13 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
 
   return (
     <fieldset className="space-y-4">
-      <legend className="text-lg font-semibold tracking-tight">Links</legend>
+      <legend className="text-base font-semibold">Portfolio website and linked accounts</legend>
 
       {LABELS.map(({ key, label, hint }) => {
         const state = status(links[key]);
         return (
           <div key={key} className="space-y-1.5">
-            <label htmlFor={`link-${key}`} className="block text-sm font-medium">
+            <label htmlFor={`link-${key}`} className="block text-sm font-semibold">
               {label}
             </label>
             <input
@@ -93,20 +93,20 @@ export function LinksPreview({ initial }: { initial: LinkState }) {
       })}
 
       <div className="rounded-lg bg-surface-sunken p-4">
-        <p className="text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+        <p className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
           On your public profile
         </p>
         {anyValid ? (
           <p className="mt-2 flex flex-wrap gap-4 text-sm">
             {/* Rendered by the same component the real page uses, so what is shown here is
                 exactly what visitors get — external-link icon, new tab, rel and all. */}
-            <ExternalLink href={links.website.trim()} className="font-medium">
+            <ExternalLink href={links.website.trim()} className="font-semibold">
               Portfolio
             </ExternalLink>
-            <ExternalLink href={links.github.trim()} className="font-medium">
+            <ExternalLink href={links.github.trim()} className="font-semibold">
               GitHub
             </ExternalLink>
-            <ExternalLink href={links.linkedin.trim()} className="font-medium">
+            <ExternalLink href={links.linkedin.trim()} className="font-semibold">
               LinkedIn
             </ExternalLink>
           </p>

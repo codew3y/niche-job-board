@@ -19,10 +19,13 @@ export function ExternalLink({
   href,
   children,
   className = '',
+  bare = false,
 }: {
   href: string | null | undefined;
   children: ReactNode;
   className?: string;
+  /** Icon links: no underline and no trailing arrow. Children must still carry a text name. */
+  bare?: boolean;
 }) {
   if (!href || !/^https:\/\//i.test(href)) return null;
 
@@ -31,14 +34,16 @@ export function ExternalLink({
       href={href}
       target="_blank"
       rel="noopener noreferrer nofollow"
-      className={cn('prose-link', className)}
+      className={cn(!bare && 'prose-link', className)}
     >
       {children}
       <span className="sr-only"> (opens in a new tab)</span>
-      <ArrowUpRight
-        aria-hidden="true"
-        className="ml-0.5 inline-block size-3.5 align-[-0.1em] opacity-60"
-      />
+      {!bare && (
+        <ArrowUpRight
+          aria-hidden="true"
+          className="ml-0.5 inline-block size-3.5 align-[-0.1em] opacity-60"
+        />
+      )}
     </a>
   );
 }

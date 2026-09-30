@@ -8,8 +8,7 @@ import { cn } from '@/lib/ui/cn';
  * look like a button without being one — a link that navigates must stay a link, or the
  * browser's own behaviour (open in new tab, the status bar URL, prefetch) disappears.
  *
- * SHAPE — a pill. It is the Editorial signature and it reads as pressable at a glance, which a
- * rectangle beside rectangular cards does not.
+ * SHAPE — the system's subtle 6px radius (`rounded-md`), like every other control.
  *
  * MOTION — `pressable`: scale(0.97) on :active, 100ms, strong ease-out. Answering on
  * pointer-down is what makes a web button feel like a native one (mobile-native §5). Hover is
@@ -21,7 +20,7 @@ import { cn } from '@/lib/ui/cn';
  */
 export const buttonStyles = cva(
   [
-    'pressable inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-medium whitespace-nowrap',
+    'pressable inline-flex shrink-0 items-center justify-center gap-2 rounded-md font-semibold whitespace-nowrap',
     'transition-[background-color,border-color,color,box-shadow,transform] duration-fast ease-out',
     'disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50',
     '[&_svg]:shrink-0',

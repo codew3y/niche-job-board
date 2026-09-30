@@ -38,5 +38,12 @@ export const talentSearchParams = paginationParams.extend({
   rateMax: z.coerce.number().min(0).optional(),
 });
 
+/**
+ * Which list /browse shows. Jobs and developers are one page with this as a filter; anything
+ * unrecognised falls back to "all" rather than erroring, because it is a query string.
+ */
+export const browseType = z.enum(['all', 'jobs', 'developers']).catch('all');
+export type BrowseType = z.infer<typeof browseType>;
+
 export type JobSearchParams = z.infer<typeof jobSearchParams>;
 export type TalentSearchParams = z.infer<typeof talentSearchParams>;

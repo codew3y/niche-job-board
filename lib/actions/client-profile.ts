@@ -41,7 +41,6 @@ export async function updateClientProfile(
     companyName: formData.get('companyName'),
     website: formData.get('website'),
     industry: formData.get('industry'),
-    companySize: formData.get('companySize'),
     about: formData.get('about'),
   });
   if (!parsed.success) {
@@ -54,7 +53,6 @@ export async function updateClientProfile(
       company_name: parsed.data.companyName,
       website: parsed.data.website,
       industry: parsed.data.industry,
-      company_size: parsed.data.companySize,
       about: parsed.data.about ?? '',
     })
     .eq('user_id', user.id);
@@ -64,6 +62,6 @@ export async function updateClientProfile(
   // The company name appears on every job card and public job page, so those caches are now
   // wrong too.
   revalidatePath('/dashboard/client/profile');
-  revalidatePath('/jobs');
+  revalidatePath('/browse');
   return { ok: true };
 }

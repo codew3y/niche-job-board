@@ -32,11 +32,11 @@ export function ErrorState({
     <div role="alert" className="mx-auto max-w-md py-16 text-center">
       <span
         aria-hidden="true"
-        className="mx-auto grid size-12 place-items-center rounded-full bg-danger-subtle text-danger"
+        className="mx-auto grid size-12 place-items-center rounded-md bg-danger-subtle text-danger"
       >
         <TriangleAlert size={22} />
       </span>
-      <h1 className="mt-5 font-serif text-display-sm">Something went wrong</h1>
+      <h1 className="mt-5 font-semibold text-display-sm">Something went wrong</h1>
       <p className="mt-3 text-text-muted text-pretty">
         This page failed to load. It is usually temporary — trying again tends to work. Nothing you
         had saved is lost.
@@ -50,9 +50,7 @@ export function ErrorState({
           Go back home
         </Link>
       </div>
-      {error.digest && (
-        <p className="mt-8 font-mono text-xs text-text-subtle">Reference: {error.digest}</p>
-      )}
+      {error.digest && <p className="mt-8 text-xs text-text-subtle">Reference: {error.digest}</p>}
     </div>
   );
 }

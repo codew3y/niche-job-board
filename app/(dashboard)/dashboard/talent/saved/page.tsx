@@ -62,7 +62,7 @@ export default async function SavedJobsPage() {
           title="Nothing saved yet"
           body="Bookmark a job while browsing and it lands here."
           action={
-            <Link href="/jobs" className={buttonStyles({ size: 'sm' })}>
+            <Link href="/browse?type=jobs" className={buttonStyles({ size: 'sm' })}>
               Browse jobs
             </Link>
           }
@@ -82,7 +82,7 @@ export default async function SavedJobsPage() {
                 className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
               >
                 <div className="min-w-0">
-                  <h2 className="font-medium">
+                  <h2 className="font-semibold">
                     <Link href={`/jobs/${job.slug}`} className="hover:underline">
                       {job.title}
                     </Link>

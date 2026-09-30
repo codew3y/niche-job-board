@@ -1,118 +1,94 @@
-import { Briefcase, Building2, House, MessageSquare, Search, UserRound } from 'lucide-react';
+import { Briefcase, House, MessageSquare, Search } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { AccountMenu } from './account-menu';
+import { Logo } from './logo';
 import { NavLinks, type NavItem } from './nav-links';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { signOut, switchRole } from '@/lib/actions/auth';
+import { logoHref } from '@/lib/roles';
+import type { ShellUser } from '@/lib/services/shell';
 
-export type ShellUser = {
-  displayName: string;
-  activeRole: 'talent' | 'client';
-  hasTalent: boolean;
-  hasClient: boolean;
-  /** Unread messages across every thread, both roles. */
-  unread: number;
-};
+export type { ShellUser } from '@/lib/services/shell';
 
 /**
- * The same five destinations for both roles, pointing at whatever they mean for that role.
+ * Four destinations per role, pointing at whatever they mean for that role.
  *
- * Owner request, modelled on Upwork's shape. The previous nav named FEATURES — "Matches",
- * "Applications", "Saved" — which required knowing the product to navigate it. This names
- * INTENTIONS, so the mental model transfers between roles and from other marketplaces:
- * Home is where I start, Search is where I find the other side, Jobs is my own work,
- * Messages is my inbox, Profile is how I appear.
+ * Browse is ONE page for both sides (jobs and developers behind a filter), so it is the same
+ * link for everyone. Profile is deliberately NOT a nav item: it lives only in the profile menu
+ * at the foot of the sidebar, so there is exactly one way to it.
  *
- * "Search" points OUTWARD at the public browse pages, which is deliberate. A client looking
- * for developers and a developer looking for work are doing the same thing from opposite
- * sides, and those pages already do it well.
- *
- * Two items Upwork has are deliberately absent: Contracts and Finances. This product handles
- * no agreements and no money — docs/decisions/ADR-007 and the terms page both say so
- * explicitly — and a navigation item leading to an explanation of why it does not exist is
- * worse than its absence.
- *
- * Matches and Saved lost their nav slots rather than their pages; both are linked from the
- * dashboards, which is where someone looks for them.
+ * Contracts and Finances are absent on purpose: this product handles no agreements and no
+ * money (ADR-007, the terms page), and a nav item explaining why a thing does not exist is
+ * worse than its absence. Matches and Saved are linked from the dashboards.
  */
 const NAV: Record<ShellUser['activeRole'], NavItem[]> = {
   talent: [
     { href: '/dashboard/talent', label: 'Home', icon: <House /> },
-    { href: '/jobs', label: 'Search', icon: <Search /> },
-    { href: '/dashboard/talent/applications', label: 'Jobs', icon: <Briefcase /> },
+    { href: '/browse', label: 'Browse', icon: <Search /> },
+    { href: '/dashboard/talent/applications', label: 'Applications', icon: <Briefcase /> },
     { href: '/dashboard/messages', label: 'Messages', icon: <MessageSquare /> },
-    { href: '/dashboard/talent/profile', label: 'Profile', icon: <UserRound /> },
   ],
   client: [
     { href: '/dashboard/client', label: 'Home', icon: <House /> },
-    { href: '/talent', label: 'Search', icon: <Search /> },
-    { href: '/dashboard/client/jobs', label: 'Jobs', icon: <Briefcase /> },
+    { href: '/browse', label: 'Browse', icon: <Search /> },
+    { href: '/dashboard/client/jobs', label: 'My jobs', icon: <Briefcase /> },
     { href: '/dashboard/messages', label: 'Messages', icon: <MessageSquare /> },
-    { href: '/dashboard/client/profile', label: 'Profile', icon: <Building2 /> },
   ],
 };
 
+/**
+ * The app frame: a fixed left sidebar, no top header.
+ *
+ *   ≥ lg   a 15rem sidebar — logo, labelled nav, profile picture at the foot.
+ *   < lg   the same sidebar as a 4rem icon rail. Labels stay in the DOM as accessible names
+ *          (and a hover title), so nothing is lost to a screen reader at any width.
+ *
+ * One <nav>, rendered once, at every width — two copies would give a screen-reader user two
+ * identical "Main" landmarks to choose between.
+ */
 export function AppShell({ user, children }: { user: ShellUser; children: ReactNode }) {
-  const home = user.activeRole === 'client' ? '/dashboard/client' : '/dashboard/talent';
-
   return (
-    // The bottom padding on phones reserves the tab bar and the home indicator, so the last row
-    // of every page — and the footer — scrolls clear of the bar instead of sitting under it.
-    <div className="flex min-h-dvh flex-col pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px))] sm:pb-0">
-      {/*
-        No backdrop-filter below `sm`: a filter makes the header the containing block for its
-        fixed-position children, which would trap the tab bar inside the header instead of
-        pinning it to the bottom of the screen.
-      */}
-      <header className="sticky top-0 z-sticky border-b border-border-base bg-surface pt-[env(safe-area-inset-top,0px)] sm:bg-surface/85 sm:backdrop-blur-md">
-        {/* Wraps rather than forcing one line: at 200% text zoom a desktop-width window keeps its
-            desktop breakpoint while the text doubles, and a no-wrap row runs off screen. */}
-        <div className="gutter mx-auto flex min-h-(--nav-height) max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 py-2">
-          {/*
-            Inside the app the logo goes to the DASHBOARD, not the marketing page.
-            It used to go to `/`, so a signed-in user clicking it landed on a page inviting
-            them to "Get started" — the product apparently forgetting who they were. A logo
-            inside an application is a home button for that application.
-          */}
-          <Link href={home} className="shrink-0 font-serif text-[1.625rem] leading-none">
-            TechSelect
+    <div className="min-h-dvh">
+      <aside
+        aria-label="App"
+        className="fixed inset-y-0 left-0 z-nav flex w-16 flex-col border-r border-border-base bg-surface pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] pl-[env(safe-area-inset-left,0px)] lg:w-60"
+      >
+        <div className="flex h-10 items-center justify-center lg:justify-start lg:px-5">
+          <Logo href={logoHref(true)} compact className="lg:hidden" />
+          <Logo href={logoHref(true)} className="hidden lg:inline-flex" />
+        </div>
+
+        <NavLinks items={NAV[user.activeRole]} unread={user.unread} />
+
+        <div className="mt-auto flex justify-center px-2 lg:justify-start lg:px-3">
+          <AccountMenu
+            displayName={user.displayName}
+            avatarUrl={user.avatarUrl}
+            activeRole={user.activeRole}
+            hasTalent={user.hasTalent}
+            hasClient={user.hasClient}
+            profileHref={user.profileHref}
+            editProfileHref={user.editProfileHref}
+            switchRole={switchRole}
+            signOut={signOut}
+          />
+        </div>
+      </aside>
+
+      <div className="flex min-h-dvh flex-col pl-16 lg:pl-60">
+        <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-8 sm:py-12">
+          {children}
+        </main>
+        <footer className="mx-auto flex w-full max-w-5xl flex-wrap gap-x-5 gap-y-1 px-4 py-6 text-sm text-text-subtle sm:px-8">
+          <Link href="/privacy" className="hover:text-text">
+            Privacy
           </Link>
-
-          <NavLinks items={NAV[user.activeRole]} unread={user.unread} />
-
-          <div className="ml-auto flex items-center gap-1 sm:ml-0">
-            <ThemeToggle />
-            <AccountMenu
-              displayName={user.displayName}
-              activeRole={user.activeRole}
-              hasTalent={user.hasTalent}
-              hasClient={user.hasClient}
-              switchRole={switchRole}
-              signOut={signOut}
-            />
-          </div>
-        </div>
-      </header>
-
-      <main id="main" className="gutter mx-auto w-full max-w-6xl flex-1 py-8 sm:py-10">
-        {children}
-      </main>
-
-      <footer className="border-t border-border-base">
-        <div className="gutter mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 py-6 text-sm text-text-subtle">
-          <span>Open to every developer; clients decide.</span>
-          <nav aria-label="Legal" className="flex gap-5">
-            <Link href="/privacy" className="hover:text-text">
-              Privacy
-            </Link>
-            <Link href="/terms" className="hover:text-text">
-              Terms
-            </Link>
-          </nav>
-        </div>
-      </footer>
+          <Link href="/terms" className="hover:text-text">
+            Terms
+          </Link>
+        </footer>
+      </div>
     </div>
   );
 }

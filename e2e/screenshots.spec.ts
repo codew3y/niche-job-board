@@ -41,11 +41,17 @@ test.describe(() => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     await page.screenshot(shot('01-landing'));
 
-    await page.goto('/jobs');
+    // Browse is sign-in-only.
+    await page.getByLabel(/email/i).fill(data.talent.email);
+    await page.getByLabel(/password/i).fill(PASSWORD);
+    await page.getByRole('button', { name: /sign in/i }).click();
+    await page.waitForURL(/\/dashboard\//, { timeout: 20_000 });
+
+    await page.goto('/browse?type=jobs');
     await expect(page.locator('a[href^="/jobs/"]').first()).toBeVisible({ timeout: 20_000 });
     await page.screenshot(shot('02-browse-jobs'));
 
-    await page.goto('/talent');
+    await page.goto('/browse?type=developers');
     await expect(page.locator('a[href^="/talent/"]').first()).toBeVisible({ timeout: 20_000 });
     await page.screenshot(shot('03-browse-talent'));
 

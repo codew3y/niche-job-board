@@ -1,5 +1,10 @@
 import { createClient } from '../supabase/server';
-import { getClientProfileId, getSessionUser, getTalentProfileId } from '../supabase/session';
+import {
+  getClientProfileId,
+  getSessionUser,
+  getTalentProfileId,
+  getViewer,
+} from '../supabase/session';
 
 /**
  * Which of the rows on this page the viewer has already saved.
@@ -34,12 +39,18 @@ export async function savedTalentIds(talentIds: string[]): Promise<Set<string>> 
 }
 
 /**
- * Whether the viewer holds the role that can save this kind of thing. The button is hidden
+ * Whether the viewer, IN THEIR ACTIVE ROLE, can save this kind of thing. The button is hidden
  * otherwise — a control that always fails is worse than no control.
+ *
+ * Keyed on `active_role`, not on which profiles exist. It used to ask "has a talent profile?",
+ * so a dual-role account browsing as a client got the developer's Save-a-job buttons — the
+ * Browse page rendering one role while the dashboard rendered the other.
  */
 export async function canSave(kind: 'job' | 'talent'): Promise<boolean> {
-  // A talent saves jobs; a client saves developers. Both lookups are cached per request, and
-  // savedJobIds() on the same page needs the same answer.
-  const id = kind === 'job' ? await getTalentProfileId() : await getClientProfileId();
-  return id !== null;
+  const viewer = await getViewer();
+  if (!viewer) return false;
+  // A developer saves jobs; a client saves developers.
+  if (kind === 'job')
+    return viewer.activeRole === 'talent' && (await getTalentProfileId()) !== null;
+  return viewer.activeRole === 'client' && (await getClientProfileId()) !== null;
 }

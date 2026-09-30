@@ -164,7 +164,7 @@ export async function saveJob(
   }
 
   revalidatePath('/dashboard/client/jobs');
-  revalidatePath('/jobs');
+  revalidatePath('/browse');
   redirect('/dashboard/client/jobs');
 }
 
@@ -185,7 +185,7 @@ export async function closeJob(formData: FormData): Promise<void> {
   // read, but the cached ranking would keep spending a slot on something nobody can apply to.
   void invalidate('job', id);
   revalidatePath('/dashboard/client/jobs');
-  revalidatePath('/jobs');
+  revalidatePath('/browse');
 }
 
 export async function reopenJob(formData: FormData): Promise<void> {
@@ -200,7 +200,7 @@ export async function reopenJob(formData: FormData): Promise<void> {
     .eq('client_id', client.id)
     .eq('status', 'closed'); // only a closed job reopens; a filled one stays filled
   revalidatePath('/dashboard/client/jobs');
-  revalidatePath('/jobs');
+  revalidatePath('/browse');
 }
 
 /**

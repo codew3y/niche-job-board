@@ -50,7 +50,7 @@ export default async function MatchesPage() {
         >
           Your profile is a draft, so clients cannot find you. Matching still runs, but nobody sees
           the result but you.{' '}
-          <Link href="/dashboard/talent/profile" className="prose-link font-medium">
+          <Link href="/dashboard/talent/profile" className="prose-link font-semibold">
             Publish it
           </Link>
         </p>
@@ -76,7 +76,10 @@ export default async function MatchesPage() {
           title="Working out what fits"
           body="Matches are calculated in the background and land here shortly — usually within the hour. Nothing is wrong; there is just nothing to show yet."
           action={
-            <Link href="/jobs" className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
+            <Link
+              href="/browse?type=jobs"
+              className={buttonStyles({ variant: 'secondary', size: 'sm' })}
+            >
               Browse jobs meanwhile
             </Link>
           }
@@ -90,7 +93,10 @@ export default async function MatchesPage() {
           title="No strong matches yet"
           body="We'd rather show nothing than pad this with briefs that don't fit. New jobs are posted regularly, and this updates on its own."
           action={
-            <Link href="/jobs" className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
+            <Link
+              href="/browse?type=jobs"
+              className={buttonStyles({ variant: 'secondary', size: 'sm' })}
+            >
               Browse everything
             </Link>
           }

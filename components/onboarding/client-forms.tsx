@@ -183,7 +183,7 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
     return (
       <p className="text-text-muted">
         No draft yet —{' '}
-        <Link href="/onboarding/client/job" className="prose-link font-medium">
+        <Link href="/onboarding/client/job" className="prose-link font-semibold">
           write your brief
         </Link>
         .
@@ -194,8 +194,8 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
   return (
     <div className="space-y-8">
       <article className="rounded-lg border border-border-base bg-surface-raised p-5 sm:p-7">
-        <p className="text-xs font-medium tracking-eyebrow text-text-subtle uppercase">Preview</p>
-        <h2 className="mt-2 font-serif text-2xl">{str(job, 'title')}</h2>
+        <p className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">Preview</p>
+        <h2 className="mt-2 font-semibold text-2xl">{str(job, 'title')}</h2>
         <p className="mt-3 text-sm whitespace-pre-line text-text-muted">
           {str(job, 'description')}
         </p>

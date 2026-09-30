@@ -43,12 +43,12 @@ export default async function SettingsPage() {
             >
               <span
                 aria-hidden="true"
-                className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-sunken text-text-subtle"
+                className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-sunken text-text-subtle"
               >
                 <Icon size={18} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block font-medium">{title}</span>
+                <span className="block font-semibold">{title}</span>
                 <span className="block text-sm text-text-muted text-pretty">{blurb}</span>
               </span>
               <ArrowRight

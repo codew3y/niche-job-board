@@ -3,34 +3,59 @@ import { expect, test } from '@playwright/test';
 import { canSeed, PASSWORD, seed, teardown, type Seeded } from './fixtures';
 
 /**
- * The front door, for both kinds of visitor.
- *
- * Written because the landing page ignored the session entirely: a signed-in user clicking
- * the logo landed on "Get started", as though the product had forgotten them. A page that
- * only works for strangers is a page nobody tested while signed in.
+ * The front door: a full-screen video, the wordmark, one line, and the login container. Nothing
+ * else — and never for someone who is signed in.
  */
 
 test.describe('signed out', () => {
-  test('offers both doors and browsing, and says there is no bar to clear', async ({ page }) => {
-    // The specific labels live in role-first.spec.ts; this asserts the shape — two ways in
-    // and a way to look around without choosing either.
-    await page.goto('/');
-    await expect(page.getByRole('link', { name: /looking for work/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /hiring/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /browse without an account/i })).toBeVisible();
-    // ADR-008 on the front page rather than discovered after signing up.
-    await expect(page.getByText(/nothing to qualify for/i)).toBeVisible();
-  });
-
-  test('CARRIES NO PLACEHOLDER COPY — it shipped as a Phase 2 skeleton for weeks', async ({
+  test('shows the wordmark, a tagline and the login container — and nothing else', async ({
     page,
   }) => {
     await page.goto('/');
-    const body = (await page.locator('body').innerText()).toLowerCase();
-    expect(body).not.toContain('walking skeleton');
-    expect(body).not.toContain('phase 2');
-    // The positioning ADR-008 removed.
-    expect(body).not.toContain('is the profile');
+    await expect(page.getByRole('link', { name: /techselect/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Log in' })).toBeVisible();
+    await expect(page.getByRole('tab', { name: 'Sign up' })).toBeVisible();
+    await expect(page.getByLabel(/email/i)).toBeVisible();
+
+    // No navbar, no browse links, no dashboard content.
+    await expect(page.getByRole('navigation')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /^(jobs|developers|browse)/i })).toHaveCount(0);
+  });
+
+  test('the background is a muted, non-looping slideshow with posters', async ({ page }) => {
+    await page.goto('/');
+    // Mounted after idle, and only when motion is allowed (Playwright's default allows it).
+    const videos = page.locator('video');
+    await expect(videos.first()).toBeAttached({ timeout: 10_000 });
+    expect(await videos.count()).toBeGreaterThanOrEqual(2);
+    for (const video of await videos.all()) {
+      await expect(video).toHaveJSProperty('muted', true);
+      await expect(video).toHaveJSProperty('loop', false);
+      await expect(video).toHaveAttribute('poster', /\/videos\/.+-poster\.jpg$/);
+    }
+  });
+
+  test('the clips are served, not redirected to the login', async ({ request }) => {
+    // The proxy matcher once skipped images but not video, so every clip 307'd to "/".
+    for (const path of ['/videos/code.mp4', '/videos/code.webm', '/videos/code-poster.jpg']) {
+      const response = await request.get(path, { maxRedirects: 0 });
+      expect(response.status(), path).toBe(200);
+    }
+  });
+
+  test('the Sign up tab switches the form to account creation', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('tab', { name: 'Sign up' }).click();
+    await expect(page.getByLabel(/your name/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /create account/i })).toBeVisible();
+  });
+
+  test('a protected page sends a signed-out visitor to the front door, keeping the target', async ({
+    page,
+  }) => {
+    await page.goto('/browse');
+    await expect(page).toHaveURL(/\/\?next=%2Fbrowse$/);
+    await expect(page.getByRole('tab', { name: 'Log in' })).toBeVisible();
   });
 });
 
@@ -45,31 +70,38 @@ test.describe('signed in', () => {
     if (data) await teardown(data);
   });
 
-  test('THE LANDING PAGE OFFERS THE DASHBOARD, not a signup button', async ({ page }) => {
-    await page.goto('/login');
+  async function signIn(page: import('@playwright/test').Page) {
+    await page.goto('/');
     await page.getByLabel(/email/i).fill(data.talent.email);
     await page.getByLabel(/password/i).fill(PASSWORD);
-    // Asserts the destination, not merely that something happened: signing in with a role
-    // must land on the dashboard directly rather than bouncing through /select-role.
     await page.getByRole('button', { name: /sign in/i }).click();
     await page.waitForURL(/\/dashboard\//, { timeout: 20_000 });
+  }
 
+  test('VISITING / REDIRECTS TO THE DASHBOARD — the landing page is never shown', async ({
+    page,
+  }) => {
+    await signIn(page);
     await page.goto('/');
-    await expect(
-      page.getByRole('link', { name: /continue as|go to your dashboard/i }),
-    ).toBeVisible();
-    await expect(page.getByRole('link', { name: /^get started$/i })).toHaveCount(0);
+    await expect(page).toHaveURL(/\/dashboard\/talent$/);
   });
 
-  test('THE LOGO INSIDE THE APP GOES TO THE DASHBOARD, not to marketing', async ({ page }) => {
-    await page.goto('/login');
-    await page.getByLabel(/email/i).fill(data.talent.email);
-    await page.getByLabel(/password/i).fill(PASSWORD);
-    await page.getByRole('button', { name: /sign in/i }).click();
-    await page.waitForURL(/\/dashboard/, { timeout: 20_000 });
+  test('THE LOGO NEVER LANDS A SIGNED-IN USER ON /', async ({ page }) => {
+    await signIn(page);
+    for (const path of ['/dashboard/talent/applications', '/browse', `/jobs/${data.job.slug}`]) {
+      await page.goto(path);
+      const logo = page.getByRole('link', { name: /techselect/i }).first();
+      await expect(logo, `logo on ${path}`).toHaveAttribute('href', '/dashboard');
+      await logo.click();
+      await expect(page).toHaveURL(/\/dashboard\//);
+    }
+  });
 
-    await page.goto('/dashboard/talent/applications');
-    await page.getByRole('link', { name: 'TechSelect' }).first().click();
-    await expect(page).toHaveURL(/\/dashboard\//);
+  test('LOGGING OUT RETURNS TO THE FRONT DOOR', async ({ page }) => {
+    await signIn(page);
+    await page.getByRole('button', { name: /profile menu/i }).click();
+    await page.getByRole('menuitem', { name: /log out/i }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByRole('tab', { name: 'Log in' })).toBeVisible();
   });
 });

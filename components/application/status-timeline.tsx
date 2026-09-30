@@ -29,7 +29,7 @@ export function StatusTimeline({ events }: { events: Event[] }) {
                 last ? 'bg-accent' : 'bg-border-strong'
               }`}
             />
-            <span className={last ? 'font-medium' : 'text-text-muted'}>
+            <span className={last ? 'font-semibold' : 'text-text-muted'}>
               {e.from_status === null ? 'Applied' : `${STATUS_LABELS[e.to_status] ?? e.to_status}`}
             </span>
             <time dateTime={e.at} className="text-text-subtle tabular-nums">

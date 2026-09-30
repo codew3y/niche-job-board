@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { embedInBackground } from '../matching/ingest';
 import { invalidate } from '../matching/cache';
+import { educationInput, experienceInput } from '../schemas/talent';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
 
@@ -62,10 +63,13 @@ export async function updateProfile(
     if (value && !/^https:\/\//i.test(value)) errors[key] = ['Must be a full https:// link.'];
   }
 
-  const min = String(formData.get('hourlyRateMin') ?? '').trim();
-  const max = String(formData.get('hourlyRateMax') ?? '').trim();
-  if (min && max && Number(min) > Number(max)) {
-    errors.hourlyRateMax = ['Maximum rate must be at least the minimum.'];
+  /**
+   * One hourly rate, stored as min = max. The columns stay a range so browse filtering and
+   * matching are untouched, and formatRange() already shows an equal pair as a single number.
+   */
+  const rate = String(formData.get('hourlyRate') ?? '').trim();
+  if (rate && !/^\d{1,8}(\.\d{1,2})?$/.test(rate)) {
+    errors.hourlyRate = ['Enter a number, like 85 or 85.50.'];
   }
 
   /**
@@ -88,8 +92,8 @@ export async function updateProfile(
       website_url: website,
       github_url: github,
       linkedin_url: linkedin,
-      hourly_rate_min: min || null,
-      hourly_rate_max: max || null,
+      hourly_rate_min: rate || null,
+      hourly_rate_max: rate || null,
       currency: String(formData.get('currency') ?? 'USD'),
       availability: String(formData.get('availability') ?? 'part_time'),
       years_experience: Number(formData.get('yearsExperience')) || null,
@@ -111,7 +115,7 @@ export async function updateProfile(
   void invalidate('talent', profile.id);
 
   revalidatePath('/dashboard/talent/profile');
-  revalidatePath('/talent');
+  revalidatePath('/browse');
   return { ok: true };
 }
 
@@ -165,7 +169,7 @@ export async function togglePublish(formData: FormData): Promise<void> {
   if (wantPublished) embedInBackground('talent_profile', profile.id);
 
   revalidatePath('/dashboard/talent/profile');
-  revalidatePath('/talent');
+  revalidatePath('/browse');
 }
 
 // ─────────────────────────── portfolio items ───────────────────────────
@@ -182,9 +186,14 @@ export async function saveItem(
   const errors: Record<string, string[]> = {};
   if (title.length < 3) errors.title = ['Give the project a name.'];
   if (description.length < 40) errors.description = ['At least 40 characters.'];
-  for (const key of ['repoUrl', 'liveUrl'] as const) {
-    const v = cleanUrl(formData.get(key));
-    if (v && !/^https:\/\//i.test(v)) errors[key] = ['Must be a full https:// link.'];
+  const links = formData
+    .getAll('link')
+    .map((v) => cleanUrl(v))
+    .filter((v): v is string => Boolean(v));
+  if (links.some((v) => !/^https:\/\//i.test(v))) {
+    errors.links = ['Every link must be a full https:// link.'];
+  } else if (links.length > 10) {
+    errors.links = ['Ten links at most.'];
   }
   if (Object.keys(errors).length) {
     return { ok: false, message: 'Check the fields below.', fields: errors };
@@ -200,23 +209,24 @@ export async function saveItem(
       .map((s) => s.trim())
       .filter(Boolean)
       .slice(0, 20),
-    repo_url: cleanUrl(formData.get('repoUrl')),
-    live_url: cleanUrl(formData.get('liveUrl')),
+    links: [...new Set(links)],
   };
 
-  const { error } = itemId
+  const { data: saved, error } = itemId
     ? await supabase
         .from('portfolio_items')
         .update(payload)
         .eq('id', itemId)
         .eq('talent_id', profile.id)
-    : await supabase.from('portfolio_items').insert({
-        ...payload,
-        talent_id: profile.id,
-        sort_order: profile.portfolio_item_count,
-      });
+        .select('id')
+        .maybeSingle()
+    : await supabase
+        .from('portfolio_items')
+        .insert({ ...payload, talent_id: profile.id, sort_order: profile.portfolio_item_count })
+        .select('id')
+        .maybeSingle();
 
-  if (error) return { ok: false, message: 'Could not save that project.' };
+  if (error || !saved) return { ok: false, message: 'Could not save that project.' };
 
   // A project is part of the profile's embedded text, so the PROFILE is re-embedded, not just
   // the item. Embedding the item alone would leave the profile matching on a version of
@@ -224,9 +234,11 @@ export async function saveItem(
   embedInBackground('talent_profile', profile.id);
   void invalidate('talent', profile.id);
 
-  revalidatePath('/dashboard/talent/portfolio');
-  revalidatePath('/talent');
-  return { ok: true };
+  revalidatePath('/dashboard/talent/profile');
+  revalidatePath('/browse');
+  // The id comes back so the editor can open a NEW project straight into its photo section —
+  // photos attach to a saved project, and making someone find it again to add one is a chore.
+  return { ok: true, id: saved.id };
 }
 
 export async function deleteItem(formData: FormData): Promise<void> {
@@ -250,8 +262,8 @@ export async function deleteItem(formData: FormData): Promise<void> {
   embedInBackground('talent_profile', profile.id);
   void invalidate('talent', profile.id);
 
-  revalidatePath('/dashboard/talent/portfolio');
-  revalidatePath('/talent');
+  revalidatePath('/dashboard/talent/profile');
+  revalidatePath('/browse');
 }
 
 /**
@@ -274,6 +286,112 @@ export async function reorderItems(formData: FormData): Promise<void> {
         .eq('talent_id', profile.id),
     ),
   );
-  revalidatePath('/dashboard/talent/portfolio');
-  revalidatePath('/talent');
+  revalidatePath('/dashboard/talent/profile');
+  revalidatePath('/browse');
+}
+
+// ─────────────────────────── experience & education ───────────────────────────
+//
+// Plain rows under the profile, owned through talent_id (RLS: experience_write_own,
+// education_write_own). The `.eq('talent_id', …)` on update/delete is belt-and-braces; the
+// policy is what a crafted request has to get past.
+
+export async function saveExperience(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { supabase, profile } = await requireTalent();
+  const id = String(formData.get('id') ?? '') || null;
+
+  const parsed = experienceInput.safeParse({
+    role: formData.get('role'),
+    company: formData.get('company'),
+    startDate: formData.get('startDate'),
+    endDate: formData.get('endDate') ?? '',
+    description: formData.get('description') ?? '',
+  });
+  if (!parsed.success) {
+    return { ok: false, message: 'Check the fields below.', fields: fieldErrors(parsed.error) };
+  }
+
+  const row = {
+    role: parsed.data.role,
+    company: parsed.data.company,
+    start_date: parsed.data.startDate,
+    end_date: parsed.data.endDate,
+    description: parsed.data.description,
+  };
+
+  const { error } = id
+    ? await supabase.from('talent_experience').update(row).eq('id', id).eq('talent_id', profile.id)
+    : await supabase.from('talent_experience').insert({ ...row, talent_id: profile.id });
+  if (error) return { ok: false, message: 'Could not save that role.' };
+
+  revalidateProfile();
+  return { ok: true };
+}
+
+export async function deleteExperience(formData: FormData): Promise<void> {
+  const { supabase, profile } = await requireTalent();
+  const id = String(formData.get('id') ?? '');
+  if (!id) return;
+  await supabase.from('talent_experience').delete().eq('id', id).eq('talent_id', profile.id);
+  revalidateProfile();
+}
+
+export async function saveEducation(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { supabase, profile } = await requireTalent();
+  const id = String(formData.get('id') ?? '') || null;
+
+  const parsed = educationInput.safeParse({
+    school: formData.get('school'),
+    degree: formData.get('degree') ?? '',
+    startYear: formData.get('startYear') ?? '',
+    endYear: formData.get('endYear') ?? '',
+  });
+  if (!parsed.success) {
+    return { ok: false, message: 'Check the fields below.', fields: fieldErrors(parsed.error) };
+  }
+
+  const row = {
+    school: parsed.data.school,
+    degree: parsed.data.degree,
+    start_year: parsed.data.startYear,
+    end_year: parsed.data.endYear,
+  };
+
+  const { error } = id
+    ? await supabase.from('talent_education').update(row).eq('id', id).eq('talent_id', profile.id)
+    : await supabase.from('talent_education').insert({ ...row, talent_id: profile.id });
+  if (error) return { ok: false, message: 'Could not save that entry.' };
+
+  revalidateProfile();
+  return { ok: true };
+}
+
+export async function deleteEducation(formData: FormData): Promise<void> {
+  const { supabase, profile } = await requireTalent();
+  const id = String(formData.get('id') ?? '');
+  if (!id) return;
+  await supabase.from('talent_education').delete().eq('id', id).eq('talent_id', profile.id);
+  revalidateProfile();
+}
+
+function revalidateProfile() {
+  revalidatePath('/dashboard/talent/profile');
+  // The public page renders both sections.
+  revalidatePath('/talent/[slug]', 'page');
+}
+
+/** Zod's field errors, flattened into the shape the forms render. */
+function fieldErrors(error: { issues: { path: PropertyKey[]; message: string }[] }) {
+  const out: Record<string, string[]> = {};
+  for (const issue of error.issues) {
+    const key = String(issue.path[0] ?? '_');
+    (out[key] ??= []).push(issue.message);
+  }
+  return out;
 }

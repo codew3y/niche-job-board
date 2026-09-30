@@ -14,6 +14,7 @@ import {
 } from '@/lib/actions/onboarding';
 import type { ActionResult } from '@/lib/actions/auth';
 import { cn } from '@/lib/ui/cn';
+import { LinkListInput } from '@/components/portfolio/link-list-input';
 
 type Item = { id: string; title: string; description: string; tech_stack: string[] };
 type Profile = Record<string, unknown> | null;
@@ -60,14 +61,14 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
         )}
         {enough ? (
           <p>
-            <strong className="font-medium">You have what you need to publish.</strong>{' '}
+            <strong className="font-semibold">You have what you need to publish.</strong>{' '}
             {hasSite && items.length === 0
               ? 'Adding two or three projects here would still improve your matches — we can read these, but we never fetch your site.'
               : 'Add more projects any time.'}
           </p>
         ) : (
           <p>
-            Link your portfolio site <strong className="font-medium">or</strong> add two projects
+            Link your portfolio site <strong className="font-semibold">or</strong> add two projects
             below — either gives a client something to judge.{' '}
             {items.length === 1 && 'One more project will do it.'}
           </p>
@@ -124,12 +125,10 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
             {items.map((item) => (
               <li key={item.id} className="flex items-start justify-between gap-4 p-4">
                 <div className="min-w-0">
-                  <p className="font-medium">{item.title}</p>
+                  <p className="font-semibold">{item.title}</p>
                   <p className="mt-0.5 line-clamp-2 text-sm text-text-muted">{item.description}</p>
                   {item.tech_stack.length > 0 && (
-                    <p className="mt-1.5 font-mono text-xs text-text-subtle">
-                      {item.tech_stack.join(' · ')}
-                    </p>
+                    <p className="mt-1.5 text-xs text-text-subtle">{item.tech_stack.join(' · ')}</p>
                   )}
                 </div>
                 <form action={deletePortfolioItem}>
@@ -148,7 +147,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
           className="space-y-5 rounded-lg border border-dashed border-border-strong p-5 sm:p-7"
           noValidate
         >
-          <p className="text-sm font-medium text-text-muted">Add a project</p>
+          <p className="text-sm font-semibold text-text-muted">Add a project</p>
           <Field
             label="Project title"
             name="title"
@@ -177,24 +176,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
             placeholder="Next.js, Stripe, Postgres"
             hint="Comma separated."
           />
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field
-              label="Repo"
-              name="repoUrl"
-              type="url"
-              inputMode="url"
-              optional
-              placeholder="https://github.com/…"
-            />
-            <Field
-              label="Live URL"
-              name="liveUrl"
-              type="url"
-              inputMode="url"
-              optional
-              placeholder="https://…"
-            />
-          </div>
+          <LinkListInput />
           {itemState?.ok === false && !itemState.fields && (
             <FormError>{itemState.message}</FormError>
           )}

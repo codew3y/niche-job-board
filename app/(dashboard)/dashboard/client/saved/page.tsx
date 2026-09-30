@@ -61,7 +61,7 @@ export default async function SavedTalentPage() {
           title="Nothing saved yet"
           body="Bookmark a developer while browsing and they land here."
           action={
-            <Link href="/talent" className={buttonStyles({ size: 'sm' })}>
+            <Link href="/browse?type=developers" className={buttonStyles({ size: 'sm' })}>
               Browse developers
             </Link>
           }
@@ -78,7 +78,7 @@ export default async function SavedTalentPage() {
                 <div className="flex min-w-0 items-center gap-3.5">
                   <Avatar name={p.headline} />
                   <div className="min-w-0">
-                    <h2 className="font-medium">
+                    <h2 className="font-semibold">
                       <Link href={`/talent/${p.slug}`} className="hover:underline">
                         {p.headline}
                       </Link>

@@ -38,10 +38,13 @@ const stillExists = async (userId: string) =>
     .auth.admin.getUserById(userId)
     .then(({ data: d, error }) => Boolean(d?.user) && !error);
 
-test('settings is reachable from the profile — /privacy points people there', async ({ page }) => {
+test('settings is reachable from the profile menu — /privacy points people there', async ({
+  page,
+}) => {
   await signIn(page, data.talent.email);
   await page.goto('/dashboard/talent/profile');
-  await page.getByRole('link', { name: /^settings$/i }).click();
+  await page.getByRole('button', { name: /profile menu/i }).click();
+  await page.getByRole('menuitem', { name: 'Settings' }).click();
   await expect(page).toHaveURL(/\/dashboard\/settings$/);
   // By destination, not by words: both cards mention "account" — Roles says "One account,
   // both sides" — so a name-based locator matches two links and proves nothing about either.
@@ -82,7 +85,7 @@ test('A PERSON CAN DELETE THEIR OWN ACCOUNT, and it is actually gone', async ({ 
 
   // Signed out, not merely redirected.
   await page.goto('/dashboard/talent');
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(/\/\?next=/);
 
   // And the credentials no longer work, which is the difference between deleted and hidden.
   await page.goto('/login');

@@ -23,7 +23,7 @@ export function LegalPage({
   children: ReactNode;
 }) {
   return (
-    <main id="main" className="gutter mx-auto w-full max-w-3xl flex-1 py-10 sm:py-16">
+    <div className="mx-auto w-full max-w-3xl flex-1 py-10 sm:py-16">
       <nav aria-label="Breadcrumb" className="mb-10 text-sm">
         <Link href="/" className="inline-flex items-center gap-1 text-text-muted hover:text-text">
           <ArrowLeft aria-hidden="true" size={15} /> TechSelect
@@ -31,24 +31,24 @@ export function LegalPage({
       </nav>
 
       <header className="border-b border-border-base pb-10">
-        <p className="text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+        <p className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
           Last updated <time dateTime={lastUpdated}>{formatDate(lastUpdated)}</time>
         </p>
-        <h1 className="mt-4 font-serif text-display-md text-balance">{title}</h1>
+        <h1 className="mt-4 font-semibold text-display-md text-balance">{title}</h1>
         <p className="mt-5 max-w-[65ch] text-lg text-text-muted text-pretty">{intro}</p>
       </header>
 
       <div className="mt-10 max-w-[65ch] space-y-12 leading-relaxed [&_a]:prose-link [&_li]:mt-1.5 [&_ul]:list-disc [&_ul]:pl-5">
         {children}
       </div>
-    </main>
+    </div>
   );
 }
 
 export function Section({ heading, children }: { heading: string; children: ReactNode }) {
   return (
     <section className="space-y-3">
-      <h2 className="font-serif text-2xl">{heading}</h2>
+      <h2 className="font-semibold text-2xl">{heading}</h2>
       <div className="space-y-3 text-text-muted">{children}</div>
     </section>
   );

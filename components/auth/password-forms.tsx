@@ -16,7 +16,7 @@ export function ResetRequestForm() {
     return (
       <div role="status" className="rounded-lg border border-border-base bg-surface-raised p-5">
         <MailCheck aria-hidden="true" className="size-6 text-success" />
-        <p className="mt-3 font-medium">Check your email.</p>
+        <p className="mt-3 font-semibold">Check your email.</p>
         {/* Deliberately says "if there's an account" — confirming whether an address is
             registered would turn this form into an account-enumeration oracle. */}
         <p className="mt-1 text-sm text-text-muted text-pretty">
@@ -54,7 +54,7 @@ export function SetPasswordForm() {
   if (state?.ok) {
     return (
       <div role="status" className="space-y-4">
-        <p className="font-medium">Password updated.</p>
+        <p className="font-semibold">Password updated.</p>
         <Link href="/login" className={buttonStyles({ className: 'w-full' })}>
           Sign in
         </Link>

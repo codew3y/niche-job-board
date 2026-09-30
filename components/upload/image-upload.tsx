@@ -7,10 +7,14 @@ import { ImagePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { controlStyles } from '@/components/ui/field';
 import { cn } from '@/lib/ui/cn';
+import { PROJECT_MEDIA_BUCKET } from '@/lib/schemas/upload';
 import { resizeImage, storagePath } from '@/lib/upload/resize';
 
 /**
- * Upload an image to the `media` bucket.
+ * Upload a project photo to the `project-media` bucket (migration 0020).
+ *
+ * Earlier uploads live in the older `media` bucket; lib/actions/media.ts deletes from whichever
+ * bucket a URL names, so both keep working.
  *
  * Direct from the browser, not through a server action. A Server Action body goes through the
  * Next.js server, which on Vercel's Hobby tier means the file must fit a request-body limit
@@ -103,11 +107,11 @@ export function ImageUpload({
     setProgress(35);
 
     const { error } = await supabase.storage
-      .from('media')
+      .from(PROJECT_MEDIA_BUCKET)
       .upload(path, pending.file, { contentType: pending.file.type, upsert: false });
 
     if (error) {
-      // The policy refuses anything outside media/{uid}/, and the bucket refuses the wrong
+      // The policy refuses anything outside {bucket}/{uid}/, and the bucket refuses the wrong
       // type or size. Both arrive here.
       setMessage(`Upload failed: ${error.message}`);
       setStage('error');
@@ -117,7 +121,7 @@ export function ImageUpload({
     setProgress(80);
     const {
       data: { publicUrl },
-    } = supabase.storage.from('media').getPublicUrl(path);
+    } = supabase.storage.from(PROJECT_MEDIA_BUCKET).getPublicUrl(path);
 
     await onUploaded({ url: publicUrl, altText: altText.trim(), path });
     setProgress(100);
@@ -163,7 +167,7 @@ export function ImageUpload({
             }}
           />
           <ImagePlus aria-hidden="true" className="mx-auto mb-2 size-6 text-text-subtle" />
-          <label htmlFor={inputId} className="prose-link cursor-pointer text-sm font-medium">
+          <label htmlFor={inputId} className="prose-link cursor-pointer text-sm font-semibold">
             {label}
           </label>
           <p className="mt-1 text-sm text-text-muted">
@@ -183,7 +187,7 @@ export function ImageUpload({
               className="size-24 shrink-0 rounded-md border border-border-base object-cover"
             />
             <div className="min-w-0 flex-1 space-y-1.5">
-              <label htmlFor={`${inputId}-alt`} className="block text-sm font-medium">
+              <label htmlFor={`${inputId}-alt`} className="block text-sm font-semibold">
                 Describe this image <span className="text-danger">*</span>
               </label>
               <textarea

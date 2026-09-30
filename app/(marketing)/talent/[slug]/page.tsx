@@ -12,9 +12,12 @@ import { TagList } from '@/components/ui/badge';
 import { buttonStyles } from '@/components/ui/button';
 import { formatRange } from '@/components/shared/money';
 import { PortfolioSection } from '@/components/portfolio/portfolio-section';
+import { GitHubIcon, LinkedInIcon } from '@/components/shared/brand-icons';
+import { formatMonth } from '@/components/talent/history-format';
 import { siteUrl } from '@/lib/env';
 import { AVAILABILITY_LABEL, getTalentBySlug } from '@/lib/services/talent';
 import { createClient } from '@/lib/supabase/server';
+import { getClientProfileId, getViewer } from '@/lib/supabase/session';
 
 export async function generateMetadata({
   params,
@@ -49,17 +52,15 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
    * POST from an account with no client profile.
    */
   let contactJobs: { id: string; title: string }[] | null = null;
-  if (user && !isOwner && p.is_published && p.accepts_messages) {
-    const { data: client } = await supabase
-      .from('client_profiles')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    if (client) {
+  // Only while ACTING as a client (active_role), not merely owning a client profile.
+  const viewer = await getViewer();
+  if (viewer?.activeRole === 'client' && !isOwner && p.is_published && p.accepts_messages) {
+    const clientId = await getClientProfileId();
+    if (clientId) {
       const { data: openJobs } = await supabase
         .from('jobs')
         .select('id, title')
-        .eq('client_id', client.id)
+        .eq('client_id', clientId)
         .eq('status', 'open')
         .order('created_at', { ascending: false })
         .limit(20);
@@ -73,6 +74,15 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
 
   const rate = formatRange(p.hourly_rate_min, p.hourly_rate_max, p.currency, '/hr');
   const items = [...(p.portfolio_items ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+  // Most recent first: current roles (no end date), then by start date.
+  const experience = [...(p.talent_experience ?? [])].sort(
+    (a, b) =>
+      Number(a.end_date !== null) - Number(b.end_date !== null) ||
+      b.start_date.localeCompare(a.start_date),
+  );
+  const education = [...(p.talent_education ?? [])].sort(
+    (a, b) => (b.end_year ?? 9999) - (a.end_year ?? 9999),
+  );
   const facts = [
     rate
       ? [
@@ -89,7 +99,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
   const hasLinks = p.github_url || p.linkedin_url;
 
   return (
-    <main id="main" className="gutter mx-auto w-full max-w-6xl flex-1 py-8 sm:py-12">
+    <div className="mx-auto w-full flex-1 py-8 sm:py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -116,7 +126,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
 
       <nav aria-label="Breadcrumb" className="mb-8 text-sm">
         <Link
-          href="/talent"
+          href="/browse?type=developers"
           className="inline-flex items-center gap-1 text-text-muted hover:text-text"
         >
           <ArrowLeft aria-hidden="true" size={15} /> All developers
@@ -129,7 +139,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
           className="mb-8 rounded-lg border border-warning/30 bg-warning-subtle px-4 py-3 text-sm"
         >
           This is a draft — only you can see it.{' '}
-          <Link href="/onboarding/talent/review" className="prose-link font-medium">
+          <Link href="/onboarding/talent/review" className="prose-link font-semibold">
             Finish and publish
           </Link>
         </p>
@@ -139,32 +149,39 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
       <div className="grid gap-x-14 gap-y-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr]">
         <header className="min-w-0 lg:col-start-1">
           <Avatar name={p.headline} size="lg" />
-          <h1 className="mt-5 font-serif text-display-md text-balance">{p.headline}</h1>
+          <h1 className="mt-5 text-display-md text-balance">{p.headline}</h1>
           {hasLinks && (
-            <p className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-              {p.github_url && (
-                <ExternalLink href={p.github_url} className="font-medium">
-                  GitHub
-                </ExternalLink>
-              )}
-              {p.linkedin_url && (
-                <ExternalLink href={p.linkedin_url} className="font-medium">
-                  LinkedIn
-                </ExternalLink>
-              )}
+            <p className="mt-4 flex gap-2">
+              {/* Linked accounts as icons; the text name is kept for screen readers. */}
+              <ExternalLink
+                href={p.github_url}
+                bare
+                className="grid size-9 place-items-center rounded-md border border-border-base text-text-muted hover:text-text"
+              >
+                <GitHubIcon />
+                <span className="sr-only">GitHub</span>
+              </ExternalLink>
+              <ExternalLink
+                href={p.linkedin_url}
+                bare
+                className="grid size-9 place-items-center rounded-md border border-border-base text-text-muted hover:text-text"
+              >
+                <LinkedInIcon />
+                <span className="sr-only">LinkedIn</span>
+              </ExternalLink>
             </p>
           )}
         </header>
 
         <aside aria-label="Profile details" className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <div className="rounded-lg border border-border-base bg-surface-raised p-5 lg:sticky lg:top-[calc(var(--nav-height)+1.5rem)]">
+          <div className="rounded-lg border border-border-base bg-surface-raised p-5 lg:sticky lg:top-8">
             <dl className="grid grid-cols-2 gap-x-4 gap-y-4 lg:grid-cols-1">
               {facts.map(([term, value]) => (
                 <div key={term}>
-                  <dt className="text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+                  <dt className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
                     {term}
                   </dt>
-                  <dd className="mt-1 font-medium">{value}</dd>
+                  <dd className="mt-1 font-semibold">{value}</dd>
                 </div>
               ))}
             </dl>
@@ -209,8 +226,50 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
           <div className="mt-10 border-t border-border-base pt-8">
             <PortfolioSection websiteUrl={p.website_url} items={items} isOwner={isOwner} />
           </div>
+
+          {experience.length > 0 && (
+            <section className="mt-10 border-t border-border-base pt-8">
+              <h2 className="text-lg font-semibold">Experience</h2>
+              <ol className="mt-4 space-y-5">
+                {experience.map((e) => (
+                  <li key={e.id}>
+                    <p className="font-semibold">
+                      {e.role} <span className="font-normal text-text-muted">· {e.company}</span>
+                    </p>
+                    <p className="text-sm text-text-subtle">
+                      {formatMonth(e.start_date)} –{' '}
+                      {e.end_date ? formatMonth(e.end_date) : 'Present'}
+                    </p>
+                    {e.description && (
+                      <p className="mt-1.5 whitespace-pre-line text-text-muted text-pretty">
+                        {e.description}
+                      </p>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+
+          {education.length > 0 && (
+            <section className="mt-10 border-t border-border-base pt-8">
+              <h2 className="text-lg font-semibold">Education</h2>
+              <ul className="mt-4 space-y-4">
+                {education.map((e) => (
+                  <li key={e.id}>
+                    <p className="font-semibold">{e.school}</p>
+                    <p className="text-sm text-text-subtle">
+                      {[e.degree, [e.start_year, e.end_year].filter(Boolean).join(' – ')]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

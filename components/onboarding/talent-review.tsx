@@ -52,11 +52,13 @@ export function TalentReview({
               >
                 {check.done ? <Check size={15} /> : <CircleDashed size={15} />}
               </span>
-              <span className={check.done ? 'text-text-muted' : 'font-medium'}>{check.label}</span>
+              <span className={check.done ? 'text-text-muted' : 'font-semibold'}>
+                {check.label}
+              </span>
               <span className="sr-only">{check.done ? 'complete' : 'still needed'}</span>
             </span>
             {!check.done && (
-              <Link href={check.fix} className="prose-link text-sm font-medium">
+              <Link href={check.fix} className="prose-link text-sm font-semibold">
                 Add
               </Link>
             )}

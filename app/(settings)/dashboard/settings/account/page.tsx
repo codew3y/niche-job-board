@@ -38,7 +38,7 @@ export default async function AccountPage() {
         title="Account"
         subtitle={
           <>
-            Signed in as <span className="font-medium text-text">{user.email}</span>.
+            Signed in as <span className="font-semibold text-text">{user.email}</span>.
           </>
         }
       />
@@ -62,7 +62,7 @@ export default async function AccountPage() {
             your side tombstoned: your name is detached and your messages are replaced with a note
             saying the account was deleted. The other person keeps their own words and cannot
             recover yours. This is set out in the{' '}
-            <Link href="/privacy" className="prose-link font-medium">
+            <Link href="/privacy" className="prose-link font-semibold">
               privacy policy
             </Link>
             .

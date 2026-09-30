@@ -72,7 +72,7 @@ export function CandidateList({ candidates }: { candidates: Candidate[] }) {
               <div className="flex min-w-0 items-start gap-3.5">
                 <Avatar name={profile?.headline ?? 'Removed'} />
                 <div className="min-w-0">
-                  <h3 className="font-medium text-balance">
+                  <h3 className="font-semibold text-balance">
                     {profile ? (
                       <Link href={`/talent/${profile.slug}`} className="hover:underline">
                         {profile.headline}

@@ -120,21 +120,21 @@ export async function saveTalentSkills(
     .maybeSingle();
   if (!profile) redirect('/onboarding/talent/basics');
 
-  const min = String(formData.get('hourlyRateMin') ?? '').trim();
-  const max = String(formData.get('hourlyRateMax') ?? '').trim();
-  if (min && max && Number(min) > Number(max)) {
+  // One hourly rate, stored as min = max (see updateProfile in lib/actions/profile.ts).
+  const rate = String(formData.get('hourlyRate') ?? '').trim();
+  if (rate && !/^\d{1,8}(\.\d{1,2})?$/.test(rate)) {
     return {
       ok: false,
       message: 'Check the fields below.',
-      fields: { hourlyRateMax: ['Maximum rate must be at least the minimum.'] },
+      fields: { hourlyRate: ['Enter a number, like 85 or 85.50.'] },
     };
   }
 
   const { error: rateError } = await supabase
     .from('talent_profiles')
     .update({
-      hourly_rate_min: min || null,
-      hourly_rate_max: max || null,
+      hourly_rate_min: rate || null,
+      hourly_rate_max: rate || null,
       currency: String(formData.get('currency') ?? 'USD'),
       availability: String(formData.get('availability') ?? 'part_time'),
     })
@@ -228,8 +228,16 @@ export async function addPortfolioItem(
       .map((s) => s.trim())
       .filter(Boolean)
       .slice(0, 20),
-    repo_url: trimOrNull(formData.get('repoUrl')),
-    live_url: trimOrNull(formData.get('liveUrl')),
+    // Blank rows dropped; the database refuses anything but https (item_links_https).
+    links: [
+      ...new Set(
+        formData
+          .getAll('link')
+          .map((v) => String(v).trim())
+          .filter(Boolean)
+          .slice(0, 10),
+      ),
+    ],
     sort_order: profile.portfolio_item_count,
   });
   if (error)

@@ -119,7 +119,7 @@ export default async function ClientDashboard() {
               jobs?.length ? (
                 <Link
                   href="/dashboard/client/jobs"
-                  className="inline-flex items-center gap-1 text-sm font-medium hover:underline"
+                  className="inline-flex items-center gap-1 text-sm font-semibold hover:underline"
                 >
                   Manage <ArrowRight aria-hidden="true" size={14} />
                 </Link>
@@ -138,7 +138,7 @@ export default async function ClientDashboard() {
                     <div className="min-w-0">
                       <Link
                         href={`/dashboard/client/jobs/${job.id}`}
-                        className="font-medium after:absolute after:inset-0 hover:underline"
+                        className="font-semibold after:absolute after:inset-0 hover:underline"
                       >
                         {job.title}
                       </Link>
@@ -214,7 +214,7 @@ export default async function ClientDashboard() {
               {(
                 [
                   ['/dashboard/client/saved', 'Saved developers', 'Private to you'],
-                  ['/talent', 'Browse developers', 'Everyone who is listed'],
+                  ['/browse?type=developers', 'Browse developers', 'Everyone who is listed'],
                   ['/dashboard/client/profile', 'Company profile', 'Shown on every job you post'],
                 ] as const
               ).map(([href, label, hint]) => (
@@ -224,7 +224,7 @@ export default async function ClientDashboard() {
                   className="group flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-fast ease-out first:rounded-t-lg last:rounded-b-lg hover:bg-surface-sunken/60"
                 >
                   <span>
-                    <span className="block text-sm font-medium">{label}</span>
+                    <span className="block text-sm font-semibold">{label}</span>
                     <span className="block text-xs text-text-subtle">{hint}</span>
                   </span>
                   <ArrowRight
@@ -267,7 +267,7 @@ async function TopCandidates({ jobId, exclude }: { jobId: string; exclude: strin
     return (
       <p className="px-5 py-6 text-sm text-text-muted">
         Not enough in the brief to match on.{' '}
-        <Link href={`/dashboard/client/jobs/${jobId}/edit`} className="prose-link font-medium">
+        <Link href={`/dashboard/client/jobs/${jobId}/edit`} className="prose-link font-semibold">
           Add to the description
         </Link>{' '}
         — it is the same text a developer reads before applying.

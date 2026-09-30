@@ -1,4 +1,4 @@
-import { Code2, Globe, SquareArrowOutUpRight } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import Image from 'next/image';
 
 import { ExternalLink } from '@/components/shared/external-link';
@@ -13,9 +13,11 @@ type Item = {
   outcome: string | null;
   tech_stack: string[];
   item_media?: { id: string; url: string; alt_text: string; sort_order: number }[];
-  repo_url: string | null;
-  live_url: string | null;
+  links: string[];
 };
+
+/** A readable name for a project link: "github.com/you/app" rather than the full URL. */
+const linkLabel = (url: string) => url.replace(/^https:\/\/(www\.)?/i, '').replace(/\/$/, '');
 
 /**
  * The four evidence states of ADR-004, rendered.
@@ -44,7 +46,7 @@ export function PortfolioSection({
   if (!hasSite && !hasItems) {
     return isOwner ? (
       <section className="rounded-lg border border-dashed border-border-strong p-8 text-center">
-        <p className="font-serif text-2xl">No work shown yet</p>
+        <p className="font-semibold">No work shown yet</p>
         <p className="mx-auto mt-2 max-w-sm text-sm text-text-muted text-pretty">
           Link your portfolio site, or add a couple of projects. Either gives a client something to
           judge.
@@ -59,14 +61,14 @@ export function PortfolioSection({
         <section className="flex items-start gap-4 rounded-lg border border-border-base bg-surface-raised p-5">
           <span
             aria-hidden="true"
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-sunken text-text-subtle"
+            className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-sunken text-text-subtle"
           >
             <Globe size={18} />
           </span>
           <div className="min-w-0">
             <h2 className="font-semibold tracking-tight">Portfolio site</h2>
             <p className="mt-0.5 truncate">
-              <ExternalLink href={websiteUrl} className="font-medium">
+              <ExternalLink href={websiteUrl} className="font-semibold">
                 {websiteUrl!.replace(/^https:\/\//, '')}
               </ExternalLink>
             </p>
@@ -119,7 +121,7 @@ export function PortfolioSection({
 
                   <div className="p-5 sm:p-6">
                     <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                      <h3 className="font-serif text-2xl leading-tight text-balance">
+                      <h3 className="text-lg font-semibold leading-tight text-balance">
                         {item.title}
                       </h3>
                       {item.role && <p className="text-sm text-text-subtle">{item.role}</p>}
@@ -138,27 +140,14 @@ export function PortfolioSection({
                         label="Built with"
                         tags={item.tech_stack.map((name) => ({ name }))}
                       />
-                      {(item.repo_url || item.live_url) && (
-                        <p className="flex gap-4 text-sm">
-                          {item.repo_url && (
-                            <ExternalLink
-                              href={item.repo_url}
-                              className="inline-flex items-center gap-1 font-medium"
-                            >
-                              <Code2 aria-hidden="true" size={15} />
-                              Code
-                            </ExternalLink>
-                          )}
-                          {item.live_url && (
-                            <ExternalLink
-                              href={item.live_url}
-                              className="inline-flex items-center gap-1 font-medium"
-                            >
-                              <SquareArrowOutUpRight aria-hidden="true" size={15} />
-                              Live
-                            </ExternalLink>
-                          )}
-                        </p>
+                      {item.links.length > 0 && (
+                        <ul className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 text-sm">
+                          {item.links.map((url) => (
+                            <li key={url} className="min-w-0 truncate">
+                              <ExternalLink href={url}>{linkLabel(url)}</ExternalLink>
+                            </li>
+                          ))}
+                        </ul>
                       )}
                     </div>
                   </div>

@@ -42,7 +42,10 @@ export default async function MessagesPage() {
           title="No messages"
           body="Clients can message you from your profile, and you can reply here. Nothing arrives until someone starts a conversation."
           action={
-            <Link href="/jobs" className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
+            <Link
+              href="/browse?type=jobs"
+              className={buttonStyles({ variant: 'secondary', size: 'sm' })}
+            >
               Browse jobs
             </Link>
           }
@@ -61,7 +64,7 @@ export default async function MessagesPage() {
                   <Avatar name={name} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className={cn('truncate', unread ? 'font-semibold' : 'font-medium')}>
+                      <span className={cn('truncate', unread ? 'font-semibold' : 'font-semibold')}>
                         {/* A deleted counterparty is named as one rather than blanked — the thread
                             is still the viewer's record of what was said. */}
                         {name}

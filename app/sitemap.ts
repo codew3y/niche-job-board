@@ -25,8 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: base, lastModified: new Date(), changeFrequency: 'daily', priority: 1 },
-    { url: `${base}/jobs`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.9 },
-    { url: `${base}/talent`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    // No browse index: it is sign-in-only now. The job and profile pages below stay public.
     // Low priority, but present: a consent screen links at them and a crawler finding them
     // 404 or redirect is the failure this project already shipped once.
     { url: `${base}/privacy`, changeFrequency: 'yearly', priority: 0.1 },

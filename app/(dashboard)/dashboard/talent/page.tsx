@@ -96,7 +96,7 @@ export default async function TalentDashboard() {
             : 'Finish your profile and publish it to start getting matched.'
         }
         actions={
-          <Link href="/jobs" className={buttonStyles({ variant: 'secondary' })}>
+          <Link href="/browse?type=jobs" className={buttonStyles({ variant: 'secondary' })}>
             Browse jobs
           </Link>
         }
@@ -139,7 +139,7 @@ export default async function TalentDashboard() {
               feed?.state === 'ready' ? (
                 <Link
                   href="/dashboard/talent/matches"
-                  className="inline-flex items-center gap-1 text-sm font-medium hover:underline"
+                  className="inline-flex items-center gap-1 text-sm font-semibold hover:underline"
                 >
                   View all <ArrowRight aria-hidden="true" size={14} />
                 </Link>
@@ -177,7 +177,10 @@ export default async function TalentDashboard() {
                 title="No strong matches yet"
                 body="We’d rather show nothing than pad this with briefs that don’t fit. New jobs are posted regularly, and this updates on its own."
                 action={
-                  <Link href="/jobs" className={buttonStyles({ variant: 'secondary', size: 'sm' })}>
+                  <Link
+                    href="/browse?type=jobs"
+                    className={buttonStyles({ variant: 'secondary', size: 'sm' })}
+                  >
                     Browse everything
                   </Link>
                 }
@@ -218,7 +221,7 @@ export default async function TalentDashboard() {
                       className="mt-0.5 shrink-0 text-text-subtle"
                     />
                   )}
-                  <span className={c.done ? 'text-text-muted' : 'font-medium'}>{c.label}</span>
+                  <span className={c.done ? 'text-text-muted' : 'font-semibold'}>{c.label}</span>
                   <span className="sr-only">{c.done ? '(done)' : '(to do)'}</span>
                 </li>
               ))}
@@ -253,7 +256,7 @@ export default async function TalentDashboard() {
                   className="group flex items-center justify-between gap-3 px-5 py-3.5 transition-colors duration-fast ease-out first:rounded-t-lg last:rounded-b-lg hover:bg-surface-sunken/60"
                 >
                   <span>
-                    <span className="block text-sm font-medium">{label}</span>
+                    <span className="block text-sm font-semibold">{label}</span>
                     <span className="block text-xs text-text-subtle">{hint}</span>
                   </span>
                   <ArrowRight

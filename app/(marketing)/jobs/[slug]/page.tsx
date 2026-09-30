@@ -16,6 +16,7 @@ import { jobPostingJsonLd } from '@/lib/seo/job-posting';
 import { ApplySection, type ApplyState } from '@/components/application/apply-section';
 import { getJobBySlug } from '@/lib/services/jobs';
 import { createClient } from '@/lib/supabase/server';
+import { getClientProfileId, getSessionUser, getViewer } from '@/lib/supabase/session';
 import type { Job } from '@/lib/services/job-types';
 
 export async function generateMetadata({
@@ -92,7 +93,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   ].filter(Boolean) as [string, React.ReactNode][];
 
   return (
-    <main id="main" className="gutter mx-auto w-full max-w-6xl flex-1 py-8 sm:py-12">
+    <div className="mx-auto w-full flex-1 py-8 sm:py-12">
       <script
         type="application/ld+json"
         // Only emitted while the posting is genuinely open. Structured data for a job nobody
@@ -104,7 +105,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
 
       <nav aria-label="Breadcrumb" className="mb-8 text-sm">
         <Link
-          href="/jobs"
+          href="/browse?type=jobs"
           className="inline-flex items-center gap-1 text-text-muted hover:text-text"
         >
           <ArrowLeft aria-hidden="true" size={15} /> All jobs
@@ -137,18 +138,18 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
             <div className="flex items-center gap-3">
               <Avatar name={company} />
               <p className="text-sm text-text-muted">
-                <span className="font-medium text-text">{company}</span>
+                <span className="font-semibold text-text">{company}</span>
                 {job.client_profiles?.industry ? ` · ${job.client_profiles.industry}` : ''}
               </p>
             </div>
-            <h1 className="mt-5 font-serif text-display-md text-balance">{job.title}</h1>
+            <h1 className="mt-5 font-semibold text-display-md text-balance">{job.title}</h1>
           </header>
         </div>
 
         <aside aria-label="Job details" className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <div className="lg:sticky lg:top-[calc(var(--nav-height)+1.5rem)]">
+          <div className="lg:sticky lg:top-8">
             <FactsCard facts={facts}>
-              <Suspense fallback={<Skeleton className="h-12 w-full rounded-full" />}>
+              <Suspense fallback={<Skeleton className="h-12 w-full rounded-md" />}>
                 <ApplyBlock job={job} closed={closed || expired} />
               </Suspense>
             </FactsCard>
@@ -176,7 +177,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
               <h2 className="text-lg font-semibold tracking-tight">Skills</h2>
               {required.length > 0 && (
                 <>
-                  <p className="mt-4 text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+                  <p className="mt-4 text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
                     Required
                   </p>
                   <TagList
@@ -188,7 +189,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
               )}
               {niceToHave.length > 0 && (
                 <>
-                  <p className="mt-5 text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+                  <p className="mt-5 text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
                     Nice to have
                   </p>
                   <TagList
@@ -211,7 +212,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
               </p>
               {job.client_profiles.website && (
                 <p className="mt-3 text-sm">
-                  <ExternalLink href={job.client_profiles.website} className="font-medium">
+                  <ExternalLink href={job.client_profiles.website} className="font-semibold">
                     {job.client_profiles.website.replace(/^https:\/\//, '')}
                   </ExternalLink>
                 </p>
@@ -220,7 +221,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -236,10 +237,10 @@ function FactsCard({
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4 lg:grid-cols-1">
         {facts.map(([term, value]) => (
           <div key={term}>
-            <dt className="text-xs font-medium tracking-eyebrow text-text-subtle uppercase">
+            <dt className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
               {term}
             </dt>
-            <dd className="mt-1 font-medium">{value}</dd>
+            <dd className="mt-1 font-semibold">{value}</dd>
           </div>
         ))}
       </dl>
@@ -267,38 +268,38 @@ async function ApplyBlock({ job, closed }: { job: Job; closed: boolean }) {
 async function resolveApplyState(jobId: string, closed: boolean): Promise<ApplyState> {
   if (closed) return { kind: 'closed' };
 
+  const viewer = await getViewer();
+  if (!viewer) {
+    // Signed in but no role yet reads as having no profile; signed out is signed out.
+    return (await getSessionUser()) ? { kind: 'no-profile' } : { kind: 'signed-out' };
+  }
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { kind: 'signed-out' };
 
-  const { data: profile } = await supabase
-    .from('talent_profiles')
-    .select('id, is_published')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (!profile) {
-    // No talent profile: either they are a client, or they have not started one.
-    const { data: client } = await supabase
-      .from('client_profiles')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (client) {
+  /**
+   * The ACTIVE role decides the branch, not which profiles exist. A dual-role account browsing
+   * as a client used to be offered "Apply", because it also owned a talent profile.
+   */
+  if (viewer.activeRole === 'client') {
+    const clientId = await getClientProfileId();
+    if (clientId) {
       const { data: ownsJob } = await supabase
         .from('jobs')
         .select('id')
         .eq('id', jobId)
-        .eq('client_id', client.id)
+        .eq('client_id', clientId)
         .maybeSingle();
       if (ownsJob) return { kind: 'own-job' };
-      return { kind: 'is-client' };
     }
-    return { kind: 'no-profile' };
+    return { kind: 'is-client' };
   }
+
+  const { data: profile } = await supabase
+    .from('talent_profiles')
+    .select('id, is_published')
+    .eq('user_id', viewer.userId)
+    .maybeSingle();
+  if (!profile) return { kind: 'no-profile' };
 
   const { data: existing } = await supabase
     .from('applications')

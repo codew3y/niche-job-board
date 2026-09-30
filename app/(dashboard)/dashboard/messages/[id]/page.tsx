@@ -45,7 +45,7 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
         <div className="flex min-w-0 items-center gap-3.5">
           <Avatar name={name} size="lg" />
           <div className="min-w-0">
-            <h1 className="font-serif text-2xl leading-tight text-balance">
+            <h1 className="font-semibold text-2xl leading-tight text-balance">
               {thread.counterparty?.href ? (
                 <Link href={thread.counterparty.href} className="hover:underline">
                   {name}

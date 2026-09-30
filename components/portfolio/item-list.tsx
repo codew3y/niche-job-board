@@ -158,12 +158,10 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
                 <GripVertical size={18} />
               </span>
               <div className="min-w-0 flex-1">
-                <h3 className="font-medium">{item.title}</h3>
+                <h3 className="font-semibold">{item.title}</h3>
                 <p className="mt-0.5 line-clamp-2 text-sm text-text-muted">{item.description}</p>
                 {item.tech_stack.length > 0 && (
-                  <p className="mt-1.5 font-mono text-xs text-text-subtle">
-                    {item.tech_stack.join(' · ')}
-                  </p>
+                  <p className="mt-1.5 text-xs text-text-subtle">{item.tech_stack.join(' · ')}</p>
                 )}
               </div>
               <div className="flex shrink-0 items-center gap-0.5">
@@ -214,7 +212,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
       {dirty && (
         <form
           action={reorderItems}
-          className="sticky bottom-[calc(var(--tabbar-height)+env(safe-area-inset-bottom,0px)+0.75rem)] flex flex-wrap items-center gap-3 rounded-lg border border-border-base bg-surface-raised p-3 shadow-md sm:bottom-4"
+          className="sticky bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] flex flex-wrap items-center gap-3 rounded-lg border border-border-base bg-surface-raised p-3 shadow-md sm:bottom-4"
         >
           {order.map((item) => (
             <input key={item.id} type="hidden" name="itemId" value={item.id} />

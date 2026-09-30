@@ -18,7 +18,12 @@ import { createClient } from '../supabase/server';
  */
 
 export type ActionResult =
-  { ok: true } | { ok: false; message: string; fields?: Record<string, string[]> };
+  | {
+      ok: true;
+      /** The row an action created or updated, when the form needs it next. */
+      id?: string;
+    }
+  | { ok: false; message: string; fields?: Record<string, string[]> };
 
 /** Zod's field errors, flattened into the shape the forms render. */
 function fieldErrors(error: { issues: { path: PropertyKey[]; message: string }[] }) {

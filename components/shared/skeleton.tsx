@@ -45,9 +45,9 @@ export function JobCardSkeleton() {
       <Skeleton className="h-4 w-1/3" />
       <Skeleton className="h-4 w-full" />
       <div className="flex gap-2 pt-1">
-        <Skeleton className="h-6 w-16 rounded-full" />
-        <Skeleton className="h-6 w-20 rounded-full" />
-        <Skeleton className="h-6 w-14 rounded-full" />
+        <Skeleton className="h-6 w-16 rounded-md" />
+        <Skeleton className="h-6 w-20 rounded-md" />
+        <Skeleton className="h-6 w-14 rounded-md" />
       </div>
     </div>
   );

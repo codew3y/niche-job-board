@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { PortfolioManager } from '@/components/portfolio/portfolio-manager';
+import { EducationEditor, ExperienceEditor } from '@/components/talent/history-editors';
 import { ProfileEditor, SkillsEditor } from '@/components/talent/profile-editor';
 import { ActionForm } from '@/components/ui/action-form';
 import { Badge } from '@/components/ui/badge';
@@ -11,16 +13,22 @@ import { SubmitButton } from '@/components/ui/submit-button';
 import { PageHeader } from '@/components/ui/page-header';
 import { togglePublish } from '@/lib/actions/profile';
 import { profileSuggestions } from '@/lib/schemas/talent';
+import type { EducationRow, ExperienceRow } from '@/lib/services/talent';
 import { createClient } from '@/lib/supabase/server';
+import { requireViewer } from '@/lib/supabase/session';
 
-export const metadata: Metadata = { title: 'Profile' };
+export const metadata: Metadata = { title: 'Edit profile' };
 
+/**
+ * Edit profile — every section of the developer profile on one page, in the order a client
+ * reads them: details (title, rate), links, skills, projects, experience, education.
+ *
+ * Projects used to have their own page (/dashboard/talent/portfolio); it redirects here now, so
+ * there is one place a profile is edited, reached from "Edit profile" in the profile menu.
+ */
 export default async function ProfilePage() {
+  const viewer = await requireViewer();
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
 
   const { data: profile } = await supabase
     .from('talent_profiles')
@@ -29,13 +37,37 @@ export default async function ProfilePage() {
        years_experience, timezone, website_url, github_url, linkedin_url,
        portfolio_item_count, is_published`,
     )
-    .eq('user_id', user.id)
+    .eq('user_id', viewer.userId)
     .maybeSingle();
   if (!profile) redirect('/onboarding/talent/basics');
 
-  const [{ data: skills }, { data: mySkills }] = await Promise.all([
+  const [
+    { data: skills },
+    { data: mySkills },
+    { data: items },
+    { data: experience },
+    { data: education },
+  ] = await Promise.all([
     supabase.from('skills').select('id, name, category, aliases').order('name'),
     supabase.from('talent_skills').select('skill_id').eq('talent_id', profile.id),
+    supabase
+      .from('portfolio_items')
+      .select(
+        `id, title, description, role, outcome, tech_stack, links, sort_order,
+           item_media ( id, url, alt_text, sort_order )`,
+      )
+      .eq('talent_id', profile.id)
+      .order('sort_order'),
+    supabase
+      .from('talent_experience')
+      .select('id, role, company, start_date, end_date, description, sort_order')
+      .eq('talent_id', profile.id)
+      .order('start_date', { ascending: false }),
+    supabase
+      .from('talent_education')
+      .select('id, school, degree, start_year, end_year, sort_order')
+      .eq('talent_id', profile.id)
+      .order('end_year', { ascending: false, nullsFirst: true }),
   ]);
 
   /**
@@ -52,18 +84,14 @@ export default async function ProfilePage() {
   return (
     <div className="max-w-3xl space-y-8">
       <PageHeader
-        title="Profile"
+        title="Edit profile"
         subtitle={
-          profile.is_published ? (
-            <>
-              Live at{' '}
-              <Link href={`/talent/${profile.slug}`} className="prose-link font-medium text-text">
-                /talent/{profile.slug}
-              </Link>
-            </>
-          ) : (
-            'Draft — only you can see it.'
-          )
+          <>
+            {profile.is_published ? 'Public at ' : 'Draft — only you can see '}
+            <Link href={`/talent/${profile.slug}`} className="prose-link text-text">
+              /talent/{profile.slug}
+            </Link>
+          </>
         }
       />
 
@@ -97,7 +125,7 @@ export default async function ProfilePage() {
 
         {suggestions.length > 0 && (
           <div className="mt-5 border-t border-border-base pt-5">
-            <p className="flex items-center gap-2 text-sm font-medium">
+            <p className="flex items-center gap-2 text-sm font-semibold">
               <Lightbulb aria-hidden="true" size={16} className="text-accent" />
               Would help you land better
             </p>
@@ -108,39 +136,47 @@ export default async function ProfilePage() {
                 </li>
               ))}
             </ul>
-            <Link
-              href="/dashboard/talent/portfolio"
-              className="prose-link mt-3 inline-block text-sm font-medium"
-            >
-              Add a project
-            </Link>
           </div>
         )}
       </Card>
 
       <Card>
-        <CardHeader title="Details" description="What clients read, and what matching reads." />
+        <CardHeader title="Details" description="Title, rate, and what matching reads." />
         <div className="p-5 sm:p-6">
           <ProfileEditor profile={profile} />
         </div>
       </Card>
 
       <Card>
-        <CardHeader title="Skills" description="Only the ones you would take work in." />
+        <CardHeader
+          title="Skills"
+          description="Pick from the list — only the ones you would take work in."
+        />
         <div className="p-5 sm:p-6">
           <SkillsEditor options={skills ?? []} initial={(mySkills ?? []).map((s) => s.skill_id)} />
         </div>
       </Card>
 
-      {/* /privacy tells people they can delete their account "from settings", so settings has
-          to be reachable from the page they are most likely to be on when they go looking. */}
-      <p className="text-sm text-text-muted">
-        Roles, sign-in address, appearance and deleting your account are in{' '}
-        <Link href="/dashboard/settings" className="prose-link font-medium">
-          settings
-        </Link>
-        .
-      </p>
+      <Card id="projects" className="scroll-mt-8">
+        <CardHeader title="Projects" description="Title, a short description, links and photos." />
+        <div className="p-5 sm:p-6">
+          <PortfolioManager items={items ?? []} />
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader title="Experience" />
+        <div className="p-5 sm:p-6">
+          <ExperienceEditor rows={(experience ?? []) as ExperienceRow[]} />
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader title="Education" />
+        <div className="p-5 sm:p-6">
+          <EducationEditor rows={(education ?? []) as EducationRow[]} />
+        </div>
+      </Card>
     </div>
   );
 }

@@ -39,7 +39,7 @@ export function EmptyState({
         <span
           aria-hidden="true"
           className={cn(
-            'mx-auto mb-4 grid size-11 place-items-center rounded-full',
+            'mx-auto mb-4 grid size-11 place-items-center rounded-md',
             tone === 'pending'
               ? 'bg-accent-subtle text-accent'
               : 'bg-surface-sunken text-text-subtle',
@@ -48,7 +48,7 @@ export function EmptyState({
           <Icon size={20} />
         </span>
       )}
-      <p className="font-serif text-2xl">{title}</p>
+      <p className="font-semibold text-2xl">{title}</p>
       <div className="mx-auto mt-2 max-w-md text-sm text-text-muted text-pretty">{body}</div>
       {action && <div className="mt-6 flex flex-wrap justify-center gap-2">{action}</div>}
     </div>

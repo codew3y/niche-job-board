@@ -2,7 +2,8 @@ import { Check } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { Logo } from '@/components/layout/logo';
+import { logoHref } from '@/lib/roles';
 import { cn } from '@/lib/ui/cn';
 
 type Step = { slug: string; title: string; blurb: string };
@@ -37,24 +38,19 @@ export function WizardFrame({
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-border-base pt-[env(safe-area-inset-top,0px)]">
-        <div className="gutter mx-auto flex min-h-(--nav-height) max-w-3xl items-center justify-between gap-4 py-2">
-          <Link href="/" className="font-serif text-[1.625rem] leading-none">
-            TechSelect
-          </Link>
-          <div className="flex items-center gap-2">
-            {/* Said out loud, and near the top: it removes the "will I lose this?" hesitation
-                that makes people rush a long form. */}
-            <p className="hidden text-sm text-text-subtle sm:block">Saved as you go</p>
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+      <div className="gutter mx-auto flex w-full max-w-3xl items-center justify-between gap-4 pt-[max(1.25rem,env(safe-area-inset-top,0px))]">
+        {/* Onboarding is always signed in, so the logo goes to the app home — which sends an
+            unfinished account straight back here. */}
+        <Logo href={logoHref(true)} />
+        {/* Said out loud, and near the top: it removes the "will I lose this?" hesitation that
+            makes people rush a long form. */}
+        <p className="hidden text-sm text-text-subtle sm:block">Saved as you go</p>
+      </div>
 
       <main id="main" className="gutter mx-auto w-full max-w-3xl flex-1 py-8 sm:py-12">
         <nav aria-label="Progress" className="mb-10">
           <p className="mb-3 flex items-baseline justify-between text-sm sm:hidden">
-            <span className="font-medium">
+            <span className="font-semibold">
               Step {index + 1} of {steps.length}
             </span>
             <span className="text-text-subtle">Saved as you go</span>
@@ -95,7 +91,7 @@ export function WizardFrame({
                     <span
                       className={cn(
                         isCurrent
-                          ? 'font-medium text-text'
+                          ? 'font-semibold text-text'
                           : complete
                             ? 'text-text-muted group-hover:text-text'
                             : 'text-text-subtle',
@@ -130,7 +126,7 @@ export function WizardFrame({
         </nav>
 
         <header className="mb-8">
-          <h1 className="font-serif text-display-sm text-balance">{step?.title}</h1>
+          <h1 className="font-semibold text-display-sm text-balance">{step?.title}</h1>
           <p className="mt-2 max-w-xl text-text-muted text-pretty">{step?.blurb}</p>
         </header>
 

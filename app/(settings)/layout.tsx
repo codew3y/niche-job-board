@@ -2,13 +2,14 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 
-import { AppShell, type ShellUser } from '@/components/layout/app-shell';
+import { AppShell } from '@/components/layout/app-shell';
+import { Logo } from '@/components/layout/logo';
 import { buttonStyles } from '@/components/ui/button';
 import { SubmitButton } from '@/components/ui/submit-button';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { signOut } from '@/lib/actions/auth';
-import { unreadCount } from '@/lib/services/messaging';
-import { createClient } from '@/lib/supabase/server';
+import { logoHref } from '@/lib/roles';
+import { loadShellUser } from '@/lib/services/shell';
+import { getSessionUser, getViewer } from '@/lib/supabase/session';
 
 /**
  * Settings has its own group because the dashboard's guard is wrong for it.
@@ -26,54 +27,35 @@ import { createClient } from '@/lib/supabase/server';
  * Route groups do not affect URLs, so the paths are unchanged.
  */
 export default async function SettingsLayout({ children }: { children: ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  const user = await getSessionUser();
+  if (!user) redirect('/');
 
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('display_name, active_role, has_talent, has_client')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const viewer = await getViewer();
 
   // The ordinary case: a finished account gets the ordinary chrome, so settings does not
   // look like a different product.
-  if (profile && (profile.has_talent || profile.has_client)) {
-    const shellUser: ShellUser = {
-      displayName: profile.display_name,
-      activeRole: profile.active_role,
-      hasTalent: profile.has_talent,
-      hasClient: profile.has_client,
-      unread: await unreadCount(user.id),
-    };
-    return <AppShell user={shellUser}>{children}</AppShell>;
+  if (viewer && (viewer.hasTalent || viewer.hasClient)) {
+    return <AppShell user={await loadShellUser(viewer)}>{children}</AppShell>;
   }
 
-  // Mid-onboarding. No role means no dashboard to link to, so the nav would be five links
-  // that all bounce. A header with a way back and a way out is the honest version.
+  // Mid-onboarding. No role means no dashboard to link to, so a sidebar would be links that
+  // all bounce. A way back and a way out is the honest version.
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="border-b border-border-base pt-[env(safe-area-inset-top,0px)]">
-        <div className="gutter mx-auto flex min-h-(--nav-height) max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 py-2">
-          <Link href="/" className="shrink-0 font-serif text-[1.625rem] leading-none">
-            TechSelect
+      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 pt-[max(1.25rem,env(safe-area-inset-top,0px))] sm:px-8">
+        <Logo href={logoHref(true)} />
+        <div className="ml-auto flex items-center gap-1">
+          <Link href="/select-role" className={buttonStyles({ variant: 'ghost', size: 'sm' })}>
+            Finish setting up
           </Link>
-          <div className="ml-auto flex items-center gap-1">
-            <ThemeToggle />
-            <Link href="/select-role" className={buttonStyles({ variant: 'ghost', size: 'sm' })}>
-              Finish setting up
-            </Link>
-            <form action={signOut}>
-              <SubmitButton variant="ghost" size="sm" pendingLabel="Signing out…">
-                Sign out
-              </SubmitButton>
-            </form>
-          </div>
+          <form action={signOut}>
+            <SubmitButton variant="ghost" size="sm" pendingLabel="Logging out…">
+              Log out
+            </SubmitButton>
+          </form>
         </div>
-      </header>
-      <main id="main" className="gutter mx-auto w-full max-w-6xl flex-1 py-8 sm:py-10">
+      </div>
+      <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-8 sm:py-12">
         {children}
       </main>
     </div>

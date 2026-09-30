@@ -38,9 +38,9 @@ test.describe('signed out', () => {
     test(`${path} is reachable without a session`, async ({ page }) => {
       const response = await page.goto(path);
       expect(response?.status(), `${path} returned ${response?.status()}`).toBeLessThan(400);
-      // The assertion that matters: no redirect to /login. A 200 is not enough, because the
-      // login page is itself a 200.
-      expect(page.url(), `${path} redirected to ${page.url()}`).not.toContain('/login?next=');
+      // The assertion that matters: no redirect to the login (which is the front door, "/").
+      // A 200 is not enough, because the login is itself a 200.
+      expect(page.url(), `${path} redirected to ${page.url()}`).not.toContain('?next=');
     });
   }
 
@@ -61,6 +61,9 @@ test.describe('signed out', () => {
   test('A PRIVATE ROUTE STILL REDIRECTS — the list has not gone open', async ({ page }) => {
     // The counterweight: proving public routes are public means nothing if everything is.
     await page.goto('/dashboard/talent');
-    expect(page.url()).toContain('/login?next=');
+    expect(page.url()).toContain('/?next=');
+    // Browse is sign-in-only now, too.
+    await page.goto('/browse');
+    expect(page.url()).toContain('/?next=');
   });
 });

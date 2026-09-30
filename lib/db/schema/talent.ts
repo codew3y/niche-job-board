@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
   boolean,
   check,
+  date,
   index,
   integer,
   numeric,
@@ -183,8 +184,16 @@ export const portfolioItems = pgTable(
       .array()
       .notNull()
       .default(sql`'{}'::text[]`),
-    repoUrl: text('repo_url'),
-    liveUrl: text('live_url'),
+    /**
+     * Any number of links (repo, live site, case study…), https only — up to ten. Replaces the
+     * fixed `repo_url` / `live_url` pair: migration 0020 backfilled them into here, and the
+     * pending contract step (lib/db/migrations-pending/0021) drops the old columns.
+     * Never embedded: a URL is not text matching can read (lib/matching/text.ts, rule 3).
+     */
+    links: text('links')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     coverImageUrl: text('cover_image_url'),
     startedAt: timestamp('started_at', { withTimezone: true }),
     endedAt: timestamp('ended_at', { withTimezone: true }),
@@ -199,10 +208,9 @@ export const portfolioItems = pgTable(
       'item_date_order',
       sql`${t.startedAt} is null or ${t.endedAt} is null or ${t.startedAt} <= ${t.endedAt}`,
     ),
-    check(
-      'item_urls_https',
-      sql`(${t.repoUrl} is null or ${t.repoUrl} ~* '^https://') and (${t.liveUrl} is null or ${t.liveUrl} ~* '^https://')`,
-    ),
+    // all_https() is defined in migration 0020 — a CHECK cannot hold the subquery itself.
+    check('item_links_https', sql`public.all_https(${t.links})`),
+    check('item_links_max', sql`cardinality(${t.links}) <= 10`),
     index('items_talent_order_idx').on(t.talentId, t.sortOrder),
     index('items_tech_stack_gin_idx').using('gin', t.techStack),
     index('items_embedding_hnsw_idx').using('hnsw', t.embedding.op('vector_cosine_ops')),
@@ -256,6 +264,83 @@ export const itemMedia = pgTable(
         join talent_profiles p on p.id = i.talent_id
         where i.id = ${t.itemId} and p.user_id = (select auth.uid())
       )`,
+    }),
+  ],
+).enableRLS();
+
+/**
+ * Work history. Visibility follows the parent profile, like portfolio_items. Shown on the
+ * public profile; not yet part of the embedded text (lib/matching/text.ts is unchanged).
+ */
+export const talentExperience = pgTable(
+  'talent_experience',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    talentId: uuid('talent_id')
+      .notNull()
+      .references(() => talentProfiles.id, { onDelete: 'cascade' }),
+    role: text('role').notNull(),
+    company: text('company').notNull(),
+    startDate: date('start_date').notNull(),
+    /** NULL = current role. */
+    endDate: date('end_date'),
+    description: text('description').notNull().default(''),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check('experience_date_order', sql`${t.endDate} is null or ${t.startDate} <= ${t.endDate}`),
+    index('experience_talent_order_idx').on(t.talentId, t.sortOrder),
+    pgPolicy('experience_select', {
+      for: 'select',
+      to: [anonRole, authenticatedRole],
+      using: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and (p.is_published or p.user_id = (select auth.uid())))`,
+    }),
+    pgPolicy('experience_write_own', {
+      for: 'all',
+      to: authenticatedRole,
+      using: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and p.user_id = (select auth.uid()))`,
+      withCheck: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and p.user_id = (select auth.uid()))`,
+    }),
+  ],
+).enableRLS();
+
+export const talentEducation = pgTable(
+  'talent_education',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    talentId: uuid('talent_id')
+      .notNull()
+      .references(() => talentProfiles.id, { onDelete: 'cascade' }),
+    school: text('school').notNull(),
+    degree: text('degree').notNull().default(''),
+    startYear: smallint('start_year'),
+    endYear: smallint('end_year'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check(
+      'education_year_range',
+      sql`(${t.startYear} is null or ${t.startYear} between 1950 and 2100) and (${t.endYear} is null or ${t.endYear} between 1950 and 2100)`,
+    ),
+    check(
+      'education_year_order',
+      sql`${t.startYear} is null or ${t.endYear} is null or ${t.startYear} <= ${t.endYear}`,
+    ),
+    index('education_talent_order_idx').on(t.talentId, t.sortOrder),
+    pgPolicy('education_select', {
+      for: 'select',
+      to: [anonRole, authenticatedRole],
+      using: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and (p.is_published or p.user_id = (select auth.uid())))`,
+    }),
+    pgPolicy('education_write_own', {
+      for: 'all',
+      to: authenticatedRole,
+      using: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and p.user_id = (select auth.uid()))`,
+      withCheck: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and p.user_id = (select auth.uid()))`,
     }),
   ],
 ).enableRLS();

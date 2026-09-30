@@ -5,7 +5,9 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
 /**
- * The landing-page hero video.
+ * The Editorial prototype's hero video — used only by the archived design directions under
+ * /prototypes (kept at the owner's request, DESIGN.md J10). The live landing page uses
+ * components/marketing/video-background.tsx.
  *
  * SOURCE AND LICENCE — "Software developer working while drinks coffee", Mixkit clip #1730,
  * https://mixkit.co/free-stock-video/software-developer-working-while-drinks-coffee-1730/

@@ -2,22 +2,20 @@
 
 import { useActionState } from 'react';
 
-import { Field, FormError, FormStatus, SelectField, TextareaField } from '@/components/ui/field';
+import { Field, FormError, FormStatus, TextareaField } from '@/components/ui/field';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
 import { updateClientProfile } from '@/lib/actions/client-profile';
-import { companySizes } from '@/lib/schemas/client';
 
 type Company = {
   company_name: string;
   website: string | null;
   industry: string | null;
-  company_size: string | null;
   about: string;
 };
 
 /** Every field with an error rendered next to it. Anything else has to go somewhere. */
-const INLINE = new Set(['companyName', 'website', 'industry', 'companySize', 'about']);
+const INLINE = new Set(['companyName', 'website', 'industry', 'about']);
 
 /**
  * Editing the company a client posts under.
@@ -80,21 +78,6 @@ export function CompanyForm({ company }: { company: Company }) {
           placeholder="SaaS, agency, e-commerce…"
         />
       </div>
-
-      <SelectField
-        label="Company size"
-        name="companySize"
-        id="companySize"
-        defaultValue={company.company_size ?? ''}
-        errors={fields?.companySize}
-      >
-        <option value="">Prefer not to say</option>
-        {companySizes.map((s) => (
-          <option key={s} value={s}>
-            {s} people
-          </option>
-        ))}
-      </SelectField>
 
       <TextareaField
         label="About"

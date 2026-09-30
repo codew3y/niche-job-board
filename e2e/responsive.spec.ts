@@ -23,7 +23,7 @@ const WIDTHS = [
 ];
 
 /** Every page reachable without a session. Authenticated pages are covered in flows.spec.ts. */
-const PUBLIC_PAGES = ['/', '/jobs', '/talent', '/login', '/signup', '/privacy', '/terms'];
+const PUBLIC_PAGES = ['/', '/login', '/signup', '/privacy', '/terms'];
 
 for (const viewport of WIDTHS) {
   test.describe(`at ${viewport.name}`, () => {
@@ -91,22 +91,15 @@ for (const viewport of WIDTHS) {
       });
     }
 
-    test('the primary navigation is reachable', async ({ page }) => {
-      await page.goto('/jobs');
-      // Not "is visible" — at 320 the nav is a horizontally scrollable strip, which is a
-      // legitimate answer. What matters is that the links exist and can be activated.
-      const jobsLink = page.getByRole('link', { name: 'Jobs', exact: true }).first();
-      await expect(jobsLink).toBeAttached();
-    });
-
-    test('tap targets on the filters are big enough to hit', async ({ page }) => {
-      await page.goto('/jobs');
-      await page.waitForLoadState('networkidle');
-      const control = page.locator('#filter-skill');
-      const box = await control.boundingBox();
-      // 36px is the height these controls are designed at (h-9). Below ~32 a control becomes
+    test('the login container is fully on screen', async ({ page }) => {
+      await page.goto('/');
+      const tab = page.getByRole('tab', { name: 'Log in' });
+      await expect(tab).toBeVisible();
+      const box = await tab.boundingBox();
+      // 36px is the height the tabs are designed at (h-9). Below ~32 a control becomes
       // genuinely hard to hit on a touch screen.
       expect(box?.height ?? 0).toBeGreaterThanOrEqual(32);
+      expect((box?.x ?? -1) >= 0 && (box?.x ?? 0) + (box?.width ?? 0) <= viewport.width).toBe(true);
     });
   });
 }

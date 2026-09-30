@@ -140,7 +140,7 @@ export default async function ClientJobsPage() {
                     <Td className="max-w-md">
                       <Link
                         href={`/dashboard/client/jobs/${job.id}`}
-                        className="font-medium hover:underline"
+                        className="font-semibold hover:underline"
                       >
                         {job.title}
                       </Link>
@@ -157,7 +157,7 @@ export default async function ClientJobsPage() {
                     <Td>
                       <JobStatusBadge status={job.status} />
                     </Td>
-                    <Td className="text-right font-medium tabular-nums">{job.applications}</Td>
+                    <Td className="text-right font-semibold tabular-nums">{job.applications}</Td>
                     <Td className="whitespace-nowrap text-text-muted tabular-nums">
                       {job.budget ?? '—'}
                     </Td>
@@ -179,7 +179,7 @@ export default async function ClientJobsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <Link
                     href={`/dashboard/client/jobs/${job.id}`}
-                    className="font-medium hover:underline"
+                    className="font-semibold hover:underline"
                   >
                     {job.title}
                   </Link>

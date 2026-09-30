@@ -1,7 +1,9 @@
 import 'server-only';
 
+import { redirect } from 'next/navigation';
 import { cache } from 'react';
 
+import type { Role } from '../roles';
 import { createClient } from './server';
 
 /**
@@ -35,17 +37,27 @@ export const getSessionUser = cache(async () => {
 export type SessionProfile = {
   userId: string;
   displayName: string;
-  activeRole: 'talent' | 'client';
+  /** THE role every page renders for. See lib/roles.ts for why it is never inferred. */
+  activeRole: Role;
   hasTalent: boolean;
   hasClient: boolean;
+  /** Provider photo (Google/GitHub) when there is one; the UI falls back to initials. */
+  avatarUrl: string | null;
 } | null;
 
+/** Only https photos from the auth provider — never a data: or javascript: URL from metadata. */
+function avatarFrom(metadata: Record<string, unknown> | undefined): string | null {
+  const raw = metadata?.avatar_url ?? metadata?.picture;
+  return typeof raw === 'string' && /^https:\/\//i.test(raw) ? raw : null;
+}
+
 /**
- * The signed-in user's profile row, also once per request.
+ * The signed-in user's profile row, once per request — THE SINGLE SOURCE OF TRUTH FOR ROLE.
  *
- * The header needs it for the role switcher, the landing page needs it to decide where to
- * point, and several pages need it to know which role is active. Three reads of a row that
- * cannot change mid-render.
+ * Every layout, page and service that needs to know which side the viewer is on reads it here
+ * (as `getViewer`). Nothing checks "does a talent profile exist?" to decide what to render: a
+ * dual-role account has both profiles, and that check is what made Browse and the dashboard
+ * disagree about who the same person was.
  */
 export const getSessionProfile = cache(async (): Promise<SessionProfile> => {
   const user = await getSessionUser();
@@ -62,11 +74,30 @@ export const getSessionProfile = cache(async (): Promise<SessionProfile> => {
   return {
     userId: user.id,
     displayName: data.display_name,
-    activeRole: data.active_role as 'talent' | 'client',
+    activeRole: data.active_role as Role,
     hasTalent: data.has_talent,
     hasClient: data.has_client,
+    avatarUrl: avatarFrom(user.user_metadata),
   };
 });
+
+/** The name pages should use. Same function; the old name stays for existing callers. */
+export const getViewer = getSessionProfile;
+
+export type Viewer = NonNullable<SessionProfile>;
+
+/**
+ * For app pages: the viewer, guaranteed signed in with a role profile — or a redirect to the
+ * front door / role selection. Re-checked here because the proxy is a convenience layer and
+ * can be bypassed (docs/api.md §1).
+ */
+export async function requireViewer(): Promise<Viewer> {
+  const user = await getSessionUser();
+  if (!user) redirect('/');
+  const viewer = await getViewer();
+  if (!viewer || (!viewer.hasTalent && !viewer.hasClient)) redirect('/select-role');
+  return viewer;
+}
 
 /**
  * The talent profile id for the signed-in user, or null.

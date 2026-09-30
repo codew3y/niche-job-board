@@ -35,21 +35,20 @@ function ThemedToaster() {
   return (
     <Toaster
       theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
-      // Bottom-centre on phones sits above the tab bar and under the thumb; bottom-right on
-      // desktop stays out of the reading column.
+      // Bottom-right, clear of the sidebar and out of the reading column.
       position="bottom-right"
       mobileOffset={{
-        bottom: 'calc(var(--tabbar-height) + env(safe-area-inset-bottom, 0px) + 12px)',
+        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
       }}
       gap={8}
       toastOptions={{
         classNames: {
           toast:
             '!rounded-lg !border !border-border-base !bg-surface-raised !text-text !shadow-lg !font-sans',
-          title: '!font-medium',
+          title: '!font-semibold',
           description: '!text-text-muted',
-          actionButton: '!rounded-full !bg-surface-inverse !text-text-inverse',
-          cancelButton: '!rounded-full !bg-surface-sunken !text-text',
+          actionButton: '!rounded-md !bg-surface-inverse !text-text-inverse',
+          cancelButton: '!rounded-md !bg-surface-sunken !text-text',
           success: '[&_[data-icon]]:!text-success',
           error: '[&_[data-icon]]:!text-danger',
         },

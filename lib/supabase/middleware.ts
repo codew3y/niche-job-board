@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { clientEnv } from '../env';
@@ -14,8 +14,8 @@ import { decideRoute, type Session } from './route-policy';
  *     `getUser()` — not `getSession()` — because only `getUser()` revalidates the token with
  *     the auth server; `getSession()` trusts whatever the cookie claims, which is forgeable.
  *
- *  2. **Gate routes.** Unauthenticated → /login. No role yet → /select-role. Onboarding
- *     incomplete → resume at the saved step.
+ *  2. **Gate routes.** Unauthenticated → / (the landing page is the login). No role yet →
+ *     /select-role. Onboarding incomplete → resume at the saved step.
  *
  * This is a convenience layer, NOT the authorization boundary. Middleware can be bypassed and
  * it never sees the data. RLS is what actually protects rows (lib/db/schema/*), and every
@@ -32,6 +32,25 @@ import { decideRoute, type Session } from './route-policy';
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+  /**
+   * Cookies and headers from a token refresh, kept so a REDIRECT can carry them too.
+   *
+   * This was a real session-loss bug. `getUser()` below may rotate the refresh token and write
+   * the new pair onto `response` — but a redirect used to be a brand-new NextResponse, so the
+   * rotated cookies were dropped and the browser kept the old refresh token. With rotation on
+   * (supabase/config.toml), that token is dead after the 10-second reuse window, and the next
+   * request signs the user out. It bit exactly when someone reopened the browser after the
+   * access token had expired and landed on a page that redirects — which, now that `/` sends
+   * signed-in visitors to their dashboard, is every return visit.
+   */
+  // A holder object rather than a `let`: TypeScript cannot see the write inside the cookie
+  // callback, and would narrow a plain variable to `null` for good.
+  const refreshed: {
+    current: {
+      cookies: { name: string; value: string; options: CookieOptions }[];
+      headers: Record<string, string>;
+    } | null;
+  } = { current: null };
 
   const supabase = createServerClient(
     clientEnv.NEXT_PUBLIC_SUPABASE_URL,
@@ -39,12 +58,16 @@ export async function updateSession(request: NextRequest) {
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
-        setAll: (cookiesToSet) => {
+        setAll: (cookiesToSet, headers) => {
           for (const { name, value } of cookiesToSet) request.cookies.set(name, value);
           response = NextResponse.next({ request });
           for (const { name, value, options } of cookiesToSet) {
             response.cookies.set(name, value, options);
           }
+          // no-store on any response that sets auth cookies, so a CDN can never serve one
+          // visitor's session to another (@supabase/ssr passes these for exactly that).
+          for (const [key, value] of Object.entries(headers)) response.headers.set(key, value);
+          refreshed.current = { cookies: cookiesToSet, headers };
         },
       },
     },
@@ -92,5 +115,14 @@ export async function updateSession(request: NextRequest) {
   // the URL is replaced rather than merged — carrying a stale query onto a redirect target is
   // how a filtered list ends up on a dashboard.
   url.search = query ? `?${query}` : '';
-  return NextResponse.redirect(url);
+  const redirect = NextResponse.redirect(url);
+  // See `refreshed` above: without this, a redirect silently discards a token rotation.
+  const carried = refreshed.current;
+  if (carried) {
+    for (const { name, value, options } of carried.cookies) {
+      redirect.cookies.set(name, value, options);
+    }
+    for (const [key, value] of Object.entries(carried.headers)) redirect.headers.set(key, value);
+  }
+  return redirect;
 }

@@ -604,8 +604,10 @@ async function main() {
           ]),
           outcome,
           techStack: pickMany([...arch.skills], Math.min(4, arch.skills.length)),
-          repoUrl: rand() > 0.45 ? `https://github.test/${handle}/project-${k + 1}` : null,
-          liveUrl: rand() > 0.5 ? `https://example.test/${handle}/work/${k + 1}` : null,
+          links: [
+            ...(rand() > 0.45 ? [`https://github.test/${handle}/project-${k + 1}`] : []),
+            ...(rand() > 0.5 ? [`https://example.test/${handle}/work/${k + 1}`] : []),
+          ],
           sortOrder: k,
         });
         itemCount++;
@@ -633,7 +635,6 @@ async function main() {
         companyName: company,
         industry,
         website: `https://example.test/${slugify(company)}`,
-        companySize: pick(['1-10', '11-50', '51-200', '201-500']),
         about: `${company} is a ${industry.toLowerCase()} business hiring independent developers for scoped projects.`,
       })
       .returning({ id: clientProfiles.id });

@@ -26,7 +26,7 @@ export default function PrivacyPage() {
     <LegalPage
       title="Privacy"
       intro="What this site stores, who can see it, and what happens when you leave."
-      lastUpdated="2026-09-24"
+      lastUpdated="2026-09-30"
     >
       <Section heading="The short version">
         <p>
@@ -42,6 +42,7 @@ export default function PrivacyPage() {
         <ul className="list-disc space-y-1 pl-5 text-text-muted">
           <li>Your headline, bio, skills, rates, availability, timezone and years of experience</li>
           <li>Your portfolio items, including any links and images you add to them</li>
+          <li>The work experience and education you add</li>
           <li>Any website, GitHub or LinkedIn links you provide</li>
         </ul>
         <p>

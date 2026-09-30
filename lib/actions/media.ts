@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { itemMediaInput } from '../schemas/talent';
+import { STORAGE_BUCKETS } from '../schemas/upload';
 import { createClient } from '../supabase/server';
 
 /**
@@ -40,7 +41,7 @@ export async function attachMedia(formData: FormData): Promise<void> {
     sort_order: parsed.data.sortOrder,
   });
 
-  revalidatePath('/dashboard/talent/portfolio');
+  revalidatePath('/dashboard/talent/profile');
 }
 
 export async function detachMedia(formData: FormData): Promise<void> {
@@ -69,24 +70,28 @@ export async function detachMedia(formData: FormData): Promise<void> {
    * is already gone from the page, which is the outcome the user asked for.
    */
   if (media?.url) {
-    const path = storagePathFromPublicUrl(media.url);
-    if (path) await supabase.storage.from('media').remove([path]);
+    const object = storageObjectFromPublicUrl(media.url);
+    if (object) await supabase.storage.from(object.bucket).remove([object.path]);
   }
 
-  revalidatePath('/dashboard/talent/portfolio');
+  revalidatePath('/dashboard/talent/profile');
 }
 
 /**
- * Recover the object path from a public URL.
+ * Recover the bucket and object path from a public URL.
  *
- * Supabase public URLs look like `.../storage/v1/object/public/media/<uid>/<file>`. Returns
- * null for anything that does not match, so an externally hosted cover image — which is still
+ * Supabase public URLs look like `.../storage/v1/object/public/<bucket>/<uid>/<file>`. Only our
+ * own buckets are recognised (`project-media`, and `media` for photos uploaded before migration
+ * 0020); anything else returns null, so an externally hosted cover image — which is still
  * allowed — is never mistaken for one of ours and passed to storage.remove().
  */
-function storagePathFromPublicUrl(url: string): string | null {
-  const marker = '/storage/v1/object/public/media/';
-  const at = url.indexOf(marker);
-  if (at === -1) return null;
-  const path = url.slice(at + marker.length);
-  return path.length > 0 ? decodeURIComponent(path) : null;
+function storageObjectFromPublicUrl(url: string): { bucket: string; path: string } | null {
+  for (const bucket of STORAGE_BUCKETS) {
+    const marker = `/storage/v1/object/public/${bucket}/`;
+    const at = url.indexOf(marker);
+    if (at === -1) continue;
+    const path = url.slice(at + marker.length);
+    return path.length > 0 ? { bucket, path: decodeURIComponent(path) } : null;
+  }
+  return null;
 }

@@ -10,6 +10,7 @@ import { SubmitButton } from '@/components/ui/submit-button';
 import { ImageUpload } from '@/components/upload/image-upload';
 import { attachMedia, detachMedia } from '@/lib/actions/media';
 import { ItemList } from './item-list';
+import { LinkListInput } from './link-list-input';
 import { saveItem } from '@/lib/actions/profile';
 import type { ActionResult } from '@/lib/actions/auth';
 
@@ -22,8 +23,7 @@ type Item = {
   role: string | null;
   outcome: string | null;
   tech_stack: string[];
-  repo_url: string | null;
-  live_url: string | null;
+  links: string[];
   sort_order: number;
   item_media?: Media[];
 };
@@ -46,7 +46,7 @@ export function PortfolioManager({ items }: { items: Item[] }) {
       ) : (
         !adding && (
           <div className="rounded-lg border border-dashed border-border-strong p-8 text-center">
-            <p className="font-serif text-2xl">No projects yet</p>
+            <p className="font-semibold">No projects yet</p>
             <p className="mx-auto mt-2 max-w-sm text-sm text-text-muted text-pretty">
               A project is what a client reads first — what it was, what you did, and what changed.
             </p>
@@ -61,6 +61,11 @@ export function PortfolioManager({ items }: { items: Item[] }) {
           onDone={() => {
             setAdding(false);
             setEditingId(null);
+          }}
+          onCreated={(id) => {
+            // A new project opens straight into edit mode, so its photos can be added now.
+            setAdding(false);
+            setEditingId(id);
           }}
         />
       )}
@@ -82,24 +87,34 @@ export function PortfolioManager({ items }: { items: Item[] }) {
   );
 }
 
-function ItemForm({ item, onDone }: { item: Item | null; onDone: () => void }) {
+function ItemForm({
+  item,
+  onDone,
+  onCreated,
+}: {
+  item: Item | null;
+  onDone: () => void;
+  onCreated: (id: string) => void;
+}) {
   const [state, action] = useActionState<ActionResult | null, FormData>(saveItem, null);
   const fields = state?.ok === false ? state.fields : undefined;
 
   if (state?.ok) {
-    // Saved — close the form rather than leaving a stale one open.
-    queueMicrotask(onDone);
+    // Saved. A brand-new project moves on to its photos; an edit closes the form rather than
+    // leaving a stale one open.
+    const createdId = !item && state.id ? state.id : null;
+    queueMicrotask(() => (createdId ? onCreated(createdId) : onDone()));
   }
 
   return (
     <form
       action={action}
-      className="animate-rise space-y-5 rounded-lg border border-border-strong bg-surface-raised p-5 shadow-sm sm:p-6"
+      className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6"
     >
       {item && <input type="hidden" name="itemId" value={item.id} />}
 
       <div className="flex items-center justify-between gap-4">
-        <h3 className="font-serif text-2xl">{item ? 'Edit project' : 'New project'}</h3>
+        <h3 className="text-base font-semibold">{item ? 'Edit project' : 'New project'}</h3>
         <Button variant="ghost" size="icon-sm" onClick={onDone} aria-label="Close without saving">
           <X aria-hidden="true" />
         </Button>
@@ -114,57 +129,53 @@ function ItemForm({ item, onDone }: { item: Item | null; onDone: () => void }) {
         errors={fields?.title}
       />
       <TextareaField
-        label="What was it, and what did you do?"
+        label="Short description"
         name="description"
         rows={3}
         defaultValue={item?.description ?? ''}
         errors={fields?.description}
+        hint="What it was and what you did — at least 40 characters."
       />
-      <Field
-        label="Outcome"
-        name="outcome"
-        optional
-        defaultValue={item?.outcome ?? ''}
-        placeholder="Failed payments fell from 4.1% to 0.6%"
-        hint="A number if you have one — this is the most persuasive field on your profile."
-      />
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          label="Role"
-          name="role"
-          optional
-          defaultValue={item?.role ?? ''}
-          placeholder="Sole developer"
-        />
-        <Field
-          label="Tech stack"
-          name="techStack"
-          optional
-          defaultValue={item?.tech_stack.join(', ') ?? ''}
-          placeholder="Next.js, Stripe, Postgres"
-          hint="Comma separated."
-        />
-      </div>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field
-          label="Repo"
-          name="repoUrl"
-          type="url"
-          inputMode="url"
-          optional
-          defaultValue={item?.repo_url ?? ''}
-          errors={fields?.repoUrl}
-        />
-        <Field
-          label="Live URL"
-          name="liveUrl"
-          type="url"
-          inputMode="url"
-          optional
-          defaultValue={item?.live_url ?? ''}
-          errors={fields?.liveUrl}
-        />
-      </div>
+
+      <LinkListInput initial={item?.links ?? []} errors={fields?.links} />
+
+      {/* Optional extras. Kept because matching reads them (lib/matching/text.ts), folded away
+          because the four fields above are the project. */}
+      <details className="group rounded-md border border-border-base px-4 py-3">
+        <summary className="cursor-pointer text-sm font-semibold select-none">
+          More detail <span className="font-normal text-text-subtle">(helps matching)</span>
+        </summary>
+        <div className="mt-4 space-y-5">
+          <Field
+            label="Outcome"
+            name="outcome"
+            optional
+            defaultValue={item?.outcome ?? ''}
+            placeholder="Failed payments fell from 4.1% to 0.6%"
+          />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field
+              label="Role"
+              name="role"
+              optional
+              defaultValue={item?.role ?? ''}
+              placeholder="Sole developer"
+            />
+            <Field
+              label="Tech stack"
+              name="techStack"
+              optional
+              defaultValue={item?.tech_stack.join(', ') ?? ''}
+              placeholder="Next.js, Stripe, Postgres"
+              hint="Comma separated."
+            />
+          </div>
+        </div>
+      </details>
+
+      {!item && (
+        <p className="text-sm text-text-subtle">You can add photos once the project is saved.</p>
+      )}
 
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
 
@@ -184,10 +195,10 @@ function ItemMedia({ item }: { item: Item }) {
   return (
     <div className="space-y-4 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6">
       <div>
-        <h3 className="text-lg font-semibold tracking-tight">Images</h3>
+        <h3 className="text-base font-semibold">Photos</h3>
         <p className="mt-0.5 text-sm text-text-muted text-pretty">
-          Screenshots of the work. Every image needs a description — that is what someone using a
-          screen reader gets instead of the picture.
+          Screenshots of the work. Every photo needs a short description — that is what someone
+          using a screen reader gets instead of the picture.
         </p>
       </div>
 
@@ -223,7 +234,7 @@ function ItemMedia({ item }: { item: Item }) {
       )}
 
       <ImageUpload
-        label="Add a screenshot"
+        label="Add a photo"
         onUploaded={async ({ url, altText }) => {
           const data = new FormData();
           data.set('itemId', item.id);

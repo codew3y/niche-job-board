@@ -9,7 +9,7 @@ import { cn } from '@/lib/ui/cn';
  * is text, so it gets the text standard, not the "it's only a label" one.
  */
 export const badgeStyles = cva(
-  'inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap [&_svg]:size-3.5 [&_svg]:shrink-0',
+  'inline-flex items-center gap-1 rounded-md font-semibold whitespace-nowrap [&_svg]:size-3.5 [&_svg]:shrink-0',
   {
     variants: {
       tone: {

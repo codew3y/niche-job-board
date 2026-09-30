@@ -32,12 +32,38 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
   return (
     <form action={action} className="space-y-6" noValidate>
       <Field
-        label="Headline"
+        label="Title"
         name="headline"
         required
         defaultValue={str(profile, 'headline')}
         errors={fields?.headline}
+        placeholder="Full-stack developer — Next.js and Stripe"
       />
+
+      <div className="grid gap-5 sm:grid-cols-[1fr_8rem]">
+        {/* One rate, stored as min = max (see updateProfile). An existing range shows its low
+            end, which is what the old "from" field meant. */}
+        <Field
+          label="Hourly rate"
+          name="hourlyRate"
+          inputMode="decimal"
+          optional
+          defaultValue={str(profile, 'hourly_rate_min') || str(profile, 'hourly_rate_max')}
+          errors={fields?.hourlyRate}
+          placeholder="85"
+        />
+        <SelectField
+          label="Currency"
+          name="currency"
+          defaultValue={str(profile, 'currency') || 'USD'}
+        >
+          {CURRENCIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </SelectField>
+      </div>
 
       <TextareaField
         label="About your work"
@@ -55,33 +81,6 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
           linkedin: str(profile, 'linkedin_url'),
         }}
       />
-
-      <div className="grid gap-5 sm:grid-cols-3">
-        <Field
-          label="Rate from"
-          name="hourlyRateMin"
-          inputMode="decimal"
-          defaultValue={str(profile, 'hourly_rate_min')}
-        />
-        <Field
-          label="Rate to"
-          name="hourlyRateMax"
-          inputMode="decimal"
-          defaultValue={str(profile, 'hourly_rate_max')}
-          errors={fields?.hourlyRateMax}
-        />
-        <SelectField
-          label="Currency"
-          name="currency"
-          defaultValue={str(profile, 'currency') || 'USD'}
-        >
-          {CURRENCIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </SelectField>
-      </div>
 
       <div className="grid gap-5 sm:grid-cols-3">
         <SelectField

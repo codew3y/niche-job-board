@@ -124,7 +124,9 @@ export function Modal({
 
               <div className="flex items-start justify-between gap-4 px-5 pt-3 pb-4 sm:px-6 sm:pt-6">
                 <div className="min-w-0">
-                  <Drawer.Title className="font-serif text-2xl leading-tight">{title}</Drawer.Title>
+                  <Drawer.Title className="font-semibold text-2xl leading-tight">
+                    {title}
+                  </Drawer.Title>
                   {description && (
                     <Drawer.Description className="mt-1 text-sm text-text-muted text-pretty">
                       {description}
@@ -135,7 +137,7 @@ export function Modal({
                     (base-ui docs), and faster than hunting for the backdrop on desktop. */}
                 <Drawer.Close
                   aria-label="Close"
-                  className="pressable -mt-1 -mr-2 grid size-9 shrink-0 place-items-center rounded-full text-text-subtle hover:bg-surface-sunken hover:text-text"
+                  className="pressable -mt-1 -mr-2 grid size-9 shrink-0 place-items-center rounded-md text-text-subtle hover:bg-surface-sunken hover:text-text"
                 >
                   <X aria-hidden="true" size={18} />
                 </Drawer.Close>

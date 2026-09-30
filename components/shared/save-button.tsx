@@ -35,7 +35,7 @@ export function SaveButton({
         aria-pressed={saved}
         aria-label={saved ? `Remove ${label} from saved` : `Save ${label}`}
         className={cn(
-          'pressable inline-flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium',
+          'pressable inline-flex h-9 items-center gap-1.5 rounded-md border px-3.5 text-sm font-semibold',
           saved
             ? 'border-surface-inverse bg-surface-inverse text-text-inverse'
             : 'border-control/60 bg-surface-raised text-text-muted hover:border-control hover:text-text',
