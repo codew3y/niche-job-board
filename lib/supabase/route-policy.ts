@@ -75,11 +75,12 @@ const PUBLIC_PREFIXES = [
 ];
 
 /**
- * Public for their CHILDREN only: /jobs/some-slug and /talent/some-slug open for anyone, while
- * /jobs and /talent themselves are the old browse indexes (now redirects to /browse, which is
- * private). A job link shared in a chat, and the JobPosting data Google reads, keep working.
+ * Public for their CHILDREN only: /jobs/some-slug, /talent/some-slug and /company/<id> open for
+ * anyone, while /jobs and /talent themselves are the old browse indexes (now redirects to
+ * /browse, which is private) and /company alone is not a page. A job link shared in a chat, and
+ * the JobPosting data Google reads, keep working, and a job's company name leads somewhere.
  */
-const PUBLIC_DETAIL_PREFIXES = ['/jobs', '/talent'];
+const PUBLIC_DETAIL_PREFIXES = ['/jobs', '/talent', '/company'];
 
 /** Reachable before the role profile exists — onboarding must be here, see above. */
 const PRE_ROLE_PREFIXES = [

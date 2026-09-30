@@ -15,10 +15,10 @@ import { cn } from '@/lib/ui/cn';
  * Items: View profile and Edit profile, Settings, the role switch (only when the account holds
  * both roles), Log out.
  *
- * View and Edit are two items only when they are two different pages. A developer's public
- * profile (/talent/<slug>) and its editor are; a client's company has no public page, so its
- * preview and its form share /dashboard/client/profile, and two items that open the same page
- * read as a bug. There it is one item, "Company profile". Same for a developer with no slug yet.
+ * View and Edit are two items only when they are two different pages: a developer's public
+ * profile (/talent/<slug>) and its editor, or a client's public company page (/company/<id>)
+ * and the company form. Two items that open the same page read as a bug, so if the public page
+ * does not exist yet (no slug, no company row) it is one item: "Profile" or "Company profile".
  *
  * The role switch and log-out are server actions, so they stay real <form>s rendered OUTSIDE
  * the menu's portal; the menu items submit them through the `form` attribute. The forms work

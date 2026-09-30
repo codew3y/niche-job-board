@@ -20,6 +20,7 @@ describe('signed out', () => {
       '/signup',
       '/jobs/some-slug',
       '/talent/some-slug',
+      '/company/0b6f2f0e-8c1a-4c4e-9d61-3f1d2a9b7c10',
     ]) {
       expect(decideRoute(p, anon)).toBeNull();
     }
@@ -45,6 +46,8 @@ describe('signed out', () => {
     expect(decideRoute('/jobs', anon)).toBe('/login?next=%2Fjobs');
     expect(decideRoute('/talent', anon)).toBe('/login?next=%2Ftalent');
     expect(decideRoute('/jobs/', anon)).toBe('/login?next=%2Fjobs%2F');
+    // /company has no index page: only a company's own page is public.
+    expect(decideRoute('/company', anon)).toBe('/login?next=%2Fcompany');
   });
 });
 
@@ -98,6 +101,7 @@ describe('the health endpoint', () => {
     for (const session of [anon, fresh, chosen, done]) {
       expect(decideRoute('/jobs/some-slug', session)).toBeNull();
       expect(decideRoute('/talent/some-slug', session)).toBeNull();
+      expect(decideRoute('/company/some-id', session)).toBeNull();
     }
   });
 });

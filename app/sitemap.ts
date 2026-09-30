@@ -44,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const [{ data: jobs }, { data: talent }] = await Promise.all([
       supabase
         .from('jobs')
-        .select('slug, updated_at')
+        .select('slug, updated_at, client_id')
         .eq('status', 'open')
         .order('published_at', { ascending: false })
         .limit(5000),
@@ -65,6 +65,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         // Job pages carry the JobPosting JSON-LD that feeds Google Jobs — the highest-leverage
         // SEO surface in the project, so they outrank profiles here.
         priority: 0.8,
+      })),
+      // A company page is listed only while it has open work (the page itself is noindex when
+      // it has none). Its lastModified is its newest open job's.
+      ...[
+        ...(jobs ?? [])
+          .reduce((latest, job) => {
+            const seen = latest.get(job.client_id);
+            if (!seen || job.updated_at > seen) latest.set(job.client_id, job.updated_at);
+            return latest;
+          }, new Map<string, string>())
+          .entries(),
+      ].map(([clientId, updatedAt]) => ({
+        url: `${base}/company/${clientId}`,
+        lastModified: new Date(updatedAt),
+        changeFrequency: 'weekly' as const,
+        priority: 0.6,
       })),
       ...(talent ?? []).map((profile) => ({
         url: `${base}/talent/${profile.slug}`,

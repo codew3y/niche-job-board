@@ -6,6 +6,7 @@ import { CompanyForm } from '@/components/client/company-form';
 import { ExternalLink } from '@/components/shared/external-link';
 import { Avatar } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
+import { buttonStyles } from '@/components/ui/button';
 import { PageHeader, SectionHeading } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
 
@@ -31,7 +32,7 @@ export default async function ClientProfilePage() {
 
   const { data: company } = await supabase
     .from('client_profiles')
-    .select('company_name, website, industry, about')
+    .select('id, company_name, website, industry, about')
     .eq('user_id', user.id)
     .maybeSingle();
 
@@ -42,11 +43,16 @@ export default async function ClientProfilePage() {
       <PageHeader
         title="Company profile"
         subtitle="What a developer sees before deciding whether to apply."
+        actions={
+          <Link href={`/company/${company.id}`} className={buttonStyles({ variant: 'secondary' })}>
+            View public page
+          </Link>
+        }
       />
 
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-start">
-        {/* "Company profile" in the profile menu lands here: the company as it appears on a job
-            page. There is no separate public client page, so this is the honest preview. */}
+        {/* "Edit profile" in the profile menu lands here. The preview is the company as it
+            appears on a job page; the full public page is /company/<id> ("View public page"). */}
         <section
           id="preview"
           aria-labelledby="preview-heading"

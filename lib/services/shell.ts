@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { createClient } from '../supabase/server';
-import type { Viewer } from '../supabase/session';
+import { getClientProfileId, type Viewer } from '../supabase/session';
 import { unreadCount } from './messaging';
 
 export type ShellUser = {
@@ -23,10 +23,15 @@ export type ShellUser = {
  * — never re-derived here.
  */
 export async function loadShellUser(viewer: Viewer): Promise<ShellUser> {
-  let profileHref = '/dashboard/client/profile#preview';
-  let editProfileHref = '/dashboard/client/profile#edit';
+  let profileHref = '/dashboard/client/profile';
+  let editProfileHref = '/dashboard/client/profile';
 
-  if (viewer.activeRole === 'talent') {
+  if (viewer.activeRole === 'client') {
+    // The public company page. Without a company row yet, both items collapse into one
+    // (account-menu shows a single "Company profile" when the two hrefs match).
+    const clientId = await getClientProfileId();
+    if (clientId) profileHref = `/company/${clientId}`;
+  } else {
     editProfileHref = '/dashboard/talent/profile';
     const supabase = await createClient();
     const { data } = await supabase

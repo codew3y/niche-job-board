@@ -1,4 +1,4 @@
-import { ArrowLeft, Lock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Lock } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -141,7 +141,16 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
             <div className="flex items-center gap-3">
               <Avatar name={company} />
               <p className="min-w-0 text-sm text-text-muted">
-                <span className="font-semibold text-text">{company}</span>
+                {job.client_profiles?.id ? (
+                  <Link
+                    href={`/company/${job.client_profiles.id}`}
+                    className="prose-link font-semibold text-text"
+                  >
+                    {company}
+                  </Link>
+                ) : (
+                  <span className="font-semibold text-text">{company}</span>
+                )}
                 {job.client_profiles?.industry ? ` · ${job.client_profiles.industry}` : ''}
               </p>
             </div>
@@ -234,6 +243,15 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                   </ExternalLink>
                 </p>
               )}
+              <p className="mt-4">
+                <Link
+                  href={`/company/${job.client_profiles.id}`}
+                  className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-link hover:underline"
+                >
+                  All open jobs from {job.client_profiles.company_name}
+                  <ArrowRight aria-hidden="true" size={16} />
+                </Link>
+              </p>
             </section>
           )}
         </div>
