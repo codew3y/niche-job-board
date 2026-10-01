@@ -43,7 +43,8 @@ export default async function TalentOnboarding({ params }: { params: Promise<{ s
   ]);
 
   const progress = {
-    hasBasics: Boolean(profile?.headline && (profile?.bio?.length ?? 0) >= 120),
+    // The title is what the basics step requires; the bio has no minimum.
+    hasBasics: Boolean(profile?.headline),
     hasSkills: (mySkills?.length ?? 0) > 0,
     hasEvidence: Boolean(profile?.website_url) || (profile?.portfolio_item_count ?? 0) >= 2,
     isPublished: Boolean(profile?.is_published),

@@ -37,7 +37,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Hiring for developers, by what they can do',
+    // The brand alone on the home page; inner pages read "Browse · TechSelect" and so on.
+    default: 'TechSelect',
     template: '%s · TechSelect',
   },
   description:
@@ -62,8 +63,8 @@ export const viewport: Viewport = {
   themeColor: [
     // The page background in each theme (--surface), so the status bar and the page are one
     // continuous colour.
-    { media: '(prefers-color-scheme: light)', color: '#f5f8fb' },
-    { media: '(prefers-color-scheme: dark)', color: '#07111f' },
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
   ],
   colorScheme: 'light dark',
 };

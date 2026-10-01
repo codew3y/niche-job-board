@@ -6,7 +6,8 @@ import { Field, FormError, FormStatus, SelectField, TextareaField } from '@/comp
 import { SubmitButton } from '@/components/ui/submit-button';
 import { LinksPreview } from './links-preview';
 import { SkillPicker, type SkillOption } from '@/components/onboarding/skill-picker';
-import { CURRENCIES } from '@/components/onboarding/talent-forms';
+import { CurrencySelect } from '@/components/shared/currency-select';
+import { TimezoneCombobox } from '@/components/shared/timezone-combobox';
 import { updateProfile, updateSkills } from '@/lib/actions/profile';
 import type { ActionResult } from '@/lib/actions/auth';
 
@@ -52,17 +53,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
           errors={fields?.hourlyRate}
           placeholder="85"
         />
-        <SelectField
-          label="Currency"
-          name="currency"
-          defaultValue={str(profile, 'currency') || 'USD'}
-        >
-          {CURRENCIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </SelectField>
+        <CurrencySelect defaultValue={str(profile, 'currency')} />
       </div>
 
       <TextareaField
@@ -71,7 +62,8 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
         rows={7}
         defaultValue={str(profile, 'bio')}
         errors={fields?.bio}
-        hint="At least 120 characters. This is the text matching reads."
+        optional
+        hint="Any length. This is the text matching reads, so a few sentences on what you build help."
       />
 
       <LinksPreview
@@ -103,12 +95,7 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
           max={60}
           defaultValue={(profile.years_experience as number | null) ?? ''}
         />
-        <Field
-          label="Time zone"
-          name="timezone"
-          defaultValue={str(profile, 'timezone')}
-          placeholder="Europe/Zurich"
-        />
+        <TimezoneCombobox defaultValue={str(profile, 'timezone')} errors={fields?.timezone} />
       </div>
 
       {state?.ok === false && <FormError>{state.message}</FormError>}

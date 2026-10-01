@@ -5,12 +5,13 @@ import { CONTAINER } from './page-parts';
 import { SiteNavLinks } from './site-nav-links';
 import { Logo } from '@/components/layout/logo';
 import { buttonStyles } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { cn } from '@/lib/ui/cn';
 import { getSessionUser } from '@/lib/supabase/session';
 
 /**
  * The public site's header, on every page outside the app: logo top-left (to the home page),
- * the page links, and Log in / Sign up on the right. Below `lg` the links and buttons collapse
+ * the page links, a light/dark toggle, and Log in / Sign up on the right. Below `lg` the links and buttons collapse
  * into a menu: five links, the logo and two buttons do not fit one row on a tablet, and the
  * labels used to wrap onto two lines there.
  *
@@ -32,6 +33,7 @@ export async function SiteHeader() {
         </nav>
 
         <div className="ml-auto hidden items-center gap-2 lg:flex">
+          <ThemeToggle />
           {dashboardHref ? (
             <Link href={dashboardHref} className={buttonStyles({ size: 'sm' })}>
               Go to dashboard
@@ -48,7 +50,10 @@ export async function SiteHeader() {
           )}
         </div>
 
-        <div className="ml-auto lg:hidden">
+        {/* On phones the toggle sits beside the menu button rather than inside the menu: a theme
+            switch is used on its own, and burying it a tap deep would hide it. */}
+        <div className="ml-auto flex items-center gap-1 lg:hidden">
+          <ThemeToggle />
           <MobileMenu dashboardHref={dashboardHref} />
         </div>
       </div>

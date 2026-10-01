@@ -2,11 +2,13 @@
 
 import { useActionState } from 'react';
 
-import { ChoiceChips, Field, FormError, SelectField, TextareaField } from '@/components/ui/field';
+import { ChoiceChips, Field, FormError, TextareaField } from '@/components/ui/field';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { SkillPicker, type SkillOption } from './skill-picker';
 import { saveTalentBasics, saveTalentSkills } from '@/lib/actions/onboarding';
 import type { ActionResult } from '@/lib/actions/auth';
+import { CurrencySelect } from '@/components/shared/currency-select';
+import { TimezoneCombobox } from '@/components/shared/timezone-combobox';
 
 type Profile = Record<string, unknown> | null;
 const str = (p: Profile, k: string) => (p?.[k] as string | null) ?? '';
@@ -48,7 +50,8 @@ export function TalentBasicsForm({ profile }: { profile: Profile }) {
           defaultValue={str(profile, 'bio')}
           errors={fields?.bio}
           placeholder="What do you build? What stack? What kind of client? Name a piece of work you're proud of."
-          hint="At least 120 characters. This is the text matching actually reads."
+          optional
+          hint="Any length. This is the text matching reads, so a few sentences on what you build help."
         />
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -62,13 +65,7 @@ export function TalentBasicsForm({ profile }: { profile: Profile }) {
             optional
             defaultValue={(profile?.years_experience as number | null) ?? ''}
           />
-          <Field
-            label="Time zone"
-            name="timezone"
-            optional
-            defaultValue={str(profile, 'timezone')}
-            placeholder="Europe/Zurich"
-          />
+          <TimezoneCombobox defaultValue={str(profile, 'timezone')} errors={fields?.timezone} />
         </div>
       </StepCard>
 
@@ -112,17 +109,7 @@ export function TalentSkillsForm({
             placeholder="85"
             errors={fields?.hourlyRate}
           />
-          <SelectField
-            label="Currency"
-            name="currency"
-            defaultValue={str(profile, 'currency') || 'USD'}
-          >
-            {CURRENCIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </SelectField>
+          <CurrencySelect defaultValue={str(profile, 'currency')} />
         </div>
 
         <ChoiceChips

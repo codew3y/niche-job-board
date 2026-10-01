@@ -76,8 +76,9 @@ export default async function TalentDashboard() {
   // that implies a grade.
   const checks = [
     {
-      label: 'Headline and a bio of a few sentences',
-      done: Boolean(profile?.headline && (profile?.bio?.length ?? 0) >= 120),
+      label: 'Headline and a bio',
+      // Any length counts; there is no minimum. The bio is still worth writing: matching reads it.
+      done: Boolean(profile?.headline && (profile?.bio?.trim().length ?? 0) > 0),
     },
     { label: 'Skills tagged', done: (skills?.count ?? 0) > 0 },
     {

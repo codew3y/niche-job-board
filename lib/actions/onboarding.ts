@@ -8,6 +8,8 @@ import { clientProfileInput } from '../schemas/client';
 import { embedInBackground } from '../matching/ingest';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
+import { CURRENCY_CODES } from '../currencies';
+import { TIME_ZONE_SET } from '../timezones';
 
 /**
  * Onboarding step actions — Phase 2 §6: "progress saved per step so a refresh doesn't lose
@@ -54,11 +56,11 @@ export async function saveTalentBasics(
 
   const errors: Record<string, string[]> = {};
   if (headline.length < 10) errors.headline = ['Say what you do — at least 10 characters.'];
-  if (bio.length < 120) {
-    errors.bio = [
-      'At least 120 characters. This is the text matching reads, so a thin bio gets thin matches.',
-    ];
-  }
+  // No minimum on the bio (owner's decision); only the upper bound the column was sized for.
+  if (bio.length > 4000) errors.bio = ['Keep it under 4,000 characters.'];
+  const timezone = trimOrNull(formData.get('timezone'));
+  if (timezone && !TIME_ZONE_SET.has(timezone))
+    errors.timezone = ['Pick a time zone from the list.'];
   if (Object.keys(errors).length) {
     return { ok: false, message: 'Check the fields below.', fields: errors };
   }
@@ -79,7 +81,7 @@ export async function saveTalentBasics(
       user_id: user.id,
       headline,
       bio,
-      timezone: trimOrNull(formData.get('timezone')),
+      timezone,
       years_experience: Number(formData.get('yearsExperience')) || null,
       is_published: false,
       slug: existing?.slug ?? makeSlug(profile?.display_name ?? 'member'),
@@ -135,7 +137,9 @@ export async function saveTalentSkills(
     .update({
       hourly_rate_min: rate || null,
       hourly_rate_max: rate || null,
-      currency: String(formData.get('currency') ?? 'USD'),
+      currency: CURRENCY_CODES.has(String(formData.get('currency')))
+        ? String(formData.get('currency'))
+        : 'USD',
       availability: String(formData.get('availability') ?? 'part_time'),
     })
     .eq('id', profile.id);

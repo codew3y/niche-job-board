@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { CategoryGrid } from '@/components/site/category-grid';
+import { ExampleMatchCard } from '@/components/site/example-match-card';
 import { HowItWorksSteps } from '@/components/site/how-it-works-steps';
 import { CONTAINER, PageCta } from '@/components/site/page-parts';
+import { SkillTicker } from '@/components/site/skill-ticker';
 import { buttonStyles } from '@/components/ui/button';
 import { getSessionUser } from '@/lib/supabase/session';
 import { cn } from '@/lib/ui/cn';
@@ -26,8 +28,12 @@ export const metadata: Metadata = {
  * CTA labels, one per intent, identical everywhere on the site: "Create a profile" (developer
  * sign-up), "Post a brief" (client sign-up), "Sign up" (the header's generic sign-up).
  *
- * Content history: the hero line, "What a match looks like", "What it will not do" and the
- * closing line come from the landing page at b9fe7d4 (introduced in eb8bb6c).
+ * Content history: "What a match looks like", "What it will not do" and the closing line come
+ * from the landing page at b9fe7d4 (introduced in eb8bb6c). The headline was "Hired for the
+ * work, not the keywords." until October 2026.
+ *
+ * Texture, added because the page read as dry: a dot grid behind the hero, an example-match card
+ * on the hero photo, and a slow ticker of real skills between the hero and the categories.
  *
  * Signed-in visitors never see this page: the proxy sends them to their dashboard
  * (lib/supabase/route-policy.ts), and this re-checks in case the proxy was bypassed.
@@ -78,13 +84,19 @@ export default async function Home({
       <section
         className={cn(
           CONTAINER,
-          'grid min-h-[calc(100svh-4rem-1px-env(safe-area-inset-top,0px))] content-center gap-10 py-10 sm:py-14 lg:grid-cols-[1fr_1.15fr] lg:content-stretch lg:items-stretch lg:gap-12 lg:py-12',
+          'relative isolate grid min-h-[calc(100svh-4rem-1px-env(safe-area-inset-top,0px))] content-center gap-10 py-10 sm:py-14 lg:grid-cols-[1fr_1.15fr] lg:content-stretch lg:items-stretch lg:gap-12 lg:py-12',
         )}
       >
+        {/* Texture: a faint dot grid in the border colour, fading out from the top left, so the
+            page is not a flat field. Behind everything (isolate + -z-10), in either theme. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 [background-image:radial-gradient(var(--border-strong)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_60%_at_25%_35%,black,transparent)]"
+        />
         <div className="flex flex-col justify-center animate-rise">
           <p className="text-sm font-semibold text-link">Software, web and automation work</p>
           <h1 className="mt-4 text-display-md text-balance sm:text-display-lg lg:text-display-md xl:text-display-lg">
-            Hired for the work, not the keywords.
+            Hire builders, not <span className="text-link">buzzwords</span>.
           </h1>
           <p className="mt-6 max-w-lg text-lg text-text-muted text-pretty">
             Matching reads the projects you describe and the brief a client writes, then says in one
@@ -121,8 +133,13 @@ export default async function Home({
             sizes="(min-width: 1024px) 55vw, 100vw"
             className="object-cover object-[62%_50%]"
           />
+          {/* What a match looks like, on the photo itself. From sm: on a phone the 16:9 photo is
+              too short to carry a card without hiding it. */}
+          <ExampleMatchCard className="absolute bottom-4 left-4 hidden sm:block" />
         </figure>
       </section>
+
+      <SkillTicker />
 
       <CategoryGrid />
 

@@ -5,7 +5,9 @@ import { redirect } from 'next/navigation';
 
 import { embedInBackground } from '../matching/ingest';
 import { invalidate } from '../matching/cache';
+import { CURRENCY_CODES } from '../currencies';
 import { educationInput, experienceInput } from '../schemas/talent';
+import { TIME_ZONE_SET } from '../timezones';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
 
@@ -54,7 +56,9 @@ export async function updateProfile(
 
   const errors: Record<string, string[]> = {};
   if (headline.length < 10) errors.headline = ['Say what you do — at least 10 characters.'];
-  if (bio.length < 120) errors.bio = ['At least 120 characters — this is what matching reads.'];
+  // No minimum on the bio (owner's decision). A short bio still ranks lower, which the profile
+  // page explains as a suggestion; it never blocks a save.
+  if (bio.length > 4000) errors.bio = ['Keep it under 4,000 characters.'];
   for (const [key, value] of [
     ['websiteUrl', website],
     ['githubUrl', github],
@@ -80,6 +84,14 @@ export async function updateProfile(
    * Removing someone's own text from their own profile is their business.
    */
 
+  // Validated against the same lists the pickers offer, so a crafted post cannot store a
+  // currency or zone the UI could never have produced.
+  const currency = String(formData.get('currency') ?? 'USD');
+  if (!CURRENCY_CODES.has(currency)) errors.currency = ['Pick a currency from the list.'];
+  const timezone = trimOrNull(formData.get('timezone'));
+  if (timezone && !TIME_ZONE_SET.has(timezone))
+    errors.timezone = ['Pick a time zone from the list.'];
+
   if (Object.keys(errors).length) {
     return { ok: false, message: errors._?.[0] ?? 'Check the fields below.', fields: errors };
   }
@@ -94,10 +106,10 @@ export async function updateProfile(
       linkedin_url: linkedin,
       hourly_rate_min: rate || null,
       hourly_rate_max: rate || null,
-      currency: String(formData.get('currency') ?? 'USD'),
+      currency,
       availability: String(formData.get('availability') ?? 'part_time'),
       years_experience: Number(formData.get('yearsExperience')) || null,
-      timezone: trimOrNull(formData.get('timezone')),
+      timezone,
     })
     .eq('id', profile.id);
 

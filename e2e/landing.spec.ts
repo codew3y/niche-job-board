@@ -8,7 +8,7 @@ import { canSeed, PASSWORD, seed, teardown, type Seeded } from './fixtures';
  */
 
 const SITE_PAGES = [
-  ['/', /hired for the work/i],
+  ['/', /hire builders, not buzzwords/i],
   ['/for-freelancers', /get hired for what you have built/i],
   ['/for-clients', /find developers by what they have shipped/i],
   ['/how-it-works', /how techselect works/i],
@@ -151,7 +151,7 @@ test.describe('signed in', () => {
     await page.getByRole('menuitem', { name: /log out/i }).click();
     await expect(page).toHaveURL(/\/$/);
     await expect(
-      page.getByRole('heading', { level: 1, name: /hired for the work/i }),
+      page.getByRole('heading', { level: 1, name: /hire builders, not buzzwords/i }),
     ).toBeVisible();
   });
 });

@@ -34,10 +34,11 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces */
-  --surface: #f5f8fb; /* the page */
+  /* Surfaces. The page is pure white in light mode and pure black in dark mode (owner's
+     choice). Cards on the page are separated by their 1px border and shadow, not by tint. */
+  --surface: #ffffff; /* the page */
   --surface-raised: #ffffff; /* cards, inputs, popovers */
-  --surface-sunken: #eaf0f6; /* wells, hover rows, skeletons */
+  --surface-sunken: #eef2f7; /* wells, hover rows, skeletons */
 
   /* Lines. `--control` is a component boundary and must reach 3:1 (WCAG 1.4.11). */
   --border: #d5dee8;
@@ -97,9 +98,9 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --surface: #07111f;
-    --surface-raised: #0c1a2e;
-    --surface-sunken: #050c17;
+    --surface: #000000;
+    --surface-raised: #0b1424;
+    --surface-sunken: #0a1220;
     --border: #1e3048;
     --border-strong: #2c4262;
     --control: #5e7597;
@@ -135,9 +136,9 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --surface: #07111f;
-  --surface-raised: #0c1a2e;
-  --surface-sunken: #050c17;
+  --surface: #000000;
+  --surface-raised: #0b1424;
+  --surface-sunken: #0a1220;
   --border: #1e3048;
   --border-strong: #2c4262;
   --control: #5e7597;
@@ -533,6 +534,20 @@
     opacity: 0;
   }
 }
+
+/*
+ * The skills ticker on the home page: one long row, duplicated, translated by half its width so
+ * the loop has no seam. Linear and slow (60s a lap), because it is ambient texture, not content
+ * anyone has to catch. Paused on hover, and stopped entirely under reduced motion (below).
+ */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@utility animate-marquee {
+  animation: marquee 60s linear infinite;
+}
 @media (prefers-reduced-motion: reduce) {
   /* Entrances keep their fade and lose their travel. */
   .animate-rise {
@@ -544,7 +559,8 @@
   }
   /* Loops and shimmer stop — continuous motion is exactly what this setting asks to remove. */
   .animate-pulse,
-  .animate-skeleton {
+  .animate-skeleton,
+  .animate-marquee {
     animation: none !important;
   }
   html {
