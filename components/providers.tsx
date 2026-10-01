@@ -38,7 +38,8 @@ function ThemedToaster() {
       // Bottom-right, clear of the sidebar and out of the reading column.
       position="bottom-right"
       mobileOffset={{
-        bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)',
+        // Above the app's phone tab bar (zero outside the app shell's breakpoint).
+        bottom: 'calc(var(--tabbar-space) + 12px)',
       }}
       gap={8}
       toastOptions={{

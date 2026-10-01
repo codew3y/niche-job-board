@@ -226,7 +226,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
       {dirty && (
         <form
           action={reorderItems}
-          className="sticky bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] flex flex-wrap items-center gap-3 rounded-lg border border-border-base bg-surface-raised p-3 shadow-md sm:bottom-4"
+          className="sticky bottom-[calc(var(--tabbar-space)+0.75rem)] md:bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] flex flex-wrap items-center gap-3 rounded-lg border border-border-base bg-surface-raised p-3 shadow-md sm:bottom-4"
         >
           {order.map((item) => (
             <input key={item.id} type="hidden" name="itemId" value={item.id} />

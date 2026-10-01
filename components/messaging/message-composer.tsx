@@ -39,7 +39,8 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
       ref={formRef}
       action={action}
       className={cn(
-        'sticky bottom-0 z-sticky',
+        // Above the phone tab bar; flush to the bottom from md, where there is no bar.
+        'sticky bottom-(--tabbar-space) z-sticky',
         // Phone: a full-bleed bar on the page surface, padded for the home indicator.
         '-mx-4 border-t border-border-base bg-surface px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))]',
         // From sm: a raised panel that floats a little above the bottom edge.

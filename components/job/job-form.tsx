@@ -221,7 +221,7 @@ export function JobForm({
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
 
       {/* The one floating element on the page, so it is the one with a shadow. */}
-      <div className="sticky bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] z-sticky flex flex-wrap items-center justify-end gap-2 rounded-lg border border-border-base bg-surface-raised p-3 shadow-md sm:bottom-4 sm:gap-3">
+      <div className="sticky bottom-[calc(var(--tabbar-space)+0.75rem)] md:bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] z-sticky flex flex-wrap items-center justify-end gap-2 rounded-lg border border-border-base bg-surface-raised p-3 shadow-md sm:bottom-4 sm:gap-3">
         <p className="mr-auto hidden text-sm text-text-muted sm:block">
           {isPublished ? 'Changes go live when you save.' : 'Drafts are private until you publish.'}
         </p>

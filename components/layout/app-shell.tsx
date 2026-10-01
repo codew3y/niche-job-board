@@ -7,6 +7,7 @@ import { Logo } from './logo';
 import { NavLinks, type NavItem } from './nav-links';
 import { signOut, switchRole } from '@/lib/actions/auth';
 import { logoHref } from '@/lib/roles';
+import { cn } from '@/lib/ui/cn';
 import type { ShellUser } from '@/lib/services/shell';
 
 export type { ShellUser } from '@/lib/services/shell';
@@ -38,11 +39,17 @@ const NAV: Record<ShellUser['activeRole'], NavItem[]> = {
 };
 
 /**
- * The app frame: a fixed left sidebar, no top header.
+ * The app frame. No top header; the navigation moves with the screen:
  *
- *   ≥ lg   a 15rem sidebar — logo, labelled nav, profile picture at the foot.
- *   < lg   the same sidebar as a 4rem icon rail. Labels stay in the DOM as accessible names
- *          (and a hover title), so nothing is lost to a screen reader at any width.
+ *   < md   a bottom tab bar, where the thumb is: the four destinations with short labels, and
+ *          the profile picture as the fifth tab (it opens the profile menu). No logo on phones;
+ *          the bar is for getting around, and every page has its own title.
+ *   md     a 4rem icon rail down the left. Labels stay in the DOM as accessible names (and a
+ *          hover title), so nothing is lost to a screen reader.
+ *   ≥ lg   a 15rem sidebar: logo, labelled nav, profile picture at the foot.
+ *
+ * The page reserves the bar's height on phones (--tabbar-space, app/globals.css), so the last
+ * row of content, and anything sticky at the bottom, is never hidden under it.
  *
  * One <nav>, rendered once, at every width — two copies would give a screen-reader user two
  * identical "Main" landmarks to choose between.
@@ -52,16 +59,22 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
     <div className="min-h-dvh">
       <aside
         aria-label="App"
-        className="fixed inset-y-0 left-0 z-nav flex w-16 flex-col border-r border-border-base bg-surface-raised pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[max(1rem,env(safe-area-inset-bottom,0px))] pl-[env(safe-area-inset-left,0px)] lg:w-60"
+        className={cn(
+          // Phones: a bar across the bottom, padded clear of the home indicator.
+          'fixed inset-x-0 bottom-0 z-nav flex border-t border-border-base bg-surface-raised/95 px-1 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-md',
+          // From md: a column down the left.
+          'md:inset-x-auto md:inset-y-0 md:left-0 md:w-16 md:flex-col md:border-t-0 md:border-r md:bg-surface-raised md:px-0 md:pt-[max(1rem,env(safe-area-inset-top,0px))] md:pb-[max(1rem,env(safe-area-inset-bottom,0px))] md:pl-[env(safe-area-inset-left,0px)] md:backdrop-blur-none',
+          'lg:w-60',
+        )}
       >
-        <div className="flex h-10 items-center justify-center lg:justify-start lg:px-5">
+        <div className="hidden h-10 items-center justify-center md:flex lg:justify-start lg:px-5">
           <Logo href={logoHref(true)} compact className="lg:hidden" />
           <Logo href={logoHref(true)} className="hidden lg:inline-flex" />
         </div>
 
         <NavLinks items={NAV[user.activeRole]} unread={user.unread} />
 
-        <div className="mt-auto flex justify-center px-2 lg:justify-start lg:px-3">
+        <div className="flex shrink-0 items-center justify-center px-2 md:mt-auto lg:justify-start lg:px-3">
           <AccountMenu
             displayName={user.displayName}
             avatarUrl={user.avatarUrl}
@@ -76,7 +89,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
         </div>
       </aside>
 
-      <div className="flex min-h-dvh flex-col pl-16 lg:pl-60">
+      <div className="flex min-h-dvh flex-col pb-(--tabbar-space) md:pl-16 lg:pl-60">
         <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-8 sm:py-12">
           {children}
         </main>
