@@ -24,7 +24,11 @@ export async function SiteHeader() {
 
   return (
     // 64px tall (the nav cap is 80px), one line from `lg`; below `lg` the menu takes over.
-    <header className="relative z-sticky border-b border-border-base bg-surface pt-[env(safe-area-inset-top,0px)]">
+    // Sticky, so the header stays in view while the page scrolls. Sticky is also a positioned
+    // element, so the mobile menu panel (absolute, top-full) still hangs from it. Slightly
+    // translucent with a blur, so content passing underneath reads as underneath, not behind
+    // a wall; solid where backdrop-filter is unsupported.
+    <header className="sticky top-0 z-sticky border-b border-border-base bg-surface/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur-md supports-[not(backdrop-filter:blur(0))]:bg-surface">
       <div className={cn(CONTAINER, 'flex h-16 items-center gap-6')}>
         <Logo href="/" />
 

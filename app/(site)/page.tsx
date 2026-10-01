@@ -32,8 +32,9 @@ export const metadata: Metadata = {
  * from the landing page at b9fe7d4 (introduced in eb8bb6c). The headline was "Hired for the
  * work, not the keywords." until October 2026.
  *
- * Texture, added because the page read as dry: a dot grid behind the hero, an example-match card
- * on the hero photo, and a slow ticker of real skills between the hero and the categories.
+ * Texture, added because the page read as dry: an example-match card on the hero photo, and a
+ * slow ticker of real skills between the hero and the categories. (A dot grid behind the hero
+ * was tried and removed at the owner's request.)
  *
  * Signed-in visitors never see this page: the proxy sends them to their dashboard
  * (lib/supabase/route-policy.ts), and this re-checks in case the proxy was bypassed.
@@ -84,15 +85,9 @@ export default async function Home({
       <section
         className={cn(
           CONTAINER,
-          'relative isolate grid min-h-[calc(100svh-4rem-1px-env(safe-area-inset-top,0px))] content-center gap-10 py-10 sm:py-14 lg:grid-cols-[1fr_1.15fr] lg:content-stretch lg:items-stretch lg:gap-12 lg:py-12',
+          'grid min-h-[calc(100svh-4rem-1px-env(safe-area-inset-top,0px))] content-center gap-10 py-10 sm:py-14 lg:grid-cols-[1fr_1.15fr] lg:content-stretch lg:items-stretch lg:gap-12 lg:py-12',
         )}
       >
-        {/* Texture: a faint dot grid in the border colour, fading out from the top left, so the
-            page is not a flat field. Behind everything (isolate + -z-10), in either theme. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 [background-image:radial-gradient(var(--border-strong)_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_70%_60%_at_25%_35%,black,transparent)]"
-        />
         <div className="flex flex-col justify-center animate-rise">
           <p className="text-sm font-semibold text-link">Software, web and automation work</p>
           <h1 className="mt-4 text-display-md text-balance sm:text-display-lg lg:text-display-md xl:text-display-lg">
