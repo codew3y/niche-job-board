@@ -7,7 +7,8 @@ import { cn } from '@/lib/ui/cn';
  *
  * One list, rendered twice and translated by half its width (animate-marquee), so the loop has
  * no seam. The second copy is aria-hidden: a screen reader hears the list once, as a list.
- * Pauses on hover; stops under prefers-reduced-motion (app/globals.css).
+ * Pauses on hover; stops under prefers-reduced-motion (app/globals.css), when the strip can
+ * still be scrolled by hand.
  */
 const SKILLS = [
   'Next.js',
@@ -43,8 +44,23 @@ export function SkillTicker() {
         Matched across 126 skills in software, web and automation, including
       </p>
       {/* The fade at each edge is a mask, so it works on any background in either theme. */}
-      <div className="group mt-4 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
-        <div className="flex w-max animate-marquee gap-3 group-hover:[animation-play-state:paused]">
+      {/* A horizontally scrollable strip, not a clipped one. While it animates the skills come
+          round on their own; when it is still (reduced motion, or paused on hover) every skill
+          can still be reached by swiping or scrolling. A clipped box would hide most of them
+          for good, which e2e/responsive.spec.ts rightly fails ("keeps every element inside the
+          viewport" only exempts scrollable strips). The scrollbar is hidden; it is a strip of
+          tags, not a document.
+
+          Focusable (tabIndex 0, a labelled region) so a keyboard can scroll it too — axe's
+          scrollable-region-focusable. It pauses while hovered or focused, so the arrow keys are
+          not fighting the animation. */}
+      <div
+        role="region"
+        aria-label="Skills, scrollable"
+        tabIndex={0}
+        className="group mt-4 overflow-x-auto overscroll-x-contain [scrollbar-width:none] [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] focus-visible:[mask-image:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <div className="flex w-max animate-marquee gap-3 group-focus-visible:[animation-play-state:paused] group-hover:[animation-play-state:paused]">
           {[0, 1].map((copy) => (
             <ul key={copy} aria-hidden={copy === 1} className="flex shrink-0 gap-3">
               {SKILLS.map((skill) => (
