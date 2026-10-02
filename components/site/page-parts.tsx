@@ -10,7 +10,7 @@ import { cn } from '@/lib/ui/cn';
  * About). Each block is a different LAYOUT FAMILY, so a page assembled from them never shows the
  * same composition twice (taste-skill 4.7, section-layout repetition ban):
  *
- *   PageIntro     split intro: copy left, a real photograph right (or copy alone)
+ *   PageIntro     the first-screen hero: copy left, a real photograph right
  *   NumberedSteps a short vertical ordered list with numeral tiles
  *   FeatureBento  an asymmetric grid with tinted cells (6 items -> 6 cells)
  *   FeatureList   a side heading with a stacked list beside it
@@ -25,9 +25,24 @@ import { cn } from '@/lib/ui/cn';
 export const CONTAINER = 'mx-auto w-full max-w-7xl gutter';
 
 /**
- * Page intro: h1, a lead of 20 words or fewer, optional actions, and an optional photograph.
- * With an image it is an asymmetric split (copy 7 / image 5 from `lg`); below `lg` the image
- * drops under the copy at a fixed 16:9, so it cannot push the actions off the first screen.
+ * The first-screen hero, shared by the home page and every page intro, so a header link always
+ * opens on the same composition: copy (1fr) beside a photo (1.15fr) from `lg`, stacked below.
+ *
+ * It fills the first screen (viewport minus the 4rem header, its 1px border and any notch
+ * inset), so the next section starts below the fold on every page, not only the home page.
+ * From `lg` the row stretches and the photo grows to fill that height, with the copy centred
+ * beside it. svh, not dvh: the height must not jump as a phone's browser bar shows and hides.
+ */
+export const HERO_SECTION =
+  'grid min-h-[calc(100svh-4rem-1px-env(safe-area-inset-top,0px))] content-center gap-10 py-10 sm:py-14 lg:grid-cols-[1fr_1.15fr] lg:content-stretch lg:items-stretch lg:gap-12 lg:py-12';
+
+/** The hero photo frame: 16:9 below `lg`, then as tall as the first screen allows. */
+export const HERO_FIGURE =
+  'relative aspect-video overflow-hidden rounded-lg border border-border-base bg-surface-sunken shadow-lg animate-rise lg:aspect-auto lg:h-full lg:min-h-80';
+
+/**
+ * Page intro: h1, a lead of 20 words or fewer, optional actions, and a photograph, laid out as
+ * the home hero (HERO_SECTION), so every page in the header lines up with the home page.
  */
 export function PageIntro({
   eyebrow,
@@ -40,37 +55,35 @@ export function PageIntro({
   title: string;
   lead: string;
   /** A static import (`import photo from '@/public/…'`), so it gets a blurred preview. */
-  image?: { src: StaticImageData; alt: string };
+  image: { src: StaticImageData; alt: string };
   children?: ReactNode;
 }) {
   return (
-    <section className={cn(CONTAINER, 'pt-12 pb-12 sm:pt-16 lg:pt-20')}>
-      <div
-        className={cn(
-          'grid gap-10',
-          image && 'lg:grid-cols-[1.25fr_1fr] lg:items-center lg:gap-14',
-        )}
-      >
-        <div className="max-w-2xl animate-rise">
-          {eyebrow && <p className="text-sm font-semibold text-link">{eyebrow}</p>}
-          <h1 className={cn('text-display-md text-balance', eyebrow && 'mt-3')}>{title}</h1>
-          <p className="mt-5 max-w-[60ch] text-lg text-text-muted text-pretty">{lead}</p>
-          {children && <div className="mt-8 flex flex-wrap items-center gap-3">{children}</div>}
-        </div>
-        {image && (
-          <div className="relative aspect-video overflow-hidden rounded-lg border border-border-base bg-surface-sunken shadow-md lg:aspect-[4/3]">
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              preload
-              placeholder="blur"
-              sizes="(min-width: 1024px) 480px, 100vw"
-              className="object-cover"
-            />
-          </div>
-        )}
+    <section className={cn(CONTAINER, HERO_SECTION)}>
+      <div className="flex flex-col justify-center animate-rise">
+        {eyebrow && <p className="text-sm font-semibold text-link">{eyebrow}</p>}
+        <h1
+          className={cn(
+            'text-display-md text-balance sm:text-display-lg lg:text-display-md xl:text-display-lg',
+            eyebrow && 'mt-4',
+          )}
+        >
+          {title}
+        </h1>
+        <p className="mt-6 max-w-lg text-lg text-text-muted text-pretty">{lead}</p>
+        {children && <div className="mt-9 flex flex-wrap items-center gap-3">{children}</div>}
       </div>
+      <figure className={HERO_FIGURE} style={{ animationDelay: '80ms' }}>
+        <Image
+          src={image.src}
+          alt={image.alt}
+          fill
+          preload
+          placeholder="blur"
+          sizes="(min-width: 1024px) 55vw, 100vw"
+          className="object-cover"
+        />
+      </figure>
     </section>
   );
 }

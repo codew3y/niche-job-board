@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 import { HowItWorksSteps } from '@/components/site/how-it-works-steps';
-import { FeatureList, FeatureRows, PageCta } from '@/components/site/page-parts';
+import { FeatureList, FeatureRows, PageCta, PageIntro } from '@/components/site/page-parts';
+import { buttonStyles } from '@/components/ui/button';
+import howPhoto from '@/public/images/pages/how-it-works.jpg';
 
 export const metadata: Metadata = {
   title: 'How It Works',
@@ -17,8 +20,8 @@ export const metadata: Metadata = {
  * The three principles come from the landing page before the Editorial redesign (6a11f96),
  * where they sat under the hero.
  *
- * Four sections, four layout families: image bento (with the h1 and lead), side-heading list,
- * definition rows, closing panel. No eyebrows.
+ * Five sections, five layout families: the first-screen hero (PageIntro, as on every page),
+ * image bento, side-heading list, definition rows, closing panel. No eyebrows.
  */
 const PRINCIPLES = [
   {
@@ -53,12 +56,20 @@ const DETAILS = [
 export default function HowItWorksPage() {
   return (
     <>
-      <HowItWorksSteps
-        heading="How TechSelect works"
+      <PageIntro
+        title="How TechSelect works"
         lead="Four steps from sign-up to working together. No approval queue, no fees."
-        headingLevel="h1"
-        showDetail
-      />
+        image={{
+          // Kaleidico, https://unsplash.com/photos/26MJGnCM0Wc (Unsplash License).
+          src: howPhoto,
+          alt: 'Two people sketching a web page layout on a whiteboard with markers',
+        }}
+      >
+        <Link href="/signup" className={buttonStyles({ size: 'lg' })}>
+          Sign up
+        </Link>
+      </PageIntro>
+      <HowItWorksSteps heading="The four steps" showDetail />
       <FeatureList heading="The three ideas behind it" items={PRINCIPLES} />
       <FeatureRows heading="About the matching" items={DETAILS} />
       <PageCta

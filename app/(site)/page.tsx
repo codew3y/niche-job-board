@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import { CategoryGrid } from '@/components/site/category-grid';
 import { ExampleMatchCard } from '@/components/site/example-match-card';
 import { HowItWorksSteps } from '@/components/site/how-it-works-steps';
-import { CONTAINER, PageCta } from '@/components/site/page-parts';
+import { CONTAINER, HERO_FIGURE, HERO_SECTION, PageCta } from '@/components/site/page-parts';
 import { SkillTicker } from '@/components/site/skill-ticker';
 import { buttonStyles } from '@/components/ui/button';
 import { getSessionUser } from '@/lib/supabase/session';
@@ -70,25 +70,13 @@ export default async function Home({
       )}
 
       {/* ───────────── Hero ─────────────
-          Asymmetric split: copy (1fr) beside the video (1.15fr, wider, so it reads as
-          landscape). Both columns stretch to the same height from `lg`; below `lg` the copy
-          stacks over a 16:9 video.
-
-          It fills the first screen (viewport minus the 4rem header, its 1px border and any notch
-          inset), so the next section starts below the fold. From `lg` the row stretches and the
-          video grows to fill that height, rather than the copy floating in empty padding
-          (taste-skill hero top-padding cap); the copy centres beside it. svh, not
-          dvh: the height must not jump as a phone's browser bar shows and hides.
+          HERO_SECTION (components/site/page-parts.tsx): copy beside the photo, filling the
+          first screen so the next section starts below the fold. Every page intro shares it.
 
           The headline is display-md up to `xl` and display-lg from `xl`, where the copy column
           is wide enough to hold it on two lines. Four text elements: eyebrow, headline,
           subtext (20 words), actions. */}
-      <section
-        className={cn(
-          CONTAINER,
-          'grid min-h-[calc(100svh-4rem-1px-env(safe-area-inset-top,0px))] content-center gap-10 py-10 sm:py-14 lg:grid-cols-[1fr_1.15fr] lg:content-stretch lg:items-stretch lg:gap-12 lg:py-12',
-        )}
-      >
+      <section className={cn(CONTAINER, HERO_SECTION)}>
         <div className="flex flex-col justify-center animate-rise">
           <p className="text-sm font-semibold text-link">Software, web and automation work</p>
           <h1 className="mt-4 text-display-md text-balance sm:text-display-lg lg:text-display-md xl:text-display-lg">
@@ -117,10 +105,7 @@ export default async function Home({
             (public/images/hero.jpg, AI-generated with Google Gemini). It is the LCP element, so
             it is preloaded. The crop favours the right of the frame, where the screen of code
             sits, because the figure is taller than the photo from `lg`. */}
-        <figure
-          className="relative aspect-video overflow-hidden rounded-lg border border-border-base bg-surface-sunken shadow-lg animate-rise lg:aspect-auto lg:h-full lg:min-h-80"
-          style={{ animationDelay: '80ms' }}
-        >
+        <figure className={HERO_FIGURE} style={{ animationDelay: '80ms' }}>
           <Image
             src={heroPhoto}
             alt="A developer in headphones writing code at a desk at night"
