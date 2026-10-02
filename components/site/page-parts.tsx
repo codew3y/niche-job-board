@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -39,7 +39,8 @@ export function PageIntro({
   eyebrow?: string;
   title: string;
   lead: string;
-  image?: { src: string; alt: string };
+  /** A static import (`import photo from '@/public/…'`), so it gets a blurred preview. */
+  image?: { src: StaticImageData; alt: string };
   children?: ReactNode;
 }) {
   return (
@@ -63,6 +64,7 @@ export function PageIntro({
               alt={image.alt}
               fill
               preload
+              placeholder="blur"
               sizes="(min-width: 1024px) 480px, 100vw"
               className="object-cover"
             />

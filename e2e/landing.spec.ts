@@ -80,7 +80,9 @@ test.describe('signed out', () => {
 
   test('How It Works shows four illustrated steps with alt text', async ({ page }) => {
     await page.goto('/how-it-works');
-    const images = page.locator('img[src*="how-it-works"], img[srcset*="how-it-works"]');
+    // By position, not by file path: the photos are static imports, served from hashed
+    // /_next/static/media/ paths that no longer contain the folder name.
+    const images = page.locator('main ol img');
     await expect(images).toHaveCount(4);
     for (const img of await images.all()) {
       await expect(img).toHaveAttribute('alt', /.{10,}/);

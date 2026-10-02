@@ -9,6 +9,7 @@ import {
   PageIntro,
 } from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
+import freelancersPhoto from '@/public/images/pages/for-freelancers.jpg';
 
 export const metadata: Metadata = {
   title: 'For Freelancers',
@@ -85,7 +86,7 @@ export default function ForFreelancersPage() {
         lead="Your profile is the work itself: projects, links and photos. Matching reads it to find briefs that fit."
         image={{
           // Per Lööv, https://unsplash.com/photos/4wOkqiXNP7M (Unsplash License).
-          src: '/images/pages/for-freelancers.jpg',
+          src: freelancersPhoto,
           alt: 'A developer working at a desk with a monitor and a laptop in a home studio',
         }}
       >

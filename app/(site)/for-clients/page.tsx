@@ -9,6 +9,7 @@ import {
   PageIntro,
 } from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
+import clientsPhoto from '@/public/images/pages/for-clients.jpg';
 
 export const metadata: Metadata = {
   title: 'For Clients',
@@ -82,7 +83,7 @@ export default function ForClientsPage() {
         lead="Post a brief for software, web or automation work. See who fits, in order, and why."
         image={{
           // Vitaly Gariev, https://unsplash.com/photos/HcS7MOSp-94 (Unsplash License).
-          src: '/images/pages/for-clients.jpg',
+          src: clientsPhoto,
           alt: 'A hiring manager in a suit holding a clipboard at a desk',
         }}
       >

@@ -46,6 +46,8 @@ function Lockup({ height }: { height: number }) {
         width={width}
         height={height}
         draggable={false}
+        // In the header on every page, so loaded straight away rather than lazily.
+        loading="eager"
         className="shrink-0 dark:hidden"
       />
       <Image
@@ -54,6 +56,8 @@ function Lockup({ height }: { height: number }) {
         width={width}
         height={height}
         draggable={false}
+        // In the header on every page, so loaded straight away rather than lazily.
+        loading="eager"
         className="hidden shrink-0 dark:block"
       />
     </>

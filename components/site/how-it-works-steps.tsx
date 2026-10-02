@@ -3,6 +3,14 @@ import type { ReactNode } from 'react';
 
 import { CONTAINER } from './page-parts';
 import { cn } from '@/lib/ui/cn';
+import stepSignUp from '@/public/images/how-it-works/01-sign-up.jpg';
+import stepBuild from '@/public/images/how-it-works/02-build-profile.jpg';
+import stepMatched from '@/public/images/how-it-works/03-get-matched.jpg';
+import stepWorking from '@/public/images/how-it-works/04-start-working.jpg';
+import pageSignUp from '@/public/images/how-it-works/page-01-sign-up.jpg';
+import pageBuild from '@/public/images/how-it-works/page-02-build.jpg';
+import pageMatched from '@/public/images/how-it-works/page-03-matched.jpg';
+import pageWorking from '@/public/images/how-it-works/page-04-working.jpg';
 
 /**
  * How It Works, as four illustrated steps. Used on the home page and, with a detail paragraph
@@ -13,6 +21,10 @@ import { cn } from '@/lib/ui/cn';
  *     column below `sm`, two from `sm`, four from `lg`;
  *   - /how-it-works (showDetail true): an asymmetric bento, spans 7/5 then 5/7 from `lg`,
  *     one column below `lg`.
+ *
+ * STATIC IMPORTS, so Next generates a tiny blurred preview of each photo at build time and inlines
+ * it in the HTML (placeholder="blur"): the image area shows the picture, softly, on the first
+ * frame, and sharpens when the file lands, instead of sitting empty on a slow connection.
  *
  * ONE IMAGE, ONE PURPOSE. The home section and the /how-it-works page each have their own four
  * photos (`image` and `pageImage`), and no step photo is reused as a page header elsewhere.
@@ -37,9 +49,9 @@ export const STEPS = [
     body: 'Create an account with Google, GitHub or email, then say whether you are here to find work or to hire. One account can hold both.',
     detail:
       'There is no approval queue and nothing to qualify for. Your role only decides which onboarding you see first. You can add the other side later in settings.',
-    image: '/images/how-it-works/01-sign-up.jpg',
+    image: stepSignUp,
     alt: 'Two people sitting at a desk looking at a website on a laptop',
-    pageImage: '/images/how-it-works/page-01-sign-up.jpg',
+    pageImage: pageSignUp,
     pageAlt: 'A woman at a desktop computer in a bright home office',
   },
   {
@@ -47,9 +59,9 @@ export const STEPS = [
     body: 'Developers describe what they have built: projects, links, photos and skills. Clients write the brief: what needs building and what done looks like.',
     detail:
       'You can publish a profile whenever you like, sparse or complete. A job has sections for the description, required and nice-to-have skills, budget and engagement type, and can be saved as a draft first.',
-    image: '/images/how-it-works/02-build-profile.jpg',
+    image: stepBuild,
     alt: 'A hand typing on a laptop showing code, beside a mug and a potted plant',
-    pageImage: '/images/how-it-works/page-02-build.jpg',
+    pageImage: pageBuild,
     pageAlt: 'Two monitors on a desk showing code in an editor',
   },
   {
@@ -57,9 +69,9 @@ export const STEPS = [
     body: 'Matching reads the projects a developer describes and the brief a client writes, and ranks the fit both ways. Each match comes with one sentence saying why.',
     detail:
       'Hard requirements are filtered first. The closest profiles and briefs are then re-ranked with a written reason. If nothing fits, it says so rather than padding the list. Search and filters still find everyone without the AI.',
-    image: '/images/how-it-works/03-get-matched.jpg',
+    image: stepMatched,
     alt: 'A laptop screen showing lines of colourful code in a dark room',
-    pageImage: '/images/how-it-works/page-03-matched.jpg',
+    pageImage: pageMatched,
     pageAlt: 'Four people around a table reviewing something on a laptop together',
   },
   {
@@ -67,9 +79,9 @@ export const STEPS = [
     body: 'Developers apply with a short note. Clients shortlist and message the people who fit. The rest is between the two of you.',
     detail:
       'Applications move through a visible timeline, and either side can message the other. TechSelect takes no fee and handles no payments. You agree terms, rates and contracts directly.',
-    image: '/images/how-it-works/04-start-working.jpg',
+    image: stepWorking,
     alt: 'Two developers working at computer monitors in a bright office',
-    pageImage: '/images/how-it-works/page-04-working.jpg',
+    pageImage: pageWorking,
     pageAlt: 'A tidy home office desk with a monitor, laptop and keyboard, ready to work',
   },
 ] as const;
@@ -131,6 +143,7 @@ export function HowItWorksSteps({
                   // Contentful Paint and must not wait for lazy loading.
                   loading={i === 0 ? 'eager' : undefined}
                   fetchPriority={i === 0 ? 'high' : undefined}
+                  placeholder="blur"
                   className="object-cover"
                 />
               </div>
@@ -156,6 +169,7 @@ export function HowItWorksSteps({
                   alt={step.alt}
                   fill
                   sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 100vw"
+                  placeholder="blur"
                   className="object-cover"
                 />
               </div>

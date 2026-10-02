@@ -12,6 +12,7 @@ import { SkillTicker } from '@/components/site/skill-ticker';
 import { buttonStyles } from '@/components/ui/button';
 import { getSessionUser } from '@/lib/supabase/session';
 import { cn } from '@/lib/ui/cn';
+import heroPhoto from '@/public/images/hero.jpg';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -121,10 +122,11 @@ export default async function Home({
           style={{ animationDelay: '80ms' }}
         >
           <Image
-            src="/images/hero.jpg"
+            src={heroPhoto}
             alt="A developer in headphones writing code at a desk at night"
             fill
             preload
+            placeholder="blur"
             sizes="(min-width: 1024px) 55vw, 100vw"
             className="object-cover object-[62%_50%]"
           />

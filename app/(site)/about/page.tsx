@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { CONTAINER, FeatureBento, PageCta, PageIntro } from '@/components/site/page-parts';
 import { cn } from '@/lib/ui/cn';
+import aboutPhoto from '@/public/images/pages/about.jpg';
 
 export const metadata: Metadata = {
   title: 'About',
@@ -55,7 +56,7 @@ export default function AboutPage() {
         lead="TechSelect connects freelance developers with clients. The best evidence of what someone can do is what they have built."
         image={{
           // Azwedo L.LC, https://unsplash.com/photos/nbEX3qxtmuA (Unsplash License).
-          src: '/images/pages/about.jpg',
+          src: aboutPhoto,
           alt: 'Two people smiling as they work through something together on a laptop',
         }}
       />
