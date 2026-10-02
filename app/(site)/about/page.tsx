@@ -54,8 +54,9 @@ export default function AboutPage() {
         title="A job board where shipped work is the profile"
         lead="TechSelect connects freelance developers with clients. The best evidence of what someone can do is what they have built."
         image={{
-          src: '/images/how-it-works/01-sign-up.jpg',
-          alt: 'Two people sitting at a desk looking at a website on a laptop',
+          // Azwedo L.LC, https://unsplash.com/photos/nbEX3qxtmuA (Unsplash License).
+          src: '/images/pages/about.jpg',
+          alt: 'Two people smiling as they work through something together on a laptop',
         }}
       />
 

@@ -14,13 +14,22 @@ import { cn } from '@/lib/ui/cn';
  *   - /how-it-works (showDetail true): an asymmetric bento, spans 7/5 then 5/7 from `lg`,
  *     one column below `lg`.
  *
+ * ONE IMAGE, ONE PURPOSE. The home section and the /how-it-works page each have their own four
+ * photos (`image` and `pageImage`), and no step photo is reused as a page header elsewhere.
+ *
  * IMAGE SOURCES: all from Unsplash, downloaded into /public/images/how-it-works (not
  * hotlinked), cropped to 4:3 at 1200px. Unsplash License (https://unsplash.com/license): free to
  * use, including commercially, no permission or attribution required. Credited anyway:
+ *   Home section
  *   01-sign-up.jpg        — KOBU Agency,        https://unsplash.com/photos/7okkFhxrxNw
  *   02-build-profile.jpg  — Nubelson Fernandes, https://unsplash.com/photos/UcYBL5V0xWQ
  *   03-get-matched.jpg    — Mohammad Rahmani,   https://unsplash.com/photos/8qEB0fTe9Vw
  *   04-start-working.jpg  — Compagnons,         https://unsplash.com/photos/Im_cQ6hQo10
+ *   /how-it-works page
+ *   page-01-sign-up.jpg   — Annie Spratt,       https://unsplash.com/photos/g9KFpAfQ5bc
+ *   page-02-build.jpg     — Farzad,             https://unsplash.com/photos/p-xSl33Wxyc
+ *   page-03-matched.jpg   — Cherrydeck,         https://unsplash.com/photos/UpsEF48wAgk
+ *   page-04-working.jpg   — Max Andrey,         https://unsplash.com/photos/TlRQin0iwjE
  */
 export const STEPS = [
   {
@@ -30,6 +39,8 @@ export const STEPS = [
       'There is no approval queue and nothing to qualify for. Your role only decides which onboarding you see first. You can add the other side later in settings.',
     image: '/images/how-it-works/01-sign-up.jpg',
     alt: 'Two people sitting at a desk looking at a website on a laptop',
+    pageImage: '/images/how-it-works/page-01-sign-up.jpg',
+    pageAlt: 'A woman at a desktop computer in a bright home office',
   },
   {
     title: 'Build your profile or post a job',
@@ -38,6 +49,8 @@ export const STEPS = [
       'You can publish a profile whenever you like, sparse or complete. A job has sections for the description, required and nice-to-have skills, budget and engagement type, and can be saved as a draft first.',
     image: '/images/how-it-works/02-build-profile.jpg',
     alt: 'A hand typing on a laptop showing code, beside a mug and a potted plant',
+    pageImage: '/images/how-it-works/page-02-build.jpg',
+    pageAlt: 'Two monitors on a desk showing code in an editor',
   },
   {
     title: 'Get AI-matched',
@@ -46,6 +59,8 @@ export const STEPS = [
       'Hard requirements are filtered first. The closest profiles and briefs are then re-ranked with a written reason. If nothing fits, it says so rather than padding the list. Search and filters still find everyone without the AI.',
     image: '/images/how-it-works/03-get-matched.jpg',
     alt: 'A laptop screen showing lines of colourful code in a dark room',
+    pageImage: '/images/how-it-works/page-03-matched.jpg',
+    pageAlt: 'Four people around a table reviewing something on a laptop together',
   },
   {
     title: 'Connect and start working',
@@ -54,6 +69,8 @@ export const STEPS = [
       'Applications move through a visible timeline, and either side can message the other. TechSelect takes no fee and handles no payments. You agree terms, rates and contracts directly.',
     image: '/images/how-it-works/04-start-working.jpg',
     alt: 'Two developers working at computer monitors in a bright office',
+    pageImage: '/images/how-it-works/page-04-working.jpg',
+    pageAlt: 'A tidy home office desk with a monitor, laptop and keyboard, ready to work',
   },
 ] as const;
 
@@ -106,8 +123,8 @@ export function HowItWorksSteps({
             >
               <div className="relative aspect-video bg-surface-sunken">
                 <Image
-                  src={step.image}
-                  alt={step.alt}
+                  src={step.pageImage}
+                  alt={step.pageAlt}
                   fill
                   sizes="(min-width: 1024px) 700px, 100vw"
                   // The steps ARE the top of this page, so the first image is the Largest

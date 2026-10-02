@@ -81,8 +81,9 @@ export default function ForClientsPage() {
         title="Find developers by what they have shipped"
         lead="Post a brief for software, web or automation work. See who fits, in order, and why."
         image={{
-          src: '/images/how-it-works/04-start-working.jpg',
-          alt: 'Two developers working at computer monitors in a bright office',
+          // Vitaly Gariev, https://unsplash.com/photos/HcS7MOSp-94 (Unsplash License).
+          src: '/images/pages/for-clients.jpg',
+          alt: 'A hiring manager in a suit holding a clipboard at a desk',
         }}
       >
         <Link href="/signup?role=client" className={buttonStyles({ size: 'lg' })}>
