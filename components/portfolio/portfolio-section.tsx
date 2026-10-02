@@ -68,9 +68,9 @@ export function PortfolioSection({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12">
       {hasSite && (
-        <section className="flex items-start gap-4 rounded-lg border border-border-base bg-surface-raised p-4 sm:p-5">
+        <section className="flex items-start gap-4 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6">
           <span
             aria-hidden="true"
             className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-sunken text-text-subtle"
@@ -78,9 +78,9 @@ export function PortfolioSection({
             <Globe size={18} />
           </span>
           <div className="min-w-0">
-            <h2 className="font-semibold tracking-tight">Portfolio site</h2>
+            <h2 className="text-xl font-semibold tracking-tight">Portfolio site</h2>
             <p className="mt-0.5 break-all">
-              <ExternalLink href={websiteUrl} className="font-semibold">
+              <ExternalLink href={websiteUrl} className="font-medium">
                 {websiteUrl!.replace(/^https:\/\//, '')}
               </ExternalLink>
             </p>
@@ -92,70 +92,77 @@ export function PortfolioSection({
       )}
 
       {hasItems && (
-        <section>
-          <h2 className="text-lg font-semibold tracking-tight">
+        <section aria-labelledby="projects-heading">
+          <h2 id="projects-heading" className="text-display-sm">
             Projects{' '}
-            <span className="font-sans text-base font-medium text-text-muted tabular-nums">
+            <span className="font-mono text-base font-normal text-text-subtle tabular-nums">
               {items.length}
             </span>
           </h2>
-          <ul className="mt-4 space-y-4">
+          {/* THE WORK IS THE HERO. Each project is an open block under a hairline, not a card:
+              the first image large in the nested frame (the one place soft-skill's double bezel
+              is used), further images as framed thumbnails, then what was done and what changed. */}
+          <ul className="mt-8 divide-y divide-border-base border-t border-border-base">
             {items.map((item) => {
               const media = [...(item.item_media ?? [])].sort(
                 (a, b) => a.sort_order - b.sort_order,
               );
+              const [lead, ...rest] = media;
               return (
-                <li
-                  key={item.id}
-                  className="overflow-hidden rounded-lg border border-border-base bg-surface-raised"
-                >
-                  {media.length > 0 && (
-                    <ul
-                      className={cn(
-                        'grid gap-px bg-border-base',
-                        media.length > 1 && 'sm:grid-cols-2',
-                      )}
-                    >
-                      {media.map((m) => (
-                        <li key={m.id} className="relative aspect-video bg-surface-sunken">
-                          {/* `sizes` does the work: one column on phones, two from sm. Get it
-                              wrong and Next serves a 1600px file to a 360px slot. Lazy by default,
-                              so a dozen of these below the fold cost nothing until scrolled to. */}
-                          <Image
-                            src={m.url}
-                            alt={m.alt_text}
-                            fill
-                            sizes={
-                              media.length > 1
-                                ? '(min-width: 640px) 40vw, 100vw'
-                                : '(min-width: 1024px) 720px, 100vw'
-                            }
-                            className="object-cover"
-                          />
+                <li key={item.id} className="py-10 first:pt-8">
+                  {lead && (
+                    <div className="frame-tray">
+                      <div className="rounded-inner relative aspect-16/10 overflow-hidden bg-surface-sunken">
+                        {/* `sizes` does the work: Next serves a file sized to the slot, not a
+                            1600px original to a 360px phone. Lazy by default, so projects below
+                            the fold cost nothing until scrolled to. */}
+                        <Image
+                          src={lead.url}
+                          alt={lead.alt_text}
+                          fill
+                          sizes="(min-width: 1024px) 46rem, 100vw"
+                          className="object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {rest.length > 0 && (
+                    <ul className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                      {rest.map((m) => (
+                        <li key={m.id} className="frame-tray">
+                          <div className="rounded-inner relative aspect-4/3 overflow-hidden bg-surface-sunken">
+                            <Image
+                              src={m.url}
+                              alt={m.alt_text}
+                              fill
+                              sizes="(min-width: 640px) 15rem, 50vw"
+                              className="object-cover"
+                            />
+                          </div>
                         </li>
                       ))}
                     </ul>
                   )}
 
-                  <div className="p-4 sm:p-6">
+                  <div className={cn(lead && 'mt-7')}>
                     <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                      <h3 className="text-lg font-semibold leading-tight text-balance">
-                        {item.title}
-                      </h3>
-                      {item.role && <p className="text-sm text-text-muted">{item.role}</p>}
+                      <h3 className="text-2xl font-semibold tracking-tight">{item.title}</h3>
+                      {item.role && (
+                        <p className="font-mono text-xs text-text-subtle">{item.role}</p>
+                      )}
                     </div>
 
-                    <p className="mt-2 text-text-muted text-pretty">{item.description}</p>
+                    <p className="mt-3 max-w-[65ch] text-text-muted">{item.description}</p>
 
                     {item.outcome && item.outcome !== item.description && (
-                      // Outcome is the most persuasive field on a profile — what changed, not what
-                      // was used — so it gets the same treatment as a match reason.
-                      <MatchReason className="mt-4" label="Outcome">
+                      // Outcome is the most persuasive field on a profile (what changed, not what
+                      // was used), so it gets the same treatment as a match reason.
+                      <MatchReason className="mt-5" label="Outcome">
                         {item.outcome}
                       </MatchReason>
                     )}
 
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
                       <TagList
                         label="Built with"
                         tags={item.tech_stack.map((name) => ({ name }))}

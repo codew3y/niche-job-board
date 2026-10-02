@@ -22,7 +22,9 @@ export default async function PublicLayout({ children }: { children: ReactNode }
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
-      <main id="main" className="mx-auto flex w-full max-w-5xl flex-1 flex-col px-4 sm:px-8">
+      {/* The site's container (1200px, safe-area gutter), so a shared job or profile lines up
+          with the rest of the public site, and portfolio work gets the width to lead. */}
+      <main id="main" className="mx-auto flex w-full max-w-page flex-1 flex-col gutter">
         {children}
       </main>
       <SiteFooter />
