@@ -1,17 +1,18 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist, Geist_Mono, Outfit } from 'next/font/google';
+import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Providers } from '@/components/providers';
 import './globals.css';
 
 /*
- * Three faces through next/font (self-hosted, subset, size-adjusted fallbacks):
- *   - Geist for text and interface (400, 500, 600);
- *   - Outfit for headings (500, 600): geometric, the closest match to the logo's wordmark;
- *   - Geist Mono for code-like values, not preloaded because no first screen uses it.
+ * Two faces through next/font (self-hosted, subset, size-adjusted fallbacks):
+ *   - Geist for headings, text and interface (400, 500, 600): one family, hierarchy from size,
+ *     weight and tracking (the October 2026 redesign dropped Outfit);
+ *   - Geist Mono for facts (rates, time zones, dates), not preloaded because no first screen
+ *     depends on it.
  *
- * `display: 'optional'`, not 'swap', for the two first-screen faces: with `swap`, text painted
+ * `display: 'optional'`, not 'swap', for the first-screen face: with `swap`, text painted
  * in the fallback re-rendered when the font landed and Chrome counted it as a new, later LCP
  * (DESIGN.md §6.2). `optional` keeps the metric-matched fallback for that view instead.
  */
@@ -19,12 +20,6 @@ const geist = Geist({
   variable: '--font-geist',
   subsets: ['latin'],
   weight: ['400', '500', '600'],
-  display: 'optional',
-});
-const outfit = Outfit({
-  variable: '--font-outfit',
-  subsets: ['latin'],
-  weight: ['500', '600'],
   display: 'optional',
 });
 const geistMono = Geist_Mono({
@@ -63,8 +58,8 @@ export const viewport: Viewport = {
   themeColor: [
     // The page background in each theme (--surface), so the status bar and the page are one
     // continuous colour.
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+    { media: '(prefers-color-scheme: light)', color: '#fafaf9' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b0b0c' },
   ],
   colorScheme: 'light dark',
 };
@@ -76,7 +71,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geist.variable} ${outfit.variable} ${geistMono.variable} h-full`}
+      className={`${geist.variable} ${geistMono.variable} h-full`}
     >
       <body className="flex min-h-full flex-col font-sans">
         {/* First tab stop on every page — a §9 requirement, not an extra. */}

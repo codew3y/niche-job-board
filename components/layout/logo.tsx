@@ -4,21 +4,20 @@ import Link from 'next/link';
 import { cn } from '@/lib/ui/cn';
 
 /**
- * The TechSelect logo: a shield with a lightning-bolt arrow, beside the TECHSELECT wordmark and
- * the "Tech careers | Job board" line. Supplied by the owner as one raster lockup.
+ * The TechSelect logo: the shield with a lightning-bolt arrow, beside the name set as live text.
  *
- * FILES — cut from that one image (trimmed, never redrawn):
- *   public/brand/logo-lockup.png       the full lockup, for light surfaces
- *   public/brand/logo-lockup-dark.png  the same, with the navy "TECH" and the tagline turned
- *                                      light so they read on dark surfaces; the blue stays
- *   public/brand/logo-mark-128.png     the shield alone, for the collapsed app rail
+ * WHY NOT THE FULL LOCKUP. The owner's raster lockup (public/brand/logo-lockup*.png) carries a
+ * "Tech careers | Job board" line that is unreadable at header size. With the owner's approval
+ * (October 2026 redesign) the interface uses the shield mark plus the name in Geist instead:
+ * sharp at any size, correct in both themes without a second file, and selectable as text is
+ * not an issue because the whole lockup sits inside a link. The lockup files stay in
+ * public/brand for anything off-screen (social cards, documents).
+ *
+ * FILES
+ *   public/brand/logo-mark-128.png     the shield alone (cut from the owner's lockup, never
+ *                                      redrawn); 128px source, shown at 28-32px, sharp on 2x
  *   app/icon.png, app/apple-icon.png   the shield as the browser-tab and iOS icons
- *
- * The source is 360px wide, so the lockup is kept at or below 180px wide in the UI to stay
- * sharp on 2x screens.
  */
-const LOCKUP = { width: 360, height: 147 };
-
 export function LogoMark({ size = 28, className }: { size?: number; className?: string }) {
   return (
     <Image
@@ -27,45 +26,15 @@ export function LogoMark({ size = 28, className }: { size?: number; className?: 
       width={size}
       height={size}
       draggable={false}
+      // In the header on every page, so loaded straight away rather than lazily.
+      loading="eager"
       className={cn('shrink-0', className)}
     />
   );
 }
 
 /**
- * Both themes are rendered and CSS picks one (`dark:`), like the theme toggle: the right one
- * shows on the first frame, with no flash while the theme resolves.
- */
-function Lockup({ height }: { height: number }) {
-  const width = Math.round((LOCKUP.width / LOCKUP.height) * height);
-  return (
-    <>
-      <Image
-        src="/brand/logo-lockup.png"
-        alt=""
-        width={width}
-        height={height}
-        draggable={false}
-        // In the header on every page, so loaded straight away rather than lazily.
-        loading="eager"
-        className="shrink-0 dark:hidden"
-      />
-      <Image
-        src="/brand/logo-lockup-dark.png"
-        alt=""
-        width={width}
-        height={height}
-        draggable={false}
-        // In the header on every page, so loaded straight away rather than lazily.
-        loading="eager"
-        className="hidden shrink-0 dark:block"
-      />
-    </>
-  );
-}
-
-/**
- * The logo. Where it points is decided by the caller — the site header links it to the home
+ * The logo. Where it points is decided by the caller: the site header links it to the home
  * page, and inside the app it goes to /dashboard (`logoHref()`, lib/roles.ts).
  */
 export function Logo({
@@ -84,14 +53,22 @@ export function Logo({
     <Link
       href={href}
       aria-label="TechSelect home"
-      // The logo is a picture, never text: it cannot be selected or dragged out as an image
-      // (the owner could highlight it when drag-selecting across the header).
+      // The mark cannot be dragged out as an image, and the name is not selected when someone
+      // drag-selects across the header.
       className={cn(
-        'inline-flex items-center text-text select-none [-webkit-touch-callout:none] [&_img]:pointer-events-none',
+        'pressable inline-flex items-center gap-2.5 rounded-md text-text select-none [-webkit-touch-callout:none] [&_img]:pointer-events-none',
         className,
       )}
     >
-      {compact ? <LogoMark size={32} /> : <Lockup height={size === 'lg' ? 64 : 48} />}
+      <LogoMark size={compact ? 32 : size === 'lg' ? 36 : 30} />
+      {!compact && (
+        <span
+          aria-hidden="true"
+          className={cn('font-semibold tracking-tight', size === 'lg' ? 'text-xl' : 'text-base')}
+        >
+          TechSelect
+        </span>
+      )}
     </Link>
   );
 }

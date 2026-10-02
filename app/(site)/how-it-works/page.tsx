@@ -60,9 +60,10 @@ export default function HowItWorksPage() {
         title="How TechSelect works"
         lead="Four steps from sign-up to working together. No approval queue, no fees."
         image={{
-          // Kaleidico, https://unsplash.com/photos/26MJGnCM0Wc (Unsplash License).
+          // Kaleidico, https://unsplash.com/photos/26MJGnCM0Wc (Unsplash License), graded to the
+          // site palette and cropped to 4:5.
           src: howPhoto,
-          alt: 'Two people sketching a web page layout on a whiteboard with markers',
+          alt: 'A hand sketching a web page layout on a whiteboard with a marker',
         }}
       >
         <Link href="/signup" className={buttonStyles({ size: 'lg' })}>

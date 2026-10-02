@@ -1,6 +1,6 @@
 'use client';
 
-import { Monitor, Moon, Sun } from 'lucide-react';
+import { Desktop as Monitor, Moon, Sun } from '@phosphor-icons/react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 

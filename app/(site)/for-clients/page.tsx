@@ -82,9 +82,10 @@ export default function ForClientsPage() {
         title="Find developers by what they have shipped"
         lead="Post a brief for software, web or automation work. See who fits, in order, and why."
         image={{
-          // Vitaly Gariev, https://unsplash.com/photos/HcS7MOSp-94 (Unsplash License).
+          // wocintechchat.com, https://unsplash.com/photos/NDoVgcS_lZM (Unsplash License),
+          // graded to the site palette and cropped to 4:5.
           src: clientsPhoto,
-          alt: 'A hiring manager in a suit holding a clipboard at a desk',
+          alt: 'Three people weighing something up together on one laptop at a table',
         }}
       >
         <Link href="/signup?role=client" className={buttonStyles({ size: 'lg' })}>

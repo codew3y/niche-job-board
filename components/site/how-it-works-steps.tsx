@@ -1,47 +1,35 @@
 import Image from 'next/image';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
-import { CONTAINER } from './page-parts';
+import { CONTAINER, SECTION } from './page-parts';
 import { cn } from '@/lib/ui/cn';
-import stepSignUp from '@/public/images/how-it-works/01-sign-up.jpg';
-import stepBuild from '@/public/images/how-it-works/02-build-profile.jpg';
-import stepMatched from '@/public/images/how-it-works/03-get-matched.jpg';
-import stepWorking from '@/public/images/how-it-works/04-start-working.jpg';
 import pageSignUp from '@/public/images/how-it-works/page-01-sign-up.jpg';
 import pageBuild from '@/public/images/how-it-works/page-02-build.jpg';
 import pageMatched from '@/public/images/how-it-works/page-03-matched.jpg';
 import pageWorking from '@/public/images/how-it-works/page-04-working.jpg';
 
 /**
- * How It Works, as four illustrated steps. Used on the home page and, with a detail paragraph
+ * How It Works, as four steps. Used on the home page and, with a photo and a detail paragraph
  * per step, on /how-it-works.
  *
  * TWO COMPOSITIONS, so the page and the home section do not look alike:
- *   - home (showDetail false): a staggered four-column rail, every second step dropped, one
- *     column below `sm`, two from `sm`, four from `lg`;
- *   - /how-it-works (showDetail true): an asymmetric bento, spans 7/5 then 5/7 from `lg`,
- *     one column below `lg`.
+ *   - home (showDetail false): a text-only row of four, each under a hairline, one column on
+ *     phones, two from `sm`, four from `lg`. No photos: the home page already carries the hero
+ *     photograph, and minimalist-ui keeps the rest of the page quiet;
+ *   - /how-it-works (showDetail true): an asymmetric bento of framed photos, spans 7/5 then 5/7
+ *     from `lg`, one column below `lg`.
  *
  * STATIC IMPORTS, so Next generates a tiny blurred preview of each photo at build time and inlines
- * it in the HTML (placeholder="blur"): the image area shows the picture, softly, on the first
- * frame, and sharpens when the file lands, instead of sitting empty on a slow connection.
+ * it in the HTML (placeholder="blur").
  *
- * ONE IMAGE, ONE PURPOSE. The home section and the /how-it-works page each have their own four
- * photos (`image` and `pageImage`), and no step photo is reused as a page header elsewhere.
- *
- * IMAGE SOURCES: all from Unsplash, downloaded into /public/images/how-it-works (not
- * hotlinked), cropped to 4:3 at 1200px. Unsplash License (https://unsplash.com/license): free to
- * use, including commercially, no permission or attribution required. Credited anyway:
- *   Home section
- *   01-sign-up.jpg        — KOBU Agency,        https://unsplash.com/photos/7okkFhxrxNw
- *   02-build-profile.jpg  — Nubelson Fernandes, https://unsplash.com/photos/UcYBL5V0xWQ
- *   03-get-matched.jpg    — Mohammad Rahmani,   https://unsplash.com/photos/8qEB0fTe9Vw
- *   04-start-working.jpg  — Compagnons,         https://unsplash.com/photos/Im_cQ6hQo10
- *   /how-it-works page
- *   page-01-sign-up.jpg   — Annie Spratt,       https://unsplash.com/photos/g9KFpAfQ5bc
- *   page-02-build.jpg     — Farzad,             https://unsplash.com/photos/p-xSl33Wxyc
- *   page-03-matched.jpg   — Cherrydeck,         https://unsplash.com/photos/UpsEF48wAgk
- *   page-04-working.jpg   — Max Andrey,         https://unsplash.com/photos/TlRQin0iwjE
+ * IMAGE SOURCES: Unsplash, downloaded into /public/images/how-it-works (not hotlinked), graded
+ * to the site's palette (40% desaturated, slightly warm) and cropped to 4:3 at 1600px. Unsplash
+ * License (https://unsplash.com/license): free to use, including commercially, no permission or
+ * attribution required. Credited anyway:
+ *   page-01-sign-up.jpg   Ilya Pavlov,        https://unsplash.com/photos/wbXdGS_D17U
+ *   page-02-build.jpg     Kelly Sikkema,      https://unsplash.com/photos/hLit2zL-Dhk
+ *   page-03-matched.jpg   Priscilla Du Preez, https://unsplash.com/photos/nNMBa7Y1Ymk
+ *   page-04-working.jpg   Brooke Cagle,       https://unsplash.com/photos/tLG2hcpITZE
  */
 export const STEPS = [
   {
@@ -49,45 +37,40 @@ export const STEPS = [
     body: 'Create an account with Google, GitHub or email, then say whether you are here to find work or to hire. One account can hold both.',
     detail:
       'There is no approval queue and nothing to qualify for. Your role only decides which onboarding you see first. You can add the other side later in settings.',
-    image: stepSignUp,
-    alt: 'Two people sitting at a desk looking at a website on a laptop',
     pageImage: pageSignUp,
-    pageAlt: 'A woman at a desktop computer in a bright home office',
+    pageAlt: 'Hands typing on a white keyboard in front of a desktop computer',
   },
   {
     title: 'Build your profile or post a job',
     body: 'Developers describe what they have built: projects, links, photos and skills. Clients write the brief: what needs building and what done looks like.',
     detail:
       'You can publish a profile whenever you like, sparse or complete. A job has sections for the description, required and nice-to-have skills, budget and engagement type, and can be saved as a draft first.',
-    image: stepBuild,
-    alt: 'A hand typing on a laptop showing code, beside a mug and a potted plant',
     pageImage: pageBuild,
-    pageAlt: 'Two monitors on a desk showing code in an editor',
+    pageAlt: "A hand sketching an app's screens and the flow between them on paper",
   },
   {
     title: 'Get AI-matched',
     body: 'Matching reads the projects a developer describes and the brief a client writes, and ranks the fit both ways. Each match comes with one sentence saying why.',
     detail:
       'Hard requirements are filtered first. The closest profiles and briefs are then re-ranked with a written reason. If nothing fits, it says so rather than padding the list. Search and filters still find everyone without the AI.',
-    image: stepMatched,
-    alt: 'A laptop screen showing lines of colourful code in a dark room',
     pageImage: pageMatched,
-    pageAlt: 'Four people around a table reviewing something on a laptop together',
+    pageAlt: 'A hand pointing at something on a laptop screen while a colleague types',
   },
   {
     title: 'Connect and start working',
     body: 'Developers apply with a short note. Clients shortlist and message the people who fit. The rest is between the two of you.',
     detail:
       'Applications move through a visible timeline, and either side can message the other. TechSelect takes no fee and handles no payments. You agree terms, rates and contracts directly.',
-    image: stepWorking,
-    alt: 'Two developers working at computer monitors in a bright office',
     pageImage: pageWorking,
-    pageAlt: 'A tidy home office desk with a monitor, laptop and keyboard, ready to work',
+    pageAlt: 'Two people working through something together on one laptop at a wooden table',
   },
 ] as const;
 
 /** Spans for the /how-it-works bento, from `lg`: 7/5, then 5/7. Four steps, four cells. */
 const BENTO_SPANS = ['lg:col-span-7', 'lg:col-span-5', 'lg:col-span-5', 'lg:col-span-7'];
+
+/** The stagger index for a list item's scroll entrance (globals.css `reveal`). */
+const stagger = (i: number) => ({ '--i': i }) as CSSProperties;
 
 export function HowItWorksSteps({
   heading = 'How it works',
@@ -97,87 +80,72 @@ export function HowItWorksSteps({
   footer,
 }: {
   heading?: string;
-  /** The /how-it-works page adds a longer paragraph under each step. */
+  /** The /how-it-works page adds a photo and a longer paragraph to each step. */
   showDetail?: boolean;
   headingLevel?: 'h1' | 'h2';
-  /** A lead paragraph under the heading (the /how-it-works page, where this is the intro). */
+  /** A lead paragraph under the heading. */
   lead?: string;
   footer?: ReactNode;
 }) {
   const Heading = headingLevel;
   const StepHeading = headingLevel === 'h1' ? 'h2' : 'h3';
-  const isPage = headingLevel === 'h1';
 
   return (
-    <section
-      aria-labelledby="how-heading"
-      className={cn(CONTAINER, isPage ? 'pt-12 pb-12 sm:pt-16 lg:pt-20' : 'py-16 sm:py-24')}
-    >
-      <div className="max-w-2xl">
-        <Heading
-          id="how-heading"
-          className={cn(isPage ? 'text-display-md' : 'text-display-sm', 'text-balance')}
-        >
+    <section aria-labelledby="how-heading" className={cn(CONTAINER, SECTION)}>
+      <div className="reveal max-w-2xl">
+        <Heading id="how-heading" className="text-display-sm">
           {heading}
         </Heading>
-        {lead && <p className="mt-5 text-lg text-text-muted text-pretty">{lead}</p>}
+        {lead && <p className="mt-5 max-w-[60ch] text-lg text-text-muted">{lead}</p>}
       </div>
 
       {showDetail ? (
-        <ol className="mt-10 grid gap-5 lg:grid-cols-12">
+        <ol className="mt-12 grid gap-x-8 gap-y-14 lg:mt-16 lg:grid-cols-12">
           {STEPS.map((step, i) => (
             <li
               key={step.title}
-              className={cn(
-                'flex flex-col overflow-hidden rounded-lg border border-border-base bg-surface-raised shadow-xs',
-                BENTO_SPANS[i],
-              )}
+              style={stagger(i % 2)}
+              className={cn('reveal flex flex-col', BENTO_SPANS[i])}
             >
-              <div className="relative aspect-video bg-surface-sunken">
-                <Image
-                  src={step.pageImage}
-                  alt={step.pageAlt}
-                  fill
-                  sizes="(min-width: 1024px) 700px, 100vw"
-                  // The steps ARE the top of this page, so the first image is the Largest
-                  // Contentful Paint and must not wait for lazy loading.
-                  loading={i === 0 ? 'eager' : undefined}
-                  fetchPriority={i === 0 ? 'high' : undefined}
-                  placeholder="blur"
-                  className="object-cover"
-                />
-              </div>
-              <div className="flex flex-1 flex-col p-6">
-                <div className="flex items-center gap-3">
-                  <StepNumber n={i + 1} />
-                  <StepHeading className="text-xl font-semibold">{step.title}</StepHeading>
+              {/* The nested frame is kept for photographs only (soft-skill double bezel). */}
+              <div className="frame-tray">
+                <div className="rounded-inner relative aspect-4/3 overflow-hidden bg-surface-sunken">
+                  <Image
+                    src={step.pageImage}
+                    alt={step.pageAlt}
+                    fill
+                    sizes="(min-width: 1024px) 42rem, 100vw"
+                    placeholder="blur"
+                    className="object-cover"
+                  />
                 </div>
-                <p className="mt-3 text-text-muted text-pretty">{step.body}</p>
-                <p className="mt-3 text-sm text-text-muted text-pretty">{step.detail}</p>
+              </div>
+              <div className="mt-6 flex items-baseline gap-4">
+                <StepNumber n={i + 1} />
+                <StepHeading className="text-2xl font-semibold tracking-tight">
+                  {step.title}
+                </StepHeading>
+              </div>
+              <div className="mt-3 max-w-[60ch] pl-10">
+                <p className="text-text-muted">{step.body}</p>
+                <p className="mt-3 text-sm text-text-subtle">{step.detail}</p>
               </div>
             </li>
           ))}
         </ol>
       ) : (
-        <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+        <ol className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
           {STEPS.map((step, i) => (
-            // Every second step drops on desktop: the row reads as a sequence, not a card shelf.
-            <li key={step.title} className={cn('flex flex-col', i % 2 === 1 && 'lg:mt-14')}>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border-base bg-surface-sunken">
-                <Image
-                  src={step.image}
-                  alt={step.alt}
-                  fill
-                  sizes="(min-width: 1024px) 300px, (min-width: 640px) 45vw, 100vw"
-                  placeholder="blur"
-                  className="object-cover"
-                />
-              </div>
-              <div className="mt-4 flex items-center gap-3">
-                <StepNumber n={i + 1} />
-                <StepHeading className="text-lg font-semibold">{step.title}</StepHeading>
-              </div>
-              <p className="mt-2 text-text-muted text-pretty">{step.body}</p>
+            <li
+              key={step.title}
+              style={stagger(i)}
+              className="reveal border-t border-border-strong pt-6"
+            >
+              <StepNumber n={i + 1} />
+              <StepHeading className="mt-6 text-xl font-semibold tracking-tight">
+                {step.title}
+              </StepHeading>
+              <p className="mt-3 text-text-muted">{step.body}</p>
             </li>
           ))}
         </ol>
@@ -188,12 +156,15 @@ export function HowItWorksSteps({
   );
 }
 
-/** The step's position, as a numeral tile. Hidden from assistive tech: the <ol> already counts. */
+/**
+ * The step's position, in the mono face. Hidden from assistive tech: the <ol> already counts.
+ * A plain numeral, not a "Step 1" label (taste-skill bans generic step labels).
+ */
 function StepNumber({ n }: { n: number }) {
   return (
     <span
       aria-hidden="true"
-      className="grid size-8 shrink-0 place-items-center rounded-md bg-primary-subtle font-display text-sm font-semibold text-primary tabular-nums"
+      className="w-6 shrink-0 font-mono text-sm text-text-subtle tabular-nums"
     >
       {n}
     </span>

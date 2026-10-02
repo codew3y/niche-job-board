@@ -46,6 +46,14 @@ const PUBLIC_PAGES = [
 ];
 
 async function scan(page: Page, path: string) {
+  /*
+   * Measure with reduced motion on. The public site's scroll entrances (globals.css `reveal`) run
+   * on a scroll timeline, not a clock: a section below the fold stays at its start frame until
+   * someone scrolls to it, so its animation never "finishes" and axe would see it transparent.
+   * With reduced motion the entrances are off and every section is at rest, which is the state
+   * contrast is a property of. Colours and layout are identical either way.
+   */
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(path);
   // Wait for the element every layout renders, rather than networkidle — a deployed page
   // behind a CDN keeps making requests and never goes idle.

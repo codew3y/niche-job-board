@@ -85,9 +85,10 @@ export default function ForFreelancersPage() {
         title="Get hired for what you have built"
         lead="Your profile is the work itself: projects, links and photos. Matching reads it to find briefs that fit."
         image={{
-          // Per Lööv, https://unsplash.com/photos/4wOkqiXNP7M (Unsplash License).
+          // Surface, https://unsplash.com/photos/ddcLX7Iis44 (Unsplash License), graded to the
+          // site palette and cropped to 4:5.
           src: freelancersPhoto,
-          alt: 'A developer working at a desk with a monitor and a laptop in a home studio',
+          alt: 'A developer working on a laptop on a window seat in a bright room',
         }}
       >
         <Link href="/signup?role=talent" className={buttonStyles({ size: 'lg' })}>

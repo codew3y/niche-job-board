@@ -1,92 +1,84 @@
 @import 'tailwindcss';
 
 /*
- * TechSelect design tokens.
+ * TechSelect design tokens: the "Quiet ledger" direction (October 2026 redesign).
  *
  * EVERY colour, radius, shadow, type size and duration in the product comes from this file.
  * Components use the semantic names (`bg-surface`, `text-text-muted`, `bg-primary`,
  * `rounded-lg`), never a raw value, so a theme change is an edit here and nowhere else.
  *
- * THE PALETTE IS THE LOGO'S. Sampled in code from public/brand/logo-lockup.png (the mean of
- * each region's opaque pixels, not eyeballed):
+ * THE PALETTE. Warm-neutral monochrome (minimalist-ui) with ONE accent, the logo's shield blue
+ * (#1278B8), darkened to #0F67A0 so it can carry text. The primary action is ink, not blue.
+ * Photography and portfolio work supply the colour; the interface stays quiet. No neon, no
+ * gradients, no pure #000 or #fff surfaces.
  *
- *   #0A3267  "TECH" wordmark navy      -> primary (light)
- *   #052C61  shield outline, deep navy -> primary pressed; text on the dark-mode primary
- *   #1278B8  shield body blue          -> the one accent
- *   #088BC6  "SELECT" cyan-blue        -> focus ring (light)
- *   #09A5D7  "SELECT" bright end       -> accent (dark)
- *   #64E6EF  bolt highlight, ice cyan  -> primary and focus (dark)
- *   #D89F71  shield inner rim, orange  -> the warning family
- *   #2B364B  tagline slate             -> the hue of every neutral
- *
- * Neutrals are cool slate on the logo's blue hue; nothing warm. The logo has no green or red,
- * so success and error are the only hues not taken from it, tuned to the palette's lightness.
- *
- * CONTRAST (WCAG 2.2, measured, worst surface in each theme):
- *   text 16.2 / 16.4, text-muted 7.4 / 8.6, text-subtle 5.2 / 6.1, link 5.7 / 9.1,
- *   primary text-on 12.6 / 9.2, status text on its tint >= 5.2 / 6.4,
- *   control (input borders) 3.5 / 3.3, focus ring 3.6 / 11.7 (non-text minimum is 3:1).
- * Two logo colours fail as small text on light surfaces (#088BC6 at 3.8, #D89F71 at 2.3); they
- * are used for the focus ring and as the source of the warning shades, never as text.
+ * CONTRAST (WCAG 2.2, measured, light / dark, on the page and on cards):
+ *   text 17.6 / 15.7, text-muted 7.3 / 7.4, text-subtle 5.1 / 5.2 (4.8 / 4.9 on wells),
+ *   accent and link 5.8 / 8.3, primary button text 18.4 / 16.8, accent button text 6.1 / 8.9,
+ *   status text on its tint >= 5.0 / 7.1, control (input borders) 3.3 / 3.3,
+ *   focus ring 4.6 / 8.3 (non-text minimum is 3:1).
  */
 
 /* ───────────────────────────── Colour: light ───────────────────────────── */
 :root {
   color-scheme: light;
 
-  /* Surfaces. The page is pure white in light mode and pure black in dark mode (owner's
-     choice). Cards on the page are separated by their 1px border and shadow, not by tint. */
-  --surface: #ffffff; /* the page */
+  /* Surfaces. An off-white page, white cards, a faint warm-grey well. No pure white page and no
+     pure black text: both flatten depth (taste-skill 8.B, minimalist-ui 3). */
+  --surface: #fafaf9; /* the page */
   --surface-raised: #ffffff; /* cards, inputs, popovers */
-  --surface-sunken: #eef2f7; /* wells, hover rows, skeletons */
+  --surface-sunken: #f4f4f2; /* wells, hover rows, skeletons */
 
-  /* Lines. `--control` is a component boundary and must reach 3:1 (WCAG 1.4.11). */
-  --border: #d5dee8;
-  --border-strong: #b6c3d2;
-  --control: #74859c;
+  /* Lines. `--border` is a decorative hairline only (minimalist-ui: 1px #EAEAEA). `--control` is
+     a component boundary and must reach 3:1 (WCAG 1.4.11). */
+  --border: #eaeaea;
+  --border-strong: #d9d7d3;
+  --control: #8f8a84;
 
-  /* Text */
-  --text: #0b1b33;
-  --text-muted: #43526a;
-  --text-subtle: #5b6a80;
+  /* Text: ink, then two greys from the same warm-neutral family. */
+  --text: #141414;
+  --text-muted: #57534e;
+  --text-subtle: #6f6b66;
 
-  /* Brand */
-  --primary: #0a3267;
-  --primary-hover: #0e4284;
-  --primary-pressed: #052c61;
-  --primary-text: #ffffff;
-  --primary-subtle: #e5edf7;
+  /* The primary action is ink, not a brand colour (minimalist-ui 5). */
+  --primary: #141414;
+  --primary-hover: #2b2a28;
+  --primary-pressed: #3a3936;
+  --primary-text: #fafaf9;
+  --primary-subtle: #f1f0ee; /* a neutral tint for selected nav items and numeral tiles */
 
-  /* The one accent: the shield blue. 4.8:1 on white, so it may carry text on raised surfaces. */
-  --accent: #1278b8;
-  --accent-hover: #0f67a0;
-  --accent-subtle: #e5f1fa;
+  /* The one accent: the logo's shield blue, darkened to carry text. Links, focus, the selected
+     state and match reasons. Never a large background. */
+  --accent: #0f67a0;
+  --accent-hover: #0b5583;
+  --accent-subtle: #e1f3fe;
   --accent-text: #ffffff;
 
   --link: #0f67a0;
 
-  /* Status: a text-safe foreground and a quiet tint each. */
-  --success: #16704a;
-  --success-subtle: #e6f4ec;
-  --warning: #8a5a1c;
-  --warning-subtle: #fbefe3;
-  --danger: #b42330;
-  --danger-subtle: #fcebec;
-  --info: #0f67a0;
-  --info-subtle: #e5f1fa;
+  /* Status: minimalist-ui's washed-out pastels, each with a text-safe foreground. */
+  --success: #346538;
+  --success-subtle: #edf3ec;
+  --warning: #8a5d00;
+  --warning-subtle: #fbf3db;
+  --danger: #9f2f2d;
+  --danger-subtle: #fdebec;
+  --info: #1f6c9f;
+  --info-subtle: #e1f3fe;
 
-  --focus: #088bc6;
+  --focus: #1278b8;
 
-  /* On-media: controls over video. Not redefined in dark mode, footage is dark in both. */
+  /* On-media: controls over photographs. Not redefined in dark mode. */
   --media-surface: #ffffff;
-  --media-text: #0b1b33;
-  --backdrop: rgb(5 20 43 / 0.45); /* behind dialogs */
+  --media-text: #141414;
+  --backdrop: rgb(20 20 20 / 0.4); /* behind dialogs */
 
-  /* Elevation, tinted navy rather than black. */
-  --elev-xs: 0 1px 2px rgb(10 50 103 / 0.06);
-  --elev-sm: 0 1px 3px rgb(10 50 103 / 0.08), 0 1px 2px rgb(10 50 103 / 0.04);
-  --elev-md: 0 8px 24px -6px rgb(10 50 103 / 0.14);
-  --elev-lg: 0 18px 48px -12px rgb(10 50 103 / 0.22);
+  /* Elevation: ultra-diffuse and faint (minimalist-ui 2: under 0.05 for resting surfaces). Only
+     floating layers (menus, dialogs, the header) reach for md and lg. */
+  --elev-xs: 0 1px 2px rgb(20 20 20 / 0.03);
+  --elev-sm: 0 2px 8px rgb(20 20 20 / 0.04);
+  --elev-md: 0 12px 32px -12px rgb(20 20 20 / 0.1);
+  --elev-lg: 0 24px 60px -20px rgb(20 20 20 / 0.16);
 }
 
 /* ───────────────────────────── Colour: dark ───────────────────────────── */
@@ -98,77 +90,77 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --surface: #000000;
-    --surface-raised: #0b1424;
-    --surface-sunken: #0a1220;
-    --border: #1e3048;
-    --border-strong: #2c4262;
-    --control: #5e7597;
-    --text: #e9eff6;
-    --text-muted: #aab7c8;
-    --text-subtle: #8b9aaf;
-    --primary: #64e6ef;
-    --primary-hover: #8df0ff;
-    --primary-pressed: #4fd3e0;
-    --primary-text: #052c61;
-    --primary-subtle: #0b2a44;
-    --accent: #09a5d7;
-    --accent-hover: #3bbbe3;
-    --accent-subtle: #0a2338;
-    --accent-text: #052c61;
-    --link: #5cc8f0;
-    --success: #4cc38a;
-    --success-subtle: #0d2a1e;
-    --warning: #e6ae7e;
-    --warning-subtle: #2a1e12;
-    --danger: #f2777f;
-    --danger-subtle: #2c1216;
-    --info: #5cc8f0;
-    --info-subtle: #0a2338;
-    --focus: #64e6ef;
-    --backdrop: rgb(2 6 12 / 0.65);
-    --elev-xs: 0 1px 2px rgb(0 4 10 / 0.4);
-    --elev-sm: 0 1px 3px rgb(0 4 10 / 0.45);
-    --elev-md: 0 8px 24px -6px rgb(0 4 10 / 0.55);
-    --elev-lg: 0 18px 48px -12px rgb(0 4 10 / 0.65);
+    --surface: #0b0b0c;
+    --surface-raised: #141416;
+    --surface-sunken: #1a1a1c;
+    --border: rgb(255 255 255 / 0.08);
+    --border-strong: rgb(255 255 255 / 0.14);
+    --control: #6b6762;
+    --text: #ededeb;
+    --text-muted: #a8a49f;
+    --text-subtle: #8c8883;
+    --primary: #ededeb;
+    --primary-hover: #d6d5d2;
+    --primary-pressed: #c2c0bc;
+    --primary-text: #0b0b0c;
+    --primary-subtle: #1f1f21;
+    --accent: #5cb8ec;
+    --accent-hover: #8bcdf2;
+    --accent-subtle: #0e2433;
+    --accent-text: #0b0b0c;
+    --link: #5cb8ec;
+    --success: #7fc58a;
+    --success-subtle: #13241a;
+    --warning: #e2b65a;
+    --warning-subtle: #2a2110;
+    --danger: #f08a86;
+    --danger-subtle: #2c1515;
+    --info: #6cc0f0;
+    --info-subtle: #0e2433;
+    --focus: #5cb8ec;
+    --backdrop: rgb(0 0 0 / 0.6);
+    --elev-xs: 0 1px 2px rgb(0 0 0 / 0.3);
+    --elev-sm: 0 2px 8px rgb(0 0 0 / 0.35);
+    --elev-md: 0 12px 32px -12px rgb(0 0 0 / 0.6);
+    --elev-lg: 0 24px 60px -20px rgb(0 0 0 / 0.7);
   }
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --surface: #000000;
-  --surface-raised: #0b1424;
-  --surface-sunken: #0a1220;
-  --border: #1e3048;
-  --border-strong: #2c4262;
-  --control: #5e7597;
-  --text: #e9eff6;
-  --text-muted: #aab7c8;
-  --text-subtle: #8b9aaf;
-  --primary: #64e6ef;
-  --primary-hover: #8df0ff;
-  --primary-pressed: #4fd3e0;
-  --primary-text: #052c61;
-  --primary-subtle: #0b2a44;
-  --accent: #09a5d7;
-  --accent-hover: #3bbbe3;
-  --accent-subtle: #0a2338;
-  --accent-text: #052c61;
-  --link: #5cc8f0;
-  --success: #4cc38a;
-  --success-subtle: #0d2a1e;
-  --warning: #e6ae7e;
-  --warning-subtle: #2a1e12;
-  --danger: #f2777f;
-  --danger-subtle: #2c1216;
-  --info: #5cc8f0;
-  --info-subtle: #0a2338;
-  --focus: #64e6ef;
-  --backdrop: rgb(2 6 12 / 0.65);
-  --elev-xs: 0 1px 2px rgb(0 4 10 / 0.4);
-  --elev-sm: 0 1px 3px rgb(0 4 10 / 0.45);
-  --elev-md: 0 8px 24px -6px rgb(0 4 10 / 0.55);
-  --elev-lg: 0 18px 48px -12px rgb(0 4 10 / 0.65);
+  --surface: #0b0b0c;
+  --surface-raised: #141416;
+  --surface-sunken: #1a1a1c;
+  --border: rgb(255 255 255 / 0.08);
+  --border-strong: rgb(255 255 255 / 0.14);
+  --control: #6b6762;
+  --text: #ededeb;
+  --text-muted: #a8a49f;
+  --text-subtle: #8c8883;
+  --primary: #ededeb;
+  --primary-hover: #d6d5d2;
+  --primary-pressed: #c2c0bc;
+  --primary-text: #0b0b0c;
+  --primary-subtle: #1f1f21;
+  --accent: #5cb8ec;
+  --accent-hover: #8bcdf2;
+  --accent-subtle: #0e2433;
+  --accent-text: #0b0b0c;
+  --link: #5cb8ec;
+  --success: #7fc58a;
+  --success-subtle: #13241a;
+  --warning: #e2b65a;
+  --warning-subtle: #2a2110;
+  --danger: #f08a86;
+  --danger-subtle: #2c1515;
+  --info: #6cc0f0;
+  --info-subtle: #0e2433;
+  --focus: #5cb8ec;
+  --backdrop: rgb(0 0 0 / 0.6);
+  --elev-xs: 0 1px 2px rgb(0 0 0 / 0.3);
+  --elev-sm: 0 2px 8px rgb(0 0 0 / 0.35);
+  --elev-md: 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  --elev-lg: 0 24px 60px -20px rgb(0 0 0 / 0.7);
 }
 
 /* ───────────────────────────── Motion, layering, layout ───────────────────────────── */
@@ -190,6 +182,29 @@
   --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer-curve: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Scroll entrances (minimalist-ui 7): a long, soft settle. */
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+  /*
+   * A real spring, sampled into CSS `linear()` (stiffness 100, damping 20, mass 1: the values
+   * taste-skill names). A small overshoot and settle, with no JavaScript, so press and hover
+   * feedback on server-rendered buttons and cards still feels physical (soft-skill 5). Browsers
+   * without `linear()` fall back to the ease-out above.
+   */
+  --ease-spring: linear(
+    0,
+    0.063,
+    0.22 5.2%,
+    0.669 13.4%,
+    0.889 18.5%,
+    1.014 23.8%,
+    1.058 28.4%,
+    1.064 32%,
+    1.047 37.5%,
+    1.012 47.5%,
+    0.997 58.3%,
+    1
+  );
+  --duration-spring: 420ms;
 
   /* Durations. UI stays under 300ms; exits are faster than entrances. */
   --duration-instant: 100ms; /* press feedback */
@@ -222,6 +237,13 @@
 @media (min-width: 48rem) {
   :root {
     --tabbar-space: 0px;
+    --spacing-section: 6rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --spacing-section: 8rem;
   }
 }
 
@@ -264,12 +286,14 @@
   --shadow-md: var(--elev-md);
   --shadow-lg: var(--elev-lg);
 
-  /* Geist for text and interface; Outfit (geometric, like the logo's wordmark) for headings;
-     Geist Mono for code-like values. Loaded in app/layout.tsx. `font-serif` maps to the display
-     face so no stray utility can reach a serif that was never loaded. */
+  /* ONE family. Geist for headings and text, with hierarchy from size, weight and tracking;
+     Geist Mono for facts (rates, time zones, dates, skills). No serif: "precise, calm, credible"
+     reads as a sans, and taste-skill bans serif as a default. Loaded in app/layout.tsx.
+     `font-display` and `font-serif` both resolve to Geist so no stray utility can reach a face
+     that was never loaded. */
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-outfit), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-outfit), var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
 
   --font-weight-normal: 400;
@@ -284,47 +308,60 @@
 
 @theme {
   /*
-   * ONE shape rule, used everywhere: badges and chips 6px (`rounded-sm`), buttons, inputs and
-   * other controls 10px (`rounded-md`), cards, panels, sheets and media 16px (`rounded-lg` and up).
-   * Pills (`rounded-full`) only for avatars' status dots and toggles.
+   * ONE shape rule, used everywhere (taste-skill shape lock):
+   *   4px  (`rounded-sm`)  small chips inside dense rows, keys
+   *   6px  (`rounded-md`)  buttons, inputs and every other control (minimalist-ui: 4-6px)
+   *   12px (`rounded-lg` and up) cards, panels, sheets and media (minimalist-ui: 12px max)
+   *   full (`rounded-full`) tags, avatars and toggles only, never buttons or containers.
    */
   --radius-xs: 0.25rem;
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 0.75rem;
 
   /*
-   * Type scale: 12 / 14 / 16 / 18 / 20 / 24, then display 30 / 38 / fluid 48-60 in Outfit.
-   * Body is 16px at 1.6; headings tighten as they grow.
+   * Type scale, about 1.33 per step, all Geist:
+   *   meta 12.5 mono / small 14 / body 16 / lead 19 / h4 20 / h3 22 /
+   *   h2 32 (display-sm) / h1 34-44 (display-md) / display 40-64 (display-lg).
+   * Body is 16px at 1.6; headings tighten in line height and tracking as they grow.
    */
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1.45;
-  --text-xs: 0.75rem;
+  --text-xs: 0.78125rem;
   --text-xs--line-height: 1.5;
   --text-sm: 0.875rem;
   --text-sm--line-height: 1.55;
   --text-base: 1rem;
   --text-base--line-height: 1.6;
-  --text-lg: 1.125rem;
+  --text-lg: 1.1875rem;
   --text-lg--line-height: 1.55;
   --text-xl: 1.25rem;
   --text-xl--line-height: 1.4;
-  --text-2xl: 1.5rem;
+  --text-2xl: 1.375rem;
   --text-2xl--line-height: 1.3;
-  --text-display-sm: 1.875rem;
+  --text-display-sm: clamp(1.625rem, 1.3rem + 1.2vw, 2rem);
   --text-display-sm--line-height: 1.15;
-  --text-display-sm--letter-spacing: -0.02em;
+  --text-display-sm--letter-spacing: -0.025em;
   --text-display-sm--font-weight: 600;
-  --text-display-md: 2.375rem;
-  --text-display-md--line-height: 1.1;
-  --text-display-md--letter-spacing: -0.025em;
+  --text-display-md: clamp(2.125rem, 1.6rem + 2vw, 2.75rem);
+  --text-display-md--line-height: 1.08;
+  --text-display-md--letter-spacing: -0.03em;
   --text-display-md--font-weight: 600;
-  --text-display-lg: clamp(2.5rem, 1.6rem + 3.2vw, 3.75rem);
-  --text-display-lg--line-height: 1.05;
-  --text-display-lg--letter-spacing: -0.03em;
+  --text-display-lg: clamp(2.5rem, 1.25rem + 4.2vw, 4rem);
+  --text-display-lg--line-height: 1.04;
+  --text-display-lg--letter-spacing: -0.035em;
   --text-display-lg--font-weight: 600;
+
+  /*
+   * Spacing rhythm for sections, one rule everywhere: 64px on phones, 96 on tablets, 128 on
+   * desktop (VISUAL_DENSITY 3). `py-section` on every top-level section; nothing hand-tuned.
+   */
+  --spacing-section: 4rem;
+
+  /* The page container: 1200px of content, centred, with the gutter outside it. */
+  --container-page: 75rem;
 
   --tracking-eyebrow: 0.14em;
 }
@@ -368,6 +405,21 @@
   z-index: var(--z-toast);
 }
 
+/*
+ * The nested media frame (soft-skill "double bezel", used ONLY around photographs and portfolio
+ * media): an outer tray with 12px corners and 6px padding, and the picture inside it with the
+ * concentric radius, 12px minus the padding, so the two curves stay parallel.
+ */
+@utility frame-tray {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface-sunken);
+  padding: 0.375rem;
+}
+@utility rounded-inner {
+  border-radius: calc(var(--radius-lg) - 0.375rem);
+}
+
 /* The page gutter, with the side safe areas added — a phone in landscape has a notch on one
    side, and content under it cannot be read or tapped. */
 @utility gutter {
@@ -376,15 +428,49 @@
 }
 
 /*
- * Press feedback on anything pressable. Scale is subtle (0.97) and on :active, not :hover, so it
- * works on touch — and it answers at pointer-down, which is when a native button answers.
+ * Press feedback on anything pressable: scale(0.98) on :active (minimalist-ui 5), released on a
+ * spring so it settles back with a small overshoot (soft-skill 5). On :active, not :hover, so it
+ * works on touch, and it answers at pointer-down, which is when a native button answers. Colour
+ * changes stay quick and plain; only the transform springs.
  */
 @utility pressable {
-  transition-property: transform, background-color, border-color, color, box-shadow, opacity;
-  transition-duration: var(--duration-instant);
-  transition-timing-function: var(--ease-out-strong);
+  transition:
+    transform var(--duration-spring) var(--ease-out-strong),
+    background-color var(--duration-fast) var(--ease-out-strong),
+    border-color var(--duration-fast) var(--ease-out-strong),
+    color var(--duration-fast) var(--ease-out-strong),
+    box-shadow var(--duration-base) var(--ease-out-strong),
+    opacity var(--duration-fast) var(--ease-out-strong);
+  @supports (transition-timing-function: linear(0, 1)) {
+    transition-timing-function:
+      var(--ease-spring), var(--ease-out-strong), var(--ease-out-strong), var(--ease-out-strong),
+      var(--ease-out-strong), var(--ease-out-strong);
+  }
   &:active:not(:disabled):not([aria-disabled='true']) {
-    transform: scale(0.97);
+    transform: scale(0.98);
+    transition-duration: var(--duration-instant);
+  }
+}
+
+/*
+ * A card that answers the pointer: a 2px lift and a faint diffuse shadow on hover, on the spring
+ * (minimalist-ui 7, soft-skill 5). Hover-capable pointers only, so it never sticks after a tap.
+ */
+@utility liftable {
+  transition:
+    transform var(--duration-spring) var(--ease-out-strong),
+    box-shadow var(--duration-base) var(--ease-out-strong),
+    border-color var(--duration-fast) var(--ease-out-strong),
+    background-color var(--duration-fast) var(--ease-out-strong);
+  @supports (transition-timing-function: linear(0, 1)) {
+    transition-timing-function:
+      var(--ease-spring), var(--ease-out-strong), var(--ease-out-strong), var(--ease-out-strong);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--elev-sm);
+    }
   }
 }
 
@@ -468,12 +554,12 @@
   h3 {
     text-wrap: balance;
   }
-  /* Headings speak in the display face; smaller headings (h4+) stay in the text face. */
+  /* Headings tighten as they grow; the display sizes carry their own tracking. */
   h1,
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
   }
   p,
   li,
@@ -550,18 +636,53 @@
 }
 
 /*
- * The skills ticker on the home page: one long row, duplicated, translated by half its width so
- * the loop has no seam. Linear and slow (60s a lap), because it is ambient texture, not content
- * anyone has to catch. Paused on hover, and stopped entirely under reduced motion (below).
+ * Scroll entrance for the public site (minimalist-ui 7): fade up 12px as a block enters the
+ * viewport, settling over the first 30% of its entry. Driven by CSS scroll-driven animation
+ * (`animation-timeline: view()`), so there is no scroll listener, no JavaScript and no hydration
+ * cost (taste-skill 5.D), and nothing is ever hidden: a browser without scroll timelines (and
+ * the first paint, and print) simply shows the content. `--i` staggers items in a list by 4% of
+ * the entry range each. Never used inside the signed-in app, where an entrance on a screen
+ * opened many times a day reads as lag.
  */
-@keyframes marquee {
-  to {
-    transform: translateX(-50%);
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
 }
-@utility animate-marquee {
-  animation: marquee 60s linear infinite;
+@utility reveal {
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--i, 0) * 4%) entry calc(30% + var(--i, 0) * 4%);
+    }
+  }
 }
+
+/*
+ * Film grain over photographs (minimalist-ui 6: "opacity 0.04 warm grain"). One fixed,
+ * pointer-events-none layer for the whole public site, never on a scrolling container, so it is
+ * composited once rather than repainted on scroll (taste-skill 6.E). An SVG turbulence filter,
+ * not a raster file. Hidden for anyone who asked for less transparency or more contrast.
+ */
+@utility grain {
+  &::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    &::after {
+      display: none;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Entrances keep their fade and lose their travel. */
   .animate-rise {
@@ -573,9 +694,12 @@
   }
   /* Loops and shimmer stop — continuous motion is exactly what this setting asks to remove. */
   .animate-pulse,
-  .animate-skeleton,
-  .animate-marquee {
+  .animate-skeleton {
     animation: none !important;
+  }
+  /* The lift is movement too; the shadow alone still says "this answers the pointer". */
+  .liftable:hover {
+    transform: none !important;
   }
   html {
     scroll-behavior: auto !important;

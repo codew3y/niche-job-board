@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, X } from 'lucide-react';
+import { List, X } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useId, useState } from 'react';
@@ -38,13 +38,14 @@ export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) 
         onClick={() => setOpen((v) => !v)}
         className="pressable grid size-10 place-items-center rounded-md text-text-muted hover:bg-surface-sunken hover:text-text"
       >
-        {open ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
+        {open ? <X aria-hidden="true" size={20} /> : <List aria-hidden="true" size={20} />}
       </button>
 
       <div
         id={panelId}
         hidden={!open}
-        className="gutter absolute inset-x-0 top-full border-b border-border-base bg-surface pb-5 shadow-md"
+        // Hangs from the floating header bar as a card of its own, the same width as the bar.
+        className="absolute inset-x-0 top-full mt-2 rounded-lg border border-border-base bg-surface-raised px-2 pb-3 shadow-md"
       >
         <nav aria-label="Site">
           <ul className="flex flex-col py-2">
@@ -55,7 +56,7 @@ export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) 
                   onClick={() => setOpen(false)}
                   aria-current={pathname === href ? 'page' : undefined}
                   className={cn(
-                    'flex min-h-11 items-center rounded-md px-3 font-medium',
+                    'flex min-h-11 items-center rounded-md px-3 font-medium transition-colors duration-fast ease-out',
                     pathname === href
                       ? 'bg-primary-subtle font-semibold text-primary'
                       : 'text-text-muted hover:bg-surface-sunken hover:text-text',
@@ -67,7 +68,7 @@ export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) 
             ))}
           </ul>
         </nav>
-        <div className="grid gap-2 border-t border-border-base pt-4 sm:grid-cols-2">
+        <div className="grid gap-2 border-t border-border-base px-1 pt-3 sm:grid-cols-2">
           {dashboardHref ? (
             <Link
               href={dashboardHref}

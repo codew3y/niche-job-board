@@ -11,9 +11,15 @@ import { getSessionUser } from '@/lib/supabase/session';
 
 /**
  * The public site's header, on every page outside the app: logo top-left (to the home page),
- * the page links, a light/dark toggle, and Log in / Sign up on the right. Below `lg` the links and buttons collapse
- * into a menu: five links, the logo and two buttons do not fit one row on a tablet, and the
- * labels used to wrap onto two lines there.
+ * the page links, a light/dark toggle, and Log in / Sign up on the right. Below `lg` the links
+ * and buttons collapse into a menu: five links, the logo and two buttons do not fit one row on a
+ * tablet.
+ *
+ * SHAPE. A floating bar detached from the top edge (soft-skill: no edge-to-edge bar glued to the
+ * top), still sticky so it stays in view while the page scrolls (the owner's requirement). A
+ * hairline, a faint diffuse shadow and a translucent surface with a blur: the one place on the
+ * site that blurs, because it is the one fixed layer content passes under. Solid where
+ * backdrop-filter is unsupported. 60px tall, one line from `lg` (nav cap 80px).
  *
  * Someone already signed in gets one "Go to dashboard" button instead of the two auth buttons:
  * offering a signed-in person "Sign up" reads as the product forgetting them.
@@ -23,42 +29,45 @@ export async function SiteHeader() {
   const dashboardHref = signedIn ? '/dashboard' : null;
 
   return (
-    // 64px tall (the nav cap is 80px), one line from `lg`; below `lg` the menu takes over.
-    // Sticky, so the header stays in view while the page scrolls. Sticky is also a positioned
-    // element, so the mobile menu panel (absolute, top-full) still hangs from it. Slightly
-    // translucent with a blur, so content passing underneath reads as underneath, not behind
-    // a wall; solid where backdrop-filter is unsupported.
-    <header className="sticky top-0 z-sticky border-b border-border-base bg-surface/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur-md supports-[not(backdrop-filter:blur(0))]:bg-surface">
-      <div className={cn(CONTAINER, 'flex h-16 items-center gap-6')}>
-        <Logo href="/" />
-
-        <nav aria-label="Site" className="hidden flex-1 justify-center lg:flex">
-          <SiteNavLinks />
-        </nav>
-
-        <div className="ml-auto hidden items-center gap-2 lg:flex">
-          <ThemeToggle />
-          {dashboardHref ? (
-            <Link href={dashboardHref} className={buttonStyles({ size: 'sm' })}>
-              Go to dashboard
-            </Link>
-          ) : (
-            <>
-              <Link href="/login" className={buttonStyles({ variant: 'ghost', size: 'sm' })}>
-                Log in
-              </Link>
-              <Link href="/signup" className={buttonStyles({ size: 'sm' })}>
-                Sign up
-              </Link>
-            </>
+    <header className="sticky top-0 z-sticky pt-[calc(env(safe-area-inset-top,0px)+0.75rem)]">
+      <div className={CONTAINER}>
+        {/* `relative` so the mobile menu panel (absolute, top-full) hangs from the bar. */}
+        <div
+          className={cn(
+            'relative flex h-15 items-center gap-6 rounded-lg border border-border-base bg-surface-raised/80 pr-2 pl-4 shadow-sm backdrop-blur-md',
+            'supports-[not(backdrop-filter:blur(0))]:bg-surface-raised',
           )}
-        </div>
+        >
+          <Logo href="/" />
 
-        {/* On phones the toggle sits beside the menu button rather than inside the menu: a theme
-            switch is used on its own, and burying it a tap deep would hide it. */}
-        <div className="ml-auto flex items-center gap-1 lg:hidden">
-          <ThemeToggle />
-          <MobileMenu dashboardHref={dashboardHref} />
+          <nav aria-label="Site" className="hidden flex-1 justify-center lg:flex">
+            <SiteNavLinks />
+          </nav>
+
+          <div className="ml-auto hidden items-center gap-1 lg:flex">
+            <ThemeToggle />
+            {dashboardHref ? (
+              <Link href={dashboardHref} className={buttonStyles({ size: 'sm' })}>
+                Go to dashboard
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className={buttonStyles({ variant: 'ghost', size: 'sm' })}>
+                  Log in
+                </Link>
+                <Link href="/signup" className={buttonStyles({ size: 'sm' })}>
+                  Sign up
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* On phones the toggle sits beside the menu button rather than inside the menu: a
+              theme switch is used on its own, and burying it a tap deep would hide it. */}
+          <div className="ml-auto flex items-center gap-1 lg:hidden">
+            <ThemeToggle />
+            <MobileMenu dashboardHref={dashboardHref} />
+          </div>
         </div>
       </div>
     </header>

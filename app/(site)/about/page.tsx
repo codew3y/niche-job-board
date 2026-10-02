@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { CONTAINER, FeatureBento, PageCta, PageIntro } from '@/components/site/page-parts';
+import { CONTAINER, FeatureBento, PageCta, PageIntro, SECTION } from '@/components/site/page-parts';
 import { cn } from '@/lib/ui/cn';
 import aboutPhoto from '@/public/images/pages/about.jpg';
 
@@ -55,22 +55,23 @@ export default function AboutPage() {
         title="A job board where shipped work is the profile"
         lead="TechSelect connects freelance developers with clients. The best evidence of what someone can do is what they have built."
         image={{
-          // Azwedo L.LC, https://unsplash.com/photos/nbEX3qxtmuA (Unsplash License).
+          // Mimi Thian, https://unsplash.com/photos/ZKBzlifgkgw (Unsplash License), graded to
+          // the site palette and cropped to 4:5.
           src: aboutPhoto,
-          alt: 'Two people smiling as they work through something together on a laptop',
+          alt: 'Several hands around one laptop as a small team works through something together',
         }}
       />
 
       <FeatureBento heading="What we believe" items={BELIEFS} />
 
-      {/* Your data: heading and a short summary on the left, the detail beside it. Stacked
+      {/* Your data: the heading on the left, the detail beside it, under one hairline. Stacked
           below `md`. */}
-      <section aria-labelledby="data-heading" className={cn(CONTAINER, 'py-12 sm:py-16')}>
-        <div className="grid gap-6 border-t border-border-strong pt-10 md:grid-cols-[1fr_2fr] md:gap-12">
-          <h2 id="data-heading" className="text-display-sm text-balance">
+      <section aria-labelledby="data-heading" className={cn(CONTAINER, SECTION)}>
+        <div className="reveal grid gap-6 border-t border-border-strong pt-12 md:grid-cols-12 md:gap-12">
+          <h2 id="data-heading" className="text-display-sm md:col-span-4">
             Your data
           </h2>
-          <div className="max-w-[65ch] space-y-4 text-text-muted text-pretty">
+          <div className="max-w-[65ch] space-y-4 text-lg text-text-muted md:col-span-8">
             <p>
               A published developer profile is public, because being found is the point of having
               one. Drafts, saved lists, applications and messages are visible only to the people
