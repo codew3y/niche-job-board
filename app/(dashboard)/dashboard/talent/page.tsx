@@ -284,7 +284,7 @@ export default async function TalentDashboard() {
                     className="group flex min-h-14 items-center justify-between gap-3 px-1 py-3 transition-colors duration-fast ease-out hover:bg-surface-sunken/60"
                   >
                     <span className="min-w-0">
-                      <span className="block text-sm font-semibold text-text">{label}</span>
+                      <span className="block text-sm font-medium text-text">{label}</span>
                       <span className="block text-sm text-text-muted">{hint}</span>
                     </span>
                     <ArrowRight

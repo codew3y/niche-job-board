@@ -225,8 +225,10 @@ async function DashboardBody({ client }: { client: { id: string; company_name: s
             )}
           </Card>
 
+          {/* A plain ruled list, not a card, as on the talent dashboard: these are links, and a
+              box would give them the weight of content. */}
           <nav aria-label="Quick links">
-            <Card className="divide-y divide-border-base">
+            <ul className="divide-y divide-border-base border-y border-border-base">
               {(
                 [
                   ['/dashboard/client/saved', 'Saved developers', 'Private to you'],
@@ -234,23 +236,24 @@ async function DashboardBody({ client }: { client: { id: string; company_name: s
                   ['/dashboard/client/profile', 'Company profile', 'Shown on every job you post'],
                 ] as const
               ).map(([href, label, hint]) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="group flex min-h-14 items-center justify-between gap-3 px-5 py-3 transition-colors duration-fast ease-out first:rounded-t-lg last:rounded-b-lg hover:bg-surface-sunken/60"
-                >
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold">{label}</span>
-                    <span className="block text-sm text-text-subtle">{hint}</span>
-                  </span>
-                  <ArrowRight
-                    aria-hidden="true"
-                    size={16}
-                    className="shrink-0 text-text-subtle transition-transform duration-fast ease-out group-hover:translate-x-0.5"
-                  />
-                </Link>
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="group flex min-h-14 items-center justify-between gap-3 px-1 py-3 transition-colors duration-fast ease-out hover:bg-surface-sunken/60"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-text">{label}</span>
+                      <span className="block text-sm text-text-muted">{hint}</span>
+                    </span>
+                    <ArrowRight
+                      aria-hidden="true"
+                      size={16}
+                      className="shrink-0 text-text-subtle transition-transform duration-fast ease-out group-hover:translate-x-0.5 motion-reduce:transition-none"
+                    />
+                  </Link>
+                </li>
               ))}
-            </Card>
+            </ul>
           </nav>
         </div>
       </div>
@@ -319,8 +322,9 @@ function DashboardSkeleton() {
   return (
     <div role="status" aria-busy="true" aria-label="Loading your dashboard">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {/* Each tile is the rendered Stat height: 106px on a phone, 112px from sm (measured). */}
         {Array.from({ length: 4 }, (_, i) => (
-          <Skeleton key={i} className="h-[5.5rem] rounded-lg" />
+          <Skeleton key={i} className="h-[6.625rem] rounded-lg sm:h-28" />
         ))}
       </div>
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] xl:items-start">

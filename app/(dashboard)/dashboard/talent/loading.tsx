@@ -26,8 +26,9 @@ export default function Loading() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {/* Each tile is the rendered Stat height: 106px on a phone, 112px from sm (measured). */}
         {Array.from({ length: 4 }, (_, i) => (
-          <Skeleton key={i} className="h-[5.25rem] rounded-lg" />
+          <Skeleton key={i} className="h-[6.625rem] rounded-lg sm:h-28" />
         ))}
       </div>
 
