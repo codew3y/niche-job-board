@@ -40,7 +40,10 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned, not `latest`: resolving "latest" makes an unauthenticated GitHub API call,
+          # which fails intermittently with "rate limit exceeded" on shared runner IPs (it
+          # failed CI on 650cc0e). A pinned version downloads directly. Bump deliberately.
+          version: 2.119.0
 
       - name: Start Supabase
         # The database suites are the ones that catch policy regressions, and skipping them
@@ -95,7 +98,10 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned, not `latest`: resolving "latest" makes an unauthenticated GitHub API call,
+          # which fails intermittently with "rate limit exceeded" on shared runner IPs (it
+          # failed CI on 650cc0e). A pinned version downloads directly. Bump deliberately.
+          version: 2.119.0
 
       - name: Start Supabase
         run: supabase start
