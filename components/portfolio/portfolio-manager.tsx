@@ -1,6 +1,11 @@
 'use client';
 
-import { ChevronRight, FolderKanban, Plus, X } from 'lucide-react';
+import {
+  CaretRight as ChevronRight,
+  Kanban as FolderKanban,
+  Plus,
+  X,
+} from '@phosphor-icons/react/ssr';
 import Image from 'next/image';
 import { useActionState, useState } from 'react';
 

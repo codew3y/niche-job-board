@@ -1,4 +1,4 @@
-import { MessageSquare } from 'lucide-react';
+import { ChatCenteredText as MessageSquare } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';

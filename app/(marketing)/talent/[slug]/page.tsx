@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 
 import { jsonLdScript } from '@/lib/seo/json-ld';
@@ -176,7 +176,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
 
         <aside aria-label="Profile details" className="lg:col-start-2 lg:row-span-2 lg:row-start-1">
           {/* The one raised panel on the page: the facts a client decides on, and the action. */}
-          <div className="rounded-lg border border-border-base bg-surface-raised p-5 shadow-xs lg:sticky lg:top-8">
+          <div className="rounded-lg border border-border-base bg-surface-raised p-5 lg:sticky lg:top-8">
             <dl className="grid grid-cols-1 gap-x-4 gap-y-4 min-[26rem]:grid-cols-2 lg:grid-cols-1">
               {facts.map(([term, value]) => (
                 <div key={term} className="min-w-0">

@@ -1,4 +1,4 @@
-import { Briefcase, Clock, FolderKanban } from 'lucide-react';
+import { Briefcase, Clock, Kanban as FolderKanban } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 
 import { formatRange } from '@/components/shared/money';

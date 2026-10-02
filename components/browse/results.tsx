@@ -1,4 +1,4 @@
-import { ArrowRight, SearchX } from 'lucide-react';
+import { ArrowRight, MagnifyingGlassMinus as SearchX } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 
 import { JobCard } from '@/components/job/job-card';

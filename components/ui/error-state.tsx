@@ -1,6 +1,6 @@
 'use client';
 
-import { RotateCw, TriangleAlert } from 'lucide-react';
+import { ArrowClockwise as RotateCw, Warning as TriangleAlert } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 import { useEffect } from 'react';
 

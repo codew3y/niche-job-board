@@ -1,6 +1,6 @@
 'use client';
 
-import { SendHorizontal } from 'lucide-react';
+import { PaperPlaneRight as SendHorizontal } from '@phosphor-icons/react/ssr';
 import { useActionState, useEffect, useRef } from 'react';
 
 import { controlStyles } from '@/components/ui/field';

@@ -1,4 +1,4 @@
-import { Bookmark } from 'lucide-react';
+import { BookmarkSimple as Bookmark } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';

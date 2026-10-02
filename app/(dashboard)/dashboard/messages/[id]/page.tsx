@@ -1,4 +1,4 @@
-import { ArrowLeft, Ban, CheckCheck } from 'lucide-react';
+import { ArrowLeft, Prohibit as Ban, Checks as CheckCheck } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 

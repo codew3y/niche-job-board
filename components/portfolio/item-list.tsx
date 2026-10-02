@@ -2,7 +2,13 @@
 
 import { useLayoutEffect, useRef, useState } from 'react';
 
-import { ArrowDown, ArrowUp, GripVertical, Pencil, Trash2 } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  DotsSixVertical as GripVertical,
+  PencilSimple as Pencil,
+  Trash as Trash2,
+} from '@phosphor-icons/react/ssr';
 
 import { Button } from '@/components/ui/button';
 import { SubmitButton } from '@/components/ui/submit-button';
@@ -136,7 +142,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
               setOverIndex(null);
             }}
             className={cn(
-              'rounded-lg border bg-surface-raised p-4 shadow-xs transition-[border-color,background-color,opacity] duration-fast ease-out sm:p-5',
+              'rounded-lg border bg-surface-raised p-4 transition-[border-color,background-color,opacity] duration-fast ease-out sm:p-5',
               dragIndex === i && 'opacity-50',
               overIndex === i && dragIndex !== i
                 ? 'border-accent bg-accent-subtle'

@@ -1,4 +1,4 @@
-import { Compass } from 'lucide-react';
+import { Compass } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 

@@ -1,4 +1,4 @@
-import { FolderKanban, Globe } from 'lucide-react';
+import { Kanban as FolderKanban, Globe } from '@phosphor-icons/react/ssr';
 import Image from 'next/image';
 import Link from 'next/link';
 

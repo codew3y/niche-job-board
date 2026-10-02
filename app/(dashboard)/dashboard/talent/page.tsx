@@ -1,15 +1,15 @@
 import {
   ArrowRight,
-  Bookmark,
+  BookmarkSimple as Bookmark,
   Briefcase,
-  CheckCircle2,
+  CheckCircle as CheckCircle2,
   Circle,
-  FolderKanban,
+  Kanban as FolderKanban,
   Hourglass,
-  SearchX,
-  Sparkles,
+  MagnifyingGlassMinus as SearchX,
+  Sparkle as Sparkles,
   Star,
-} from 'lucide-react';
+} from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -112,10 +112,9 @@ export default async function TalentDashboard() {
         }
       />
 
-      {/* Below lg the app rail takes 4rem, so a 360px phone leaves ~264px of content: too
-          narrow for two tiles whose labels cannot wrap ("Applications"). One column there, a
-          2x2 grid from a 416px viewport, one row of four from lg. */}
-      <div className="grid grid-cols-1 gap-3 min-[26rem]:grid-cols-2 lg:grid-cols-4">
+      {/* A 2x2 grid on phones (the navigation is a bottom bar there, so the full width is
+          free: two 158px tiles fit "Applications" at 360px), one row of four from lg. */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
           label="Applications"
           value={active}

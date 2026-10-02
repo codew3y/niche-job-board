@@ -1,4 +1,4 @@
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from '@phosphor-icons/react/ssr';
 import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/ui/cn';

@@ -1,4 +1,4 @@
-import { Bookmark } from 'lucide-react';
+import { BookmarkSimple as Bookmark } from '@phosphor-icons/react/ssr';
 
 import { toggleSavedJob, toggleSavedTalent } from '@/lib/actions/saved';
 import { cn } from '@/lib/ui/cn';
@@ -44,7 +44,7 @@ export function SaveButton({
             : 'border-control bg-surface-raised text-text hover:bg-surface-sunken',
         )}
       >
-        <Bookmark aria-hidden="true" size={15} fill={saved ? 'currentColor' : 'none'} />
+        <Bookmark aria-hidden="true" size={15} weight={saved ? 'fill' : 'regular'} />
         {saved ? 'Saved' : 'Save'}
       </button>
     </form>

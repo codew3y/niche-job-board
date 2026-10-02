@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/ui/cn';
@@ -22,7 +22,7 @@ export function EmptyState({
   title: string;
   body: ReactNode;
   action?: ReactNode;
-  icon?: LucideIcon;
+  icon?: PhosphorIcon;
   /** `pending` for "not ready yet", which must not look like "nothing here". */
   tone?: 'default' | 'pending';
   className?: string;
@@ -30,10 +30,10 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'rounded-lg border border-dashed px-6 py-12 text-center',
-        tone === 'pending'
-          ? 'border-accent/40 bg-accent-subtle/50'
-          : 'border-border-strong bg-surface-raised/40',
+        // A quiet well, not a dashed box: one Phosphor icon on a tile, a line that says what is
+        // true, and one way forward (the redesign's empty-state rule).
+        'rounded-lg px-6 py-14 text-center',
+        tone === 'pending' ? 'bg-accent-subtle' : 'bg-surface-sunken',
         className,
       )}
     >
@@ -43,15 +43,15 @@ export function EmptyState({
           className={cn(
             'mx-auto mb-4 grid size-11 place-items-center rounded-md',
             tone === 'pending'
-              ? 'bg-accent-subtle text-link'
-              : 'bg-surface-sunken text-text-subtle',
+              ? 'bg-surface-raised text-link'
+              : 'bg-surface-raised text-text-muted',
           )}
         >
           <Icon size={20} />
         </span>
       )}
-      <p className="font-display text-2xl font-semibold tracking-tight">{title}</p>
-      <div className="mx-auto mt-2 max-w-md text-sm text-text-muted text-pretty">{body}</div>
+      <p className="text-xl font-semibold tracking-tight">{title}</p>
+      <div className="mx-auto mt-2 max-w-md text-text-muted">{body}</div>
       {action && <div className="mt-6 flex flex-wrap justify-center gap-2">{action}</div>}
     </div>
   );

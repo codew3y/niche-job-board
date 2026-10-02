@@ -1,4 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
 import Link from 'next/link';
 
 import { cn } from '@/lib/ui/cn';
@@ -7,8 +7,8 @@ import { cn } from '@/lib/ui/cn';
  * A summary number. Linked when there is somewhere to go — a count you cannot click through to
  * is a number that asks a question and refuses to answer it.
  *
- * The figure is set in the display face (Outfit) with tabular numerals, so a column of stats
- * lines up. Outfit's "1" has a flag and cannot be misread as a lowercase "l".
+ * The figure is large Geist with tabular numerals, so a column of stats lines up. Flat: a
+ * hairline, no resting shadow; a linked stat lifts on hover like any other link target.
  */
 export function Stat({
   label,
@@ -20,7 +20,7 @@ export function Stat({
   label: string;
   value: number | string;
   href?: string;
-  icon?: LucideIcon;
+  icon?: PhosphorIcon;
   emphasis?: boolean;
 }) {
   const body = (
@@ -29,20 +29,14 @@ export function Stat({
         {Icon && <Icon aria-hidden="true" size={16} className="text-text-subtle" />}
         {label}
       </dt>
-      <dd
-        className={cn(
-          'mt-2 font-display text-3xl leading-none font-semibold tracking-tight tabular-nums',
-          emphasis && 'text-link',
-        )}
-      >
+      <dd className={cn('mt-4 text-display-sm leading-none tabular-nums', emphasis && 'text-link')}>
         {value}
       </dd>
     </>
   );
-  const shell =
-    'block rounded-lg border border-border-base bg-surface-raised p-4 transition-[border-color,box-shadow] duration-base ease-out';
+  const shell = 'block rounded-lg border border-border-base bg-surface-raised p-5';
   return href ? (
-    <Link href={href} className={cn(shell, 'hover:border-border-strong hover:shadow-sm')}>
+    <Link href={href} className={cn(shell, 'pressable liftable hover:border-border-strong')}>
       <dl>{body}</dl>
     </Link>
   ) : (

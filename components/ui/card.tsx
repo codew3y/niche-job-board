@@ -3,12 +3,12 @@ import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/ui/cn';
 
 /**
- * A card. Editorial leans on RULES before shadows: the default card is a raised surface with a
- * hairline, and elevation is reserved for things that float (menus, sheets, toasts). A page of
- * shadowed cards reads as a pile; a page of ruled ones reads as a document.
+ * A card: a flat raised surface with a hairline (minimalist-ui), no resting shadow. Elevation is
+ * reserved for things that float (menus, sheets, toasts). A page of shadowed cards reads as a
+ * pile; a page of ruled ones reads as a document.
  *
- * `interactive` is for a card that is itself a single link target — it gets a hover lift on
- * pointer devices only (a lift that sticks after a tap is the classic mobile tell).
+ * `interactive` is for a card that is itself a single link target: a 2px lift and a faint
+ * shadow on the spring (globals.css `liftable`), on hover-capable pointers only.
  */
 export function Card({
   className,
@@ -23,8 +23,7 @@ export function Card({
         tone === 'raised' && 'border-border-base bg-surface-raised',
         tone === 'sunken' && 'border-transparent bg-surface-sunken',
         tone === 'plain' && 'border-border-base',
-        interactive &&
-          'transition-[border-color,box-shadow,transform] duration-base ease-out hover:border-border-strong hover:shadow-sm',
+        interactive && 'liftable hover:border-border-strong',
         className,
       )}
       {...props}
@@ -45,7 +44,7 @@ export function CardHeader({
   as?: 'h2' | 'h3';
 }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-border-base px-5 py-4">
+    <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 border-b border-border-base px-6 py-5">
       <div className="min-w-0">
         <Heading className="font-semibold tracking-tight">{title}</Heading>
         {description && <p className="mt-0.5 text-sm text-text-subtle">{description}</p>}

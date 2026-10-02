@@ -1,4 +1,10 @@
-import { ArrowLeft, ChevronRight, Hourglass, Inbox, SearchX } from 'lucide-react';
+import {
+  ArrowLeft,
+  CaretRight as ChevronRight,
+  Hourglass,
+  Tray as Inbox,
+  MagnifyingGlassMinus as SearchX,
+} from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';

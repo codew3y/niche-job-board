@@ -1,7 +1,7 @@
 'use client';
 
 import { Drawer } from '@base-ui/react/drawer';
-import { X } from 'lucide-react';
+import { X } from '@phosphor-icons/react/ssr';
 import type { KeyboardEvent, ReactElement, ReactNode } from 'react';
 
 import { cn } from '@/lib/ui/cn';

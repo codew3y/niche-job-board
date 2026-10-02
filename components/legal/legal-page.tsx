@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -34,8 +34,8 @@ export function LegalPage({
       </nav>
 
       {/* The one eyebrow on the page, and it carries a fact (the date), not a category. */}
-      <header className="rounded-lg border border-border-base bg-surface-raised px-6 py-8 shadow-xs sm:px-10 sm:py-10">
-        <p className="text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
+      <header className="rounded-lg border border-border-base bg-surface-raised px-6 py-8 sm:px-10 sm:py-10">
+        <p className="font-mono text-xs text-text-subtle">
           Last updated <time dateTime={lastUpdated}>{formatDate(lastUpdated)}</time>
         </p>
         <h1 className="mt-3 text-display-md text-balance">{title}</h1>

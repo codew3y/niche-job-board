@@ -1,6 +1,6 @@
 'use client';
 
-import { Ban, Flag, ShieldCheck } from 'lucide-react';
+import { Prohibit as Ban, Flag, ShieldCheck } from '@phosphor-icons/react/ssr';
 import { useActionState, type ReactElement } from 'react';
 
 import { Button } from '@/components/ui/button';

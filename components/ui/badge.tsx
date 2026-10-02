@@ -4,12 +4,14 @@ import type { ComponentProps } from 'react';
 import { cn } from '@/lib/ui/cn';
 
 /**
- * A small status or category label. Every tone pairs a text-safe foreground with a quiet
- * background, and every pair is measured above 4.5:1 in both themes (DESIGN.md §4.1) — a badge
- * is text, so it gets the text standard, not the "it's only a label" one.
+ * A small status or category label: a pill (with avatars and toggles, the only full rounding the
+ * shape lock allows). Every tone pairs a text-safe foreground with a quiet pastel background,
+ * measured at 4.5:1 or better in both themes: a badge is text, so it gets the text standard.
+ * Sentence case, not minimalist-ui's uppercase: skill names like "Next.js" must read as
+ * themselves.
  */
 export const badgeStyles = cva(
-  'inline-flex items-center gap-1 rounded-sm font-medium whitespace-nowrap [&_svg]:size-3.5 [&_svg]:shrink-0',
+  'inline-flex items-center gap-1 rounded-full font-medium whitespace-nowrap [&_svg]:size-3.5 [&_svg]:shrink-0',
   {
     variants: {
       tone: {

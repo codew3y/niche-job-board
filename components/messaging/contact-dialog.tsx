@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageSquare } from 'lucide-react';
+import { ChatCenteredText as MessageSquare } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 import { useActionState } from 'react';
 

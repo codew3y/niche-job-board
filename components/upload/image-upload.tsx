@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState } from 'react';
 
-import { ImagePlus } from 'lucide-react';
+import { ImageSquare as ImagePlus } from '@phosphor-icons/react/ssr';
 
 import { Button, buttonStyles } from '@/components/ui/button';
 import { controlStyles } from '@/components/ui/field';

@@ -1,6 +1,6 @@
 'use client';
 
-import { Briefcase, Code2 } from 'lucide-react';
+import { Briefcase, Code as Code2 } from '@phosphor-icons/react/ssr';
 import { useActionState } from 'react';
 
 import { ActionForm } from '@/components/ui/action-form';

@@ -1,4 +1,11 @@
-import { ArrowRight, CheckCircle2, CircleAlert, Clock, Lock, type LucideIcon } from 'lucide-react';
+import type { Icon as PhosphorIcon } from '@phosphor-icons/react';
+import {
+  ArrowRight,
+  CheckCircle as CheckCircle2,
+  WarningCircle as CircleAlert,
+  Clock,
+  Lock,
+} from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 
 import { buttonStyles } from '@/components/ui/button';
@@ -31,7 +38,7 @@ export type ApplyState =
  */
 const STATUS: Record<
   string,
-  { copy: string; tone: 'success' | 'info' | 'neutral'; icon: LucideIcon }
+  { copy: string; tone: 'success' | 'info' | 'neutral'; icon: PhosphorIcon }
 > = {
   applied: {
     copy: 'Application sent. Waiting on the client.',

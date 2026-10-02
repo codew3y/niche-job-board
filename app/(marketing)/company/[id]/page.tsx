@@ -1,4 +1,10 @@
-import { ArrowLeft, BadgeCheck, Briefcase, Globe, Pencil } from 'lucide-react';
+import {
+  ArrowLeft,
+  SealCheck as BadgeCheck,
+  Briefcase,
+  Globe,
+  PencilSimple as Pencil,
+} from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -113,7 +119,7 @@ export default async function CompanyPage({ params }: Params) {
           aria-label="Company details"
           className="@3xl:col-start-2 @3xl:row-span-2 @3xl:row-start-1"
         >
-          <dl className="rounded-lg border border-border-base bg-surface-raised p-5 shadow-xs">
+          <dl className="rounded-lg border border-border-base bg-surface-raised p-5">
             <div className="flex items-center gap-3">
               <dt className="grid size-10 shrink-0 place-items-center rounded-md bg-primary-subtle text-primary">
                 <Briefcase aria-hidden="true" size={18} />

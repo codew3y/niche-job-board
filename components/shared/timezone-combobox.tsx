@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, Search, X } from 'lucide-react';
+import { CaretDown as ChevronDown, MagnifyingGlass as Search, X } from '@phosphor-icons/react/ssr';
 import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 
 import { controlStyles } from '@/components/ui/field';

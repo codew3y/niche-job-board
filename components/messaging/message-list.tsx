@@ -1,4 +1,4 @@
-import { MessageSquare } from 'lucide-react';
+import { ChatCenteredText as MessageSquare } from '@phosphor-icons/react/ssr';
 
 import type { ThreadMessage } from '@/lib/services/messaging';
 import { cn } from '@/lib/ui/cn';

@@ -1,7 +1,13 @@
 'use client';
 
 import { Menu } from '@base-ui/react/menu';
-import { ArrowLeftRight, LogOut, Pencil, Settings, UserRound } from 'lucide-react';
+import {
+  ArrowsLeftRight as ArrowLeftRight,
+  SignOut as LogOut,
+  PencilSimple as Pencil,
+  Gear as Settings,
+  User as UserRound,
+} from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 
 import { Avatar } from '@/components/ui/avatar';

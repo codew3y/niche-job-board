@@ -1,4 +1,8 @@
-import { Hourglass, SearchX, Sparkles } from 'lucide-react';
+import {
+  Hourglass,
+  MagnifyingGlassMinus as SearchX,
+  Sparkle as Sparkles,
+} from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -55,7 +59,7 @@ export default async function MatchesPage() {
       {!profile.is_published && (
         <p
           role="status"
-          className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-warning/40 bg-warning-subtle px-4 py-3 text-sm text-text text-pretty"
+          className="mb-6 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg bg-warning-subtle px-4 py-3 text-sm text-text"
         >
           <span>
             Your profile is a draft, so clients cannot find you. Matching still runs, but only you

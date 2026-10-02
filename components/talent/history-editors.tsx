@@ -1,6 +1,6 @@
 'use client';
 
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { PencilSimple as Pencil, Plus, Trash as Trash2 } from '@phosphor-icons/react/ssr';
 import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -161,7 +161,7 @@ function ExperienceForm({ row, onDone }: { row: ExperienceRow | null; onDone: ()
   return (
     <form
       action={action}
-      className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 shadow-xs sm:p-5"
+      className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 sm:p-5"
       noValidate
     >
       {row && <input type="hidden" name="id" value={row.id} />}
@@ -227,7 +227,7 @@ function EducationForm({ row, onDone }: { row: EducationRow | null; onDone: () =
   return (
     <form
       action={action}
-      className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 shadow-xs sm:p-5"
+      className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 sm:p-5"
       noValidate
     >
       {row && <input type="hidden" name="id" value={row.id} />}

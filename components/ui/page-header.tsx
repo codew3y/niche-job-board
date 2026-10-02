@@ -3,8 +3,9 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/ui/cn';
 
 /**
- * The page title. This is the ONE serif moment on an app screen (DESIGN.md §3.1): the display
- * face announces where you are, and everything below it is working UI in the sans.
+ * The page title on an app screen: the largest type on the screen, in Geist like everything else
+ * (hierarchy from size and weight, not a second face). An optional eyebrow sits above it in the
+ * mono face, sentence case, never the uppercase tracked label taste-skill counts as a tell.
  */
 export function PageHeader({
   title,
@@ -21,23 +22,19 @@ export function PageHeader({
 }) {
   return (
     <header
-      className={cn('mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-4', className)}
+      className={cn('mb-10 flex flex-wrap items-end justify-between gap-x-6 gap-y-4', className)}
     >
       <div className="min-w-0 max-w-2xl">
-        {eyebrow && (
-          <p className="mb-2 text-xs font-semibold tracking-eyebrow text-text-subtle uppercase">
-            {eyebrow}
-          </p>
-        )}
-        <h1 className="font-semibold text-display-sm text-balance">{title}</h1>
-        {subtitle && <div className="mt-2 text-text-muted text-pretty">{subtitle}</div>}
+        {eyebrow && <p className="mb-3 font-mono text-xs text-text-subtle">{eyebrow}</p>}
+        <h1 className="text-display-sm">{title}</h1>
+        {subtitle && <div className="mt-3 max-w-[60ch] text-text-muted">{subtitle}</div>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
   );
 }
 
-/** A section heading inside a page — sans, because it is structure, not a title moment. */
+/** A section heading inside a page: one step below the page title. */
 export function SectionHeading({
   title,
   description,
@@ -50,9 +47,9 @@ export function SectionHeading({
   id?: string;
 }) {
   return (
-    <div className="mb-4 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
       <div className="min-w-0">
-        <h2 id={id} className="text-lg font-semibold tracking-tight">
+        <h2 id={id} className="text-xl font-semibold tracking-tight">
           {title}
         </h2>
         {description && <p className="mt-0.5 text-sm text-text-subtle">{description}</p>}

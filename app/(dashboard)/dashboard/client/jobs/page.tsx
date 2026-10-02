@@ -1,4 +1,4 @@
-import { Briefcase, Copy, Pencil, Plus } from 'lucide-react';
+import { Briefcase, Copy, PencilSimple as Pencil, Plus } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';

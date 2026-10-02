@@ -1,6 +1,6 @@
 'use client';
 
-import { TriangleAlert } from 'lucide-react';
+import { Warning as TriangleAlert } from '@phosphor-icons/react/ssr';
 import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/button';

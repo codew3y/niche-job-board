@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 
 import { ExternalLink } from '@/components/shared/external-link';
@@ -15,8 +15,7 @@ import { cn } from '@/lib/ui/cn';
  * sentence itself in full-contrast body text at a readable size, and an optional small label
  * ("Why it fits", "Outcome") so the block says what it is without relying on the rule.
  *
- * In a list it stays in the sans, because a column of display type is slow to scan
- * (DESIGN.md §9, J2).
+ * In a list it stays at body size: a column of display type is slow to scan.
  */
 export function MatchReason({
   children,
@@ -29,14 +28,9 @@ export function MatchReason({
   label?: string;
 }) {
   return (
-    <div className={cn('border-l-2 border-accent py-0.5 pl-3.5', className)}>
-      {label && <p className="text-xs font-semibold text-text-muted">{label}</p>}
-      <p
-        className={cn(
-          'max-w-prose text-[0.9375rem] leading-relaxed text-text text-pretty',
-          label && 'mt-0.5',
-        )}
-      >
+    <div className={cn('border-l-2 border-accent py-0.5 pl-4', className)}>
+      {label && <p className="font-mono text-xs text-text-subtle">{label}</p>}
+      <p className={cn('max-w-prose text-base leading-relaxed text-text', label && 'mt-0.5')}>
         {children}
       </p>
     </div>
@@ -77,7 +71,7 @@ export function TalentMatchItem({ match }: { match: TalentMatch }) {
   const strong = match.score !== null && match.score >= STRONG_MATCH_SCORE;
 
   return (
-    <li className="relative px-4 py-5 transition-colors duration-fast ease-out hover:bg-surface-sunken/60 sm:px-5">
+    <li className="relative px-5 py-6 transition-colors duration-fast ease-out hover:bg-surface-sunken/60 sm:px-6">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h3 className="font-semibold text-balance">
@@ -138,7 +132,7 @@ export function CandidateMatchItem({ match }: { match: CandidateMatch }) {
         : 'No work shown yet';
 
   return (
-    <li className="px-4 py-5 sm:px-5">
+    <li className="px-5 py-6 sm:px-6">
       <div className="flex items-start gap-3.5">
         <Avatar name={match.headline} className="hidden sm:grid" />
         <div className="min-w-0 flex-1">

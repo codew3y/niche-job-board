@@ -1,6 +1,6 @@
 'use client';
 
-import { Loader2, Search, X } from 'lucide-react';
+import { CircleNotch as Loader2, MagnifyingGlass as Search, X } from '@phosphor-icons/react/ssr';
 
 import { controlStyles } from '@/components/ui/field';
 import { cn } from '@/lib/ui/cn';

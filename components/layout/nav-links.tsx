@@ -45,19 +45,19 @@ export function NavLinks({ items, unread }: { items: NavItem[]; unread: number }
             aria-current={isActive ? 'page' : undefined}
             className={cn(
               // Phones: a tab, icon above a small label.
-              'relative flex min-h-16 flex-1 flex-col items-center justify-center gap-1 rounded-md text-[0.6875rem] leading-none transition-colors duration-fast ease-out',
+              'relative flex min-h-16 flex-1 flex-col items-center justify-center gap-1 rounded-md text-2xs leading-none transition-colors duration-fast ease-out',
               // md rail and lg sidebar: a row.
               'md:h-10 md:min-h-0 md:flex-none md:flex-row md:gap-3 md:text-sm md:leading-normal lg:justify-start lg:px-3',
               '[&_svg]:size-5 [&_svg]:shrink-0 md:[&_svg]:size-[1.125rem]',
               isActive
-                ? 'font-semibold text-primary md:bg-primary-subtle'
+                ? 'font-medium text-text md:bg-primary-subtle'
                 : 'text-text-muted hover:text-text md:hover:bg-surface-sunken',
             )}
           >
             <span aria-hidden="true">{icon}</span>
             <span className="md:sr-only lg:not-sr-only">{label}</span>
             {showBadge && (
-              <span className="absolute top-2 left-[calc(50%+0.375rem)] min-w-4 rounded-full bg-accent px-1 text-center text-[0.6875rem] leading-4 font-semibold text-accent-text tabular-nums md:top-1 md:right-1 md:left-auto lg:static lg:ml-auto">
+              <span className="absolute top-2 left-[calc(50%+0.375rem)] min-w-4 rounded-full bg-accent px-1 text-center text-2xs leading-4 font-medium text-accent-text tabular-nums md:top-1 md:right-1 md:left-auto lg:static lg:ml-auto">
                 {unread > 99 ? '99+' : unread}
                 <span className="sr-only"> unread messages</span>
               </span>

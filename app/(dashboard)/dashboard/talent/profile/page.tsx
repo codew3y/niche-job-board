@@ -1,4 +1,4 @@
-import { Lightbulb } from 'lucide-react';
+import { Lightbulb } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -145,7 +145,7 @@ export default async function ProfilePage() {
             feeds. The publish control comes FIRST and is never conditional. Putting advice
             above a button people are entitled to press reads as a gate even when it is not
             one. */}
-        <Card className="p-5 shadow-xs sm:p-6">
+        <Card className="p-5 sm:p-6">
           <ActionForm
             action={togglePublish}
             success={profile.is_published ? 'Profile unpublished' : 'Profile published'}

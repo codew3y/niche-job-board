@@ -1,4 +1,9 @@
-import { Briefcase, House, MessageSquare, Search } from 'lucide-react';
+import {
+  Briefcase,
+  House,
+  ChatCenteredText as MessageSquare,
+  MagnifyingGlass as Search,
+} from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 

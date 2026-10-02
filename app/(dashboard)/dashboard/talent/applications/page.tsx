@@ -1,4 +1,4 @@
-import { Send } from 'lucide-react';
+import { PaperPlaneTilt as Send } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';

@@ -1,4 +1,8 @@
-import { ChevronRight, UserRoundCog, Users } from 'lucide-react';
+import {
+  CaretRight as ChevronRight,
+  UserGear as UserRoundCog,
+  Users,
+} from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';

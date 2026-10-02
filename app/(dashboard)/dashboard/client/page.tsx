@@ -1,4 +1,12 @@
-import { ArrowRight, Bookmark, Briefcase, Hourglass, Inbox, Plus, UsersRound } from 'lucide-react';
+import {
+  ArrowRight,
+  BookmarkSimple as Bookmark,
+  Briefcase,
+  Hourglass,
+  Tray as Inbox,
+  Plus,
+  Users as UsersRound,
+} from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
