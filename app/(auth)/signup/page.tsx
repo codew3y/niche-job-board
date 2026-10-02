@@ -41,6 +41,7 @@ export default async function SignupPage({
 
   return (
     <AuthCard
+      photo="signup"
       title={intent ? copy[intent].title : 'Create an account'}
       subtitle={
         intent
@@ -50,7 +51,7 @@ export default async function SignupPage({
       footer={
         <>
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-link underline underline-offset-4">
+          <Link href="/login" className="prose-link font-medium text-text">
             Sign in
           </Link>
         </>

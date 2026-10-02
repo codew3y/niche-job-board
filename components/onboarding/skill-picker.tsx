@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, X } from 'lucide-react';
+import { MagnifyingGlass as Search, X } from '@phosphor-icons/react/ssr';
 import { useId, useMemo, useState, type KeyboardEvent } from 'react';
 
 import { controlStyles } from '@/components/ui/field';
@@ -105,7 +105,7 @@ export function SkillPicker({
         <input key={id} type="hidden" name={name} value={id} />
       ))}
 
-      <label htmlFor={`${uid}-input`} className="block text-sm font-semibold text-text">
+      <label htmlFor={`${uid}-input`} className="block text-sm font-medium text-text">
         Skills
       </label>
 

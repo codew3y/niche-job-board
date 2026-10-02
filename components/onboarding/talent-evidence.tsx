@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, Info } from 'lucide-react';
+import { CheckCircle as CheckCircle2, Info } from '@phosphor-icons/react/ssr';
 import { useActionState } from 'react';
 
 import { TagList } from '@/components/ui/badge';
@@ -122,11 +122,11 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
         </div>
 
         {items.length > 0 && (
-          <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised shadow-xs">
+          <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
             {items.map((item) => (
               <li key={item.id} className="flex items-start justify-between gap-4 p-4 sm:p-5">
                 <div className="min-w-0">
-                  <p className="font-semibold text-text">{item.title}</p>
+                  <p className="font-medium text-text">{item.title}</p>
                   <p className="mt-0.5 line-clamp-2 text-sm text-text-muted">{item.description}</p>
                   <TagList
                     className="mt-2.5"
@@ -151,7 +151,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
           className="space-y-5 rounded-lg border border-dashed border-border-strong bg-surface-raised/50 p-5 sm:p-7"
           noValidate
         >
-          <h3 className="font-semibold text-text">Add a project</h3>
+          <h3 className="font-medium text-text">Add a project</h3>
           <Field
             label="Project title"
             name="title"

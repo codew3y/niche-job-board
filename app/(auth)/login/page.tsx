@@ -21,10 +21,11 @@ export default async function LoginPage({
     <AuthCard
       title="Sign in"
       subtitle="Welcome back."
+      photo="login"
       footer={
         <>
           New here?{' '}
-          <Link href="/signup" className="font-semibold text-link underline underline-offset-4">
+          <Link href="/signup" className="prose-link font-medium text-text">
             Create an account
           </Link>
         </>

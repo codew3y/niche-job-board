@@ -16,7 +16,14 @@ import { cn } from '@/lib/ui/cn';
  * page down rather than trapping focus, so there is nothing to escape from. It closes when a
  * link in it is followed, and on Escape.
  */
-export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) {
+export function MobileMenu({
+  dashboardHref,
+  current,
+}: {
+  dashboardHref: string | null;
+  /** The auth page being shown, whose own button is left out. */
+  current?: 'login' | 'signup';
+}) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const pathname = usePathname();
@@ -79,20 +86,24 @@ export function MobileMenu({ dashboardHref }: { dashboardHref: string | null }) 
             </Link>
           ) : (
             <>
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className={buttonStyles({ variant: 'secondary', className: 'w-full' })}
-              >
-                Log in
-              </Link>
-              <Link
-                href="/signup"
-                onClick={() => setOpen(false)}
-                className={buttonStyles({ className: 'w-full' })}
-              >
-                Sign up
-              </Link>
+              {current !== 'login' && (
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className={buttonStyles({ variant: 'secondary', className: 'w-full' })}
+                >
+                  Log in
+                </Link>
+              )}
+              {current !== 'signup' && (
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className={buttonStyles({ className: 'w-full' })}
+                >
+                  Sign up
+                </Link>
+              )}
             </>
           )}
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText } from 'lucide-react';
+import { FileText } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 import { useActionState, useState } from 'react';
 
@@ -199,7 +199,7 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
 
   return (
     <div className="space-y-8">
-      <article className="rounded-lg border border-border-base bg-surface-raised p-5 shadow-xs sm:p-7">
+      <article className="rounded-lg border border-border-base bg-surface-raised p-5 sm:p-7">
         <Badge tone="neutral">Preview</Badge>
         <h2 className="mt-3 font-display text-2xl font-semibold text-balance">
           {str(job, 'title')}

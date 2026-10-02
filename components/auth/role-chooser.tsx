@@ -1,6 +1,6 @@
 'use client';
 
-import { Briefcase, Check, Code2 } from 'lucide-react';
+import { Briefcase, Check, Code } from '@phosphor-icons/react';
 import { useActionState, useState } from 'react';
 
 import { FormError } from '@/components/ui/field';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/ui/cn';
 const ROLES = [
   {
     value: 'talent',
-    icon: Code2,
+    icon: Code,
     title: 'I’m looking for work',
     body: 'Build a profile around what you’ve shipped and get matched to briefs that fit it.',
   },
@@ -39,10 +39,9 @@ export function RoleChooser() {
               key={value}
               className={cn(
                 'pressable flex cursor-pointer items-start gap-4 rounded-lg border p-5 select-none',
-                'transition-[border-color,background-color,box-shadow] duration-fast ease-out',
                 'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus',
                 checked
-                  ? 'border-primary bg-primary-subtle shadow-xs'
+                  ? 'border-primary bg-primary-subtle'
                   : 'border-control bg-surface-raised hover:border-border-strong hover:bg-surface-sunken',
               )}
             >
@@ -64,8 +63,8 @@ export function RoleChooser() {
                 <Icon size={18} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block font-semibold text-text">{title}</span>
-                <span className="mt-1 block text-sm text-text-muted text-pretty">{body}</span>
+                <span className="block font-medium text-text">{title}</span>
+                <span className="mt-1 block text-sm text-text-muted">{body}</span>
               </span>
               {/* The radio mark: the selection is shown by shape as well as colour. */}
               <span
@@ -75,7 +74,7 @@ export function RoleChooser() {
                   checked ? 'border-primary bg-primary text-primary-text' : 'border-control',
                 )}
               >
-                {checked && <Check size={12} strokeWidth={3} />}
+                {checked && <Check size={12} weight="bold" />}
               </span>
             </label>
           );

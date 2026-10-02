@@ -1,4 +1,4 @@
-import { MailCheck } from 'lucide-react';
+import { EnvelopeSimple } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -17,11 +17,11 @@ export default function VerifyPage() {
           aria-hidden="true"
           className="grid size-10 shrink-0 place-items-center rounded-md bg-primary-subtle text-primary"
         >
-          <MailCheck size={20} />
+          <EnvelopeSimple size={20} />
         </span>
-        <p className="text-sm text-text-muted text-pretty">
+        <p className="text-sm text-text-muted">
           Nothing arrived? Check spam, or{' '}
-          <Link href="/signup" className="font-semibold text-link underline underline-offset-4">
+          <Link href="/signup" className="prose-link font-medium text-text">
             try again
           </Link>
           . Signing in with Google or GitHub skips this step entirely.

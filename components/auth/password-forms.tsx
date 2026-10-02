@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Check, MailCheck } from 'lucide-react';
+import { Check, EnvelopeSimple } from '@phosphor-icons/react';
 import { useActionState } from 'react';
 
 import { buttonStyles } from '@/components/ui/button';
@@ -19,7 +19,7 @@ export function ResetRequestForm() {
           aria-hidden="true"
           className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-raised text-success"
         >
-          <MailCheck size={20} />
+          <EnvelopeSimple size={20} />
         </span>
         <div className="min-w-0">
           <p className="font-semibold text-text">Check your email.</p>

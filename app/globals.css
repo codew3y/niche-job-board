@@ -406,6 +406,15 @@
 }
 
 /*
+ * The soft halo around a focused text control: the accent tint as a 3px ring outside the
+ * border. The border itself turns the focus colour (3:1 or better), so the halo is decoration
+ * on top of a compliant indicator, never the indicator on its own.
+ */
+@utility focus-halo {
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+/*
  * The nested media frame (soft-skill "double bezel", used ONLY around photographs and portfolio
  * media): an outer tray with 12px corners and 6px padding, and the picture inside it with the
  * concentric radius, 12px minus the padding, so the two curves stay parallel.

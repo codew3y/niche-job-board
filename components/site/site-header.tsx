@@ -22,9 +22,11 @@ import { getSessionUser } from '@/lib/supabase/session';
  * backdrop-filter is unsupported. 60px tall, one line from `lg` (nav cap 80px).
  *
  * Someone already signed in gets one "Go to dashboard" button instead of the two auth buttons:
- * offering a signed-in person "Sign up" reads as the product forgetting them.
+ * offering a signed-in person "Sign up" reads as the product forgetting them. On /login and
+ * /signup (`current`) the button for the page you are on is dropped: a "Sign up" button above
+ * the sign-up form is a second call to action for the same thing (taste-skill).
  */
-export async function SiteHeader() {
+export async function SiteHeader({ current }: { current?: 'login' | 'signup' } = {}) {
   const signedIn = Boolean(await getSessionUser());
   const dashboardHref = signedIn ? '/dashboard' : null;
 
@@ -52,12 +54,16 @@ export async function SiteHeader() {
               </Link>
             ) : (
               <>
-                <Link href="/login" className={buttonStyles({ variant: 'ghost', size: 'sm' })}>
-                  Log in
-                </Link>
-                <Link href="/signup" className={buttonStyles({ size: 'sm' })}>
-                  Sign up
-                </Link>
+                {current !== 'login' && (
+                  <Link href="/login" className={buttonStyles({ variant: 'ghost', size: 'sm' })}>
+                    Log in
+                  </Link>
+                )}
+                {current !== 'signup' && (
+                  <Link href="/signup" className={buttonStyles({ size: 'sm' })}>
+                    Sign up
+                  </Link>
+                )}
               </>
             )}
           </div>
@@ -66,7 +72,7 @@ export async function SiteHeader() {
               theme switch is used on its own, and burying it a tap deep would hide it. */}
           <div className="ml-auto flex items-center gap-1 lg:hidden">
             <ThemeToggle />
-            <MobileMenu dashboardHref={dashboardHref} />
+            <MobileMenu dashboardHref={dashboardHref} current={current} />
           </div>
         </div>
       </div>

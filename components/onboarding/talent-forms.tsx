@@ -18,7 +18,7 @@ export const CURRENCIES = ['USD', 'EUR', 'GBP', 'CHF'] as const;
 /** The step's form body: fields in a card, the action row below it. */
 export function StepCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="space-y-6 rounded-lg border border-border-base bg-surface-raised p-5 shadow-xs sm:p-7">
+    <div className="space-y-6 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-7">
       {children}
     </div>
   );

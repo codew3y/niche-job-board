@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react';
+import { CaretDown } from '@phosphor-icons/react/ssr';
 import type { ComponentProps, ReactNode } from 'react';
 
 import { cn } from '@/lib/ui/cn';
@@ -22,7 +22,7 @@ import { cn } from '@/lib/ui/cn';
 export const controlStyles = cn(
   'w-full rounded-md border bg-surface-raised text-text placeholder:text-text-subtle',
   'transition-[border-color,box-shadow] duration-fast ease-out',
-  'focus-visible:border-focus focus-visible:shadow-[0_0_0_3px_var(--color-accent-subtle)] focus-visible:outline-none',
+  'focus-visible:focus-halo focus-visible:border-focus focus-visible:outline-none',
   'disabled:cursor-not-allowed disabled:opacity-60',
 );
 
@@ -68,7 +68,7 @@ export function FieldShell({
     <div className={cn('space-y-1.5', className)}>
       <label
         htmlFor={fieldId}
-        className={cn('block text-sm font-semibold text-text', srOnlyLabel && 'sr-only')}
+        className={cn('block text-sm font-medium text-text', srOnlyLabel && 'sr-only')}
       >
         {label}
         {optional && <span className="ml-1.5 font-normal text-text-subtle">Optional</span>}
@@ -219,7 +219,7 @@ export function SelectField({
           >
             {children}
           </select>
-          <ChevronDown
+          <CaretDown
             aria-hidden="true"
             size={16}
             className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-text-subtle"
@@ -254,7 +254,7 @@ export function ChoiceChips({
 }) {
   return (
     <fieldset>
-      <legend className="mb-2 text-sm font-semibold">{legend}</legend>
+      <legend className="mb-2 text-sm font-medium">{legend}</legend>
       <div className="flex flex-wrap gap-2">
         {options.map(([v, l]) => (
           <label
@@ -287,10 +287,7 @@ export function ChoiceChips({
 /** A form-level error — the message an action returns when no single field is at fault. */
 export function FormError({ children }: { children: ReactNode }) {
   return (
-    <p
-      role="alert"
-      className="rounded-md border border-danger/25 bg-danger-subtle px-3.5 py-3 text-sm text-danger"
-    >
+    <p role="alert" className="rounded-md bg-danger-subtle px-3.5 py-3 text-sm text-danger">
       {children}
     </p>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, CircleDashed } from 'lucide-react';
+import { Check, CircleDashed } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 import { useActionState } from 'react';
 
@@ -37,7 +37,7 @@ export function TalentReview({
     <div className="space-y-8">
       {/* The checklist names exactly what is missing, rather than disabling a button and leaving
           the user to guess (§7, docs/components.md). */}
-      <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised shadow-xs">
+      <ul className="divide-y divide-border-base overflow-hidden rounded-lg border border-border-base bg-surface-raised">
         {checks.map((check) => (
           <li
             key={check.label}
@@ -53,9 +53,9 @@ export function TalentReview({
                     : 'border border-control text-text-subtle',
                 )}
               >
-                {check.done ? <Check size={16} strokeWidth={2.5} /> : <CircleDashed size={16} />}
+                {check.done ? <Check size={16} weight="bold" /> : <CircleDashed size={16} />}
               </span>
-              <span className={check.done ? 'text-text-muted' : 'font-semibold text-text'}>
+              <span className={check.done ? 'text-text-muted' : 'font-medium text-text'}>
                 {check.label}
               </span>
               {!check.done && <span className="sr-only">(still needed)</span>}
@@ -65,7 +65,7 @@ export function TalentReview({
             ) : (
               <Link
                 href={check.fix}
-                className="inline-flex min-h-10 shrink-0 items-center rounded-md px-2 text-sm font-semibold text-link hover:underline"
+                className="inline-flex min-h-10 shrink-0 items-center rounded-md px-2 text-sm font-medium text-link hover:underline"
               >
                 Add<span className="sr-only"> {check.label.toLowerCase()}</span>
               </Link>
