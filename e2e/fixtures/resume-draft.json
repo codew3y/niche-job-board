@@ -1,0 +1,48 @@
+{
+  "headline": "Full-stack developer, payments and integrations",
+  "summary": "I build checkout and billing systems for small SaaS teams, from the database up. Most of my work is moving payments onto Stripe without losing history.",
+  "website": "https://e2e-import.example.dev",
+  "skills": ["TypeScript", "postgres", "Docker", "COBOL 74"],
+  "experience": [
+    {
+      "role": "Senior Developer",
+      "company": "Ledgerline",
+      "start": "2021-03",
+      "current": true,
+      "description": "Led the billing rebuild."
+    },
+    {
+      "role": "Junior Developer",
+      "company": "Undated Ltd",
+      "description": "No dates on the resume."
+    }
+  ],
+  "education": [
+    {
+      "school": "University of the Philippines Diliman",
+      "degree": "BS Computer Science",
+      "startYear": 2012,
+      "endYear": 2016
+    }
+  ],
+  "projects": [
+    {
+      "title": "Imported subscription migration",
+      "description": "Moved 4,000 subscriptions from a homegrown billing system onto Stripe Billing, keeping invoice history.",
+      "role": "Lead developer",
+      "outcome": "Failed payments fell from 4.1% to 0.6%.",
+      "techStack": ["TypeScript", "Stripe"],
+      "links": ["https://github.com/example/billing", "javascript:alert(1)"]
+    },
+    { "title": "Tiny thing", "description": "Too short." }
+  ],
+  "certifications": [
+    {
+      "name": "Imported Cloud Practitioner",
+      "issuer": "Amazon Web Services",
+      "issued": "2023-05",
+      "url": "https://www.credly.com/badges/e2e-import"
+    },
+    { "name": "Undated Certificate", "issuer": "Somewhere" }
+  ]
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import { CheckCircle as CheckCircle2, Info } from '@phosphor-icons/react/ssr';
+import Link from 'next/link';
 import { useActionState } from 'react';
 
 import { ConnectedAccounts } from '@/components/talent/connected-accounts';
@@ -114,6 +115,14 @@ export function TalentEvidenceStep({
           <p className="mt-1 text-sm text-text-muted text-pretty">
             Matching reads these most closely. What you did, and what changed because of it, matters
             more than the stack list.
+          </p>
+          <p className="mt-2 text-sm">
+            <Link
+              href="/dashboard/talent/profile/import?returnTo=/onboarding/talent/portfolio"
+              className="inline-flex min-h-10 items-center font-semibold text-link hover:underline"
+            >
+              Have a resume? Import it to fill this in faster
+            </Link>
           </p>
         </div>
 

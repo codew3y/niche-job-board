@@ -51,6 +51,14 @@ const nextConfig: NextConfig = {
       { source: '/talent', destination: '/browse?type=developers', permanent: false },
     ];
   },
+  experimental: {
+    serverActions: {
+      // Resume import uploads a PDF through a server action (lib/actions/resume-import.ts).
+      // The default 1 MB is too small for a resume; 4 MB stays under Vercel's 4.5 MB request
+      // limit, and lib/import/extract.ts refuses anything over 3 MB with a clear message.
+      bodySizeLimit: '4mb',
+    },
+  },
   images: {
     // AVIF first, WebP for everything that cannot take it. Both are roughly half the bytes of
     // the JPEG/PNG originals at the same quality.

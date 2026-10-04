@@ -143,6 +143,15 @@ export default function PrivacyPage() {
           publish and nothing else.
         </p>
         <p>
+          <strong>One exception you start yourself: importing a resume.</strong> If you use
+          &ldquo;Import from resume&rdquo;, we read the text of the PDF you upload, remove email
+          addresses and phone numbers, and send the rest to Gemini to sort into profile sections.
+          This happens only when you press the button, after you confirm it, and it can include text
+          from a profile you have not published yet. The file itself is never stored, and nothing is
+          added to your profile until you choose what to keep. The free-tier note below applies to
+          this text too.
+        </p>
+        <p>
           {/*
             Stated plainly rather than buried. This is the cost of the free tier, it is a real
             trade, and someone deciding what to put in a public bio deserves to know it before
@@ -152,9 +161,9 @@ export default function PrivacyPage() {
             We use Google&rsquo;s free tier, and Google states that content sent to it may be used
             to improve their products.
           </strong>{' '}
-          In practice that means the public text described above may be used in training. Everything
-          private to you — your messages, your applications, your email — is never part of it,
-          because it is never sent.
+          In practice that means the public text described above, and the text of a resume you
+          import, may be used in training. Everything else private to you — your messages, your
+          applications, your email — is never part of it, because it is never sent.
         </p>
         <p className="text-text-muted">
           If matching is unavailable, nothing else breaks: profiles, jobs, applications and messages
@@ -189,7 +198,8 @@ export default function PrivacyPage() {
       <Section heading="Retention">
         <p>
           Data stays until you delete it or delete your account. We do not currently expire old
-          jobs, applications or messages automatically.
+          jobs, applications or messages automatically. A resume you import is not kept at all: it
+          is read once and discarded.
         </p>
       </Section>
 

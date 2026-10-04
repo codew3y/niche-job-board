@@ -61,5 +61,11 @@ export default defineConfig({
         url: 'http://127.0.0.1:3100/api/health',
         reuseExistingServer: !process.env.CI,
         timeout: 300_000,
+        // Resume import cannot call Gemini in tests: this fixed draft stands in for the model's
+        // answer (lib/import/extract.ts; ignored on Vercel). Everything else runs for real.
+        env: {
+          ...(process.env as Record<string, string>),
+          RESUME_IMPORT_FIXTURE: `${process.cwd()}/e2e/fixtures/resume-draft.json`,
+        },
       },
 });

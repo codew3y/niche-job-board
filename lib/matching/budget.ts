@@ -20,7 +20,7 @@ import { createServiceClient } from '../supabase/server';
  * available.
  */
 
-export type AiCallKind = 'embedding' | 'rerank';
+export type AiCallKind = 'embedding' | 'rerank' | 'resume_import';
 
 /**
  * Daily limits, deliberately under the provider's.
@@ -35,6 +35,9 @@ export type AiCallKind = 'embedding' | 'rerank';
 export const DAILY_LIMITS: Record<AiCallKind, number> = {
   embedding: 500,
   rerank: 200,
+  // Resume import (migration 0023): its own site-wide cap, so imports can never use up the
+  // matching budget. Each person is also limited per day (lib/import/extract.ts).
+  resume_import: 100,
 };
 
 /**
