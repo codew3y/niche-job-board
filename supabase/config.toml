@@ -455,6 +455,6 @@ secret = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"
 # Connect" product → redirect URL <supabase url>/auth/v1/callback. Then set the two env vars
 # and switch this on (locally) or enable LinkedIn (OIDC) in the dashboard (hosted).
 [auth.external.linkedin_oidc]
-enabled = false
+enabled = true
 client_id = "env(SUPABASE_AUTH_EXTERNAL_LINKEDIN_OIDC_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_EXTERNAL_LINKEDIN_OIDC_SECRET)"
