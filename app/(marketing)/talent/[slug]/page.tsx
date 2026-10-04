@@ -1,4 +1,4 @@
-import { ArrowLeft } from '@phosphor-icons/react/ssr';
+import { ArrowLeft, SealCheck } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 
 import { jsonLdScript } from '@/lib/seo/json-ld';
@@ -96,7 +96,11 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
     p.years_experience ? ['Experience', `${p.years_experience} years`] : null,
     p.timezone ? ['Time zone', p.timezone] : null,
   ].filter(Boolean) as [string, React.ReactNode][];
-  const hasLinks = p.github_url || p.linkedin_url;
+  // Only connected accounts are shown (migration 0021): a GitHub or LinkedIn link on a profile
+  // is one its owner signed in to prove. Typed links from before connecting stay stored, unshown.
+  const github = p.github_connected_at ? p.github_url : null;
+  const linkedin = p.linkedin_connected_at ? p.linkedin_url : null;
+  const hasLinks = github || linkedin;
 
   return (
     <div className="mx-auto w-full flex-1 py-8 sm:py-12">
@@ -115,7 +119,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
                     url: `${siteUrl()}/talent/${p.slug}`,
                     // sameAs is how a search engine connects this profile to the same person
                     // elsewhere — the external links are the point, not decoration (§9).
-                    sameAs: [p.website_url, p.github_url, p.linkedin_url].filter(Boolean),
+                    sameAs: [p.website_url, github, linkedin].filter(Boolean),
                     knowsAbout: p.talent_skills.map((s) => s.skills?.name).filter(Boolean),
                   },
                 }
@@ -149,24 +153,31 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
           <Avatar name={p.headline} size="lg" />
           <h1 className="mt-6 max-w-[22ch] text-display-md">{p.headline}</h1>
           {hasLinks && (
-            <p className="mt-4 flex gap-2">
-              {/* Linked accounts as icons; the text name is kept for screen readers. */}
-              <ExternalLink
-                href={p.github_url}
-                bare
-                className="pressable grid size-10 place-items-center rounded-md border border-control bg-surface-raised text-text-muted hover:bg-surface-sunken hover:text-text"
-              >
-                <GitHubIcon />
-                <span className="sr-only">GitHub</span>
-              </ExternalLink>
-              <ExternalLink
-                href={p.linkedin_url}
-                bare
-                className="pressable grid size-10 place-items-center rounded-md border border-control bg-surface-raised text-text-muted hover:bg-surface-sunken hover:text-text"
-              >
-                <LinkedInIcon />
-                <span className="sr-only">LinkedIn</span>
-              </ExternalLink>
+            <p className="mt-4 flex flex-wrap gap-2">
+              {/* Connected accounts: brand icon, name, and a "Connected" mark, so a client can
+                  tell these were signed in to, not typed (migration 0021). */}
+              {(
+                [
+                  [github, 'GitHub', <GitHubIcon key="gh" />],
+                  [linkedin, 'LinkedIn', <LinkedInIcon key="li" />],
+                ] as const
+              ).map(([href, label, icon]) =>
+                href ? (
+                  <ExternalLink
+                    key={label}
+                    href={href}
+                    bare
+                    className="pressable inline-flex min-h-10 items-center gap-2 rounded-md border border-control bg-surface-raised px-3 text-sm font-medium text-text hover:bg-surface-sunken"
+                  >
+                    {icon}
+                    {label}
+                    <span className="inline-flex items-center gap-1 text-xs font-normal text-success">
+                      <SealCheck aria-hidden="true" size={14} weight="fill" />
+                      Connected
+                    </span>
+                  </ExternalLink>
+                ) : null,
+              )}
             </p>
           )}
         </header>

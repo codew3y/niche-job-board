@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { PortfolioManager } from '@/components/portfolio/portfolio-manager';
 import { EducationEditor, ExperienceEditor } from '@/components/talent/history-editors';
 import { ProfileEditor, SkillsEditor } from '@/components/talent/profile-editor';
+import { getConnections } from '@/lib/services/connections';
 import { ActionForm } from '@/components/ui/action-form';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -30,6 +31,7 @@ export const metadata: Metadata = { title: 'Edit profile' };
 export default async function ProfilePage() {
   const viewer = await requireViewer();
   const supabase = await createClient();
+  const connections = await getConnections();
 
   const { data: profile } = await supabase
     .from('talent_profiles')
@@ -99,7 +101,7 @@ export default async function ProfilePage() {
   ] as const;
 
   const body: Record<(typeof sections)[number]['id'], React.ReactNode> = {
-    details: <ProfileEditor profile={profile} />,
+    details: <ProfileEditor profile={profile} connections={connections} />,
     skills: (
       <SkillsEditor options={skills ?? []} initial={(mySkills ?? []).map((s) => s.skill_id)} />
     ),

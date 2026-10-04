@@ -3,6 +3,9 @@
 import { CheckCircle as CheckCircle2, Info } from '@phosphor-icons/react/ssr';
 import { useActionState } from 'react';
 
+import { ConnectedAccounts } from '@/components/talent/connected-accounts';
+import type { Connections } from '@/lib/services/connections';
+
 import { TagList } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Field, FormError, TextareaField } from '@/components/ui/field';
@@ -32,7 +35,15 @@ const str = (p: Profile, k: string) => (p?.[k] as string | null) ?? '';
  * cannot read produces a weaker match, and saying so is more honest and more persuasive than
  * blocking publish.
  */
-export function TalentEvidenceStep({ profile, items }: { profile: Profile; items: Item[] }) {
+export function TalentEvidenceStep({
+  profile,
+  items,
+  connections,
+}: {
+  profile: Profile;
+  items: Item[];
+  connections: Connections;
+}) {
   const [linkState, linkAction] = useActionState<ActionResult | null, FormData>(
     saveTalentEvidence,
     null,
@@ -84,30 +95,15 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
             name="websiteUrl"
             type="url"
             inputMode="url"
-            placeholder="https://mariasantos.dev"
+            placeholder="Portfolio Link"
             defaultValue={str(profile, 'website_url')}
             errors={linkFields?.websiteUrl}
           />
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <Field
-              label="GitHub"
-              name="githubUrl"
-              type="url"
-              inputMode="url"
-              placeholder="https://github.com/mariasantos"
-              defaultValue={str(profile, 'github_url')}
-              errors={linkFields?.githubUrl}
-            />
-            <Field
-              label="LinkedIn"
-              name="linkedinUrl"
-              type="url"
-              inputMode="url"
-              placeholder="https://www.linkedin.com/in/mariasantos"
-              defaultValue={str(profile, 'linkedin_url')}
-              errors={linkFields?.linkedinUrl}
-            />
-          </div>
+          <ConnectedAccounts
+            connections={connections}
+            linkedinUrl={str(profile, 'linkedin_url')}
+            linkedinErrors={linkFields?.linkedinUrl}
+          />
         </StepCard>
         <Submit label="Save links and continue" />
       </form>

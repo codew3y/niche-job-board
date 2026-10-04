@@ -4,7 +4,9 @@ import { useActionState } from 'react';
 
 import { Field, FormError, FormStatus, SelectField, TextareaField } from '@/components/ui/field';
 import { SubmitButton } from '@/components/ui/submit-button';
+import { ConnectedAccounts } from './connected-accounts';
 import { LinksPreview } from './links-preview';
+import type { Connections } from '@/lib/services/connections';
 import { SkillPicker, type SkillOption } from '@/components/onboarding/skill-picker';
 import { CurrencySelect } from '@/components/shared/currency-select';
 import { TimezoneCombobox } from '@/components/shared/timezone-combobox';
@@ -26,7 +28,13 @@ const AVAILABILITY = [
  * form is long, the confirmation belongs next to the button that was pressed, and a toast in the
  * corner as well would announce the same event twice.
  */
-export function ProfileEditor({ profile }: { profile: Profile }) {
+export function ProfileEditor({
+  profile,
+  connections,
+}: {
+  profile: Profile;
+  connections: Connections;
+}) {
   const [state, action] = useActionState<ActionResult | null, FormData>(updateProfile, null);
   const fields = state?.ok === false ? state.fields : undefined;
 
@@ -66,12 +74,12 @@ export function ProfileEditor({ profile }: { profile: Profile }) {
         hint="Any length. This is the text matching reads, so a few sentences on what you build help."
       />
 
-      <LinksPreview
-        initial={{
-          website: str(profile, 'website_url'),
-          github: str(profile, 'github_url'),
-          linkedin: str(profile, 'linkedin_url'),
-        }}
+      <LinksPreview initial={{ website: str(profile, 'website_url') }} />
+
+      <ConnectedAccounts
+        connections={connections}
+        linkedinUrl={str(profile, 'linkedin_url')}
+        linkedinErrors={fields?.linkedinUrl}
       />
 
       <div className="grid gap-5 sm:grid-cols-3">

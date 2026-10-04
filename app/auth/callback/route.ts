@@ -17,8 +17,24 @@ export async function GET(request: NextRequest) {
   // callback as an open redirect.
   const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/select-role';
 
+  // `link=1` marks a "Connect GitHub / LinkedIn" round trip from a signed-in profile page
+  // (components/talent/connected-accounts.tsx). Its failures go back to that page, not to the
+  // login screen: the person is still signed in.
+  const linking = searchParams.get('link') === '1';
+
   if (!code) {
-    const error = searchParams.get('error_description') ?? 'Sign-in was cancelled.';
+    const raw = searchParams.get('error_description');
+    if (linking) {
+      const message = /already linked|identity.*exists|already.*(used|registered)/i.test(raw ?? '')
+        ? 'That account is already connected to a different TechSelect account.'
+        : raw
+          ? 'The connection was not completed.'
+          : 'The connection was cancelled.';
+      return NextResponse.redirect(
+        `${origin}${target}?connect_error=${encodeURIComponent(message)}`,
+      );
+    }
+    const error = raw ?? 'Sign-in was cancelled.';
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error)}`);
   }
 
@@ -36,6 +52,10 @@ export async function GET(request: NextRequest) {
    * first time. It is a no-op for everyone who has been welcomed already, so calling it on
    * every OAuth sign-in is correct rather than wasteful.
    */
+  // Copy any GitHub / LinkedIn identity onto the developer profile (migration 0021). Runs on
+  // every OAuth return, sign-in or connect; a no-op without a profile. Best effort.
+  await supabase.rpc('sync_connected_accounts');
+
   await sendWelcomeOnce();
 
   /*

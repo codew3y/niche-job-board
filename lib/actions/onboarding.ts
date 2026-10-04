@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { makeSlug } from '../onboarding/steps';
 import { clientProfileInput } from '../schemas/client';
+import { LINKEDIN_PROFILE_URL } from '../schemas/talent';
 import { embedInBackground } from '../matching/ingest';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
@@ -90,6 +91,11 @@ export async function saveTalentBasics(
   );
   if (error) return { ok: false, message: 'Could not save. Try again.' };
 
+  // Someone who signed up with GitHub is connected from the moment their profile exists; the
+  // sync copies the account onto the new row (migration 0021). Best effort: a failure here only
+  // means the GitHub link appears after their next sign-in.
+  await supabase.rpc('sync_connected_accounts');
+
   revalidatePath('/onboarding/talent', 'layout');
   redirect('/onboarding/talent/skills');
 }
@@ -164,7 +170,7 @@ export async function saveTalentEvidence(
 
   const { data: profile } = await supabase
     .from('talent_profiles')
-    .select('id')
+    .select('id, linkedin_connected_at')
     .eq('user_id', user.id)
     .maybeSingle();
   if (!profile) redirect('/onboarding/talent/basics');
@@ -174,24 +180,27 @@ export async function saveTalentEvidence(
     return s ? s.replace(/\/+$/, '') : null;
   };
   const website = clean(formData.get('websiteUrl'));
-  const github = clean(formData.get('githubUrl'));
+  // GitHub comes from the connected account, never from input; LinkedIn only once connected
+  // (migration 0021).
   const linkedin = clean(formData.get('linkedinUrl'));
+  const linkedinConnected = Boolean(profile.linkedin_connected_at);
 
   const errors: Record<string, string[]> = {};
-  for (const [key, value] of [
-    ['websiteUrl', website],
-    ['githubUrl', github],
-    ['linkedinUrl', linkedin],
-  ] as const) {
+  for (const [key, value] of [['websiteUrl', website]] as const) {
     // https only — the *_urls_https CHECK enforces the same rule. This copy names the field.
     if (value && !/^https:\/\//i.test(value)) errors[key] = ['Must be a full https:// link.'];
+  }
+  if (linkedinConnected && linkedin && !LINKEDIN_PROFILE_URL.test(linkedin)) {
+    errors.linkedinUrl = [
+      'Paste your LinkedIn profile link, like https://www.linkedin.com/in/your-name.',
+    ];
   }
   if (Object.keys(errors).length)
     return { ok: false, message: 'Check the links below.', fields: errors };
 
   const { error } = await supabase
     .from('talent_profiles')
-    .update({ website_url: website, github_url: github, linkedin_url: linkedin })
+    .update({ website_url: website, ...(linkedinConnected ? { linkedin_url: linkedin } : {}) })
     .eq('id', profile.id);
   if (error) return { ok: false, message: 'Could not save your links.' };
 

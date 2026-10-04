@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import { embedInBackground } from '../matching/ingest';
 import { invalidate } from '../matching/cache';
 import { CURRENCY_CODES } from '../currencies';
-import { educationInput, experienceInput } from '../schemas/talent';
+import { LINKEDIN_PROFILE_URL, educationInput, experienceInput } from '../schemas/talent';
 import { TIME_ZONE_SET } from '../timezones';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
@@ -28,7 +28,7 @@ async function requireTalent() {
 
   const { data: profile } = await supabase
     .from('talent_profiles')
-    .select('id, is_published, bio, website_url, portfolio_item_count')
+    .select('id, is_published, bio, website_url, portfolio_item_count, linkedin_connected_at')
     .eq('user_id', user.id)
     .maybeSingle();
   if (!profile) redirect('/onboarding/talent/basics');
@@ -51,20 +51,23 @@ export async function updateProfile(
   const headline = String(formData.get('headline') ?? '').trim();
   const bio = String(formData.get('bio') ?? '').trim();
   const website = cleanUrl(formData.get('websiteUrl'));
-  const github = cleanUrl(formData.get('githubUrl'));
+  // GitHub is never typed: it comes from the connected account (migration 0021). LinkedIn is
+  // typed, but only once connected; the field is not even rendered before then.
   const linkedin = cleanUrl(formData.get('linkedinUrl'));
+  const linkedinConnected = Boolean(profile.linkedin_connected_at);
 
   const errors: Record<string, string[]> = {};
   if (headline.length < 10) errors.headline = ['Say what you do — at least 10 characters.'];
   // No minimum on the bio (owner's decision). A short bio still ranks lower, which the profile
   // page explains as a suggestion; it never blocks a save.
   if (bio.length > 4000) errors.bio = ['Keep it under 4,000 characters.'];
-  for (const [key, value] of [
-    ['websiteUrl', website],
-    ['githubUrl', github],
-    ['linkedinUrl', linkedin],
-  ] as const) {
+  for (const [key, value] of [['websiteUrl', website]] as const) {
     if (value && !/^https:\/\//i.test(value)) errors[key] = ['Must be a full https:// link.'];
+  }
+  if (linkedinConnected && linkedin && !LINKEDIN_PROFILE_URL.test(linkedin)) {
+    errors.linkedinUrl = [
+      'Paste your LinkedIn profile link, like https://www.linkedin.com/in/your-name.',
+    ];
   }
 
   /**
@@ -102,8 +105,7 @@ export async function updateProfile(
       headline,
       bio,
       website_url: website,
-      github_url: github,
-      linkedin_url: linkedin,
+      ...(linkedinConnected ? { linkedin_url: linkedin } : {}),
       hourly_rate_min: rate || null,
       hourly_rate_max: rate || null,
       currency,

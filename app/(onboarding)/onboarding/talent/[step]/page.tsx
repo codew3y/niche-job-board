@@ -4,6 +4,7 @@ import { WizardFrame } from '@/components/onboarding/wizard-frame';
 import { TalentBasicsForm } from '@/components/onboarding/talent-forms';
 import { TalentSkillsForm } from '@/components/onboarding/talent-forms';
 import { TalentEvidenceStep } from '@/components/onboarding/talent-evidence';
+import { getConnections } from '@/lib/services/connections';
 import { TalentReview } from '@/components/onboarding/talent-review';
 import { TALENT_STEPS, talentStepDone, type TalentStep } from '@/lib/onboarding/steps';
 import { createClient } from '@/lib/supabase/server';
@@ -65,7 +66,13 @@ export default async function TalentOnboarding({ params }: { params: Promise<{ s
           initial={(mySkills ?? []).map((s) => s.skill_id)}
         />
       )}
-      {step === 'portfolio' && <TalentEvidenceStep profile={profile ?? null} items={items ?? []} />}
+      {step === 'portfolio' && (
+        <TalentEvidenceStep
+          profile={profile ?? null}
+          items={items ?? []}
+          connections={await getConnections()}
+        />
+      )}
       {step === 'review' && <TalentReview profile={profile ?? null} progress={progress} />}
     </WizardFrame>
   );

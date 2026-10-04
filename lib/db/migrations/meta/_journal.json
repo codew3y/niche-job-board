@@ -148,6 +148,13 @@
       "when": 1790516828076,
       "tag": "0020_profile_sections",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1790603228076,
+      "tag": "0021_connected_accounts",
+      "breakpoints": true
     }
   ]
 }

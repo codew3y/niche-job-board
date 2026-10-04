@@ -105,6 +105,7 @@ export async function getTalentBySlug(slug: string) {
     .select(
       `id, user_id, slug, headline, bio, hourly_rate_min, hourly_rate_max, currency,
        availability, years_experience, timezone, website_url, github_url, linkedin_url,
+       github_connected_at, linkedin_connected_at,
        portfolio_item_count, is_published, accepts_messages, updated_at,
        talent_skills ( proficiency, years, skills ( name, slug, category ) ),
        portfolio_items ( id, title, description, role, outcome, tech_stack, links,
@@ -142,6 +143,8 @@ export type TalentProfileDetail = {
   website_url: string | null;
   github_url: string | null;
   linkedin_url: string | null;
+  github_connected_at: string | null;
+  linkedin_connected_at: string | null;
   portfolio_item_count: number;
   is_published: boolean;
   accepts_messages: boolean;

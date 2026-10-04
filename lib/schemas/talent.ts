@@ -215,3 +215,11 @@ export const educationInput = z
 
 export type TalentProfileInput = z.infer<typeof talentProfileInput>;
 export type PortfolioItemInput = z.infer<typeof portfolioItemInput>;
+
+/**
+ * A LinkedIn member profile address: https, linkedin.com (any country subdomain), /in/<handle>.
+ * The only LinkedIn link a connected account may add (migration 0021); company pages, posts and
+ * look-alike domains are refused.
+ */
+export const LINKEDIN_PROFILE_URL =
+  /^https:\/\/(?:[a-z]{2,3}\.)?linkedin\.com\/in\/[A-Za-z0-9\-_%.]{2,100}\/?$/i;

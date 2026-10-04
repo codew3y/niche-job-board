@@ -561,8 +561,14 @@ async function main() {
           'Asia/Manila',
         ]),
         websiteUrl: hasSite ? `https://example.test/${handle}` : null,
-        githubUrl: rand() > 0.35 ? `https://github.test/${handle}` : null,
-        linkedinUrl: rand() > 0.6 ? `https://linkedin.test/in/${handle}` : null,
+        // Seeded as connected accounts (migration 0021): the public profile shows only those.
+        // The seed runs as the owner role, which the guard trigger lets through.
+        ...(rand() > 0.35
+          ? { githubUrl: `https://github.test/${handle}`, githubConnectedAt: new Date() }
+          : {}),
+        ...(rand() > 0.6
+          ? { linkedinUrl: `https://linkedin.test/in/${handle}`, linkedinConnectedAt: new Date() }
+          : {}),
         acceptsMessages: rand() > 0.12, // a few opt out — ADR-007 D1
         // Always inserted as a DRAFT, then published at the end once its evidence exists.
         // The publish gate is a CHECK evaluated on every write, so a profile whose evidence

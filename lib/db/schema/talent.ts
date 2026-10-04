@@ -54,6 +54,13 @@ export const talentProfiles = pgTable(
     websiteUrl: text('website_url'),
     githubUrl: text('github_url'),
     linkedinUrl: text('linkedin_url'),
+    /**
+     * Set only by sync_connected_accounts() from auth.identities (migration 0021); a guard
+     * trigger refuses API updates to these and to github_url. The public profile shows the
+     * GitHub and LinkedIn links only while connected.
+     */
+    githubConnectedAt: timestamp('github_connected_at', { withTimezone: true }),
+    linkedinConnectedAt: timestamp('linkedin_connected_at', { withTimezone: true }),
 
     /**
      * ADR-007 D3: v1 never writes these. They exist from the first migration so that closing
@@ -187,7 +194,7 @@ export const portfolioItems = pgTable(
     /**
      * Any number of links (repo, live site, case study…), https only — up to ten. Replaces the
      * fixed `repo_url` / `live_url` pair: migration 0020 backfilled them into here, and the
-     * pending contract step (lib/db/migrations-pending/0021) drops the old columns.
+     * pending contract step (lib/db/migrations-pending/0022) drops the old columns.
      * Never embedded: a URL is not text matching can read (lib/matching/text.ts, rule 3).
      */
     links: text('links')
