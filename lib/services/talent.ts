@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { rateFilters } from './rate-filter';
+import { rateFilters } from './currency-filters';
 import { createClient } from '../supabase/server';
 import { decodeCursor, encodeCursor } from './cursor';
 import type { TalentSearchParams } from '../schemas/search';
@@ -50,7 +50,7 @@ export async function listTalent(params: TalentSearchParams) {
     query = query.textSearch('search_vector', params.q, { type: 'websearch' });
   }
   if (params.availability) query = query.eq('availability', params.availability);
-  // Rates compare within one currency only; see lib/services/rate-filter.ts.
+  // Rates compare within one currency only; see lib/services/currency-filters.ts.
   for (const filter of rateFilters(params)) query = query.or(filter);
 
   /**

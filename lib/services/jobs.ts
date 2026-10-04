@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { budgetFilters } from './currency-filters';
 import { createClient } from '../supabase/server';
 import { decodeCursor, encodeCursor } from './cursor';
 import type { JobSearchParams } from '../schemas/search';
@@ -49,7 +50,8 @@ export async function listJobs(params: JobSearchParams) {
     .limit(limit + 1); // one extra to detect "is there a next page" without a count query
 
   /**
-   * Sort, which `jobSearchParams` has also parsed and ignored. Budget sorts put NULLs last:
+   * Sort, which `jobSearchParams` has also parsed and ignored. Budget sorts run within one
+   * currency (budgetFilters below scopes the list), and put NULLs last:
    * a job with no stated budget is not the cheapest job, it is an unknown, and ranking it
    * first under "lowest budget" would be actively misleading.
    *
@@ -82,11 +84,9 @@ export async function listJobs(params: JobSearchParams) {
   if (params.engagement) query = query.eq('engagement_type', params.engagement);
   if (params.locationType) query = query.eq('location_type', params.locationType);
   if (params.experience) query = query.eq('experience_level', params.experience);
-  // Budget overlap, not containment: a £3–5k job matches a "£4k+" search.
-  if (params.budgetMin !== undefined)
-    query = query.or(`budget_max.gte.${params.budgetMin},budget_max.is.null`);
-  if (params.budgetMax !== undefined)
-    query = query.or(`budget_min.lte.${params.budgetMax},budget_min.is.null`);
+  // Budget sorts and filters compare within one currency (overlap, not containment); see
+  // lib/services/currency-filters.ts. "Newest first" with no budget filter adds nothing here.
+  for (const filter of budgetFilters(params)) query = query.or(filter);
 
   /**
    * Skill filtering, which `jobSearchParams` has parsed and `listJobs` has ignored since it

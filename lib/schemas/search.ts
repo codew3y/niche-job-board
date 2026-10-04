@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { RATE_CURRENCIES } from '../services/rate-filter';
+import { RATE_CURRENCIES } from '../services/currency-filters';
 import { engagementType, experienceLevel, locationType } from './enums';
 import { paginationParams, trimmed } from './primitives';
 
@@ -23,6 +23,8 @@ export const jobSearchParams = paginationParams.extend({
   budgetMin: z.coerce.number().min(0).optional(),
   budgetMax: z.coerce.number().min(0).optional(),
   sort: z.enum(['recent', 'budget_high', 'budget_low']).default('recent'),
+  /** The currency budget sorts and filters compare in (lib/services/currency-filters.ts). */
+  currency: z.enum(RATE_CURRENCIES).optional().catch(undefined),
 });
 
 export const talentSearchParams = paginationParams.extend({
@@ -38,7 +40,7 @@ export const talentSearchParams = paginationParams.extend({
   rateMin: z.coerce.number().min(0).optional(),
   rateMax: z.coerce.number().min(0).optional(),
   /**
-   * The currency the rate filter applies in (lib/services/rate-filter.ts). An unknown value is
+   * The currency the rate filter applies in (lib/services/currency-filters.ts). An unknown value is
    * dropped rather than failing the whole parse, which would silently clear every filter.
    */
   currency: z.enum(RATE_CURRENCIES).optional().catch(undefined),

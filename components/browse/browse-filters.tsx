@@ -10,7 +10,7 @@ import { FilterSelect } from '@/components/shared/filter-select';
 import { SearchBar } from '@/components/shared/search-bar';
 import { SkillFilter } from '@/components/shared/skill-filter';
 import type { BrowseType } from '@/lib/schemas/search';
-import { DEFAULT_RATE_CURRENCY, RATE_CURRENCIES } from '@/lib/services/rate-filter';
+import { DEFAULT_RATE_CURRENCY, RATE_CURRENCIES } from '@/lib/services/currency-filters';
 import type { SkillOption } from '@/lib/services/skills';
 import { cn } from '@/lib/ui/cn';
 
@@ -62,9 +62,11 @@ export function BrowseFilters({
     startTransition(() => router.push(`${pathname}?${next.toString()}`));
   };
 
-  // The rate filter compares within one currency (lib/services/rate-filter.ts). A rate with no
-  // currency in the URL is read as USD by the server, so the control shows USD too.
+  // Money is compared within one currency (lib/services/currency-filters.ts): developer rates,
+  // and job budgets while a budget sort is on. With no currency in the URL the server uses
+  // USD, so the controls say USD too. One `currency` param serves both; switching type drops it.
   const rateCurrency = params.get('currency') ?? DEFAULT_RATE_CURRENCY;
+  const budgetSort = params.get('sort') === 'budget_high' || params.get('sort') === 'budget_low';
 
   /** The type tabs are links, so they work before hydration and open in a new tab. */
   const typeHref = (t: BrowseType) => {
@@ -150,11 +152,26 @@ export function BrowseFilters({
               value={params.get('sort') ?? ''}
               options={{
                 recent: 'Newest first',
-                budget_high: 'Highest budget',
-                budget_low: 'Lowest budget',
+                budget_high: `Highest budget (${rateCurrency})`,
+                budget_low: `Lowest budget (${rateCurrency})`,
               }}
               onChange={(v) => set('sort', v)}
             />
+            {/* Only while a budget sort is on: that is the only time job money is compared. */}
+            {budgetSort && (
+              <Select
+                label="Budget currency"
+                value={params.get('currency') ?? ''}
+                anyLabel={`Budgets in ${DEFAULT_RATE_CURRENCY}`}
+                options={Object.fromEntries(
+                  RATE_CURRENCIES.filter((c) => c !== DEFAULT_RATE_CURRENCY).map((c) => [
+                    c,
+                    `Budgets in ${c}`,
+                  ]),
+                )}
+                onChange={(v) => set('currency', v)}
+              />
+            )}
           </>
         )}
 
@@ -167,7 +184,7 @@ export function BrowseFilters({
               onChange={(v) => set('availability', v)}
             />
             {/* A single "up to": a client browsing has a ceiling, not a floor. It applies in
-                the chosen currency only; rates are never converted (lib/services/rate-filter.ts).
+                the chosen currency only; rates are never converted (lib/services/currency-filters.ts).
                 USD is the default and reads as the un-highlighted "any" state, like the other
                 filters; choosing another currency highlights the control. */}
             <Select
@@ -209,6 +226,16 @@ export function BrowseFilters({
           </button>
         )}
       </div>
+
+      {/* Said in words, because a budget sort hides jobs in other currencies rather than
+          comparing their numbers. Without this, those jobs would just seem to vanish. */}
+      {type === 'jobs' && budgetSort && (
+        <p className="text-sm text-text-muted">
+          Sorting by budget compares {rateCurrency} budgets only. Jobs budgeted in another currency
+          are hidden until you switch currency or sort by newest. Jobs with no budget are listed
+          last.
+        </p>
+      )}
 
       {/* aria-live so the result of a filter change is announced, not just seen. */}
       <p aria-live="polite" className="sr-only">
