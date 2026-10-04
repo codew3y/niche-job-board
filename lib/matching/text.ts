@@ -33,6 +33,8 @@ export type TalentForText = {
   bio: string | null;
   skills: { name: string; proficiency?: string | null; years?: number | null }[];
   items: ItemForText[];
+  /** Certification names with their issuer (migration 0022). Public, and a real signal. */
+  certifications?: { name: string; issuer: string }[];
   availability?: string | null;
   yearsExperience?: number | null;
   timezone?: string | null;
@@ -113,6 +115,10 @@ export function talentToText(talent: TalentForText): string {
     talent.items.length > 0 ? `Shipped work:\n${talent.items.map(itemToText).join('\n\n')}` : null,
     section('About', talent.bio ?? ''),
     section('Skills', skills),
+    section(
+      'Certifications',
+      (talent.certifications ?? []).map((c) => `${c.name} (${c.issuer})`).join(', '),
+    ),
     section('Context', context),
   ].filter(Boolean);
 

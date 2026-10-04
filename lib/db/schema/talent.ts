@@ -194,7 +194,7 @@ export const portfolioItems = pgTable(
     /**
      * Any number of links (repo, live site, case study…), https only — up to ten. Replaces the
      * fixed `repo_url` / `live_url` pair: migration 0020 backfilled them into here, and the
-     * pending contract step (lib/db/migrations-pending/0022) drops the old columns.
+     * pending contract step (lib/db/migrations-pending/0023) drops the old columns.
      * Never embedded: a URL is not text matching can read (lib/matching/text.ts, rule 3).
      */
     links: text('links')
@@ -305,6 +305,60 @@ export const talentExperience = pgTable(
       using: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and (p.is_published or p.user_id = (select auth.uid())))`,
     }),
     pgPolicy('experience_write_own', {
+      for: 'all',
+      to: authenticatedRole,
+      using: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and p.user_id = (select auth.uid()))`,
+      withCheck: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and p.user_id = (select auth.uid()))`,
+    }),
+  ],
+).enableRLS();
+
+/**
+ * Certifications (migration 0022). Same visibility as experience: public while the profile is
+ * published, writable by the owner. Fields follow LinkedIn's certification model.
+ */
+export const talentCertifications = pgTable(
+  'talent_certifications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    talentId: uuid('talent_id')
+      .notNull()
+      .references(() => talentProfiles.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    issuer: text('issuer').notNull(),
+    /** Month precision: stored as the 1st. */
+    issuedOn: date('issued_on').notNull(),
+    /** NULL = does not expire. */
+    expiresOn: date('expires_on'),
+    credentialId: text('credential_id'),
+    /** A Credly / Accredible badge page or the issuer's verify page. https only. */
+    verificationUrl: text('verification_url'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check('certification_name_length', sql`char_length(${t.name}) between 2 and 200`),
+    check('certification_issuer_length', sql`char_length(${t.issuer}) between 1 and 160`),
+    check(
+      'certification_credential_length',
+      sql`${t.credentialId} is null or char_length(${t.credentialId}) <= 200`,
+    ),
+    check(
+      'certification_date_order',
+      sql`${t.expiresOn} is null or ${t.issuedOn} <= ${t.expiresOn}`,
+    ),
+    check(
+      'certification_url_https',
+      sql`${t.verificationUrl} is null or ${t.verificationUrl} ~* '^https://'`,
+    ),
+    index('certification_talent_order_idx').on(t.talentId, t.sortOrder),
+    pgPolicy('certification_select', {
+      for: 'select',
+      to: [anonRole, authenticatedRole],
+      using: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and (p.is_published or p.user_id = (select auth.uid())))`,
+    }),
+    pgPolicy('certification_write_own', {
       for: 'all',
       to: authenticatedRole,
       using: sql`exists (select 1 from talent_profiles p where p.id = ${t.talentId} and p.user_id = (select auth.uid()))`,

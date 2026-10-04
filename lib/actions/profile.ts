@@ -6,7 +6,12 @@ import { redirect } from 'next/navigation';
 import { embedInBackground } from '../matching/ingest';
 import { invalidate } from '../matching/cache';
 import { CURRENCY_CODES } from '../currencies';
-import { LINKEDIN_PROFILE_URL, educationInput, experienceInput } from '../schemas/talent';
+import {
+  LINKEDIN_PROFILE_URL,
+  certificationInput,
+  educationInput,
+  experienceInput,
+} from '../schemas/talent';
 import { TIME_ZONE_SET } from '../timezones';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
@@ -391,6 +396,65 @@ export async function deleteEducation(formData: FormData): Promise<void> {
   const id = String(formData.get('id') ?? '');
   if (!id) return;
   await supabase.from('talent_education').delete().eq('id', id).eq('talent_id', profile.id);
+  revalidateProfile();
+}
+
+// ─────────────────────────── certifications ───────────────────────────
+//
+// Plain rows under the profile (RLS: certification_write_own, migration 0022). Unlike experience
+// and education, certification names are part of the matching text (lib/matching/text.ts), so a
+// change re-embeds the profile and drops its cached matches, like a project edit does.
+
+export async function saveCertification(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  const { supabase, profile } = await requireTalent();
+  const id = String(formData.get('id') ?? '') || null;
+
+  const parsed = certificationInput.safeParse({
+    name: formData.get('name'),
+    issuer: formData.get('issuer'),
+    issuedOn: formData.get('issuedOn'),
+    expiresOn: formData.get('expiresOn') ?? '',
+    credentialId: formData.get('credentialId') ?? '',
+    verificationUrl: formData.get('verificationUrl') ?? '',
+  });
+  if (!parsed.success) {
+    return { ok: false, message: 'Check the fields below.', fields: fieldErrors(parsed.error) };
+  }
+
+  const row = {
+    name: parsed.data.name,
+    issuer: parsed.data.issuer,
+    issued_on: parsed.data.issuedOn,
+    expires_on: parsed.data.expiresOn,
+    credential_id: parsed.data.credentialId,
+    verification_url: parsed.data.verificationUrl,
+  };
+
+  const { error } = id
+    ? await supabase
+        .from('talent_certifications')
+        .update(row)
+        .eq('id', id)
+        .eq('talent_id', profile.id)
+    : await supabase.from('talent_certifications').insert({ ...row, talent_id: profile.id });
+  if (error) return { ok: false, message: 'Could not save that certification.' };
+
+  embedInBackground('talent_profile', profile.id);
+  void invalidate('talent', profile.id);
+  revalidateProfile();
+  return { ok: true };
+}
+
+export async function deleteCertification(formData: FormData): Promise<void> {
+  const { supabase, profile } = await requireTalent();
+  const id = String(formData.get('id') ?? '');
+  if (!id) return;
+  await supabase.from('talent_certifications').delete().eq('id', id).eq('talent_id', profile.id);
+  embedInBackground('talent_profile', profile.id);
+  void invalidate('talent', profile.id);
   revalidateProfile();
 }
 

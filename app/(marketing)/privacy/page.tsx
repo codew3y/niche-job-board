@@ -132,9 +132,10 @@ export default function PrivacyPage() {
           beside each match. Both steps run on Google&rsquo;s Gemini API.
         </p>
         <p>
-          <strong>What is sent:</strong> job titles and descriptions, and developer headlines, bios
-          and portfolio text. <strong>Only from published profiles and open jobs</strong> — the
-          things already visible to anyone on the internet and indexed by search engines.
+          <strong>What is sent:</strong> job titles and descriptions, and developer headlines, bios,
+          portfolio text and certification names.{' '}
+          <strong>Only from published profiles and open jobs</strong> — the things already visible
+          to anyone on the internet and indexed by search engines.
         </p>
         <p>
           <strong>What is never sent:</strong> email addresses, messages, applications and cover

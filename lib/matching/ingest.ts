@@ -144,7 +144,8 @@ async function buildText(type: EntityType, id: string): Promise<string | null> {
       .select(
         `headline, bio, availability, years_experience, timezone,
          talent_skills ( proficiency, years, skills ( name ) ),
-         portfolio_items ( title, description, role, outcome, tech_stack )`,
+         portfolio_items ( title, description, role, outcome, tech_stack ),
+         talent_certifications ( name, issuer )`,
       )
       .eq('id', id)
       .maybeSingle()
@@ -166,6 +167,7 @@ async function buildText(type: EntityType, id: string): Promise<string | null> {
           outcome: string | null;
           tech_stack: string[];
         }[];
+        talent_certifications: { name: string; issuer: string }[];
       }>();
     if (!data) return null;
 
@@ -186,6 +188,7 @@ async function buildText(type: EntityType, id: string): Promise<string | null> {
         // Supabase types a text[] column loosely; the column is text[] NOT NULL by schema.
         techStack: (i.tech_stack ?? []) as string[],
       })),
+      certifications: data.talent_certifications ?? [],
     };
     return talentToText(input);
   }

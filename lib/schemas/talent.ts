@@ -201,6 +201,32 @@ const optionalYear = z
   .optional()
   .transform((v) => (v === '' || v === undefined ? null : v));
 
+/**
+ * A certification (migration 0022). LinkedIn's fields: name, issuing organisation, issue and
+ * optional expiry month, optional credential ID and verification link. The verification link is
+ * https only, like every link in the product.
+ */
+export const certificationInput = z
+  .object({
+    name: trimmed.min(2, 'Name the certification.').max(200),
+    issuer: trimmed.min(1, 'Who issued it?').max(160),
+    issuedOn: monthDate,
+    /** Blank = does not expire. */
+    expiresOn: z
+      .union([monthDate, z.literal('')])
+      .optional()
+      .transform((v) => (v ? v : null)),
+    credentialId: trimmed
+      .max(200, 'Keep the credential ID under 200 characters.')
+      .optional()
+      .transform((v) => (v ? v : null)),
+    verificationUrl: optionalHttpsUrl,
+  })
+  .refine((v) => !v.expiresOn || v.issuedOn <= v.expiresOn, {
+    path: ['expiresOn'],
+    message: 'Expiry cannot be before the issue date.',
+  });
+
 export const educationInput = z
   .object({
     school: trimmed.min(2, 'Which school?').max(160),

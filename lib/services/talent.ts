@@ -112,7 +112,9 @@ export async function getTalentBySlug(slug: string) {
                          cover_image_url, sort_order,
                          item_media ( id, url, alt_text, sort_order ) ),
        talent_experience ( id, role, company, start_date, end_date, description, sort_order ),
-       talent_education ( id, school, degree, start_year, end_year, sort_order )`,
+       talent_education ( id, school, degree, start_year, end_year, sort_order ),
+       talent_certifications ( id, name, issuer, issued_on, expires_on, credential_id,
+                               verification_url, sort_order )`,
     )
     .eq('slug', slug)
     .maybeSingle();
@@ -168,6 +170,7 @@ export type TalentProfileDetail = {
   }[];
   talent_experience: ExperienceRow[];
   talent_education: EducationRow[];
+  talent_certifications: CertificationRow[];
 };
 
 export type ExperienceRow = {
@@ -194,4 +197,16 @@ export const AVAILABILITY_LABEL: Record<string, string> = {
   part_time: 'Part time',
   occasional: 'Occasional',
   unavailable: 'Not available',
+};
+
+export type CertificationRow = {
+  id: string;
+  name: string;
+  issuer: string;
+  /** YYYY-MM-DD, the 1st of the month. */
+  issued_on: string;
+  expires_on: string | null;
+  credential_id: string | null;
+  verification_url: string | null;
+  sort_order: number;
 };

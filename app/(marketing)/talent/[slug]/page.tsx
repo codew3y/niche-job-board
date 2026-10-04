@@ -8,12 +8,12 @@ import { notFound } from 'next/navigation';
 import { ContactDialog } from '@/components/messaging/contact-dialog';
 import { ExternalLink } from '@/components/shared/external-link';
 import { Avatar } from '@/components/ui/avatar';
-import { TagList } from '@/components/ui/badge';
+import { Badge, TagList } from '@/components/ui/badge';
 import { buttonStyles } from '@/components/ui/button';
 import { formatRange } from '@/components/shared/money';
 import { PortfolioSection } from '@/components/portfolio/portfolio-section';
 import { GitHubIcon, LinkedInIcon } from '@/components/shared/brand-icons';
-import { formatMonth } from '@/components/talent/history-format';
+import { certificationDates, formatMonth } from '@/components/talent/history-format';
 import { siteUrl } from '@/lib/env';
 import { AVAILABILITY_LABEL, getTalentBySlug } from '@/lib/services/talent';
 import { createClient } from '@/lib/supabase/server';
@@ -80,6 +80,10 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
       Number(a.end_date !== null) - Number(b.end_date !== null) ||
       b.start_date.localeCompare(a.start_date),
   );
+  // Newest first. Expired ones stay, labelled: it is still true that the person earned them.
+  const certifications = [...(p.talent_certifications ?? [])].sort((a, b) =>
+    b.issued_on.localeCompare(a.issued_on),
+  );
   const education = [...(p.talent_education ?? [])].sort(
     (a, b) => (b.end_year ?? 9999) - (a.end_year ?? 9999),
   );
@@ -121,6 +125,15 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
                     // elsewhere — the external links are the point, not decoration (§9).
                     sameAs: [p.website_url, github, linkedin].filter(Boolean),
                     knowsAbout: p.talent_skills.map((s) => s.skills?.name).filter(Boolean),
+                    // schema.org's credential type; lets search engines read the certifications
+                    // the page already shows.
+                    hasCredential: (p.talent_certifications ?? []).map((c) => ({
+                      '@type': 'EducationalOccupationalCredential',
+                      name: c.name,
+                      recognizedBy: { '@type': 'Organization', name: c.issuer },
+                      ...(c.verification_url ? { url: c.verification_url } : {}),
+                      ...(c.expires_on ? { expires: c.expires_on } : {}),
+                    })),
                   },
                 }
               : {},
@@ -265,6 +278,52 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
                   </li>
                 ))}
               </ol>
+            </section>
+          )}
+
+          {certifications.length > 0 && (
+            <section
+              aria-labelledby="certifications-heading"
+              className="mt-14 border-t border-border-base pt-10"
+            >
+              <h2 id="certifications-heading" className="text-xl font-semibold tracking-tight">
+                Certifications
+              </h2>
+              <ul className="mt-4 space-y-5">
+                {certifications.map((c) => {
+                  const dates = certificationDates(c.issued_on, c.expires_on);
+                  return (
+                    <li key={c.id}>
+                      <p className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold">
+                        {c.name}
+                        {dates.expired && <Badge tone="outline">Expired</Badge>}
+                      </p>
+                      <p className="text-sm text-text-muted tabular-nums">
+                        {c.issuer} · {dates.text}
+                      </p>
+                      {(c.credential_id || c.verification_url) && (
+                        <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                          {c.credential_id && (
+                            <span className="text-text-subtle">
+                              Credential ID{' '}
+                              <span className="font-mono text-text-muted">{c.credential_id}</span>
+                            </span>
+                          )}
+                          {c.verification_url && (
+                            <ExternalLink
+                              href={c.verification_url}
+                              className="inline-flex min-h-10 items-center font-semibold text-link"
+                            >
+                              Verify
+                              <span className="sr-only"> {c.name}</span>
+                            </ExternalLink>
+                          )}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
             </section>
           )}
 

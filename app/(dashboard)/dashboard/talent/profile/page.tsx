@@ -4,7 +4,11 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { PortfolioManager } from '@/components/portfolio/portfolio-manager';
-import { EducationEditor, ExperienceEditor } from '@/components/talent/history-editors';
+import {
+  CertificationEditor,
+  EducationEditor,
+  ExperienceEditor,
+} from '@/components/talent/history-editors';
 import { ProfileEditor, SkillsEditor } from '@/components/talent/profile-editor';
 import { getConnections } from '@/lib/services/connections';
 import { ActionForm } from '@/components/ui/action-form';
@@ -14,7 +18,7 @@ import { SubmitButton } from '@/components/ui/submit-button';
 import { PageHeader, SectionHeading } from '@/components/ui/page-header';
 import { togglePublish } from '@/lib/actions/profile';
 import { profileSuggestions } from '@/lib/schemas/talent';
-import type { EducationRow, ExperienceRow } from '@/lib/services/talent';
+import type { CertificationRow, EducationRow, ExperienceRow } from '@/lib/services/talent';
 import { createClient } from '@/lib/supabase/server';
 import { requireViewer } from '@/lib/supabase/session';
 
@@ -50,6 +54,7 @@ export default async function ProfilePage() {
     { data: items },
     { data: experience },
     { data: education },
+    { data: certifications },
   ] = await Promise.all([
     supabase.from('skills').select('id, name, category, aliases').order('name'),
     supabase.from('talent_skills').select('skill_id').eq('talent_id', profile.id),
@@ -71,6 +76,13 @@ export default async function ProfilePage() {
       .select('id, school, degree, start_year, end_year, sort_order')
       .eq('talent_id', profile.id)
       .order('end_year', { ascending: false, nullsFirst: true }),
+    supabase
+      .from('talent_certifications')
+      .select(
+        'id, name, issuer, issued_on, expires_on, credential_id, verification_url, sort_order',
+      )
+      .eq('talent_id', profile.id)
+      .order('issued_on', { ascending: false }),
   ]);
 
   /**
@@ -97,6 +109,12 @@ export default async function ProfilePage() {
       description: 'Title, a short description, links and photos.',
     },
     { id: 'experience', title: 'Experience', description: 'Roles a client should know about.' },
+    {
+      id: 'certifications',
+      title: 'Certifications',
+      description:
+        'Optional. Each one shows on your profile, with a link to verify it if you add one.',
+    },
     { id: 'education', title: 'Education', description: 'Optional. Add it if it helps.' },
   ] as const;
 
@@ -107,6 +125,7 @@ export default async function ProfilePage() {
     ),
     projects: <PortfolioManager items={items ?? []} />,
     experience: <ExperienceEditor rows={(experience ?? []) as ExperienceRow[]} />,
+    certifications: <CertificationEditor rows={(certifications ?? []) as CertificationRow[]} />,
     education: <EducationEditor rows={(education ?? []) as EducationRow[]} />,
   };
 

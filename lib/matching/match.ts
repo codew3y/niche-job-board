@@ -90,7 +90,7 @@ export async function matchesForTalent(
     const { data: profile } = await supabase
       .from('talent_profiles')
       .select(
-        'embedding, headline, bio, availability, years_experience, timezone, talent_skills ( proficiency, years, skills ( name ) ), portfolio_items ( title, description, role, outcome, tech_stack )',
+        'embedding, headline, bio, availability, years_experience, timezone, talent_skills ( proficiency, years, skills ( name ) ), portfolio_items ( title, description, role, outcome, tech_stack ), talent_certifications ( name, issuer )',
       )
       .eq('id', talentId)
       .maybeSingle()
@@ -121,6 +121,7 @@ export async function matchesForTalent(
           outcome: i.outcome,
           techStack: (i.tech_stack ?? []) as string[],
         })),
+        certifications: profile.talent_certifications ?? [],
       }),
       candidates: candidates
         .map((c) => ({ id: c.id, similarity: c.similarity, text: texts.get(c.id) ?? '' }))
@@ -224,6 +225,7 @@ type TalentRow = {
     outcome: string | null;
     tech_stack: string[];
   }[];
+  talent_certifications: { name: string; issuer: string }[];
 };
 
 /** The candidate text the model judges — the same representation that was embedded. */
@@ -232,7 +234,7 @@ async function talentTexts(ids: string[]): Promise<Map<string, string>> {
   const { data } = await supabase
     .from('talent_profiles')
     .select(
-      'id, headline, bio, availability, years_experience, timezone, talent_skills ( proficiency, years, skills ( name ) ), portfolio_items ( title, description, role, outcome, tech_stack )',
+      'id, headline, bio, availability, years_experience, timezone, talent_skills ( proficiency, years, skills ( name ) ), portfolio_items ( title, description, role, outcome, tech_stack ), talent_certifications ( name, issuer )',
     )
     .in('id', ids)
     .overrideTypes<(TalentRow & { id: string })[]>();
@@ -257,6 +259,7 @@ async function talentTexts(ids: string[]): Promise<Map<string, string>> {
           outcome: i.outcome,
           techStack: (i.tech_stack ?? []) as string[],
         })),
+        certifications: row.talent_certifications ?? [],
       }),
     );
   }

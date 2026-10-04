@@ -8,13 +8,15 @@ import { Field, FormError, TextareaField } from '@/components/ui/field';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
 import {
+  deleteCertification,
   deleteEducation,
   deleteExperience,
+  saveCertification,
   saveEducation,
   saveExperience,
 } from '@/lib/actions/profile';
-import type { EducationRow, ExperienceRow } from '@/lib/services/talent';
-import { formatMonth } from './history-format';
+import type { CertificationRow, EducationRow, ExperienceRow } from '@/lib/services/talent';
+import { certificationDates, formatMonth } from './history-format';
 
 /**
  * Experience and education: repeatable entries with add / edit / remove. Both follow the same
@@ -70,6 +72,31 @@ export function EducationEditor({ rows }: { rows: EducationRow[] }) {
       form={
         editing !== null && (
           <EducationForm key={editing} row={current} onDone={() => setEditing(null)} />
+        )
+      }
+    />
+  );
+}
+
+export function CertificationEditor({ rows }: { rows: CertificationRow[] }) {
+  const [editing, setEditing] = useState<Editing>(null);
+  const current = rows.find((r) => r.id === editing) ?? null;
+
+  return (
+    <RowList
+      empty="No certifications yet. Add any that back up the skills you list."
+      addLabel="Add a certification"
+      editing={editing}
+      setEditing={setEditing}
+      items={rows.map((r) => ({
+        id: r.id,
+        title: `${r.name} · ${r.issuer}`,
+        meta: certificationDates(r.issued_on, r.expires_on).text,
+      }))}
+      remove={deleteCertification}
+      form={
+        editing !== null && (
+          <CertificationForm key={editing} row={current} onDone={() => setEditing(null)} />
         )
       }
     />
@@ -267,6 +294,84 @@ function EducationForm({ row, onDone }: { row: EducationRow | null; onDone: () =
           optional
           defaultValue={row?.end_year ?? ''}
           errors={fields?.endYear}
+        />
+      </div>
+      {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
+      <div className="flex gap-2">
+        <SubmitButton size="sm" className="max-sm:h-10" pendingLabel="Saving…">
+          Save
+        </SubmitButton>
+        <Button variant="ghost" size="sm" className="max-sm:h-10" onClick={onDone}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function CertificationForm({ row, onDone }: { row: CertificationRow | null; onDone: () => void }) {
+  const [state, action] = useActionState<ActionResult | null, FormData>(saveCertification, null);
+  const fields = state?.ok === false ? state.fields : undefined;
+  useSaved(state, onDone);
+
+  return (
+    <form
+      action={action}
+      className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 sm:p-5"
+      noValidate
+    >
+      {row && <input type="hidden" name="id" value={row.id} />}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field
+          label="Certification"
+          name="name"
+          required
+          defaultValue={row?.name ?? ''}
+          errors={fields?.name}
+          placeholder="AWS Certified Developer, Associate"
+        />
+        <Field
+          label="Issued by"
+          name="issuer"
+          required
+          defaultValue={row?.issuer ?? ''}
+          errors={fields?.issuer}
+          placeholder="Amazon Web Services"
+        />
+        <Field
+          label="Issued"
+          name="issuedOn"
+          type="month"
+          required
+          defaultValue={row?.issued_on.slice(0, 7) ?? ''}
+          errors={fields?.issuedOn}
+        />
+        <Field
+          label="Expires"
+          name="expiresOn"
+          type="month"
+          optional
+          defaultValue={row?.expires_on?.slice(0, 7) ?? ''}
+          errors={fields?.expiresOn}
+          hint="Leave empty if it does not expire."
+        />
+        <Field
+          label="Credential ID"
+          name="credentialId"
+          optional
+          defaultValue={row?.credential_id ?? ''}
+          errors={fields?.credentialId}
+        />
+        <Field
+          label="Verification link"
+          name="verificationUrl"
+          type="url"
+          inputMode="url"
+          optional
+          defaultValue={row?.verification_url ?? ''}
+          errors={fields?.verificationUrl}
+          placeholder="https://www.credly.com/badges/…"
+          hint="Where a client can check it, such as a Credly badge or the issuer's page."
         />
       </div>
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
