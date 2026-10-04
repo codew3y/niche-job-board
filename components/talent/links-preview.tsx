@@ -27,9 +27,9 @@ import { ExternalLink } from '@/components/shared/external-link';
 type LinkState = { website: string; github: string; linkedin: string };
 
 const LABELS: { key: keyof LinkState; label: string; hint: string }[] = [
-  { key: 'website', label: 'Portfolio website', hint: 'https://yourname.dev' },
-  { key: 'github', label: 'GitHub', hint: 'https://github.com/yourname' },
-  { key: 'linkedin', label: 'LinkedIn', hint: 'https://linkedin.com/in/yourname' },
+  { key: 'website', label: 'Portfolio website', hint: 'https://mariasantos.dev' },
+  { key: 'github', label: 'GitHub', hint: 'https://github.com/mariasantos' },
+  { key: 'linkedin', label: 'LinkedIn', hint: 'https://www.linkedin.com/in/mariasantos' },
 ];
 
 function status(value: string): 'empty' | 'ok' | 'not-https' | 'malformed' {

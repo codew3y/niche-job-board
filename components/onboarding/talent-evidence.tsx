@@ -84,7 +84,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
             name="websiteUrl"
             type="url"
             inputMode="url"
-            placeholder="https://yoursite.dev"
+            placeholder="https://mariasantos.dev"
             defaultValue={str(profile, 'website_url')}
             errors={linkFields?.websiteUrl}
           />
@@ -94,7 +94,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
               name="githubUrl"
               type="url"
               inputMode="url"
-              placeholder="https://github.com/you"
+              placeholder="https://github.com/mariasantos"
               defaultValue={str(profile, 'github_url')}
               errors={linkFields?.githubUrl}
             />
@@ -103,7 +103,7 @@ export function TalentEvidenceStep({ profile, items }: { profile: Profile; items
               name="linkedinUrl"
               type="url"
               inputMode="url"
-              placeholder="https://linkedin.com/in/you"
+              placeholder="https://www.linkedin.com/in/mariasantos"
               defaultValue={str(profile, 'linkedin_url')}
               errors={linkFields?.linkedinUrl}
             />
