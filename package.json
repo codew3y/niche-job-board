@@ -37,6 +37,7 @@
     "@base-ui/react": "^1.8.0",
     "@google/genai": "^2.24.0",
     "@phosphor-icons/react": "^2.1.10",
+    "@sentry/nextjs": "^11.4.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
     "class-variance-authority": "^0.7.1",

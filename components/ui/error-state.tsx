@@ -4,6 +4,8 @@ import { ArrowClockwise as RotateCw, Warning as TriangleAlert } from '@phosphor-
 import Link from 'next/link';
 import { useEffect } from 'react';
 
+import { reportError } from '@/lib/observability/report-error';
+
 import { Button, buttonStyles } from './button';
 
 /**
@@ -26,6 +28,9 @@ export function ErrorState({
   useEffect(() => {
     // The server already logged it; this is for the browser console during development.
     console.error(error);
+    // And to error tracking, when it is on: a boundary catches the error, so the browser never
+    // reports it as unhandled (lib/observability/report-error.ts).
+    reportError(error);
   }, [error]);
 
   return (

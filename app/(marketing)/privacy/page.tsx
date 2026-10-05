@@ -120,10 +120,16 @@ export default function PrivacyPage() {
             <strong>Google (Gemini API)</strong> — powers matching. See below, because this one
             carries a condition worth reading rather than a line in a list
           </li>
+          <li>
+            <strong>Sentry</strong> — error tracking, when it is switched on: if something breaks,
+            it receives the technical error, the page path and the browser, so the problem can be
+            fixed. Never your email address, messages, form contents, cookies or anything you typed
+          </li>
         </ul>
         <p className="text-text-muted">
           There is no analytics, no advertising and no tracking on this site. The only cookies set
-          are the ones that keep you signed in.
+          are the ones that keep you signed in. Error reports (Sentry, above) are about the software
+          failing, not about you, and set no cookies.
         </p>
       </Section>
 
