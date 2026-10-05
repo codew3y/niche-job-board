@@ -116,6 +116,12 @@ const serverSchema = z.object({
    * request — an unauthenticated route that spends API quota is a free denial-of-wallet.
    */
   MATCH_WARM_SECRET: blankAsUndefined(z.string().min(16).optional()),
+  /**
+   * Who may open /dashboard/admin (the reports queue): a comma-separated list of the email
+   * addresses they sign in with. Unset means nobody. Server-only: the list is never sent to a
+   * browser, so it does not advertise whose accounts are worth taking over.
+   */
+  ADMIN_EMAILS: blankAsUndefined(z.string().min(3).optional()),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 

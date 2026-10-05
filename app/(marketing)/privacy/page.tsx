@@ -90,7 +90,9 @@ export default function PrivacyPage() {
         <p>
           <strong>Reports are one-way.</strong> The person you report cannot see that you reported
           them. A person reads reports; there is no automated action and no fixed turnaround, so
-          blocking is the control that takes effect immediately.
+          blocking is the control that takes effect immediately. When a conversation or a message is
+          reported, the person handling it reads the latest messages in that conversation, because a
+          report cannot be judged without them.
         </p>
       </Section>
 
@@ -229,9 +231,10 @@ export default function PrivacyPage() {
       <Section heading="Honest limitations">
         <p className="text-text-muted">
           This is an independently built product, not a company with a compliance department. There
-          is no human moderation queue: blocking and reporting are what exists. No system is
-          perfectly secure, and we are not going to pretend otherwise. If you find a problem with
-          how data is handled here, tell us and it will get fixed.
+          is no round-the-clock moderation: reports go to a queue that one person works through, and
+          blocking is what takes effect at once. No system is perfectly secure, and we are not going
+          to pretend otherwise. If you find a problem with how data is handled here, tell us and it
+          will get fixed.
         </p>
       </Section>
 

@@ -7,6 +7,7 @@ import {
   PencilSimple as Pencil,
   Gear as Settings,
   User as UserRound,
+  Flag,
 } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 
@@ -39,6 +40,7 @@ export function AccountMenu({
   hasClient,
   profileHref,
   editProfileHref,
+  isAdmin = false,
   switchRole,
   signOut,
 }: {
@@ -49,6 +51,8 @@ export function AccountMenu({
   hasClient: boolean;
   profileHref: string;
   editProfileHref: string;
+  /** In ADMIN_EMAILS: show the reports queue. */
+  isAdmin?: boolean;
   switchRole: (formData: FormData) => Promise<void>;
   signOut: () => Promise<void>;
 }) {
@@ -119,6 +123,12 @@ export function AccountMenu({
                 <Settings aria-hidden="true" />
                 Settings
               </Menu.LinkItem>
+              {isAdmin && (
+                <Menu.LinkItem className={item} render={<Link href="/dashboard/admin" />}>
+                  <Flag aria-hidden="true" />
+                  Reports
+                </Menu.LinkItem>
+              )}
               {hasBoth && (
                 <Menu.Item
                   className={item}

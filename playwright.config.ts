@@ -66,6 +66,8 @@ export default defineConfig({
         env: {
           ...(process.env as Record<string, string>),
           RESUME_IMPORT_FIXTURE: `${process.cwd()}/e2e/fixtures/resume-draft.json`,
+          // The reports queue (e2e/admin.spec.ts) is for this test account only.
+          ADMIN_EMAILS: 'e2e-admin@example.test',
         },
       },
 });

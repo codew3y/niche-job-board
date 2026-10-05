@@ -4,6 +4,7 @@ import { createClient } from '../supabase/server';
 import { getClientProfileId, type Viewer } from '../supabase/session';
 import { unreadCount } from './messaging';
 import { unreadNotificationCount } from './notifications';
+import { isAdmin } from '../admin';
 
 export type ShellUser = {
   displayName: string;
@@ -15,6 +16,8 @@ export type ShellUser = {
   unread: number;
   /** Unread in-app notifications, for the bell. */
   notificationsUnread: number;
+  /** In ADMIN_EMAILS: the profile menu shows the reports queue. */
+  isAdmin: boolean;
   /** "View profile" — how the active role appears to others. */
   profileHref: string;
   /** "Edit profile" — where the active role's profile is edited. */
@@ -55,6 +58,7 @@ export async function loadShellUser(viewer: Viewer): Promise<ShellUser> {
     avatarUrl: viewer.avatarUrl,
     unread: await unreadCount(viewer.userId),
     notificationsUnread: await unreadNotificationCount(viewer.userId),
+    isAdmin: await isAdmin(),
     profileHref,
     editProfileHref,
   };

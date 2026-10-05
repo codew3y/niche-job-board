@@ -103,6 +103,7 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
             hasClient={user.hasClient}
             profileHref={user.profileHref}
             editProfileHref={user.editProfileHref}
+            isAdmin={user.isAdmin}
             switchRole={switchRole}
             signOut={signOut}
           />
