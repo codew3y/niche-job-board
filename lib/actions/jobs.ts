@@ -8,6 +8,7 @@ import { invalidate } from '../matching/cache';
 import { embedInBackground } from '../matching/ingest';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
+import { isRateLimited } from './rate-limit';
 
 /**
  * Job lifecycle outside onboarding: create, edit, publish, close, reopen, duplicate.
@@ -106,6 +107,8 @@ async function syncSkills(
   }
 }
 
+const PUBLISH_LIMIT = 'You have published several jobs in the last minute. Try again shortly.';
+
 export async function saveJob(
   _prev: ActionResult | null,
   formData: FormData,
@@ -136,6 +139,7 @@ export async function saveJob(
       })
       .eq('id', jobId)
       .eq('client_id', client.id);
+    if (isRateLimited(error)) return { ok: false, message: PUBLISH_LIMIT };
     if (error) return { ok: false, message: 'Could not save this job.' };
     await syncSkills(supabase, jobId, skillIds);
     /**
@@ -158,6 +162,7 @@ export async function saveJob(
       })
       .select('id')
       .single();
+    if (isRateLimited(error)) return { ok: false, message: PUBLISH_LIMIT };
     if (error || !created) return { ok: false, message: 'Could not create this job.' };
     await syncSkills(supabase, created.id, skillIds);
     embedInBackground('job', created.id);

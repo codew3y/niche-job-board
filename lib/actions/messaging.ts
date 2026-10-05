@@ -15,6 +15,7 @@ import { sendEmailInBackground } from '../email/send';
 import { newMessageEmail } from '../email/templates';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
+import { isRateLimited } from './rate-limit';
 
 /**
  * Direct messaging — in v1 by owner decision (ADR-007 D1).
@@ -302,6 +303,12 @@ export async function reportContent(
     subject_id: parsed.data.subjectId,
     reason: parsed.data.reason,
   });
+  if (isRateLimited(error)) {
+    return {
+      ok: false,
+      message: 'You have sent several reports in the last minute. Try again shortly.',
+    };
+  }
   if (error) return { ok: false, message: 'Could not send that report. Try again.' };
 
   /**

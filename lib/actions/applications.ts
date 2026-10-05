@@ -16,6 +16,7 @@ import { notify } from '../notifications/notify';
 import { applyInput, statusChangeInput } from '../schemas/application';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
+import { isRateLimited } from './rate-limit';
 
 /**
  * Applying, withdrawing, and moving an application through its states.
@@ -96,6 +97,13 @@ export async function applyToJob(
     // something a human can act on.
     if (error.code === '23505') {
       return { ok: false, message: 'You have already applied to this job.' };
+    }
+    if (isRateLimited(error)) {
+      return {
+        ok: false,
+        message:
+          'You have sent several applications in the last minute. Give each one a moment, then try again.',
+      };
     }
     // An insert blocked by RLS means the job is not open, since ownership is already proven.
     if (error.code === '42501') {
