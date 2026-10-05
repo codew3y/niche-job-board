@@ -188,6 +188,28 @@ export async function closeJob(formData: FormData): Promise<void> {
   revalidatePath('/browse');
 }
 
+/**
+ * Mark an open job as filled: the client hired someone through it. Like closing, it stops new
+ * applications and takes the job out of search and matching; unlike closing, it records that the
+ * work found its person, and a filled job does not reopen (reopenJob only reopens 'closed').
+ */
+export async function fillJob(formData: FormData): Promise<void> {
+  const { supabase, client } = await requireClient();
+  const id = String(formData.get('jobId') ?? '');
+  if (!id) return;
+
+  await supabase
+    .from('jobs')
+    .update({ status: 'filled' })
+    .eq('id', id)
+    .eq('client_id', client.id)
+    .eq('status', 'open');
+  void invalidate('job', id);
+  revalidatePath(`/dashboard/client/jobs/${id}`);
+  revalidatePath('/dashboard/client/jobs');
+  revalidatePath('/browse');
+}
+
 export async function reopenJob(formData: FormData): Promise<void> {
   const { supabase, client } = await requireClient();
   const id = String(formData.get('jobId') ?? '');

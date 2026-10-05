@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   CaretRight as ChevronRight,
+  CheckCircle,
   Hourglass,
   Tray as Inbox,
   MagnifyingGlassMinus as SearchX,
@@ -11,6 +12,9 @@ import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
 import { CandidateList } from '@/components/application/candidate-list';
+import { ActionForm } from '@/components/ui/action-form';
+import { SubmitButton } from '@/components/ui/submit-button';
+import { fillJob } from '@/lib/actions/jobs';
 import { SuggestedList } from '@/components/application/suggested-list';
 import { Skeleton } from '@/components/shared/skeleton';
 import { rankApplicants, suggestedForJob } from '@/lib/services/matches';
@@ -139,103 +143,127 @@ async function Applicants({ job }: { job: OwnJob }) {
     rows.map((r) => r.talent_id),
   );
 
+  // Hired someone, job still open: offer to close it as filled, so new applications stop and it
+  // leaves search. An offer, not automatic: some clients hire more than one person per brief.
+  const hiredWhileOpen = job.status === 'open' && ranked.some((r) => r.status === 'hired');
+
   return (
-    // One column until xl; the content area is too narrow for two readable ones before that.
-    <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:items-start">
-      <section aria-labelledby="applicants-heading">
-        <SectionHeading
-          id="applicants-heading"
-          title={
-            <>
-              Applicants{' '}
-              <span className="font-normal text-text-subtle tabular-nums">{active.length}</span>
-            </>
-          }
-          description="Best fit first, each with the reason. Never a score."
-        />
-        {active.length > 0 ? (
-          <>
-            <CandidateList candidates={active} job={{ id: job.id, title: job.title }} />
-            {active.some((a) => !a.ranked) && (
-              // Said plainly rather than hidden. An applicant with no ranking is unmeasured,
-              // not poor: usually they applied since the last ranking was computed, and
-              // silently sorting them last would read as a verdict.
-              <p className="mt-3 text-sm text-text-subtle text-pretty">
-                Applicants without a reason haven&rsquo;t been assessed yet. That usually means they
-                applied recently; it updates within the hour.
-              </p>
-            )}
-          </>
-        ) : (
-          <EmptyState
-            icon={Inbox}
-            title="No applications yet"
-            body="They'll appear here as they arrive, ordered by how well they fit, with the reason for each."
-          />
-        )}
-
-        {withdrawn.length > 0 && (
-          <details className="group mt-6">
-            <summary className="inline-flex min-h-10 cursor-pointer list-none items-center gap-1.5 rounded-md text-sm text-text-muted hover:text-text [&::-webkit-details-marker]:hidden">
-              <ChevronRight
-                aria-hidden="true"
-                size={15}
-                className="transition-transform duration-fast ease-out group-open:rotate-90"
-              />
-              <span className="tabular-nums">{withdrawn.length} withdrawn</span>
-            </summary>
-            <div className="mt-3">
-              <CandidateList candidates={withdrawn} job={{ id: job.id, title: job.title }} />
-            </div>
-          </details>
-        )}
-      </section>
-
-      <section aria-labelledby="suggested-heading">
-        <SectionHeading
-          id="suggested-heading"
-          title="Developers who fit this brief"
-          description="They haven’t applied. You can look at their work, or message them."
-        />
-
-        {suggested.state === 'ready' && (
-          <SuggestedList matches={suggested.matches} job={{ id: job.id, title: job.title }} />
-        )}
-
-        {suggested.state === 'pending' && (
-          <EmptyState
-            icon={Hourglass}
-            tone="pending"
-            title="Still working through this"
-            body="We're matching this brief against every published profile. Results arrive within the hour."
-          />
-        )}
-
-        {suggested.state === 'empty' && (
-          // Story S4 again: say nothing fits rather than padding the list.
-          <EmptyState
-            icon={SearchX}
-            title="Nobody strong enough yet"
-            body="We'd rather show nothing than pad this with developers who don't fit. New profiles are published regularly."
-          />
-        )}
-
-        {suggested.state === 'too-sparse' && (
-          <EmptyState
-            title="Not enough in the brief to match on"
-            body="Matching reads the description and required skills. A fuller description gets better suggestions, and it is the same text a developer reads before deciding to apply."
-            action={
-              <Link
-                href={`/dashboard/client/jobs/${job.id}/edit`}
-                className={buttonStyles({ variant: 'secondary', size: 'sm' })}
-              >
-                Edit job
-              </Link>
+    <>
+      {hiredWhileOpen && (
+        <ActionForm
+          action={fillJob}
+          success="Job marked as filled"
+          className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-lg bg-success-subtle p-4"
+        >
+          <input type="hidden" name="jobId" value={job.id} />
+          <p className="flex min-w-0 flex-1 items-start gap-3 text-sm text-text text-pretty">
+            <CheckCircle aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-success" />
+            <span>
+              <strong className="font-semibold">You hired someone for this job.</strong> Mark it as
+              filled to stop new applications and take it out of search. If you are still hiring for
+              it, leave it open.
+            </span>
+          </p>
+          <SubmitButton pendingLabel="Marking…">Mark as filled</SubmitButton>
+        </ActionForm>
+      )}
+      {/* One column until xl; the content area is too narrow for two readable ones before that. */}
+      <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:items-start">
+        <section aria-labelledby="applicants-heading">
+          <SectionHeading
+            id="applicants-heading"
+            title={
+              <>
+                Applicants{' '}
+                <span className="font-normal text-text-subtle tabular-nums">{active.length}</span>
+              </>
             }
+            description="Best fit first, each with the reason. Never a score."
           />
-        )}
-      </section>
-    </div>
+          {active.length > 0 ? (
+            <>
+              <CandidateList candidates={active} job={{ id: job.id, title: job.title }} />
+              {active.some((a) => !a.ranked) && (
+                // Said plainly rather than hidden. An applicant with no ranking is unmeasured,
+                // not poor: usually they applied since the last ranking was computed, and
+                // silently sorting them last would read as a verdict.
+                <p className="mt-3 text-sm text-text-subtle text-pretty">
+                  Applicants without a reason haven&rsquo;t been assessed yet. That usually means
+                  they applied recently; it updates within the hour.
+                </p>
+              )}
+            </>
+          ) : (
+            <EmptyState
+              icon={Inbox}
+              title="No applications yet"
+              body="They'll appear here as they arrive, ordered by how well they fit, with the reason for each."
+            />
+          )}
+
+          {withdrawn.length > 0 && (
+            <details className="group mt-6">
+              <summary className="inline-flex min-h-10 cursor-pointer list-none items-center gap-1.5 rounded-md text-sm text-text-muted hover:text-text [&::-webkit-details-marker]:hidden">
+                <ChevronRight
+                  aria-hidden="true"
+                  size={15}
+                  className="transition-transform duration-fast ease-out group-open:rotate-90"
+                />
+                <span className="tabular-nums">{withdrawn.length} withdrawn</span>
+              </summary>
+              <div className="mt-3">
+                <CandidateList candidates={withdrawn} job={{ id: job.id, title: job.title }} />
+              </div>
+            </details>
+          )}
+        </section>
+
+        <section aria-labelledby="suggested-heading">
+          <SectionHeading
+            id="suggested-heading"
+            title="Developers who fit this brief"
+            description="They haven’t applied. You can look at their work, or message them."
+          />
+
+          {suggested.state === 'ready' && (
+            <SuggestedList matches={suggested.matches} job={{ id: job.id, title: job.title }} />
+          )}
+
+          {suggested.state === 'pending' && (
+            <EmptyState
+              icon={Hourglass}
+              tone="pending"
+              title="Still working through this"
+              body="We're matching this brief against every published profile. Results arrive within the hour."
+            />
+          )}
+
+          {suggested.state === 'empty' && (
+            // Story S4 again: say nothing fits rather than padding the list.
+            <EmptyState
+              icon={SearchX}
+              title="Nobody strong enough yet"
+              body="We'd rather show nothing than pad this with developers who don't fit. New profiles are published regularly."
+            />
+          )}
+
+          {suggested.state === 'too-sparse' && (
+            <EmptyState
+              title="Not enough in the brief to match on"
+              body="Matching reads the description and required skills. A fuller description gets better suggestions, and it is the same text a developer reads before deciding to apply."
+              action={
+                <Link
+                  href={`/dashboard/client/jobs/${job.id}/edit`}
+                  className={buttonStyles({ variant: 'secondary', size: 'sm' })}
+                >
+                  Edit job
+                </Link>
+              }
+            />
+          )}
+        </section>
+      </div>
+    </>
   );
 }
 

@@ -122,8 +122,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
         >
           <Lock aria-hidden="true" size={16} className="mt-0.5 shrink-0 text-text-subtle" />
           <span>
-            {closed ? 'This job is closed.' : 'The deadline for this job has passed.'} It stays
-            visible so existing applicants keep their record of it.
+            {job.status === 'filled'
+              ? 'This job has been filled.'
+              : closed
+                ? 'This job is closed.'
+                : 'The deadline for this job has passed.'}{' '}
+            It stays visible so existing applicants keep their record of it.
           </span>
         </p>
       )}
