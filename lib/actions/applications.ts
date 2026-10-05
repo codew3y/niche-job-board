@@ -3,9 +3,16 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { applicantEmail, applicantHeadline, jobOwnerEmail } from '../email/recipients';
+import {
+  applicantEmail,
+  applicantHeadline,
+  applicantUser,
+  jobOwnerEmail,
+  jobOwnerUser,
+} from '../email/recipients';
 import { sendEmailInBackground } from '../email/send';
-import { newApplicationEmail, statusChangeEmail } from '../email/templates';
+import { EMAILED_STATUSES, newApplicationEmail, statusChangeEmail } from '../email/templates';
+import { notify } from '../notifications/notify';
 import { applyInput, statusChangeInput } from '../schemas/application';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
@@ -111,10 +118,20 @@ export async function applyToJob(
 }
 
 async function notifyJobOwner(jobId: string, talentProfileId: string): Promise<void> {
-  const [owner, headline] = await Promise.all([
+  const [owner, headline, ownerUser] = await Promise.all([
     jobOwnerEmail(jobId),
     applicantHeadline(talentProfileId),
+    jobOwnerUser(jobId),
   ]);
+  // In-app (the bell), independent of email: someone with no deliverable address still sees it.
+  if (ownerUser) {
+    void notify(
+      ownerUser.userId,
+      'application_received',
+      { jobId, jobTitle: ownerUser.jobTitle, applicantHeadline: headline },
+      `application:${jobId}:${talentProfileId}`,
+    );
+  }
   if (!owner) return;
   sendEmailInBackground(
     newApplicationEmail({
@@ -198,6 +215,18 @@ export async function updateApplicationStatus(formData: FormData): Promise<void>
 }
 
 async function notifyApplicant(applicationId: string, status: string): Promise<void> {
+  // In-app for the same statuses that are emailed: "viewed" and "withdrawn" are not news.
+  if (EMAILED_STATUSES.includes(status)) {
+    const user = await applicantUser(applicationId);
+    if (user) {
+      void notify(
+        user.userId,
+        'application_status_changed',
+        { status, jobTitle: user.jobTitle, company: user.company },
+        `status:${applicationId}`,
+      );
+    }
+  }
   const recipient = await applicantEmail(applicationId);
   if (!recipient) return;
   // Returns null for transitions not worth an email — `viewed` most of all. See templates.ts.

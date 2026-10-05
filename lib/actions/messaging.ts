@@ -9,7 +9,8 @@ import {
   sendMessageInput,
   startConversationInput,
 } from '../schemas/messaging';
-import { messageRecipient } from '../email/recipients';
+import { conversationRecipient, messageRecipient } from '../email/recipients';
+import { notify } from '../notifications/notify';
 import { sendEmailInBackground } from '../email/send';
 import { newMessageEmail } from '../email/templates';
 import { createClient } from '../supabase/server';
@@ -316,6 +317,18 @@ async function notifyMessageRecipient(
   senderId: string,
   sentAt: string,
 ): Promise<void> {
+  // In-app: one entry per conversation (dedupe key), brought back to the top as unread on every
+  // new message. Unlike the email, it is cheap, so it does not wait for the thread to be read.
+  const target = await conversationRecipient(conversationId, senderId);
+  if (target) {
+    void notify(
+      target.userId,
+      'message_received',
+      { conversationId, senderName: target.senderName, jobTitle: target.jobTitle },
+      `message:${conversationId}`,
+    );
+  }
+
   const recipient = await messageRecipient(conversationId, senderId, sentAt);
   if (!recipient) return;
   sendEmailInBackground(

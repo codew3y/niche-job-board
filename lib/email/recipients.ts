@@ -159,3 +159,97 @@ export async function messageRecipient(
     return null;
   }
 }
+
+// ─────────────────────────── in-app notification targets ───────────────────────────
+//
+// The same lookups as above, returning the person's user id (for an in-app notification)
+// instead of an address. Same rules: service role, called only after the caller's own
+// RLS-checked write succeeded, null rather than throwing.
+
+/** The job's owner, for "new application". */
+export async function jobOwnerUser(
+  jobId: string,
+): Promise<{ userId: string; jobTitle: string } | null> {
+  try {
+    const { data } = await createServiceClient()
+      .from('jobs')
+      .select('title, client_profiles ( user_id )')
+      .eq('id', jobId)
+      .maybeSingle()
+      .overrideTypes<{ title: string; client_profiles: { user_id: string } | null }>();
+    return data?.client_profiles?.user_id
+      ? { userId: data.client_profiles.user_id, jobTitle: data.title }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/** The applicant, for a status change, with the job and company it is about. */
+export async function applicantUser(
+  applicationId: string,
+): Promise<{ userId: string; jobTitle: string; company: string | null } | null> {
+  try {
+    const { data } = await createServiceClient()
+      .from('applications')
+      .select('talent_profiles ( user_id ), jobs ( title, client_profiles ( company_name ) )')
+      .eq('id', applicationId)
+      .maybeSingle()
+      .overrideTypes<{
+        talent_profiles: { user_id: string } | null;
+        jobs: { title: string; client_profiles: { company_name: string } | null } | null;
+      }>();
+    if (!data?.talent_profiles?.user_id || !data.jobs) return null;
+    return {
+      userId: data.talent_profiles.user_id,
+      jobTitle: data.jobs.title,
+      company: data.jobs.client_profiles?.company_name ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** The other participant of a conversation, and how to name the sender. */
+export async function conversationRecipient(
+  conversationId: string,
+  senderId: string,
+): Promise<{ userId: string; senderName: string; jobTitle: string | null } | null> {
+  try {
+    const supabase = createServiceClient();
+    const { data: convo } = await supabase
+      .from('conversations')
+      .select(
+        'client_profiles ( user_id, company_name ), talent_profiles ( user_id, headline ), jobs ( title )',
+      )
+      .eq('id', conversationId)
+      .maybeSingle()
+      .overrideTypes<{
+        client_profiles: { user_id: string; company_name: string } | null;
+        talent_profiles: { user_id: string; headline: string } | null;
+        jobs: { title: string } | null;
+      }>();
+    const client = convo?.client_profiles;
+    const talent = convo?.talent_profiles;
+    if (!client || !talent) return null;
+    const senderIsClient = client.user_id === senderId;
+    if (!senderIsClient && talent.user_id !== senderId) return null;
+
+    let senderName = senderIsClient ? client.company_name : talent.headline;
+    if (!senderIsClient) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('display_name')
+        .eq('user_id', senderId)
+        .maybeSingle();
+      senderName = profile?.display_name?.trim() || senderName;
+    }
+    return {
+      userId: senderIsClient ? talent.user_id : client.user_id,
+      senderName,
+      jobTitle: convo?.jobs?.title ?? null,
+    };
+  } catch {
+    return null;
+  }
+}

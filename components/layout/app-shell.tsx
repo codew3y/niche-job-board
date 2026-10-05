@@ -1,4 +1,5 @@
 import {
+  Bell,
   Briefcase,
   House,
   ChatCenteredText as MessageSquare,
@@ -77,7 +78,21 @@ export function AppShell({ user, children }: { user: ShellUser; children: ReactN
           <Logo href={logoHref(true)} className="hidden lg:inline-flex" />
         </div>
 
-        <NavLinks items={NAV[user.activeRole]} unread={user.unread} />
+        <NavLinks
+          items={[
+            ...NAV[user.activeRole].map((item) =>
+              item.href === '/dashboard/messages'
+                ? { ...item, badge: { count: user.unread, label: 'unread messages' } }
+                : item,
+            ),
+            {
+              href: '/dashboard/notifications',
+              label: 'Notifications',
+              icon: <Bell />,
+              badge: { count: user.notificationsUnread, label: 'new notifications' },
+            },
+          ]}
+        />
 
         <div className="flex shrink-0 items-center justify-center px-2 md:mt-auto lg:justify-start lg:px-3">
           <AccountMenu

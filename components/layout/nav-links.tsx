@@ -11,7 +11,13 @@ import { cn } from '@/lib/ui/cn';
  * handed to this Client Component, and a component is a function — which cannot cross that
  * boundary ("Functions cannot be passed directly to Client Components"). An element can.
  */
-export type NavItem = { href: string; label: string; icon: ReactNode };
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: ReactNode;
+  /** A count and what it counts, e.g. 3 "unread messages". Shown when above zero. */
+  badge?: { count: number; label: string };
+};
 
 /**
  * The app navigation. On phones, tabs in the bottom bar: icon over a short label, each tab an
@@ -22,7 +28,7 @@ export type NavItem = { href: string; label: string; icon: ReactNode };
  * No animation on the active state: navigation is used tens of times a session, and motion on
  * a frequent action reads as lag.
  */
-export function NavLinks({ items, unread }: { items: NavItem[]; unread: number }) {
+export function NavLinks({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
   // Longest matching prefix wins, so /dashboard/client/jobs lights "My jobs", not "Home".
   const active = items
@@ -34,9 +40,9 @@ export function NavLinks({ items, unread }: { items: NavItem[]; unread: number }
       aria-label="Main"
       className="flex flex-1 md:mt-8 md:flex-none md:flex-col md:gap-1 md:px-2 lg:px-3"
     >
-      {items.map(({ href, label, icon }) => {
+      {items.map(({ href, label, icon, badge }) => {
         const isActive = href === active;
-        const showBadge = href === '/dashboard/messages' && unread > 0;
+        const showBadge = Boolean(badge && badge.count > 0);
         return (
           <Link
             key={href}
@@ -58,8 +64,8 @@ export function NavLinks({ items, unread }: { items: NavItem[]; unread: number }
             <span className="md:sr-only lg:not-sr-only">{label}</span>
             {showBadge && (
               <span className="absolute top-2 left-[calc(50%+0.375rem)] min-w-4 rounded-full bg-accent px-1 text-center text-2xs leading-4 font-medium text-accent-text tabular-nums md:top-1 md:right-1 md:left-auto lg:static lg:ml-auto">
-                {unread > 99 ? '99+' : unread}
-                <span className="sr-only"> unread messages</span>
+                {badge!.count > 99 ? '99+' : badge!.count}
+                <span className="sr-only"> {badge!.label}</span>
               </span>
             )}
           </Link>
