@@ -211,6 +211,16 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
                 <ContactDialog talentId={p.id} talentHeadline={p.headline} jobs={contactJobs} />
               </div>
             )}
+            {/* Said rather than silently missing: a client looking for the button should learn
+                why it is not there. */}
+            {viewer?.activeRole === 'client' &&
+              !isOwner &&
+              p.is_published &&
+              !p.accepts_messages && (
+                <p className="mt-6 border-t border-border-base pt-5 text-sm text-text-muted text-pretty">
+                  Not taking new messages right now.
+                </p>
+              )}
             {isOwner && (
               <div className="mt-6 border-t border-border-base pt-5">
                 <Link

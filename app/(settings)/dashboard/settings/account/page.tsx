@@ -1,9 +1,10 @@
-import { ArrowLeft } from '@phosphor-icons/react/ssr';
+import { ArrowLeft, DownloadSimple } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { DeleteAccount } from '@/components/settings/delete-account';
+import { buttonStyles } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
 
@@ -42,6 +43,31 @@ export default async function AccountPage() {
           </>
         }
       />
+
+      <section
+        aria-labelledby="export-heading"
+        className="space-y-4 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6"
+      >
+        <div>
+          <h2 id="export-heading" className="text-lg font-semibold tracking-tight">
+            Download your data
+          </h2>
+          <p className="mt-2 text-sm text-text-muted text-pretty">
+            One file with everything that is yours: your account, profile, projects, experience,
+            certifications, jobs you posted, applications you made, conversations you are part of,
+            saved lists, blocks and reports. It is in JSON, which any text editor can open.
+          </p>
+        </div>
+        {/* A plain link with `download`: a GET that only reads, so it works with JavaScript off. */}
+        <a
+          href="/dashboard/settings/account/export"
+          download
+          className={buttonStyles({ variant: 'secondary' })}
+        >
+          <DownloadSimple aria-hidden="true" />
+          Download my data
+        </a>
+      </section>
 
       <section
         aria-labelledby="delete-heading"

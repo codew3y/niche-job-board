@@ -191,6 +191,21 @@ export async function togglePublish(formData: FormData): Promise<void> {
   revalidatePath('/browse');
 }
 
+/**
+ * Turn new messages from clients on or off (`accepts_messages`; the terms promise it).
+ *
+ * Off means no client can START a conversation with this developer: conversations_insert_client
+ * checks the flag, so this is enforced by the database, not just by hiding the button.
+ * Conversations already open continue; blocking is the tool for ending one of those.
+ */
+export async function setAcceptsMessages(formData: FormData): Promise<void> {
+  const { supabase, profile } = await requireTalent();
+  const accepts = formData.get('accepts') === 'true';
+  await supabase.from('talent_profiles').update({ accepts_messages: accepts }).eq('id', profile.id);
+  revalidatePath('/dashboard/talent/profile');
+  revalidatePath('/talent/[slug]', 'page');
+}
+
 // ─────────────────────────── portfolio items ───────────────────────────
 
 export async function saveItem(

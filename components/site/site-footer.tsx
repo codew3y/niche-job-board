@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { SITE_NAV } from './nav';
 import { CONTAINER } from './page-parts';
 import { Logo } from '@/components/layout/logo';
+import { clientEnv } from '@/lib/env';
 import { cn } from '@/lib/ui/cn';
 
 /** The public site's footer: the same pages as the header, plus the legal pages. */
@@ -60,6 +61,16 @@ export function SiteFooter() {
                 Terms
               </Link>
             </li>
+            {clientEnv.NEXT_PUBLIC_CONTACT_EMAIL && (
+              <li>
+                <a
+                  href={`mailto:${clientEnv.NEXT_PUBLIC_CONTACT_EMAIL}`}
+                  className="inline-flex min-h-10 items-center text-text-muted transition-colors duration-fast ease-out hover:text-text"
+                >
+                  Contact
+                </a>
+              </li>
+            )}
           </ul>
         </nav>
       </div>

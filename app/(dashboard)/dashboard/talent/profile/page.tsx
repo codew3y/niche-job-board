@@ -17,7 +17,7 @@ import { buttonStyles } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { PageHeader, SectionHeading } from '@/components/ui/page-header';
-import { togglePublish } from '@/lib/actions/profile';
+import { setAcceptsMessages, togglePublish } from '@/lib/actions/profile';
 import { profileSuggestions } from '@/lib/schemas/talent';
 import type { CertificationRow, EducationRow, ExperienceRow } from '@/lib/services/talent';
 import { createClient } from '@/lib/supabase/server';
@@ -51,7 +51,7 @@ export default async function ProfilePage({
     .select(
       `id, slug, headline, bio, hourly_rate_min, hourly_rate_max, currency, availability,
        years_experience, timezone, website_url, github_url, linkedin_url,
-       portfolio_item_count, is_published`,
+       portfolio_item_count, is_published, accepts_messages`,
     )
     .eq('user_id', viewer.userId)
     .maybeSingle();
@@ -224,6 +224,38 @@ export default async function ProfilePage({
               pendingLabel={profile.is_published ? 'Unpublishing…' : 'Publishing…'}
             >
               {profile.is_published ? 'Unpublish' : 'Publish'}
+            </SubmitButton>
+          </ActionForm>
+
+          {/* New messages on or off: the terms promise developers can turn them off. Enforced by
+              the database (conversations_insert_client), not only by hiding the button. */}
+          <ActionForm
+            action={setAcceptsMessages}
+            success={
+              profile.accepts_messages ? 'New messages turned off' : 'New messages turned on'
+            }
+            className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-border-base pt-5"
+          >
+            <input
+              type="hidden"
+              name="accepts"
+              value={profile.accepts_messages ? 'false' : 'true'}
+            />
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <Badge tone={profile.accepts_messages ? 'success' : 'outline'} size="md">
+                {profile.accepts_messages ? 'Messages on' : 'Messages off'}
+              </Badge>
+              <p className="min-w-0 text-sm text-text-muted text-pretty">
+                {profile.accepts_messages
+                  ? 'Clients can message you from your profile.'
+                  : 'Clients cannot start new conversations with you. Conversations you already have stay open; block someone to end one.'}
+              </p>
+            </div>
+            <SubmitButton
+              variant="secondary"
+              pendingLabel={profile.accepts_messages ? 'Turning off…' : 'Turning on…'}
+            >
+              {profile.accepts_messages ? 'Turn off messages' : 'Turn on messages'}
             </SubmitButton>
           </ActionForm>
 

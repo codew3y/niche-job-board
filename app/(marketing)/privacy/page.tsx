@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { LegalPage, Section } from '@/components/legal/legal-page';
-import { siteUrl } from '@/lib/env';
+import { clientEnv, siteUrl } from '@/lib/env';
 
 export const metadata: Metadata = {
   title: 'Privacy',
@@ -207,9 +207,22 @@ export default function PrivacyPage() {
 
       <Section heading="Your rights">
         <p>
-          You can see and edit everything on your profile from your dashboard, and delete your
-          account from settings at any time. For anything else — a copy of your data, or a question
-          about how it is handled — contact us and we will deal with it.
+          You can see and edit everything on your profile from your dashboard, download a copy of
+          your data from{' '}
+          <Link href="/dashboard/settings/account" className="prose-link">
+            Settings → Account
+          </Link>
+          , and delete your account there at any time.
+          {clientEnv.NEXT_PUBLIC_CONTACT_EMAIL ? (
+            <>
+              {' '}
+              For anything else, such as a question about how your data is handled, write to{' '}
+              <a href={`mailto:${clientEnv.NEXT_PUBLIC_CONTACT_EMAIL}`} className="prose-link">
+                {clientEnv.NEXT_PUBLIC_CONTACT_EMAIL}
+              </a>{' '}
+              and we will deal with it.
+            </>
+          ) : null}
         </p>
       </Section>
 

@@ -34,6 +34,15 @@ const clientSchema = z.object({
     (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
     z.url().optional(),
   ),
+  /**
+   * Where people write about their data or the service: shown on /privacy and in the footer
+   * when set. Optional, and blank counts as unset, so the site never shows "contact us" with a
+   * broken or empty address.
+   */
+  NEXT_PUBLIC_CONTACT_EMAIL: z.preprocess(
+    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+    z.email('NEXT_PUBLIC_CONTACT_EMAIL must be an email address.').optional(),
+  ),
 });
 
 /**
@@ -137,6 +146,7 @@ export const clientEnv = parseOrThrow(
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_CONTACT_EMAIL: process.env.NEXT_PUBLIC_CONTACT_EMAIL,
   },
   'client',
 );
