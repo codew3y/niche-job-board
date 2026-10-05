@@ -123,7 +123,14 @@ export function TalentMatchItem({ match }: { match: TalentMatch }) {
  * NO SCORE (ADR-007 D2): order and reason only. The type has no score field at all, so there is
  * nothing to leak.
  */
-export function CandidateMatchItem({ match }: { match: CandidateMatch }) {
+export function CandidateMatchItem({
+  match,
+  action,
+}: {
+  match: CandidateMatch;
+  /** An extra control for the row, such as a Message button on a job's suggestions. */
+  action?: React.ReactNode;
+}) {
   const evidence =
     match.portfolioItemCount > 0
       ? `${match.portfolioItemCount} project${match.portfolioItemCount === 1 ? '' : 's'}`
@@ -162,6 +169,7 @@ export function CandidateMatchItem({ match }: { match: CandidateMatch }) {
                 Portfolio site
               </ExternalLink>
             )}
+            {action}
           </p>
         </div>
       </div>

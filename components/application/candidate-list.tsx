@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { MatchReason } from '@/components/matches/match-items';
+import { ContactDialog } from '@/components/messaging/contact-dialog';
 import { ActionForm } from '@/components/ui/action-form';
 import { Avatar } from '@/components/ui/avatar';
 import { SubmitButton } from '@/components/ui/submit-button';
@@ -28,6 +29,7 @@ type Candidate = {
     headline: string;
     portfolio_item_count: number;
     website_url: string | null;
+    accepts_messages: boolean;
   } | null;
 };
 
@@ -58,7 +60,14 @@ const rank = (s: string) => {
  * click is worse than not rendering it. Each change confirms with a toast: the badge updates in
  * place, which is easy to miss after a click further down the card.
  */
-export function CandidateList({ candidates }: { candidates: Candidate[] }) {
+export function CandidateList({
+  candidates,
+  job,
+}: {
+  candidates: Candidate[];
+  /** The job these applied to: a message from here is about it. */
+  job: { id: string; title: string };
+}) {
   return (
     <ul className="space-y-3">
       {candidates.map((c) => {
@@ -115,8 +124,20 @@ export function CandidateList({ candidates }: { candidates: Candidate[] }) {
 
             {c.reason && <MatchReason className="mt-4">{c.reason}</MatchReason>}
 
-            {next.length > 0 && (
+            {(next.length > 0 || profile?.accepts_messages) && (
               <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-border-base pt-4">
+                {/* Message an applicant about this job. Continues an existing conversation if
+                    there is one (startConversation reuses it). Hidden when they turned new
+                    messages off; the database would refuse it anyway. */}
+                {profile?.accepts_messages && (
+                  <ContactDialog
+                    talentId={c.talent_id}
+                    talentHeadline={profile.headline}
+                    jobs={[job]}
+                    defaultJobId={job.id}
+                    trigger="compact"
+                  />
+                )}
                 {next.map((status) => {
                   const a = ACTION[status as keyof typeof ACTION];
                   return (

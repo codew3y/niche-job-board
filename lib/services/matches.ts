@@ -37,6 +37,8 @@ export type CandidateMatch = {
   headline: string;
   portfolioItemCount: number;
   websiteUrl: string | null;
+  /** Whether a client can start a conversation (the developer's messages switch). */
+  acceptsMessages: boolean;
   /** DELIBERATELY ABSENT. A client sees order and reason, never a number (ADR-007 D2). */
   reason: string | null;
 };
@@ -72,7 +74,7 @@ export async function candidatesForJob(jobId: string): Promise<MatchFeed<Candida
 
   const { data: profiles } = await service
     .from('talent_profiles')
-    .select('id, slug, headline, portfolio_item_count, website_url')
+    .select('id, slug, headline, portfolio_item_count, website_url, accepts_messages')
     .in(
       'id',
       cached.map((c) => c.targetId),
@@ -94,6 +96,7 @@ export async function candidatesForJob(jobId: string): Promise<MatchFeed<Candida
         headline: profile.headline,
         portfolioItemCount: profile.portfolio_item_count,
         websiteUrl: profile.website_url,
+        acceptsMessages: profile.accepts_messages,
         reason: c.reason,
       };
     })

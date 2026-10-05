@@ -112,7 +112,7 @@ async function Applicants({ job }: { job: OwnJob }) {
     .from('applications')
     .select(
       `id, talent_id, status, cover_note, created_at,
-       talent_profiles ( slug, headline, portfolio_item_count, website_url )`,
+       talent_profiles ( slug, headline, portfolio_item_count, website_url, accepts_messages )`,
     )
     .eq('job_id', job.id)
     .order('created_at', { ascending: false });
@@ -155,7 +155,7 @@ async function Applicants({ job }: { job: OwnJob }) {
         />
         {active.length > 0 ? (
           <>
-            <CandidateList candidates={active} />
+            <CandidateList candidates={active} job={{ id: job.id, title: job.title }} />
             {active.some((a) => !a.ranked) && (
               // Said plainly rather than hidden. An applicant with no ranking is unmeasured,
               // not poor: usually they applied since the last ranking was computed, and
@@ -185,7 +185,7 @@ async function Applicants({ job }: { job: OwnJob }) {
               <span className="tabular-nums">{withdrawn.length} withdrawn</span>
             </summary>
             <div className="mt-3">
-              <CandidateList candidates={withdrawn} />
+              <CandidateList candidates={withdrawn} job={{ id: job.id, title: job.title }} />
             </div>
           </details>
         )}
@@ -198,7 +198,9 @@ async function Applicants({ job }: { job: OwnJob }) {
           description="They haven’t applied. You can look at their work, or message them."
         />
 
-        {suggested.state === 'ready' && <SuggestedList matches={suggested.matches} />}
+        {suggested.state === 'ready' && (
+          <SuggestedList matches={suggested.matches} job={{ id: job.id, title: job.title }} />
+        )}
 
         {suggested.state === 'pending' && (
           <EmptyState

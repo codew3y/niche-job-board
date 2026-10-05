@@ -22,6 +22,8 @@ export function ContactDialog({
   talentId,
   talentHeadline,
   jobs,
+  defaultJobId,
+  trigger = 'profile',
 }: {
   talentId: string;
   /**
@@ -32,16 +34,32 @@ export function ContactDialog({
   talentHeadline: string;
   /** The client's open jobs, so a first message can be anchored to one. */
   jobs: { id: string; title: string }[];
+  /** Pre-select one of `jobs` (an applicant list knows which job this is about). */
+  defaultJobId?: string;
+  /** "compact": a small "Message" button for a row in a list, named for the person. */
+  trigger?: 'profile' | 'compact';
 }) {
   const [state, action] = useActionState<ActionResult | null, FormData>(startConversation, null);
 
   return (
     <Modal
       trigger={
-        <Button size="lg">
-          <MessageSquare aria-hidden="true" />
-          Message this developer
-        </Button>
+        trigger === 'compact' ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            className="min-h-10 sm:min-h-0"
+            aria-label={`Message ${talentHeadline}`}
+          >
+            <MessageSquare aria-hidden="true" />
+            Message
+          </Button>
+        ) : (
+          <Button size="lg">
+            <MessageSquare aria-hidden="true" />
+            Message this developer
+          </Button>
+        )
       }
       title="Message"
       description={talentHeadline}
@@ -54,7 +72,13 @@ export function ContactDialog({
         </p>
 
         {jobs.length > 0 && (
-          <SelectField label="About a job" name="jobId" id="jobId" optional defaultValue="">
+          <SelectField
+            label="About a job"
+            name="jobId"
+            id="jobId"
+            optional
+            defaultValue={defaultJobId ?? ''}
+          >
             <option value="">General enquiry</option>
             {jobs.map((j) => (
               <option key={j.id} value={j.id}>
