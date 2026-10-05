@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Lock } from '@phosphor-icons/react/ssr';
+import { ArrowLeft, ArrowRight, Flag, Lock } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -6,7 +6,9 @@ import { jsonLdScript } from '@/lib/seo/json-ld';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+import { ReportDialog } from '@/components/messaging/thread-actions';
 import { ExternalLink } from '@/components/shared/external-link';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/shared/skeleton';
 import { Avatar } from '@/components/ui/avatar';
 import { TagList } from '@/components/ui/badge';
@@ -174,6 +176,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
                 <ApplyBlock job={job} closed={closed || expired} />
               </Suspense>
             </FactsCard>
+            <Suspense fallback={null}>
+              <ReportJob jobId={job.id} ownerClientId={job.client_profiles?.id ?? null} />
+            </Suspense>
           </div>
         </aside>
 
@@ -353,4 +358,34 @@ async function resolveApplyState(jobId: string, closed: boolean): Promise<ApplyS
 
   if (!profile.is_published) return { kind: 'unpublished' };
   return { kind: 'can-apply' };
+}
+
+/**
+ * "Report this job", for anyone signed in who does not own it. Streamed, so the session lookup
+ * never holds up the job itself.
+ */
+async function ReportJob({
+  jobId,
+  ownerClientId,
+}: {
+  jobId: string;
+  ownerClientId: string | null;
+}) {
+  if (!(await getSessionUser())) return null;
+  if (ownerClientId && (await getClientProfileId()) === ownerClientId) return null;
+  return (
+    <div className="mt-3 flex justify-center">
+      <ReportDialog
+        subjectType="job"
+        subjectId={jobId}
+        subjectLabel="this job"
+        trigger={
+          <Button variant="ghost" size="sm" className="text-text-muted">
+            <Flag aria-hidden="true" />
+            Report this job
+          </Button>
+        }
+      />
+    </div>
+  );
 }

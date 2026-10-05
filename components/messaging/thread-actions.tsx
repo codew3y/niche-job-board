@@ -95,8 +95,10 @@ export function ReportDialog({
             block, which is the control the reporter holds themselves.
           */}
           <p className="text-sm text-text-muted text-pretty">
-            A person reads these; there is no automatic action and no set turnaround. If you want
-            the messages to stop now, block them as well.
+            A person reads these; there is no automatic action and no set turnaround.
+            {subjectType === 'conversation' || subjectType === 'message'
+              ? ' If you want the messages to stop now, block them as well.'
+              : ' It stays visible until it has been reviewed.'}
           </p>
           <div className="flex justify-end">
             <ModalClose

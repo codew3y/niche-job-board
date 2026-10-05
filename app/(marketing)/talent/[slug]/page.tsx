@@ -1,4 +1,4 @@
-import { ArrowLeft, SealCheck } from '@phosphor-icons/react/ssr';
+import { ArrowLeft, Flag, SealCheck } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 
 import { jsonLdScript } from '@/lib/seo/json-ld';
@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { ContactDialog } from '@/components/messaging/contact-dialog';
+import { ReportDialog } from '@/components/messaging/thread-actions';
+import { Button } from '@/components/ui/button';
 import { ExternalLink } from '@/components/shared/external-link';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge, TagList } from '@/components/ui/badge';
@@ -229,6 +231,23 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
                 >
                   Edit your profile
                 </Link>
+              </div>
+            )}
+            {/* Anyone signed in can report a profile (reports, migration 0000). Not shown to
+                its owner, nor to signed-out visitors, who have no account to report from. */}
+            {user && !isOwner && (
+              <div className="mt-4 flex justify-center">
+                <ReportDialog
+                  subjectType="profile"
+                  subjectId={p.id}
+                  subjectLabel="this profile"
+                  trigger={
+                    <Button variant="ghost" size="sm" className="text-text-muted">
+                      <Flag aria-hidden="true" />
+                      Report this profile
+                    </Button>
+                  }
+                />
               </div>
             )}
           </div>
