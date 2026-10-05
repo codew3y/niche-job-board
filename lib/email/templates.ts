@@ -129,6 +129,47 @@ ${url}
 }
 
 /**
+ * "You have a new message" (gap analysis #1).
+ *
+ * The message itself is NOT in the email: the sender's name and the job it is about are enough to
+ * decide to open it, and keeping the text on TechSelect means a private conversation is not copied
+ * into an inbox, a mail provider's logs and every device that syncs that inbox. One email per
+ * unread stretch (lib/email/recipients.ts, messageRecipient), never one per message.
+ */
+export function newMessageEmail(input: {
+  to: string;
+  senderName: string;
+  jobTitle: string | null;
+  conversationId: string;
+}): EmailMessage {
+  const url = `${siteUrl()}/dashboard/messages/${input.conversationId}`;
+  const about = input.jobTitle ? ` about ${input.jobTitle}` : '';
+  return {
+    to: input.to,
+    template: 'new_message',
+    subject: `New message from ${input.senderName}${about}`,
+    text: `${input.senderName} sent you a message${about} on TechSelect.
+
+Read and reply:
+${url}
+
+You will not get another email about this conversation until you have read it.
+
+TechSelect`,
+    html: layout({
+      heading: 'You have a new message',
+      body:
+        p(
+          `<strong>${esc(input.senderName)}</strong> sent you a message${
+            input.jobTitle ? ` about <strong>${esc(input.jobTitle)}</strong>` : ''
+          }.`,
+        ) + p('You will not get another email about this conversation until you have read it.'),
+      cta: { label: 'Read and reply', href: url },
+    }),
+  };
+}
+
+/**
  * Status changes the applicant is told about.
  *
  * `viewed` is absent on purpose. Emailing "a client opened your application" is a

@@ -15,6 +15,7 @@ import { describe, expect, it } from 'vitest';
 import {
   EMAILED_STATUSES,
   newApplicationEmail,
+  newMessageEmail,
   statusChangeEmail,
   welcomeEmail,
 } from './templates';
@@ -28,6 +29,12 @@ const all = [
     applicantHeadline: 'Payments engineer',
   }),
   statusChangeEmail({ to: 'c@example.test', jobTitle: 'Stripe integration', status: 'hired' })!,
+  newMessageEmail({
+    to: 'd@example.test',
+    senderName: 'Ledgerline',
+    jobTitle: 'Stripe integration',
+    conversationId: '00000000-0000-4000-8000-000000000001',
+  }),
 ];
 
 describe('every template', () => {
@@ -143,5 +150,39 @@ describe('links', () => {
       expect(m.html).toContain('/privacy');
       expect(m.html).toContain('/terms');
     }
+  });
+});
+
+describe('the new-message email', () => {
+  const base = {
+    to: 'd@example.test',
+    senderName: 'Ledgerline',
+    jobTitle: 'Stripe integration' as string | null,
+    conversationId: '00000000-0000-4000-8000-000000000001',
+  };
+
+  it('says who wrote and about which job, and links to the conversation', () => {
+    const m = newMessageEmail(base);
+    expect(m.subject).toBe('New message from Ledgerline about Stripe integration');
+    expect(m.text).toContain('/dashboard/messages/00000000-0000-4000-8000-000000000001');
+    expect(m.html).toContain('/dashboard/messages/00000000-0000-4000-8000-000000000001');
+  });
+
+  it('reads naturally for a conversation not tied to a job', () => {
+    expect(newMessageEmail({ ...base, jobTitle: null }).subject).toBe(
+      'New message from Ledgerline',
+    );
+  });
+
+  it('escapes the sender name, which is user-supplied', () => {
+    const m = newMessageEmail({ ...base, senderName: '<img src=x onerror=alert(1)>' });
+    expect(m.html).not.toContain('<img src=x');
+    expect(m.html).toContain('&lt;img');
+  });
+
+  it('never carries the message itself, and says no more email comes until it is read', () => {
+    const m = newMessageEmail(base);
+    expect(Object.keys(base)).not.toContain('body');
+    expect(m.text).toMatch(/not get another email about this conversation until you have read it/);
   });
 });

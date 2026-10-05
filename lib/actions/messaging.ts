@@ -9,6 +9,9 @@ import {
   sendMessageInput,
   startConversationInput,
 } from '../schemas/messaging';
+import { messageRecipient } from '../email/recipients';
+import { sendEmailInBackground } from '../email/send';
+import { newMessageEmail } from '../email/templates';
 import { createClient } from '../supabase/server';
 import type { ActionResult } from './auth';
 
@@ -188,10 +191,17 @@ async function postMessage(
   senderId: string,
   body: string,
 ): Promise<ActionResult> {
-  const { error } = await supabase
+  const { data: inserted, error } = await supabase
     .from('messages')
-    .insert({ conversation_id: conversationId, sender_id: senderId, body });
-  if (!error) return { ok: true };
+    .insert({ conversation_id: conversationId, sender_id: senderId, body })
+    .select('created_at')
+    .maybeSingle();
+  if (!error) {
+    // After the insert, never before: the RLS-checked write is what proves the sender may post
+    // here. Fire and forget; a failed email never fails the send.
+    if (inserted) void notifyMessageRecipient(conversationId, senderId, inserted.created_at);
+    return { ok: true };
+  }
   if (error.code === RLS_DENIED) return { ok: true };
   return { ok: false, message: 'Could not send that message. Try again.' };
 }
@@ -222,26 +232,6 @@ export async function sendMessage(
   revalidatePath(`/dashboard/messages/${parsed.data.conversationId}`);
   revalidatePath('/dashboard/messages');
   return result;
-}
-
-export async function markRead(formData: FormData): Promise<void> {
-  const conversationId = String(formData.get('conversationId') ?? '');
-  if (!conversationId) return;
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
-
-  await supabase
-    .from('messages')
-    .update({ read_at: new Date().toISOString() })
-    .eq('conversation_id', conversationId)
-    .neq('sender_id', user.id)
-    .is('read_at', null);
-
-  revalidatePath('/dashboard/messages');
 }
 
 export async function blockUser(formData: FormData): Promise<void> {
@@ -319,4 +309,44 @@ export async function reportContent(
    * exist — and points at block, which is the control the reporter actually holds.
    */
   return { ok: true };
+}
+
+async function notifyMessageRecipient(
+  conversationId: string,
+  senderId: string,
+  sentAt: string,
+): Promise<void> {
+  const recipient = await messageRecipient(conversationId, senderId, sentAt);
+  if (!recipient) return;
+  sendEmailInBackground(
+    newMessageEmail({
+      to: recipient.email,
+      senderName: recipient.senderName,
+      jobTitle: recipient.jobTitle,
+      conversationId,
+    }),
+  );
+}
+
+/**
+ * Mark a conversation read, called by the thread page in the browser once it is actually on
+ * screen (components/messaging/thread-live.tsx). Not on render: link prefetch and the
+ * back/forward cache render pages nobody looked at.
+ */
+export async function markConversationRead(conversationId: string): Promise<void> {
+  if (!/^[0-9a-f-]{36}$/i.test(conversationId)) return;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from('messages')
+    .update({ read_at: new Date().toISOString() })
+    .eq('conversation_id', conversationId)
+    .neq('sender_id', user.id)
+    .is('read_at', null);
+
+  revalidatePath('/dashboard/messages');
 }

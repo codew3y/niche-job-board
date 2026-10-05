@@ -174,9 +174,11 @@ export default function PrivacyPage() {
 
       <Section heading="Email we send">
         <p>
-          Only email tied to something you did: confirming your address, resetting a password, a new
-          application on your job, and a change to an application you submitted. There is no
-          marketing email, so there is no marketing list to unsubscribe from.
+          Only email tied to something you did or that was sent to you: confirming your address, a
+          welcome when you first sign in, resetting a password, a new application on your job, a
+          change to an application you submitted, and a new message (at most one email per
+          conversation until you have read it, without the message itself). There is no marketing
+          email, so there is no marketing list to unsubscribe from.
         </p>
       </Section>
 

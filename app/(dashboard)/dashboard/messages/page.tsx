@@ -1,5 +1,7 @@
 import { ChatCenteredText as MessageSquare } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
+
+import { ThreadLive } from '@/components/messaging/thread-live';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 
@@ -43,6 +45,8 @@ export default async function MessagesPage() {
       <Suspense fallback={<InboxSkeleton />}>
         <Inbox userId={user.id} />
       </Suspense>
+      {/* New conversations and unread counts appear without a reload while this is open. */}
+      <ThreadLive />
     </div>
   );
 }

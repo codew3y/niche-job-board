@@ -88,8 +88,10 @@ maybe('reserve_ai_call', () => {
   });
 
   it('starts a fresh budget on a new day', async () => {
-    // Yesterday's exhaustion must not bleed into today.
-    await sql`insert into ai_usage (day, kind, calls) values (current_date - 1, 'embedding', 9999)`;
+    // Yesterday's exhaustion must not bleed into today. Upsert: a local database that really
+    // did make calls yesterday already has that row, and a plain insert collided with it.
+    await sql`insert into ai_usage (day, kind, calls) values (current_date - 1, 'embedding', 9999)
+              on conflict (day, kind) do update set calls = 9999`;
     expect(await reserve('embedding', 2)).toBe(true);
     await sql`delete from ai_usage where day = current_date - 1`;
   });

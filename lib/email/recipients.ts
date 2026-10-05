@@ -91,3 +91,71 @@ export async function applicantHeadline(talentProfileId: string): Promise<string
     return 'A developer';
   }
 }
+
+/**
+ * Who to tell about a new message, and whether to tell them at all.
+ *
+ * The recipient is the conversation's other participant. They are emailed only when this message
+ * is the ONLY unread message to them in the conversation: the first message of an unread stretch.
+ * A burst of ten messages is one email, and the next email comes only after they have read the
+ * thread. No extra state is needed for that rule; `messages.read_at` already holds it.
+ *
+ * Counted up to and including this message (`sentAt`), so two messages sent at the same moment
+ * still produce exactly one email: the first sees one unread, the second sees two.
+ *
+ * Called only after the sender's insert succeeded under RLS, which is what proves they are a
+ * participant and not blocked (a blocked send is refused, and never reaches here).
+ */
+export async function messageRecipient(
+  conversationId: string,
+  senderId: string,
+  sentAt: string,
+): Promise<{ email: string; senderName: string; jobTitle: string | null } | null> {
+  try {
+    const supabase = createServiceClient();
+    const { data: convo } = await supabase
+      .from('conversations')
+      .select(
+        'client_profiles ( user_id, company_name ), talent_profiles ( user_id, headline ), jobs ( title )',
+      )
+      .eq('id', conversationId)
+      .maybeSingle()
+      .overrideTypes<{
+        client_profiles: { user_id: string; company_name: string } | null;
+        talent_profiles: { user_id: string; headline: string } | null;
+        jobs: { title: string } | null;
+      }>();
+    const client = convo?.client_profiles;
+    const talent = convo?.talent_profiles;
+    if (!client || !talent) return null;
+
+    const senderIsClient = client.user_id === senderId;
+    if (!senderIsClient && talent.user_id !== senderId) return null;
+    const recipientId = senderIsClient ? talent.user_id : client.user_id;
+
+    const { count } = await supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('conversation_id', conversationId)
+      .neq('sender_id', recipientId)
+      .is('read_at', null)
+      .lte('created_at', sentAt);
+    if (count !== 1) return null;
+
+    let senderName = senderIsClient ? client.company_name : talent.headline;
+    if (!senderIsClient) {
+      // A person's name reads better than their headline in "New message from …".
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('display_name')
+        .eq('user_id', senderId)
+        .maybeSingle();
+      senderName = profile?.display_name?.trim() || senderName;
+    }
+
+    const email = await emailForUser(recipientId);
+    return email ? { email, senderName, jobTitle: convo?.jobs?.title ?? null } : null;
+  } catch {
+    return null;
+  }
+}

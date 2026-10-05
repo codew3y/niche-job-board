@@ -1,13 +1,12 @@
-import { ArrowLeft, Prohibit as Ban, Checks as CheckCheck } from '@phosphor-icons/react/ssr';
+import { ArrowLeft, Prohibit as Ban } from '@phosphor-icons/react/ssr';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { MessageComposer } from '@/components/messaging/message-composer';
 import { MessageList } from '@/components/messaging/message-list';
+import { ThreadLive } from '@/components/messaging/thread-live';
 import { ThreadActions } from '@/components/messaging/thread-actions';
 import { Avatar } from '@/components/ui/avatar';
-import { SubmitButton } from '@/components/ui/submit-button';
-import { markRead } from '@/lib/actions/messaging';
 import { getThread } from '@/lib/services/messaging';
 import { createClient } from '@/lib/supabase/server';
 
@@ -101,25 +100,10 @@ export default async function ThreadPage({ params }: { params: Promise<{ id: str
 
       <MessageList messages={thread.messages} />
 
-      {/*
-        Marking read is a POST, not a side effect of rendering. A GET that mutates gets fired by
-        link prefetch and by the browser's own back/forward cache, which would clear the unread
-        badge for a page the person never actually looked at.
-      */}
-      {unread && (
-        <form action={markRead} className="mb-3 flex justify-end">
-          <input type="hidden" name="conversationId" value={thread.id} />
-          <SubmitButton
-            variant="ghost"
-            size="sm"
-            className="min-h-10 sm:min-h-0"
-            pendingLabel="Marking…"
-          >
-            <CheckCheck aria-hidden="true" />
-            Mark as read
-          </SubmitButton>
-        </form>
-      )}
+      {/* Marks the thread read once it is on screen, and refreshes it every 10 seconds while
+          visible, so replies arrive without a reload. Marking read is a POST from the browser,
+          never a side effect of rendering (prefetch renders pages nobody looked at). */}
+      <ThreadLive conversationId={thread.id} hasUnread={unread} />
 
       <MessageComposer conversationId={thread.id} />
     </div>
