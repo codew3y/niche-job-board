@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { DeleteAccount } from '@/components/settings/delete-account';
+import { DisplayNameForm } from '@/components/settings/display-name-form';
 import { buttonStyles } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
@@ -22,6 +23,11 @@ export default async function AccountPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user?.email) redirect('/login');
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('display_name')
+    .eq('user_id', user.id)
+    .maybeSingle();
 
   return (
     <div className="max-w-3xl space-y-8">
@@ -43,6 +49,16 @@ export default async function AccountPage() {
           </>
         }
       />
+
+      <section
+        aria-labelledby="name-heading"
+        className="space-y-4 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6"
+      >
+        <h2 id="name-heading" className="text-lg font-semibold tracking-tight">
+          Name
+        </h2>
+        <DisplayNameForm current={profile?.display_name ?? ''} />
+      </section>
 
       <section
         aria-labelledby="export-heading"
