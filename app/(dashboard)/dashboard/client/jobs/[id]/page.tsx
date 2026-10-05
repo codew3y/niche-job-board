@@ -116,7 +116,7 @@ async function Applicants({ job }: { job: OwnJob }) {
     .from('applications')
     .select(
       `id, talent_id, status, cover_note, created_at,
-       talent_profiles ( slug, headline, portfolio_item_count, website_url, accepts_messages )`,
+       talent_profiles ( slug, headline, portfolio_item_count, website_url, accepts_messages, avatar_url )`,
     )
     .eq('job_id', job.id)
     .order('created_at', { ascending: false });

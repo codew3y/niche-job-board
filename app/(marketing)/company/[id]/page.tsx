@@ -86,7 +86,7 @@ export default async function CompanyPage({ params }: Params) {
       <div className="mt-6 grid grid-cols-1 gap-x-12 gap-y-10 @3xl:grid-cols-[minmax(0,1fr)_18rem]">
         <header className="min-w-0 @3xl:col-start-1 @3xl:row-start-1">
           <div className="flex items-start gap-4">
-            <Avatar name={company.company_name} size="lg" />
+            <Avatar name={company.company_name} src={company.logo_url} size="lg" />
             <div className="min-w-0">
               <h1 className="font-semibold text-display-sm break-words text-balance sm:text-display-md">
                 {company.company_name}

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
 import { CompanyForm } from '@/components/client/company-form';
+import { PhotoUpload } from '@/components/upload/photo-upload';
 import { ExternalLink } from '@/components/shared/external-link';
 import { Avatar } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
@@ -32,7 +33,7 @@ export default async function ClientProfilePage() {
 
   const { data: company } = await supabase
     .from('client_profiles')
-    .select('id, company_name, website, industry, about')
+    .select('id, company_name, website, industry, about, logo_url')
     .eq('user_id', user.id)
     .maybeSingle();
 
@@ -63,7 +64,7 @@ export default async function ClientProfilePage() {
           </h2>
           <Card className="p-5">
             <div className="flex items-center gap-3">
-              <Avatar name={company.company_name} />
+              <Avatar name={company.company_name} src={company.logo_url} />
               <div className="min-w-0">
                 <p className="font-semibold break-words">{company.company_name}</p>
                 {company.industry && <p className="text-sm text-text-subtle">{company.industry}</p>}
@@ -94,6 +95,9 @@ export default async function ClientProfilePage() {
           className="scroll-mt-8 lg:col-start-1 lg:row-start-1"
         >
           <SectionHeading id="edit-heading" title="Details" />
+          <div className="mb-8">
+            <PhotoUpload kind="logo" name={company.company_name} current={company.logo_url} />
+          </div>
           <CompanyForm company={company} />
 
           <div className="mt-10 space-y-2 border-t border-border-base pt-6 text-sm text-text-muted">

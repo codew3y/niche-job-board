@@ -141,7 +141,7 @@ export function CandidateMatchItem({
   return (
     <li className="px-5 py-6 sm:px-6">
       <div className="flex items-start gap-3.5">
-        <Avatar name={match.headline} className="hidden sm:grid" />
+        <Avatar name={match.headline} src={match.avatarUrl} className="hidden sm:grid" />
         <div className="min-w-0 flex-1">
           <h3 className="font-semibold text-balance">
             <Link href={`/talent/${match.slug}`} className="hover:underline">

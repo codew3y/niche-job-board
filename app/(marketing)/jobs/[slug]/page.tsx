@@ -145,7 +145,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
         <div className="min-w-0 @3xl:col-start-1">
           <header>
             <div className="flex items-center gap-3">
-              <Avatar name={company} />
+              <Avatar name={company} src={job.client_profiles?.logo_url} />
               <p className="min-w-0 text-sm text-text-muted">
                 {job.client_profiles?.id ? (
                   <Link
@@ -237,7 +237,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
               className="mt-10 border-t border-border-base pt-8"
             >
               <div className="flex items-center gap-3">
-                <Avatar name={company} />
+                <Avatar name={company} src={job.client_profiles?.logo_url} />
                 <h2 id="company-heading" className="text-lg font-semibold tracking-tight">
                   About {job.client_profiles.company_name}
                 </h2>

@@ -33,7 +33,7 @@ export default async function SavedTalentPage() {
         .select(
           `talent_id, created_at,
            talent_profiles ( id, slug, headline, hourly_rate_min, hourly_rate_max, currency,
-                             portfolio_item_count, is_published )`,
+                             portfolio_item_count, is_published, avatar_url )`,
         )
         .eq('client_id', client.id)
         .order('created_at', { ascending: false })
@@ -49,6 +49,7 @@ export default async function SavedTalentPage() {
       currency: string;
       portfolio_item_count: number;
       is_published: boolean;
+      avatar_url: string | null;
     };
   }[];
 
@@ -77,7 +78,7 @@ export default async function SavedTalentPage() {
                 className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-4 sm:flex-nowrap sm:px-5"
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3.5">
-                  <Avatar name={p.headline} className="hidden sm:grid" />
+                  <Avatar name={p.headline} src={p.avatar_url} className="hidden sm:grid" />
                   <div className="min-w-0">
                     <h2 className="font-semibold break-words">
                       <Link href={`/talent/${p.slug}`} className="hover:underline">

@@ -10,6 +10,7 @@ import {
   ExperienceEditor,
 } from '@/components/talent/history-editors';
 import { ProfileEditor, SkillsEditor } from '@/components/talent/profile-editor';
+import { PhotoUpload } from '@/components/upload/photo-upload';
 import { getConnections } from '@/lib/services/connections';
 import { ActionForm } from '@/components/ui/action-form';
 import { Badge } from '@/components/ui/badge';
@@ -51,7 +52,7 @@ export default async function ProfilePage({
     .select(
       `id, slug, headline, bio, hourly_rate_min, hourly_rate_max, currency, availability,
        years_experience, timezone, website_url, github_url, linkedin_url,
-       portfolio_item_count, is_published, accepts_messages`,
+       portfolio_item_count, is_published, accepts_messages, avatar_url`,
     )
     .eq('user_id', viewer.userId)
     .maybeSingle();
@@ -128,7 +129,12 @@ export default async function ProfilePage({
   ] as const;
 
   const body: Record<(typeof sections)[number]['id'], React.ReactNode> = {
-    details: <ProfileEditor profile={profile} connections={connections} />,
+    details: (
+      <div className="space-y-8">
+        <PhotoUpload kind="photo" name={profile.headline} current={profile.avatar_url} />
+        <ProfileEditor profile={profile} connections={connections} />
+      </div>
+    ),
     skills: (
       <SkillsEditor options={skills ?? []} initial={(mySkills ?? []).map((s) => s.skill_id)} />
     ),

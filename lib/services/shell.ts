@@ -31,20 +31,33 @@ export type ShellUser = {
 export async function loadShellUser(viewer: Viewer): Promise<ShellUser> {
   let profileHref = '/dashboard/client/profile';
   let editProfileHref = '/dashboard/client/profile';
+  // The picture in the profile menu: the uploaded photo or logo for the active role (migration
+  // 0025), else the sign-in provider's photo, else initials.
+  let avatarUrl = viewer.avatarUrl;
 
   if (viewer.activeRole === 'client') {
     // The public company page. Without a company row yet, both items collapse into one
     // (account-menu shows a single "Company profile" when the two hrefs match).
     const clientId = await getClientProfileId();
-    if (clientId) profileHref = `/company/${clientId}`;
+    if (clientId) {
+      profileHref = `/company/${clientId}`;
+      const supabase = await createClient();
+      const { data } = await supabase
+        .from('client_profiles')
+        .select('logo_url')
+        .eq('id', clientId)
+        .maybeSingle();
+      avatarUrl = data?.logo_url ?? avatarUrl;
+    }
   } else {
     editProfileHref = '/dashboard/talent/profile';
     const supabase = await createClient();
     const { data } = await supabase
       .from('talent_profiles')
-      .select('slug')
+      .select('slug, avatar_url')
       .eq('user_id', viewer.userId)
       .maybeSingle();
+    avatarUrl = data?.avatar_url ?? avatarUrl;
     // The owner can read their own draft at its public URL (with a draft banner), so this link
     // works whether or not the profile is published.
     profileHref = data?.slug ? `/talent/${data.slug}` : editProfileHref;
@@ -55,7 +68,7 @@ export async function loadShellUser(viewer: Viewer): Promise<ShellUser> {
     activeRole: viewer.activeRole,
     hasTalent: viewer.hasTalent,
     hasClient: viewer.hasClient,
-    avatarUrl: viewer.avatarUrl,
+    avatarUrl,
     unread: await unreadCount(viewer.userId),
     notificationsUnread: await unreadNotificationCount(viewer.userId),
     isAdmin: await isAdmin(),

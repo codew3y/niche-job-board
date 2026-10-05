@@ -25,6 +25,7 @@ export type TalentListItem = {
   website_url: string | null;
   portfolio_item_count: number;
   updated_at: string;
+  avatar_url: string | null;
   talent_skills: { skills: { name: string; slug: string } | null }[];
 };
 
@@ -36,7 +37,7 @@ export async function listTalent(params: TalentSearchParams) {
     .from('talent_profiles')
     .select(
       `id, slug, headline, bio, hourly_rate_min, hourly_rate_max, currency, availability,
-       years_experience, website_url, portfolio_item_count, updated_at,
+       years_experience, website_url, portfolio_item_count, updated_at, avatar_url,
        talent_skills ( skills ( name, slug ) )`,
     )
     .eq('is_published', true)
@@ -105,7 +106,7 @@ export async function getTalentBySlug(slug: string) {
     .select(
       `id, user_id, slug, headline, bio, hourly_rate_min, hourly_rate_max, currency,
        availability, years_experience, timezone, website_url, github_url, linkedin_url,
-       github_connected_at, linkedin_connected_at,
+       github_connected_at, linkedin_connected_at, avatar_url,
        portfolio_item_count, is_published, accepts_messages, updated_at,
        talent_skills ( proficiency, years, skills ( name, slug, category ) ),
        portfolio_items ( id, title, description, role, outcome, tech_stack, links,
@@ -135,6 +136,7 @@ export type TalentProfileDetail = {
   user_id: string;
   slug: string;
   headline: string;
+  avatar_url: string | null;
   bio: string;
   hourly_rate_min: string | null;
   hourly_rate_max: string | null;

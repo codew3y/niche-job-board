@@ -167,7 +167,7 @@ function ProfilePicture({ name, src }: { name: string; src: string | null }) {
       width={32}
       height={32}
       referrerPolicy="no-referrer"
-      className="size-8 shrink-0 rounded-md border border-border-base object-cover"
+      className="size-8 shrink-0 rounded-full border border-border-base object-cover"
     />
   );
 }

@@ -11,8 +11,8 @@
 -- HOW:
 --   1. Take a Supabase backup (docs/deploy.md: a dropped column is NOT reversible).
 --   2. Move this file to lib/db/migrations/ and add its entry to meta/_journal.json
---      (idx 25, tag "0025_drop_legacy_columns"). It was renumbered from 0021 as 0021-0024
---      (connected accounts, certifications, resume import, rate limits) took those numbers;
+--      (idx 26, tag "0026_drop_legacy_columns"). It was renumbered from 0021 as 0021-0025
+--      (connected accounts, certifications, resume import, rate limits, photos) took those numbers;
 --      0020's header still says 0021, and an applied migration is not edited.
 --   3. Apply with the docs/deploy.md procedure (preflight, read, apply, verify).
 --

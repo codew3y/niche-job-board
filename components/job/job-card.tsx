@@ -49,7 +49,7 @@ export function JobCard({
 
   return (
     <article className="relative flex gap-4 border-b border-border-base px-4 py-5 transition-colors duration-fast ease-out last:border-0 hover:bg-surface-sunken/50 sm:px-6">
-      <Avatar name={company} className="hidden sm:grid" />
+      <Avatar name={company} src={job.client_profiles?.logo_url} className="hidden sm:grid" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
           <h2 className="min-w-0 text-base font-semibold tracking-tight text-balance">

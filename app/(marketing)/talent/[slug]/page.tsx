@@ -165,7 +165,7 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
           it is one column, so the facts panel sits between the header and the bio. */}
       <div className="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr]">
         <header className="min-w-0 lg:col-start-1">
-          <Avatar name={p.headline} size="lg" />
+          <Avatar name={p.headline} src={p.avatar_url} size="lg" />
           <h1 className="mt-6 max-w-[22ch] text-display-md">{p.headline}</h1>
           {hasLinks && (
             <p className="mt-4 flex flex-wrap gap-2">

@@ -30,6 +30,7 @@ type Candidate = {
     portfolio_item_count: number;
     website_url: string | null;
     accepts_messages: boolean;
+    avatar_url: string | null;
   } | null;
 };
 
@@ -92,7 +93,11 @@ export function CandidateList({
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex min-w-0 flex-1 items-start gap-3.5">
-                <Avatar name={profile?.headline ?? 'Removed'} className="hidden sm:grid" />
+                <Avatar
+                  name={profile?.headline ?? 'Removed'}
+                  src={profile?.avatar_url}
+                  className="hidden sm:grid"
+                />
                 <div className="min-w-0">
                   <h3 className="font-semibold text-balance">
                     {profile ? (
