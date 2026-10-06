@@ -1,11 +1,17 @@
 import { ArrowRight, Briefcase, Clock, Kanban as FolderKanban } from '@phosphor-icons/react/ssr';
+import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { ENGAGEMENT_LABEL, formatRange } from '@/components/shared/money';
 import { Avatar } from '@/components/ui/avatar';
 import { listJobs, type JobListItem } from '@/lib/services/jobs';
-import { AVAILABILITY_LABEL, listTalent, type TalentListItem } from '@/lib/services/talent';
+import {
+  AVAILABILITY_LABEL,
+  listTalent,
+  projectCovers,
+  type TalentListItem,
+} from '@/lib/services/talent';
 import { cn } from '@/lib/ui/cn';
 
 /**
@@ -181,6 +187,7 @@ function DeveloperRow({ person, i }: { person: TalentListItem; i: number }) {
           </p>
         </div>
       </div>
+      <Covers covers={projectCovers(person)} />
       <Chips names={skills.slice(0, 3)} />
     </li>
   );
@@ -231,5 +238,21 @@ export async function DevelopersShowcase() {
         />
       )}
     </Panel>
+  );
+}
+
+function Covers({ covers }: { covers: { url: string; alt: string }[] }) {
+  if (!covers.length) return null;
+  return (
+    <ul aria-label="Project photos" className="mt-3 grid grid-cols-3 gap-1.5">
+      {covers.map((c) => (
+        <li
+          key={c.url}
+          className="relative aspect-video overflow-hidden rounded-md border border-border-base bg-surface-sunken"
+        >
+          <Image src={c.url} alt={c.alt} fill sizes="8rem" className="object-cover" />
+        </li>
+      ))}
+    </ul>
   );
 }

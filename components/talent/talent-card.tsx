@@ -1,11 +1,12 @@
 import { Briefcase, Clock, Kanban as FolderKanban } from '@phosphor-icons/react/ssr';
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { formatRange } from '@/components/shared/money';
 import { SaveButton } from '@/components/shared/save-button';
 import { Avatar } from '@/components/ui/avatar';
 import { TagList } from '@/components/ui/badge';
-import { AVAILABILITY_LABEL, type TalentListItem } from '@/lib/services/talent';
+import { AVAILABILITY_LABEL, projectCovers, type TalentListItem } from '@/lib/services/talent';
 
 /**
  * A developer in a browse list. Same row-as-link pattern as JobCard. The evidence shape (how
@@ -13,7 +14,8 @@ import { AVAILABILITY_LABEL, type TalentListItem } from '@/lib/services/talent';
  * product is about.
  *
  * Hierarchy: the headline is the title, the rate sits opposite it, the facts follow in one
- * muted line, and Save is the single action.
+ * muted line, then up to three project covers (the work, seen before it is read about), and Save
+ * is the single action.
  */
 export function TalentCard({
   person,
@@ -80,6 +82,9 @@ export function TalentCard({
 
         <p className="mt-2.5 line-clamp-2 text-sm text-text-muted text-pretty">{person.bio}</p>
 
+        {/* The work itself, before the skills: up to three project covers. */}
+        <Covers covers={projectCovers(person)} />
+
         <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3">
           <TagList tags={skills} label="Skills" />
           {saveable && (
@@ -88,5 +93,27 @@ export function TalentCard({
         </div>
       </div>
     </article>
+  );
+}
+
+function Covers({ covers }: { covers: { url: string; alt: string }[] }) {
+  if (!covers.length) return null;
+  return (
+    <ul aria-label="Project photos" className="mt-3.5 grid max-w-md grid-cols-3 gap-2">
+      {covers.map((c) => (
+        <li
+          key={c.url}
+          className="relative aspect-video overflow-hidden rounded-md border border-border-base bg-surface-sunken"
+        >
+          <Image
+            src={c.url}
+            alt={c.alt}
+            fill
+            sizes="(min-width: 640px) 9rem, 30vw"
+            className="object-cover"
+          />
+        </li>
+      ))}
+    </ul>
   );
 }

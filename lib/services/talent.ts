@@ -27,7 +27,26 @@ export type TalentListItem = {
   updated_at: string;
   avatar_url: string | null;
   talent_skills: { skills: { name: string; slug: string } | null }[];
+  /** Only what a cover needs: each project's order and its photos. */
+  portfolio_items?: {
+    sort_order: number;
+    item_media: { url: string; alt_text: string; sort_order: number }[];
+  }[];
 };
+
+/**
+ * Up to `max` project covers for a list card: the first photo of each project, in the order the
+ * developer arranged their projects. Projects without a photo are skipped, not shown as blanks.
+ */
+export function projectCovers(person: Pick<TalentListItem, 'portfolio_items'>, max = 3) {
+  return [...(person.portfolio_items ?? [])]
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .flatMap((item) => {
+      const first = [...(item.item_media ?? [])].sort((a, b) => a.sort_order - b.sort_order)[0];
+      return first ? [{ url: first.url, alt: first.alt_text }] : [];
+    })
+    .slice(0, max);
+}
 
 export async function listTalent(params: TalentSearchParams) {
   const supabase = await createClient();
@@ -38,7 +57,8 @@ export async function listTalent(params: TalentSearchParams) {
     .select(
       `id, slug, headline, bio, hourly_rate_min, hourly_rate_max, currency, availability,
        years_experience, website_url, portfolio_item_count, updated_at, avatar_url,
-       talent_skills ( skills ( name, slug ) )`,
+       talent_skills ( skills ( name, slug ) ),
+       portfolio_items ( sort_order, item_media ( url, alt_text, sort_order ) )`,
     )
     .eq('is_published', true)
     .order('updated_at', { ascending: false })
