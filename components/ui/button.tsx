@@ -34,6 +34,9 @@ export const buttonStyles = cva(
         secondary: 'border border-control bg-surface-raised text-text hover:bg-surface-sunken',
         /** The primary action set ON the brand colour (the closing band): the colours swapped. */
         inverse: 'bg-primary-text text-primary hover:bg-primary-text/90 active:bg-primary-text/80',
+        /** The second action on the brand colour: an outline in the band's text colour. */
+        'inverse-outline':
+          'border border-primary-text/50 text-primary-text hover:bg-primary-text/10 active:bg-primary-text/15',
         ghost: 'text-text-muted hover:bg-surface-sunken hover:text-text',
         danger: 'bg-danger text-primary-text hover:opacity-90',
         /** A destructive action that is not the primary one — "Not a fit", "Delete". */

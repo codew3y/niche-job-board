@@ -1,8 +1,10 @@
+import { ArrowRight } from '@phosphor-icons/react/ssr';
 import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
 import type { IconProps } from '@phosphor-icons/react';
 import type { ComponentType, CSSProperties, ReactNode } from 'react';
 
+import { LogoMark } from '@/components/layout/logo';
 import { buttonStyles } from '@/components/ui/button';
 import { cn } from '@/lib/ui/cn';
 
@@ -364,30 +366,53 @@ export function FeatureRows({
 }
 
 /**
- * The closing call to action, at the foot of every public page: a band in the brand colour with
- * a large statement and the action. The primary action is a button inverted onto the band; the
- * alternative is a text link, so there is one button. A solid colour, no gradient. Stacked
- * below `md`.
+ * The closing call to action, at the foot of every public page: a band in the brand colour,
+ * centred, with the logo mark on a white tile, the statement, one supporting line and two
+ * buttons side by side (the primary inverted onto the band, the alternative as an outline). A
+ * faint dot grid, in the band's own text colour, gives it texture without adding a colour.
  */
 export function PageCta({
   title,
+  lead = 'Free for developers and clients. No fees, no approval queue, no middleman.',
   primary,
   secondary,
 }: {
   title: string;
+  /** One supporting line under the statement. */
+  lead?: string;
   primary: { href: string; label: string };
   secondary?: { href: string; label: string };
 }) {
   return (
     <section className={cn(CONTAINER, SECTION)}>
-      <div className="reveal grid gap-8 overflow-hidden rounded-2xl bg-primary px-6 py-10 text-primary-text sm:px-10 sm:py-14 md:grid-cols-12 md:items-end md:gap-12 lg:px-14 lg:py-16">
-        <h2 className="max-w-[20ch] text-display-sm md:col-span-8">{title}</h2>
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 md:col-span-4 md:justify-end">
-          <Link href={primary.href} className={buttonStyles({ variant: 'inverse', size: 'lg' })}>
+      <div className="reveal relative isolate overflow-hidden rounded-2xl bg-primary px-6 py-14 text-center text-primary-text sm:px-10 sm:py-16 lg:py-20">
+        {/* The dot grid, faded out towards the edges so the centre stays calm. */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-[radial-gradient(color-mix(in_oklch,var(--primary-text)_22%,transparent)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_75%)] bg-size-[22px_22px]"
+        />
+        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary-text shadow-md">
+          <LogoMark size={32} />
+        </span>
+        <h2 className="mx-auto mt-6 max-w-[22ch] text-display-sm text-balance">{title}</h2>
+        <p className="mx-auto mt-4 max-w-[46ch] text-lg text-primary-text/90">{lead}</p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href={primary.href}
+            className={buttonStyles({ variant: 'inverse', size: 'lg', className: 'max-sm:w-full' })}
+          >
             {primary.label}
+            <ArrowRight aria-hidden="true" />
           </Link>
           {secondary && (
-            <Link href={secondary.href} className="prose-link font-medium text-primary-text">
+            <Link
+              href={secondary.href}
+              className={buttonStyles({
+                variant: 'inverse-outline',
+                size: 'lg',
+                className: 'max-sm:w-full',
+              })}
+            >
               {secondary.label}
             </Link>
           )}
