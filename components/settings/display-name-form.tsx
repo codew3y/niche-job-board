@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 
 import { Field, FormError, FormStatus } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
 import { updateDisplayName } from '@/lib/actions/display-name';
@@ -12,7 +13,7 @@ export function DisplayNameForm({ current }: { current: string }) {
   const [state, action] = useActionState<ActionResult | null, FormData>(updateDisplayName, null);
   const fields = state?.ok === false ? state.fields : undefined;
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <Form state={state} action={action} className="space-y-4" noValidate>
       <Field
         label="Your name"
         name="displayName"
@@ -29,6 +30,6 @@ export function DisplayNameForm({ current }: { current: string }) {
         </SubmitButton>
         {state?.ok && <FormStatus>Saved.</FormStatus>}
       </div>
-    </form>
+    </Form>
   );
 }

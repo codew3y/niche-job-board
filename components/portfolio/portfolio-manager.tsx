@@ -12,6 +12,7 @@ import { useActionState, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Field, FormError, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { ImageUpload } from '@/components/upload/image-upload';
 import { attachMedia, detachMedia } from '@/lib/actions/media';
@@ -119,7 +120,8 @@ function ItemForm({
   }
 
   return (
-    <form
+    <Form
+      state={state}
       action={action}
       className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 shadow-sm sm:p-6"
     >
@@ -210,7 +212,7 @@ function ItemForm({
           Cancel
         </Button>
       </div>
-    </form>
+    </Form>
   );
 }
 

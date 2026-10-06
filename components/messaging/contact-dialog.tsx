@@ -6,6 +6,7 @@ import { useActionState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { FormError, SelectField, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { Modal, ModalClose } from '@/components/ui/modal';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
@@ -64,7 +65,7 @@ export function ContactDialog({
       title="Message"
       description={talentHeadline}
     >
-      <form action={action} className="space-y-5">
+      <Form state={state} action={action} className="space-y-5">
         <input type="hidden" name="talentId" value={talentId} />
         <p className="text-sm text-text-muted text-pretty">
           They can reply, block you, or ignore it. Say what the work is and what it pays: those two
@@ -117,7 +118,7 @@ export function ContactDialog({
           <ModalClose render={<Button variant="ghost">Cancel</Button>} />
           <SubmitButton pendingLabel="Sending…">Send message</SubmitButton>
         </div>
-      </form>
+      </Form>
     </Modal>
   );
 }

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { buttonStyles } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ChoiceChips, Field, FormError, SelectField, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { SkillPicker, type SkillOption } from './skill-picker';
 import { CURRENCIES, StepCard, Submit } from './talent-forms';
@@ -23,7 +24,7 @@ export function CompanyForm({ client }: { client: Row }) {
   const fields = state?.ok === false ? state.fields : undefined;
 
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <Form state={state} action={action} className="space-y-6" noValidate>
       <StepCard>
         <Field
           label="Company name"
@@ -63,7 +64,7 @@ export function CompanyForm({ client }: { client: Row }) {
       </StepCard>
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
       <Submit label="Continue" />
-    </form>
+    </Form>
   );
 }
 
@@ -94,7 +95,7 @@ export function FirstJobForm({
   const [locationType, setLocationType] = useState(str(job, 'location_type') || 'remote');
 
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <Form state={state} action={action} className="space-y-6" noValidate>
       <StepCard>
         <Field
           label="Title"
@@ -175,7 +176,7 @@ export function FirstJobForm({
 
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
       <Submit label="Continue" />
-    </form>
+    </Form>
   );
 }
 
@@ -209,7 +210,7 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
         </p>
       </article>
 
-      <form action={action} className="space-y-4">
+      <Form state={state} action={action} className="space-y-4">
         <p className="max-w-xl text-text-muted text-pretty">
           Publishing makes this brief public so developers can find and apply to it. You can close
           it at any time.
@@ -218,7 +219,7 @@ export function ClientReview({ job, progress }: { job: Row; progress: ClientProg
         <SubmitButton size="lg" className="w-full sm:w-auto" pendingLabel="Publishing…">
           Publish this brief
         </SubmitButton>
-      </form>
+      </Form>
     </div>
   );
 }

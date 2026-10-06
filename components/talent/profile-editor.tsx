@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 
 import { Field, FormError, FormStatus, SelectField, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { ConnectedAccounts } from './connected-accounts';
 import { LinksPreview } from './links-preview';
@@ -39,7 +40,7 @@ export function ProfileEditor({
   const fields = state?.ok === false ? state.fields : undefined;
 
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <Form state={state} action={action} className="space-y-6" noValidate>
       <Field
         label="Title"
         name="headline"
@@ -119,7 +120,7 @@ export function ProfileEditor({
         </SubmitButton>
         {state?.ok && <FormStatus>Saved.</FormStatus>}
       </div>
-    </form>
+    </Form>
   );
 }
 
@@ -127,7 +128,7 @@ export function SkillsEditor({ options, initial }: { options: SkillOption[]; ini
   const [state, action] = useActionState<ActionResult | null, FormData>(updateSkills, null);
 
   return (
-    <form action={action} className="space-y-5">
+    <Form state={state} action={action} className="space-y-5">
       <SkillPicker options={options} initial={initial} />
       {state?.ok === false && <FormError>{state.message}</FormError>}
       <div className="flex flex-wrap items-center gap-4 border-t border-border-base pt-5">
@@ -136,6 +137,6 @@ export function SkillsEditor({ options, initial }: { options: SkillOption[]; ini
         </SubmitButton>
         {state?.ok && <FormStatus>Skills saved.</FormStatus>}
       </div>
-    </form>
+    </Form>
   );
 }

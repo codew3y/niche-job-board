@@ -6,6 +6,7 @@ import { useActionState } from 'react';
 import { ActionForm } from '@/components/ui/action-form';
 import { Badge } from '@/components/ui/badge';
 import { FormError } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { addRole, switchRole, type ActionResult } from '@/lib/actions/auth';
 import { ROLE_NAME } from '@/lib/roles';
@@ -107,12 +108,12 @@ function RoleAction({
   }
 
   return (
-    <form action={action} className="space-y-2">
+    <Form state={state} action={action} className="space-y-2">
       <input type="hidden" name="role" value={role} />
       <SubmitButton className="w-full sm:w-auto" pendingLabel="Setting up…">
         Add {ROLE_NAME[role]} profile
       </SubmitButton>
       {state?.ok === false && <FormError>{state.message}</FormError>}
-    </form>
+    </Form>
   );
 }

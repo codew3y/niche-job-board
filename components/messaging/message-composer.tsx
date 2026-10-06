@@ -4,6 +4,7 @@ import { PaperPlaneRight as SendHorizontal } from '@phosphor-icons/react/ssr';
 import { useActionState, useEffect, useRef } from 'react';
 
 import { controlStyles } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
 import { sendMessage } from '@/lib/actions/messaging';
@@ -35,7 +36,8 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
   }, [state]);
 
   return (
-    <form
+    <Form
+      state={state}
       ref={formRef}
       action={action}
       className={cn(
@@ -91,6 +93,6 @@ export function MessageComposer({ conversationId }: { conversationId: string }) 
           Enter adds a new line. Press Ctrl or Cmd and Enter to send.
         </p>
       )}
-    </form>
+    </Form>
   );
 }

@@ -5,6 +5,7 @@ import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Field, FormError } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
 import { deleteAccount } from '@/lib/actions/account';
@@ -38,7 +39,11 @@ export function DeleteAccount({ email }: { email: string }) {
   }
 
   return (
-    <form action={action} className="animate-rise space-y-5 border-t border-border-base pt-5">
+    <Form
+      state={state}
+      action={action}
+      className="animate-rise space-y-5 border-t border-border-base pt-5"
+    >
       <p className="flex gap-3 rounded-md bg-danger-subtle px-3.5 py-3 text-sm font-medium text-danger">
         <TriangleAlert aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
         This cannot be undone. Type the email address you sign in with to confirm.
@@ -68,6 +73,6 @@ export function DeleteAccount({ email }: { email: string }) {
           Delete my account permanently
         </SubmitButton>
       </div>
-    </form>
+    </Form>
   );
 }

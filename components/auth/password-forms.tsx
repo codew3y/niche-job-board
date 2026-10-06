@@ -6,6 +6,7 @@ import { useActionState } from 'react';
 
 import { buttonStyles } from '@/components/ui/button';
 import { Field, FormError } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { requestPasswordReset, updatePassword, type ActionResult } from '@/lib/actions/auth';
 
@@ -35,7 +36,7 @@ export function ResetRequestForm() {
   }
 
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <Form state={state} action={action} className="space-y-5" noValidate>
       <Field
         label="Email"
         name="email"
@@ -50,7 +51,7 @@ export function ResetRequestForm() {
       <SubmitButton size="lg" className="w-full" pendingLabel="Sending…">
         Send reset link
       </SubmitButton>
-    </form>
+    </Form>
   );
 }
 
@@ -78,7 +79,7 @@ export function SetPasswordForm() {
   }
 
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <Form state={state} action={action} className="space-y-5" noValidate>
       <Field
         label="New password"
         name="password"
@@ -100,6 +101,6 @@ export function SetPasswordForm() {
       <SubmitButton size="lg" className="w-full" pendingLabel="Saving…">
         Save password
       </SubmitButton>
-    </form>
+    </Form>
   );
 }

@@ -5,6 +5,7 @@ import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Field, FormError, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
 import {
@@ -186,7 +187,8 @@ function ExperienceForm({ row, onDone }: { row: ExperienceRow | null; onDone: ()
   useSaved(state, onDone);
 
   return (
-    <form
+    <Form
+      state={state}
       action={action}
       className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 sm:p-5"
       noValidate
@@ -242,7 +244,7 @@ function ExperienceForm({ row, onDone }: { row: ExperienceRow | null; onDone: ()
           Cancel
         </Button>
       </div>
-    </form>
+    </Form>
   );
 }
 
@@ -252,7 +254,8 @@ function EducationForm({ row, onDone }: { row: EducationRow | null; onDone: () =
   useSaved(state, onDone);
 
   return (
-    <form
+    <Form
+      state={state}
       action={action}
       className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 sm:p-5"
       noValidate
@@ -305,7 +308,7 @@ function EducationForm({ row, onDone }: { row: EducationRow | null; onDone: () =
           Cancel
         </Button>
       </div>
-    </form>
+    </Form>
   );
 }
 
@@ -315,7 +318,8 @@ function CertificationForm({ row, onDone }: { row: CertificationRow | null; onDo
   useSaved(state, onDone);
 
   return (
-    <form
+    <Form
+      state={state}
       action={action}
       className="space-y-5 rounded-lg border border-border-base bg-surface-raised p-4 sm:p-5"
       noValidate
@@ -383,6 +387,6 @@ function CertificationForm({ row, onDone }: { row: CertificationRow | null; onDo
           Cancel
         </Button>
       </div>
-    </form>
+    </Form>
   );
 }

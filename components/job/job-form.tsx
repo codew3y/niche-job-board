@@ -5,6 +5,7 @@ import { useActionState, useState, type ReactNode } from 'react';
 import { SkillPicker, type SkillOption } from '@/components/onboarding/skill-picker';
 import { CURRENCIES } from '@/components/onboarding/talent-forms';
 import { ChoiceChips, Field, FormError, SelectField, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { saveJob } from '@/lib/actions/jobs';
 import type { ActionResult } from '@/lib/actions/auth';
@@ -81,7 +82,7 @@ export function JobForm({
   const [locationType, setLocationType] = useState(str(job, 'location_type') || 'remote');
 
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <Form state={state} action={action} className="space-y-6" noValidate>
       {job?.id ? <input type="hidden" name="jobId" value={String(job.id)} /> : null}
 
       <div className="divide-y divide-border-base rounded-lg border border-border-base bg-surface-raised">
@@ -245,6 +246,6 @@ export function JobForm({
           {isPublished ? 'Save changes' : 'Publish'}
         </SubmitButton>
       </div>
-    </form>
+    </Form>
   );
 }

@@ -7,6 +7,7 @@ import { useActionState, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonStyles } from '@/components/ui/button';
 import { FormError } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import {
   applyResume,
@@ -74,7 +75,7 @@ function Upload({
   }
 
   return (
-    <form action={action} className="max-w-2xl space-y-6">
+    <Form state={state} action={action} className="max-w-2xl space-y-6">
       <div className="rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6">
         <label htmlFor="resume" className="block font-semibold">
           Your resume (PDF)
@@ -137,7 +138,7 @@ function Upload({
         </Link>
       </div>
       <p className="text-sm text-text-subtle">Reading takes up to half a minute.</p>
-    </form>
+    </Form>
   );
 }
 
@@ -268,7 +269,7 @@ function Review({
   }
 
   return (
-    <form action={applyAction} className="max-w-3xl space-y-8">
+    <Form state={applyState} action={applyAction} className="max-w-3xl space-y-8">
       <input type="hidden" name="selection" value={JSON.stringify(selection)} />
       <input type="hidden" name="returnTo" value={returnTo} />
 
@@ -432,7 +433,7 @@ function Review({
           Start over
         </Button>
       </div>
-    </form>
+    </Form>
   );
 }
 

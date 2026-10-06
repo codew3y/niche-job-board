@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useActionState } from 'react';
 
 import { Field, FormError } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { signIn, signUp, type ActionResult } from '@/lib/actions/auth';
 
@@ -28,7 +29,7 @@ export function EmailPasswordForm({
   const fields = state?.ok === false ? state.fields : undefined;
 
   return (
-    <form action={formAction} className="space-y-5" noValidate>
+    <Form state={state} action={formAction} className="space-y-5" noValidate>
       {next && <input type="hidden" name="next" value={next} />}
       {intent && <input type="hidden" name="intent" value={intent} />}
 
@@ -90,6 +91,6 @@ export function EmailPasswordForm({
       >
         {mode === 'signup' ? 'Create account' : 'Sign in'}
       </SubmitButton>
-    </form>
+    </Form>
   );
 }

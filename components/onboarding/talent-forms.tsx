@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 
 import { ChoiceChips, Field, FormError, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { SkillPicker, type SkillOption } from './skill-picker';
 import { saveTalentBasics, saveTalentSkills } from '@/lib/actions/onboarding';
@@ -29,7 +30,7 @@ export function TalentBasicsForm({ profile }: { profile: Profile }) {
   const fields = state?.ok === false ? state.fields : undefined;
 
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <Form state={state} action={action} className="space-y-6" noValidate>
       <StepCard>
         <Field
           label="Headline"
@@ -71,7 +72,7 @@ export function TalentBasicsForm({ profile }: { profile: Profile }) {
 
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
       <Submit label="Continue" />
-    </form>
+    </Form>
   );
 }
 
@@ -94,7 +95,7 @@ export function TalentSkillsForm({
   const fields = state?.ok === false ? state.fields : undefined;
 
   return (
-    <form action={action} className="space-y-6" noValidate>
+    <Form state={state} action={action} className="space-y-6" noValidate>
       <StepCard>
         <SkillPicker options={options} initial={initial} />
 
@@ -122,7 +123,7 @@ export function TalentSkillsForm({
 
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
       <Submit label="Continue" />
-    </form>
+    </Form>
   );
 }
 

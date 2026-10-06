@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 
 import { Field, FormError, FormStatus, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
 import { updateClientProfile } from '@/lib/actions/client-profile';
@@ -34,7 +35,7 @@ export function CompanyForm({ company }: { company: Company }) {
   const homeless = Object.entries(fields ?? {}).filter(([key]) => !INLINE.has(key));
 
   return (
-    <form action={action} className="space-y-6">
+    <Form state={state} action={action} className="space-y-6">
       {state?.ok === false && (
         <FormError>
           {state.message}
@@ -97,6 +98,6 @@ export function CompanyForm({ company }: { company: Company }) {
             reader. The exact text is what e2e/navigation.spec.ts waits for. */}
         {state?.ok && <FormStatus>Saved.</FormStatus>}
       </div>
-    </form>
+    </Form>
   );
 }

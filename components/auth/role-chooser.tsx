@@ -4,6 +4,7 @@ import { Briefcase, Check, Code } from '@phosphor-icons/react';
 import { useActionState, useState } from 'react';
 
 import { FormError } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { selectRole, type ActionResult } from '@/lib/actions/auth';
 import { cn } from '@/lib/ui/cn';
@@ -28,7 +29,7 @@ export function RoleChooser() {
   const [selected, setSelected] = useState<string>('talent');
 
   return (
-    <form action={formAction} className="space-y-6">
+    <Form state={state} action={formAction} className="space-y-6">
       {/* A radiogroup rather than two buttons: this is one choice with two options, and a
           keyboard user should move between them with arrow keys, not Tab. */}
       <div role="radiogroup" aria-label="How will you use this?" className="grid gap-3">
@@ -86,6 +87,6 @@ export function RoleChooser() {
       <SubmitButton size="lg" className="w-full" pendingLabel="Setting up…">
         Continue
       </SubmitButton>
-    </form>
+    </Form>
   );
 }

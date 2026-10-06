@@ -5,6 +5,7 @@ import { useActionState, type ReactElement } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { FormError, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { Modal, ModalClose } from '@/components/ui/modal';
 import { SubmitButton } from '@/components/ui/submit-button';
 import type { ActionResult } from '@/lib/actions/auth';
@@ -111,7 +112,7 @@ export function ReportDialog({
           </div>
         </div>
       ) : (
-        <form action={action} className="space-y-5">
+        <Form state={state} action={action} className="space-y-5">
           <input type="hidden" name="subjectType" value={subjectType} />
           <input type="hidden" name="subjectId" value={subjectId} />
           <TextareaField
@@ -130,7 +131,7 @@ export function ReportDialog({
               Send report
             </SubmitButton>
           </div>
-        </form>
+        </Form>
       )}
     </Modal>
   );

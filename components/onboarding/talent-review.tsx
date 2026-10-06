@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useActionState } from 'react';
 
 import { FormError } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { publishTalent } from '@/lib/actions/onboarding';
 import type { ActionResult } from '@/lib/actions/auth';
@@ -75,7 +76,7 @@ export function TalentReview({
       </ul>
 
       {ready ? (
-        <form action={action} className="space-y-4">
+        <Form state={state} action={action} className="space-y-4">
           <p className="max-w-xl text-text-muted text-pretty">
             Publishing makes your profile public and lets clients find you. You can unpublish at any
             time.
@@ -84,7 +85,7 @@ export function TalentReview({
           <SubmitButton size="lg" className="w-full sm:w-auto" pendingLabel="Publishing…">
             Publish my profile
           </SubmitButton>
-        </form>
+        </Form>
       ) : (
         <p className="rounded-lg bg-surface-sunken px-4 py-3 text-sm text-text-muted">
           Finish the items above and come back here to publish.

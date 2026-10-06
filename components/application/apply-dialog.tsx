@@ -5,6 +5,7 @@ import { useActionState, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { FormError, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { Modal, ModalClose } from '@/components/ui/modal';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { applyToJob } from '@/lib/actions/applications';
@@ -35,7 +36,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: string; jobTitle: stri
       title="Apply"
       description={jobTitle}
     >
-      <form action={action} className="space-y-5">
+      <Form state={state} action={action} className="space-y-5">
         <input type="hidden" name="jobId" value={jobId} />
 
         <TextareaField
@@ -79,7 +80,7 @@ export function ApplyDialog({ jobId, jobTitle }: { jobId: string; jobTitle: stri
           <ModalClose render={<Button variant="ghost">Cancel</Button>} />
           <SubmitButton pendingLabel="Sending…">Send application</SubmitButton>
         </div>
-      </form>
+      </Form>
     </Modal>
   );
 }

@@ -10,6 +10,7 @@ import type { Connections } from '@/lib/services/connections';
 import { TagList } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Field, FormError, TextareaField } from '@/components/ui/field';
+import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { StepCard, Submit } from './talent-forms';
 import {
@@ -88,7 +89,7 @@ export function TalentEvidenceStep({
         )}
       </div>
 
-      <form action={linkAction} className="space-y-6" noValidate>
+      <Form state={linkState} action={linkAction} className="space-y-6" noValidate>
         <StepCard>
           <h2 className="text-lg font-semibold tracking-tight">Your links</h2>
           <Field
@@ -107,7 +108,7 @@ export function TalentEvidenceStep({
           />
         </StepCard>
         <Submit label="Save links and continue" />
-      </form>
+      </Form>
 
       <section className="space-y-4">
         <div>
@@ -151,7 +152,8 @@ export function TalentEvidenceStep({
           </ul>
         )}
 
-        <form
+        <Form
+          state={itemState}
           action={itemAction}
           className="space-y-5 rounded-lg border border-dashed border-border-strong bg-surface-raised/50 p-5 sm:p-7"
           noValidate
@@ -192,7 +194,7 @@ export function TalentEvidenceStep({
           <SubmitButton variant="secondary" className="w-full sm:w-auto" pendingLabel="Adding…">
             Add project
           </SubmitButton>
-        </form>
+        </Form>
       </section>
     </div>
   );
