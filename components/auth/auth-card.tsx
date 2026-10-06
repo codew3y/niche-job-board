@@ -64,7 +64,7 @@ export function AuthCard({
           CONTAINER,
           'grid flex-1 py-10 sm:py-16',
           image
-            ? 'lg:grid-cols-12 lg:items-start lg:gap-12 lg:py-16'
+            ? 'lg:grid-cols-12 lg:items-stretch lg:gap-12 lg:py-16'
             : 'place-items-start justify-center sm:place-items-center',
         )}
       >
@@ -80,11 +80,12 @@ export function AuthCard({
         </div>
 
         {image && (
-          // From `lg` only: on a phone the form is the whole job. Top-aligned with the heading
-          // and sticky below the floating header, so it stays beside a form taller than the
-          // screen. The LCP element on desktop, so preloaded at high priority, never faded in.
-          <figure className="frame-tray sticky top-24 hidden lg:col-span-6 lg:col-start-7 lg:block">
-            <div className="rounded-inner relative aspect-3/4 max-h-[calc(100svh-9rem)] w-full overflow-hidden bg-surface-sunken">
+          // From `lg` only: on a phone the form is the whole job. The photo is exactly as tall as
+          // the form column (the grid stretches both), so the two scroll as one piece: no sticky
+          // photo holding still while the form moves past it. The LCP element on desktop, so
+          // preloaded at high priority, never faded in.
+          <figure className="frame-tray hidden lg:col-span-6 lg:col-start-7 lg:flex">
+            <div className="rounded-inner relative min-h-[32rem] w-full flex-1 overflow-hidden bg-surface-sunken">
               <Image
                 src={image.src}
                 alt={image.alt}

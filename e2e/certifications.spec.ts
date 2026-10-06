@@ -34,8 +34,8 @@ async function addCertification(
   await section.getByRole('button', { name: 'Add a certification' }).click();
   await section.getByLabel('Certification').fill(cert.name);
   await section.getByLabel('Issued by').fill(cert.issuer);
-  await section.getByLabel('Issued', { exact: true }).fill(cert.issued);
-  if (cert.expires) await section.getByLabel(/^Expires/).fill(cert.expires);
+  await section.getByLabel('Issue date', { exact: true }).fill(cert.issued);
+  if (cert.expires) await section.getByLabel(/^Expiry date/).fill(cert.expires);
   if (cert.url) await section.getByLabel(/^Verification link/).fill(cert.url);
   await section.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(section.getByText(`${cert.name} · ${cert.issuer}`)).toBeVisible();
@@ -50,14 +50,14 @@ test('a certification goes from the editor to the public profile, and back off i
   await addCertification(page, {
     name: 'AWS Certified Developer, Associate',
     issuer: 'Amazon Web Services',
-    issued: '2024-03',
+    issued: '2024-03-14',
     url: 'https://www.credly.com/badges/e2e-example',
   });
   await addCertification(page, {
     name: 'Old Scrum Certificate',
     issuer: 'Scrum Alliance',
-    issued: '2019-01',
-    expires: '2021-01',
+    issued: '2019-01-10',
+    expires: '2021-01-10',
   });
 
   await page.goto(`/talent/${data.talent.slug}`);
@@ -91,8 +91,8 @@ test('an expiry before the issue date is refused on the field', async ({ page })
   await section.getByRole('button', { name: 'Add a certification' }).click();
   await section.getByLabel('Certification').fill('Backwards Cert');
   await section.getByLabel('Issued by').fill('Nobody');
-  await section.getByLabel('Issued', { exact: true }).fill('2025-06');
-  await section.getByLabel(/^Expires/).fill('2024-06');
+  await section.getByLabel('Issue date', { exact: true }).fill('2025-06-01');
+  await section.getByLabel(/^Expiry date/).fill('2024-06-01');
   await section.getByRole('button', { name: 'Save', exact: true }).click();
   await expect(section.getByText('Expiry cannot be before the issue date.')).toBeVisible();
 });

@@ -25,7 +25,7 @@ import { cn } from '@/lib/ui/cn';
  * View and Edit are two items only when they are two different pages: a developer's public
  * profile (/talent/<slug>) and its editor, or a client's public company page (/company/<id>)
  * and the company form. Two items that open the same page read as a bug, so if the public page
- * does not exist yet (no slug, no company row) it is one item: "Profile" or "Company profile".
+ * does not exist yet (no slug, no company row) it is one item: "Profile" or "Client profile".
  *
  * The role switch and log-out are server actions, so they stay real <form>s rendered OUTSIDE
  * the menu's portal; the menu items submit them through the `form` attribute. The forms work
@@ -71,7 +71,7 @@ export function AccountMenu({
       </form>
       <form id="account-sign-out" action={signOut} className="hidden" />
 
-      <Menu.Root>
+      <Menu.Root modal={false}>
         <Menu.Trigger
           aria-label={`Profile menu: ${displayName}`}
           className="flex items-center gap-3 rounded-md p-1 text-left outline-offset-2 hover:bg-surface-sunken data-popup-open:bg-surface-sunken lg:w-full lg:px-2 lg:py-2"
@@ -105,7 +105,7 @@ export function AccountMenu({
               {onePage ? (
                 <Menu.LinkItem className={item} render={<Link href={editProfileHref} />}>
                   <UserRound aria-hidden="true" />
-                  {activeRole === 'client' ? 'Company profile' : 'Profile'}
+                  {activeRole === 'client' ? 'Client profile' : 'Profile'}
                 </Menu.LinkItem>
               ) : (
                 <>

@@ -8,13 +8,11 @@ import { SubmitButton } from '@/components/ui/submit-button';
 import { SkillPicker, type SkillOption } from './skill-picker';
 import { saveTalentBasics, saveTalentSkills } from '@/lib/actions/onboarding';
 import type { ActionResult } from '@/lib/actions/auth';
-import { CurrencySelect } from '@/components/shared/currency-select';
+import { CurrencyCombobox } from '@/components/shared/currency-combobox';
 import { TimezoneCombobox } from '@/components/shared/timezone-combobox';
 
 type Profile = Record<string, unknown> | null;
 const str = (p: Profile, k: string) => (p?.[k] as string | null) ?? '';
-
-export const CURRENCIES = ['USD', 'EUR', 'GBP', 'CHF'] as const;
 
 /** The step's form body: fields in a card, the action row below it. */
 export function StepCard({ children }: { children: React.ReactNode }) {
@@ -110,7 +108,7 @@ export function TalentSkillsForm({
             placeholder="85"
             errors={fields?.hourlyRate}
           />
-          <CurrencySelect defaultValue={str(profile, 'currency')} />
+          <CurrencyCombobox defaultValue={str(profile, 'currency')} errors={fields?.currency} />
         </div>
 
         <ChoiceChips

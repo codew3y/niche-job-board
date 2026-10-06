@@ -32,7 +32,7 @@ test.describe('signed out', () => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/');
     const site = page.getByRole('navigation', { name: 'Site' });
-    for (const label of ['Home', 'For Freelancers', 'For Clients', 'How It Works', 'About']) {
+    for (const label of ['Home', 'Freelancers', 'Clients', 'How It Works', 'About']) {
       await expect(site.getByRole('link', { name: label, exact: true })).toBeVisible();
     }
     await expect(page.getByRole('banner').getByRole('link', { name: 'Log in' })).toHaveAttribute(
@@ -50,11 +50,11 @@ test.describe('signed out', () => {
     await page.goto('/');
     await expect(page.getByRole('banner').getByRole('link', { name: 'Log in' })).toBeHidden();
     await page.getByRole('button', { name: 'Open menu' }).click();
-    // Scoped to the header: the footer lists the same pages, so an unscoped "For Clients"
+    // Scoped to the header: the footer lists the same pages, so an unscoped "Clients"
     // matches two links and strict mode refuses to pick one.
     const header = page.getByRole('banner');
     await expect(header.getByRole('link', { name: 'Log in' })).toBeVisible();
-    await expect(header.getByRole('link', { name: 'For Clients' })).toBeVisible();
+    await expect(header.getByRole('link', { name: 'Clients', exact: true })).toBeVisible();
   });
 
   test('the home page has a hero figure and no login form', async ({ page }) => {

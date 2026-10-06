@@ -60,7 +60,7 @@ export default async function ClientDashboard() {
         subtitle={
           client?.company_name
             ? 'Briefs you have posted, what has come in, and who fits.'
-            : 'Set up your company profile to start posting.'
+            : 'Add the name developers will see, then post your first brief.'
         }
         actions={
           client ? (
@@ -196,7 +196,7 @@ async function DashboardBody({ client }: { client: { id: string; company_name: s
                 body={
                   client
                     ? 'Use Post a job to write your first brief. We rank developers against the work they have actually shipped.'
-                    : 'Once your company profile is set up, you can post your first brief.'
+                    : 'Once you have added the name developers will see, you can post your first brief.'
                 }
               />
             </div>
@@ -233,7 +233,7 @@ async function DashboardBody({ client }: { client: { id: string; company_name: s
                 [
                   ['/dashboard/client/saved', 'Saved developers', 'Private to you'],
                   ['/browse?type=developers', 'Browse developers', 'Everyone who is listed'],
-                  ['/dashboard/client/profile', 'Company profile', 'Shown on every job you post'],
+                  ['/dashboard/client/profile', 'Client profile', 'Shown on every job you post'],
                 ] as const
               ).map(([href, label, hint]) => (
                 <li key={href}>

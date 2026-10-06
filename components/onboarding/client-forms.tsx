@@ -7,11 +7,12 @@ import { useActionState, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { buttonStyles } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
-import { ChoiceChips, Field, FormError, SelectField, TextareaField } from '@/components/ui/field';
+import { ChoiceChips, Field, FormError, TextareaField } from '@/components/ui/field';
 import { Form } from '@/components/ui/form';
+import { CurrencyCombobox } from '@/components/shared/currency-combobox';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { SkillPicker, type SkillOption } from './skill-picker';
-import { CURRENCIES, StepCard, Submit } from './talent-forms';
+import { StepCard, Submit } from './talent-forms';
 import { publishFirstJob, saveCompany, saveFirstJob } from '@/lib/actions/onboarding';
 import type { ActionResult } from '@/lib/actions/auth';
 import type { ClientProgress } from '@/lib/onboarding/steps';
@@ -19,7 +20,13 @@ import type { ClientProgress } from '@/lib/onboarding/steps';
 type Row = Record<string, unknown> | null;
 const str = (r: Row, k: string) => (r?.[k] as string | null) ?? '';
 
-export function CompanyForm({ client }: { client: Row }) {
+/**
+ * The first client step, kept plain: nobody has to be a company to hire here. One name, already
+ * filled in with the person's own, which is what developers see on the brief. Someone hiring for
+ * a business can type its name instead. Website and a line about the work are optional; the
+ * industry field lives on the full client profile, not in the way of a first brief.
+ */
+export function CompanyForm({ client, displayName }: { client: Row; displayName: string }) {
   const [state, action] = useActionState<ActionResult | null, FormData>(saveCompany, null);
   const fields = state?.ok === false ? state.fields : undefined;
 
@@ -27,39 +34,31 @@ export function CompanyForm({ client }: { client: Row }) {
     <Form state={state} action={action} className="space-y-6" noValidate>
       <StepCard>
         <Field
-          label="Company name"
+          label="Name on your briefs"
           name="companyName"
           required
-          autoComplete="organization"
-          defaultValue={str(client, 'company_name')}
+          autoComplete="name"
+          defaultValue={str(client, 'company_name') || displayName}
           errors={fields?.companyName}
+          hint="Your own name is fine. Use a business or team name only if you are hiring for one."
         />
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <Field
-            label="Website"
-            name="website"
-            type="url"
-            inputMode="url"
-            optional
-            placeholder="https://yourcompany.com"
-            defaultValue={str(client, 'website')}
-            errors={fields?.website}
-          />
-          <Field
-            label="Industry"
-            name="industry"
-            optional
-            placeholder="Logistics"
-            defaultValue={str(client, 'industry')}
-          />
-        </div>
+        <Field
+          label="Website"
+          name="website"
+          type="url"
+          inputMode="url"
+          optional
+          placeholder="https://example.com"
+          defaultValue={str(client, 'website')}
+          errors={fields?.website}
+        />
         <TextareaField
-          label="About"
+          label="What you hire for"
           name="about"
-          rows={4}
+          rows={3}
           optional
           defaultValue={str(client, 'about')}
-          placeholder="What the company does, and what you need help with."
+          placeholder="A line or two about the work, so developers know who they would be working with."
         />
       </StepCard>
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
@@ -141,18 +140,11 @@ export function FirstJobForm({
             placeholder="4000"
             errors={fields?.budgetMax}
           />
-          <SelectField
-            label="Currency"
-            name="currency"
-            defaultValue={str(job, 'currency') || 'USD'}
-            wrapperClassName="col-span-2 sm:col-span-1"
-          >
-            {CURRENCIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </SelectField>
+          <CurrencyCombobox
+            defaultValue={str(job, 'currency')}
+            errors={fields?.currency}
+            className="col-span-2 sm:col-span-1"
+          />
         </div>
         <div className="space-y-4">
           <ChoiceChips

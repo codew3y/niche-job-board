@@ -111,20 +111,20 @@ for (const [role, emailKey] of [
   });
 }
 
-test('a client can edit the company name shown on every job they post', async ({ page }) => {
+test('a client can edit the name shown on every job they post', async ({ page }) => {
   // This page did not exist: the name was set once during onboarding and never again, while
   // appearing on every job card and public job page.
   await signIn(page, data.client.email);
   await page.goto('/dashboard/client/profile');
-  await expect(page.getByLabel(/company name/i)).toBeVisible();
+  await expect(page.getByLabel(/name on your briefs/i)).toBeVisible();
 
   const updated = `Renamed Co ${data.runId}`;
-  await page.getByLabel(/company name/i).fill(updated);
+  await page.getByLabel(/name on your briefs/i).fill(updated);
   await page.getByRole('button', { name: /save changes/i }).click();
   await expect(page.getByText(/^saved\.$/i)).toBeVisible({ timeout: 15_000 });
 
   await page.reload();
-  await expect(page.getByLabel(/company name/i)).toHaveValue(updated);
+  await expect(page.getByLabel(/name on your briefs/i)).toHaveValue(updated);
 });
 
 test('matches and saved stay reachable after leaving the nav', async ({ page }) => {

@@ -11,6 +11,7 @@ import {
   certificationInput,
   educationInput,
   experienceInput,
+  itemMediaInput,
 } from '../schemas/talent';
 import { TIME_ZONE_SET } from '../timezones';
 import { createClient } from '../supabase/server';
@@ -261,6 +262,28 @@ export async function saveItem(
         .maybeSingle();
 
   if (error || !saved) return { ok: false, message: 'Could not save that project.' };
+
+  // Photos added while creating the project. They are already in Storage (the browser uploads
+  // them directly, components/upload/image-upload.tsx); these are the rows that point at them,
+  // under the same rules as attachMedia: an https URL and real alt text, or not saved at all.
+  if (!itemId) {
+    const urls = formData.getAll('mediaUrl').map(String);
+    const alts = formData.getAll('mediaAlt').map(String);
+    const media = urls
+      .slice(0, 10)
+      .map((url, i) => itemMediaInput.safeParse({ url, altText: alts[i] ?? '', sortOrder: i }))
+      .flatMap((r) => (r.success ? [r.data] : []));
+    if (media.length) {
+      await supabase.from('item_media').insert(
+        media.map((m) => ({
+          item_id: saved.id,
+          url: m.url,
+          alt_text: m.altText,
+          sort_order: m.sortOrder,
+        })),
+      );
+    }
+  }
 
   // A project is part of the profile's embedded text, so the PROFILE is re-embedded, not just
   // the item. Embedding the item alone would leave the profile matching on a version of

@@ -142,8 +142,18 @@ export const talentLinksInput = z.object({
   linkedinUrl: optionalHttpsUrl,
 });
 
+/**
+ * A project photo's address: https, or plain http only for a local Supabase (127.0.0.1 or
+ * localhost), whose Storage serves over http. Same allowance as the profile photo constraint
+ * (migration 0025); without it no project photo could be saved in local development.
+ */
+const mediaUrl = z.union([
+  httpsUrl,
+  trimmed.regex(/^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?\//, 'Must be a full https:// link.'),
+]);
+
 export const itemMediaInput = z.object({
-  url: httpsUrl,
+  url: mediaUrl,
   /** Required, not optional. Alt text is an accessibility gate (§9), enforced NOT NULL. */
   altText: trimmed
     .min(3, 'Describe the image for people who cannot see it.')
@@ -202,18 +212,25 @@ const optionalYear = z
   .transform((v) => (v === '' || v === undefined ? null : v));
 
 /**
- * A certification (migration 0022). LinkedIn's fields: name, issuing organisation, issue and
- * optional expiry month, optional credential ID and verification link. The verification link is
+ * A certification (migration 0022). LinkedIn's fields: name, issuing organisation, issue date and
+ * optional expiry date, optional credential ID and verification link. The verification link is
  * https only, like every link in the product.
  */
+/** `<input type="date">` posts "YYYY-MM-DD". A bare month (a resume import) becomes the 1st. */
+const calendarDate = z
+  .string()
+  .trim()
+  .regex(/^\d{4}-\d{2}(-\d{2})?$/, 'Pick a date.')
+  .transform((v) => (v.length === 7 ? `${v}-01` : v));
+
 export const certificationInput = z
   .object({
     name: trimmed.min(2, 'Name the certification.').max(200),
     issuer: trimmed.min(1, 'Who issued it?').max(160),
-    issuedOn: monthDate,
+    issuedOn: calendarDate,
     /** Blank = does not expire. */
     expiresOn: z
-      .union([monthDate, z.literal('')])
+      .union([calendarDate, z.literal('')])
       .optional()
       .transform((v) => (v ? v : null)),
     credentialId: trimmed

@@ -37,7 +37,7 @@ export async function loadShellUser(viewer: Viewer): Promise<ShellUser> {
 
   if (viewer.activeRole === 'client') {
     // The public company page. Without a company row yet, both items collapse into one
-    // (account-menu shows a single "Company profile" when the two hrefs match).
+    // (account-menu shows a single "Client profile" when the two hrefs match).
     const clientId = await getClientProfileId();
     if (clientId) {
       profileHref = `/company/${clientId}`;

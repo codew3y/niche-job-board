@@ -35,7 +35,7 @@ export function PhotoUpload({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [pending, startTransition] = useTransition();
-  const label = kind === 'photo' ? 'Profile photo' : 'Company logo';
+  const label = kind === 'photo' ? 'Profile photo' : 'Photo or logo';
 
   const upload = async (file: File) => {
     setError(null);

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+import { CURRENCY_CODES } from '../currencies';
 import { engagementType, experienceLevel, locationType } from './enums';
 import { currency, optionalMoney, richText, slug, trimmed, uuid } from './primitives';
 
@@ -21,7 +22,10 @@ export const jobInput = z
     engagementType,
     budgetMin: optionalMoney,
     budgetMax: optionalMoney,
-    currency: currency.default('USD'),
+    // Any currency in circulation (the picker offers them all); not just any three letters.
+    currency: currency
+      .refine((c) => CURRENCY_CODES.has(c), 'Choose a currency from the list.')
+      .default('USD'),
     locationType: locationType.default('remote'),
     location: trimmed.max(120).nullable().optional(),
     experienceLevel: experienceLevel.nullable().optional(),

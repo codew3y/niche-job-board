@@ -16,6 +16,7 @@ import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
 import { ImageUpload } from '@/components/upload/image-upload';
 import { attachMedia, detachMedia } from '@/lib/actions/media';
+import { PROJECT_MEDIA_BUCKET } from '@/lib/schemas/upload';
 import { ItemList } from './item-list';
 import { LinkListInput } from './link-list-input';
 import { saveItem } from '@/lib/actions/profile';
@@ -82,11 +83,8 @@ export function PortfolioManager({ items }: { items: Item[] }) {
         />
       )}
 
-      {/*
-        Images attach to a SAVED item, so this only appears when editing one. A new project has
-        no id yet, and uploading against an id that does not exist would either orphan the object
-        or need a draft row nobody asked for.
-      */}
+      {/* A saved project's photos. A new project picks its photos inside the form itself
+          (NewProjectPhotos), and they are attached when it is first saved. */}
       {editing && <ItemMedia item={editing} />}
 
       {/* With no projects, the empty state above carries this same button. */}
@@ -200,9 +198,8 @@ function ItemForm({
         </div>
       </details>
 
-      {!item && (
-        <p className="text-sm text-text-subtle">You can add photos once the project is saved.</p>
-      )}
+      {/* A new project takes its photos right here; a saved one manages them below the form. */}
+      {!item && <NewProjectPhotos />}
 
       {state?.ok === false && !state.fields && <FormError>{state.message}</FormError>}
 
@@ -213,6 +210,77 @@ function ItemForm({
         </Button>
       </div>
     </Form>
+  );
+}
+
+type StagedPhoto = { url: string; altText: string; path: string };
+
+/**
+ * Photos for a project that does not exist yet. Each one is uploaded to Storage straight away
+ * (alt text first, as everywhere), shown as a thumbnail, and posted with the form as
+ * mediaUrl/mediaAlt pairs; saveItem writes the rows once the project has an id. Removing one
+ * before saving deletes the uploaded file too, so nothing is left behind in Storage.
+ */
+function NewProjectPhotos() {
+  const [photos, setPhotos] = useState<StagedPhoto[]>([]);
+
+  const remove = async (photo: StagedPhoto) => {
+    setPhotos((all) => all.filter((p) => p.path !== photo.path));
+    const { createClient } = await import('@/lib/supabase/client');
+    await createClient().storage.from(PROJECT_MEDIA_BUCKET).remove([photo.path]);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="text-sm font-semibold">
+          Photos <span className="ml-1.5 font-normal text-text-subtle">Optional</span>
+        </p>
+        <p className="mt-0.5 text-sm text-text-muted">
+          Screenshots of the work. The first one is the project&apos;s cover.
+        </p>
+      </div>
+
+      {photos.length > 0 && (
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {photos.map((photo, i) => (
+            <li key={photo.path}>
+              <input type="hidden" name="mediaUrl" value={photo.url} />
+              <input type="hidden" name="mediaAlt" value={photo.altText} />
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border-base bg-surface-sunken">
+                <Image
+                  src={photo.url}
+                  alt={photo.altText}
+                  fill
+                  sizes="(min-width: 640px) 200px, 45vw"
+                  className="object-cover"
+                />
+                {i === 0 && (
+                  <span className="absolute top-2 left-2 rounded-sm bg-surface-raised/90 px-1.5 py-0.5 text-xs font-semibold">
+                    Cover
+                  </span>
+                )}
+              </div>
+              <Button
+                variant="danger-ghost"
+                size="sm"
+                className="mt-1.5 -ml-2 max-sm:h-10"
+                onClick={() => void remove(photo)}
+              >
+                Remove
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {photos.length < 10 && (
+        <ImageUpload
+          label={photos.length ? 'Add another photo' : 'Add a photo'}
+          onUploaded={(photo) => setPhotos((all) => [...all, photo])}
+        />
+      )}
+    </div>
   );
 }
 

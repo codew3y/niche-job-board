@@ -15,11 +15,14 @@ export default async function ClientOnboarding({ params }: { params: Promise<{ s
   } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: client } = await supabase
-    .from('client_profiles')
-    .select('id, company_name, website, industry, about')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const [{ data: client }, { data: me }] = await Promise.all([
+    supabase
+      .from('client_profiles')
+      .select('id, company_name, website, industry, about')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+    supabase.from('user_profiles').select('display_name').eq('user_id', user.id).maybeSingle(),
+  ]);
 
   const [{ data: skills }, { data: draft }, { data: published }] = await Promise.all([
     supabase.from('skills').select('id, name, category, aliases').order('name'),
@@ -63,7 +66,9 @@ export default async function ClientOnboarding({ params }: { params: Promise<{ s
       basePath="/onboarding/client"
       done={(slug) => clientStepDone(slug as ClientStep, progress)}
     >
-      {step === 'company' && <CompanyForm client={client ?? null} />}
+      {step === 'company' && (
+        <CompanyForm client={client ?? null} displayName={me?.display_name ?? ''} />
+      )}
       {step === 'job' && (
         <FirstJobForm
           job={draft ?? null}

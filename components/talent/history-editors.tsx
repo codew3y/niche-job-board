@@ -342,20 +342,22 @@ function CertificationForm({ row, onDone }: { row: CertificationRow | null; onDo
           errors={fields?.issuer}
           placeholder="Amazon Web Services"
         />
+        {/* Full dates, as printed on a certificate. Older entries saved from a month picker are
+            stored as the 1st of that month and open showing it. */}
         <Field
-          label="Issued"
+          label="Issue date"
           name="issuedOn"
-          type="month"
+          type="date"
           required
-          defaultValue={row?.issued_on.slice(0, 7) ?? ''}
+          defaultValue={row?.issued_on ?? ''}
           errors={fields?.issuedOn}
         />
         <Field
-          label="Expires"
+          label="Expiry date"
           name="expiresOn"
-          type="month"
+          type="date"
           optional
-          defaultValue={row?.expires_on?.slice(0, 7) ?? ''}
+          defaultValue={row?.expires_on ?? ''}
           errors={fields?.expiresOn}
           hint="Leave empty if it does not expire."
         />

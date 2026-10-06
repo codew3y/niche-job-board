@@ -19,10 +19,10 @@ type Company = {
 const INLINE = new Set(['companyName', 'website', 'industry', 'about']);
 
 /**
- * Editing the company a client posts under.
+ * Editing the client profile: the name a client posts under, their own or a business's.
  *
- * The company name is the only identity a client has here: it appears on every job card,
- * every public job page and in the other party's inbox.
+ * That name is the only identity a client has here: it appears on every job card, every public
+ * job page and in the other party's inbox.
  */
 export function CompanyForm({ company }: { company: Company }) {
   const [state, action] = useActionState<ActionResult | null, FormData>(updateClientProfile, null);
@@ -50,13 +50,13 @@ export function CompanyForm({ company }: { company: Company }) {
       )}
 
       <Field
-        label="Company name"
+        label="Name on your briefs"
         name="companyName"
         required
-        autoComplete="organization"
+        autoComplete="name"
         defaultValue={company.company_name}
         errors={fields?.companyName}
-        hint="Shown on every job you post."
+        hint="Shown on every job you post. Your own name, or a business's if you hire for one."
       />
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -81,7 +81,7 @@ export function CompanyForm({ company }: { company: Company }) {
       </div>
 
       <TextareaField
-        label="About"
+        label="What you hire for"
         name="about"
         id="about"
         rows={4}
@@ -89,7 +89,7 @@ export function CompanyForm({ company }: { company: Company }) {
         defaultValue={company.about}
         maxLength={2000}
         errors={fields?.about}
-        placeholder="What you build and who for. A developer reads this before deciding whether to apply."
+        placeholder="A line or two about the work. A developer reads this before deciding whether to apply."
       />
 
       <div className="flex flex-wrap items-center gap-4 border-t border-border-base pt-5">

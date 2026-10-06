@@ -10,7 +10,8 @@ const optionalText = (max: number) =>
     .transform((v) => (v ? v : null));
 
 export const clientProfileInput = z.object({
-  companyName: trimmed.min(2, 'Company name is required.').max(120),
+  /** The name on the client's briefs: their own, or a business's. Not necessarily a company. */
+  companyName: trimmed.min(2, 'Add the name developers will see on your briefs.').max(120),
   website: optionalHttpsUrl,
   industry: optionalText(80),
   about: richText(2000, 'About').default(''),

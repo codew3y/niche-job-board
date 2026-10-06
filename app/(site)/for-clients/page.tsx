@@ -12,7 +12,7 @@ import { buttonStyles } from '@/components/ui/button';
 import clientsPhoto from '@/public/images/pages/for-clients.jpg';
 
 export const metadata: Metadata = {
-  title: 'For Clients',
+  title: 'Clients',
   description:
     'Post a brief for software, web or automation work and see developers ordered by fit, each with a reason.',
   alternates: { canonical: '/for-clients' },
@@ -42,8 +42,8 @@ const POSTING = [
     body: 'Save a job as a draft until it is ready. Published jobs have a public page anyone can open from a link; close or reopen it whenever you need to.',
   },
   {
-    title: 'Your company profile',
-    body: 'The company name, website and a short description appear on every job you post. It is the context a developer reads before applying.',
+    title: 'No company needed',
+    body: 'Hire as yourself or for a business. The name you choose, plus an optional website and a line about the work, appears on every job you post.',
   },
 ] as const;
 
@@ -78,7 +78,7 @@ export default function ForClientsPage() {
   return (
     <>
       <PageIntro
-        eyebrow="For clients"
+        eyebrow="Clients"
         title="Find developers by what they have shipped"
         lead="Post a brief for software, web or automation work. See who fits, in order, and why."
         image={{

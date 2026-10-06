@@ -26,6 +26,16 @@ describe('certificationInput (migration 0022)', () => {
     expect(certificationInput.safeParse({ ...base, issuedOn: '' }).success).toBe(false);
   });
 
+  it('takes a full date from the date picker as it is', () => {
+    const r = certificationInput.safeParse({
+      ...base,
+      issuedOn: '2024-03-14',
+      expiresOn: '2027-03-14',
+    });
+    expect(r.data?.issuedOn).toBe('2024-03-14');
+    expect(r.data?.expiresOn).toBe('2027-03-14');
+  });
+
   it('refuses an expiry before the issue date, on the expiry field', () => {
     const r = certificationInput.safeParse({ ...base, expiresOn: '2023-12' });
     expect(r.success).toBe(false);

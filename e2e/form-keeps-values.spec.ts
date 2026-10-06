@@ -50,7 +50,10 @@ test.describe('signed in', () => {
     await page.getByRole('radio', { name: 'Hourly' }).check({ force: true });
     await page.getByLabel('Budget from').fill('40');
     await page.getByLabel('Budget to').fill('60');
-    await page.getByLabel('Currency').selectOption('EUR');
+    // The searchable currency picker: type, then choose from the list.
+    const currency = page.getByRole('combobox', { name: 'Currency' });
+    await currency.fill('swiss');
+    await page.getByRole('option', { name: /CHF/ }).click();
     await page.getByRole('button', { name: /save draft/i }).click();
 
     // Refused by the server: no skill was added (the description is short too).
@@ -64,6 +67,6 @@ test.describe('signed in', () => {
     await expect(page.getByRole('radio', { name: 'Hourly' })).toBeChecked();
     await expect(page.getByLabel('Budget from')).toHaveValue('40');
     await expect(page.getByLabel('Budget to')).toHaveValue('60');
-    await expect(page.getByLabel('Currency')).toHaveValue('EUR');
+    await expect(currency).toHaveValue('CHF · Swiss Franc');
   });
 });

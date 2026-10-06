@@ -72,13 +72,13 @@ export default async function CompanyPage({ params }: Params) {
           role="note"
           className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-base bg-primary-subtle px-4 py-3 text-sm text-text"
         >
-          <p>This is how developers see your company.</p>
+          <p>This is how developers see your client page.</p>
           <Link
             href="/dashboard/client/profile"
             className={buttonStyles({ variant: 'secondary', size: 'sm' })}
           >
             <Pencil aria-hidden="true" />
-            Edit company
+            Edit client profile
           </Link>
         </div>
       )}

@@ -17,7 +17,7 @@ export const TALENT_STEPS = [
 ] as const;
 
 export const CLIENT_STEPS = [
-  { slug: 'company', title: 'Your company', blurb: 'Who candidates will be talking to.' },
+  { slug: 'company', title: 'About you', blurb: 'The name developers see on your briefs.' },
   { slug: 'job', title: 'First brief', blurb: 'What you need built.' },
   { slug: 'review', title: 'Publish', blurb: 'A last look before it goes live.' },
 ] as const;

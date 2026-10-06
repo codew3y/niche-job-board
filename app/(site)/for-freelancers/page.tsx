@@ -12,7 +12,7 @@ import { buttonStyles } from '@/components/ui/button';
 import freelancersPhoto from '@/public/images/pages/for-freelancers.jpg';
 
 export const metadata: Metadata = {
-  title: 'For Freelancers',
+  title: 'Freelancers',
   description:
     'Build a profile around the work you have shipped, get matched to briefs that fit, and apply with the evidence.',
   alternates: { canonical: '/for-freelancers' },
@@ -81,7 +81,7 @@ export default function ForFreelancersPage() {
   return (
     <>
       <PageIntro
-        eyebrow="For freelancers"
+        eyebrow="Freelancers"
         title="Get hired for what you have built"
         lead="Your profile is the work itself: projects, links and photos. Matching reads it to find briefs that fit."
         image={{

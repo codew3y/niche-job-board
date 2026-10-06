@@ -3,7 +3,7 @@
 import { useActionState, useState, type ReactNode } from 'react';
 
 import { SkillPicker, type SkillOption } from '@/components/onboarding/skill-picker';
-import { CURRENCIES } from '@/components/onboarding/talent-forms';
+import { CurrencyCombobox } from '@/components/shared/currency-combobox';
 import { ChoiceChips, Field, FormError, SelectField, TextareaField } from '@/components/ui/field';
 import { Form } from '@/components/ui/form';
 import { SubmitButton } from '@/components/ui/submit-button';
@@ -158,18 +158,11 @@ export function JobForm({
               errors={fields?.budgetMax}
               className="tabular-nums"
             />
-            <SelectField
-              label="Currency"
-              name="currency"
-              defaultValue={str(job, 'currency') || 'USD'}
-              wrapperClassName="col-span-2 sm:col-span-1"
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </SelectField>
+            <CurrencyCombobox
+              defaultValue={str(job, 'currency')}
+              errors={fields?.currency}
+              className="col-span-2 sm:col-span-1"
+            />
           </div>
         </FormSection>
 

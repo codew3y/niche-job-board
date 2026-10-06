@@ -310,19 +310,19 @@ export async function saveCompany(
   const parsed = clientProfileInput.safeParse({
     companyName: formData.get('companyName'),
     website: formData.get('website') || '',
-    industry: formData.get('industry') || null,
     about: formData.get('about') || '',
   });
   if (!parsed.success) {
     return { ok: false, message: 'Check the fields below.', fields: fieldErrors(parsed.error) };
   }
 
+  // No industry here: the first step does not ask for it (it is on the full client profile), and
+  // leaving it out of the upsert keeps one saved there rather than blanking it.
   const { error } = await supabase.from('client_profiles').upsert(
     {
       user_id: user.id,
       company_name: parsed.data.companyName,
       website: parsed.data.website,
-      industry: parsed.data.industry,
       about: parsed.data.about,
     },
     { onConflict: 'user_id' },

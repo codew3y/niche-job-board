@@ -9,7 +9,7 @@ import { ConnectedAccounts } from './connected-accounts';
 import { LinksPreview } from './links-preview';
 import type { Connections } from '@/lib/services/connections';
 import { SkillPicker, type SkillOption } from '@/components/onboarding/skill-picker';
-import { CurrencySelect } from '@/components/shared/currency-select';
+import { CurrencyCombobox } from '@/components/shared/currency-combobox';
 import { TimezoneCombobox } from '@/components/shared/timezone-combobox';
 import { updateProfile, updateSkills } from '@/lib/actions/profile';
 import type { ActionResult } from '@/lib/actions/auth';
@@ -62,7 +62,7 @@ export function ProfileEditor({
           errors={fields?.hourlyRate}
           placeholder="85"
         />
-        <CurrencySelect defaultValue={str(profile, 'currency')} />
+        <CurrencyCombobox defaultValue={str(profile, 'currency')} errors={fields?.currency} />
       </div>
 
       <TextareaField

@@ -11,7 +11,7 @@ import { buttonStyles } from '@/components/ui/button';
 import { PageHeader, SectionHeading } from '@/components/ui/page-header';
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata: Metadata = { title: 'Company profile' };
+export const metadata: Metadata = { title: 'Client profile' };
 
 /**
  * The company a client posts under.
@@ -42,7 +42,7 @@ export default async function ClientProfilePage() {
   return (
     <div>
       <PageHeader
-        title="Company profile"
+        title="Client profile"
         subtitle="What a developer sees before deciding whether to apply."
         actions={
           <Link href={`/company/${company.id}`} className={buttonStyles({ variant: 'secondary' })}>

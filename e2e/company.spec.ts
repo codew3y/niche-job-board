@@ -40,7 +40,7 @@ test('opens signed out, with the company and its open job', async ({ page }) => 
   await expect(page).toHaveURL(new RegExp(`/jobs/${data.job.slug}$`));
   // Not the owner: no edit banner.
   await page.goBack();
-  await expect(page.getByText('This is how developers see your company.')).toHaveCount(0);
+  await expect(page.getByText('This is how developers see your client page.')).toHaveCount(0);
 });
 
 test('the job page links its company name to the company page', async ({ page }) => {
@@ -62,8 +62,8 @@ test('the owner reaches it from View profile and can edit from it', async ({ pag
   await page.getByRole('button', { name: /profile menu/i }).click();
   await page.getByRole('menuitem', { name: 'View profile' }).click();
   await expect(page).toHaveURL(new RegExp(`/company/${data.client.profileId}$`));
-  await expect(page.getByText('This is how developers see your company.')).toBeVisible();
-  await page.getByRole('link', { name: 'Edit company' }).click();
+  await expect(page.getByText('This is how developers see your client page.')).toBeVisible();
+  await page.getByRole('link', { name: 'Edit client profile' }).click();
   await expect(page).toHaveURL(/\/dashboard\/client\/profile$/);
   await expect(page.getByRole('link', { name: 'View public page' })).toHaveAttribute(
     'href',
