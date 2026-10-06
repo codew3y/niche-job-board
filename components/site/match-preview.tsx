@@ -96,9 +96,7 @@ export function MatchPreview() {
           </ul>
         </div>
 
-        <p className="px-1 text-xs font-medium tracking-wide text-text-subtle uppercase">
-          Best fit first
-        </p>
+        <p className="px-1 font-mono text-xs text-text-subtle">Best fit first</p>
 
         {/* The ranked developers. A list in order: the position is the ranking. */}
         <ol className="flex flex-col gap-2.5">

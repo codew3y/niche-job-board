@@ -305,7 +305,7 @@ async function ClientCard({ client }: { client: NonNullable<Job['client_profiles
       <div className="flex items-center gap-3">
         <Avatar name={client.company_name} src={client.logo_url} size="lg" />
         <div className="min-w-0">
-          <p className="text-xs text-text-subtle">About the client</p>
+          <p className="font-mono text-xs text-text-subtle">About the client</p>
           <h2 id="company-heading" className="truncate text-lg font-semibold tracking-tight">
             {client.company_name}
           </h2>
@@ -383,7 +383,7 @@ function FactsCard({
       <dl className="grid grid-cols-2 gap-x-4 gap-y-4 @xl:grid-cols-3 @3xl:grid-cols-1">
         {facts.map(([term, value]) => (
           <div key={term} className="min-w-0">
-            <dt className="text-sm text-text-subtle">{term}</dt>
+            <dt className="font-mono text-xs text-text-subtle">{term}</dt>
             <dd className="mt-0.5 font-semibold break-words">{value}</dd>
           </div>
         ))}

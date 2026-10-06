@@ -296,6 +296,9 @@
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  /* LABELS, site-wide: a small label above or beside a value (an eyebrow, a fact's name, a
+     footer column, "Best fit first") is `font-mono text-xs text-text-subtle`, sentence case.
+     No uppercase-tracked labels and no plain small-grey labels: one label style. */
   --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
 
   --font-weight-normal: 400;
