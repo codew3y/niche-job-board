@@ -31,9 +31,12 @@ export function EmptyState({
     <div
       className={cn(
         // A quiet well, not a dashed box: one Phosphor icon on a tile, a line that says what is
-        // true, and one way forward (the redesign's empty-state rule).
-        'rounded-lg px-6 py-14 text-center',
-        tone === 'pending' ? 'bg-accent-subtle' : 'bg-surface-sunken',
+        // true, and one way forward (the redesign's empty-state rule). A soft light from the
+        // top centre, in the brand tint, so it reads as a place to start rather than a hole.
+        'rounded-xl border border-border-base px-6 py-14 text-center',
+        tone === 'pending'
+          ? 'bg-accent-subtle'
+          : 'bg-surface-sunken bg-[radial-gradient(ellipse_at_50%_0%,var(--primary-subtle),transparent_65%)]',
         className,
       )}
     >
@@ -41,13 +44,11 @@ export function EmptyState({
         <span
           aria-hidden="true"
           className={cn(
-            'mx-auto mb-4 grid size-11 place-items-center rounded-md',
-            tone === 'pending'
-              ? 'bg-surface-raised text-link'
-              : 'bg-surface-raised text-text-muted',
+            'mx-auto mb-5 grid size-12 place-items-center rounded-xl border border-border-base bg-surface-raised shadow-sm',
+            tone === 'pending' ? 'text-accent' : 'text-primary',
           )}
         >
-          <Icon size={20} />
+          <Icon size={22} weight="duotone" />
         </span>
       )}
       <p className="text-xl font-semibold tracking-tight">{title}</p>

@@ -125,13 +125,21 @@ async function DashboardBody({ client }: { client: { id: string; company_name: s
       {/* Phone: two by two. From lg: one row of four. */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
+          tone="blue"
           label="Open jobs"
           value={open.length}
           icon={Briefcase}
           href="/dashboard/client/jobs"
         />
-        <Stat label="Applications" value={live.length} icon={Inbox} href="/dashboard/client/jobs" />
         <Stat
+          tone="teal"
+          label="Applications"
+          value={live.length}
+          icon={Inbox}
+          href="/dashboard/client/jobs"
+        />
+        <Stat
+          tone="amber"
           label="To review"
           value={toReview}
           icon={UsersRound}
@@ -139,6 +147,7 @@ async function DashboardBody({ client }: { client: { id: string; company_name: s
           href="/dashboard/client/jobs"
         />
         <Stat
+          tone="violet"
           label="Saved developers"
           value={saved.count ?? 0}
           icon={Bookmark}

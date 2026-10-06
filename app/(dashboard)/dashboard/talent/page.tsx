@@ -116,12 +116,14 @@ export default async function TalentDashboard() {
           free: two 158px tiles fit "Applications" at 360px), one row of four from lg. */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat
+          tone="blue"
           label="Applications"
           value={active}
           icon={Briefcase}
           href="/dashboard/talent/applications"
         />
         <Stat
+          tone="teal"
           label="Shortlisted"
           value={shortlisted}
           icon={Star}
@@ -129,12 +131,14 @@ export default async function TalentDashboard() {
           href="/dashboard/talent/applications"
         />
         <Stat
+          tone="amber"
           label="Saved jobs"
           value={saved?.count ?? 0}
           icon={Bookmark}
           href="/dashboard/talent/saved"
         />
         <Stat
+          tone="violet"
           label="Projects"
           value={profile?.portfolio_item_count ?? 0}
           icon={FolderKanban}
