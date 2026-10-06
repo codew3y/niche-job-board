@@ -7,14 +7,16 @@
  * Components use the semantic names (`bg-surface`, `text-text-muted`, `bg-primary`,
  * `rounded-lg`), never a raw value, so a theme change is an edit here and nowhere else.
  *
- * THE PALETTE. Warm-neutral monochrome (minimalist-ui) with ONE accent, the logo's shield blue
- * (#1278B8), darkened to #0F67A0 so it can carry text. The primary action is ink, not blue.
- * Photography and portfolio work supply the colour; the interface stays quiet. No neon, no
- * gradients, no pure #000 or #fff surfaces.
+ * THE PALETTE. Warm-neutral surfaces and text with two colours from the logo: the shield blue
+ * (#1278B8, darkened to #0F67A0 to carry text) as the primary action, and a teal from its cyan
+ * highlight (#0B7285) as the accent. In dark mode both lighten and take dark text. Until October
+ * 2026 the primary action was ink; the owner asked for a brand colour. No neon, no pure #000 or
+ * #fff surfaces.
  *
  * CONTRAST (WCAG 2.2, measured, light / dark, on the page and on cards):
  *   text 17.6 / 15.7, text-muted 7.3 / 7.4, text-subtle 5.1 / 5.2 (4.8 / 4.9 on wells),
- *   accent and link 5.8 / 8.3, primary button text 18.4 / 16.8, accent button text 6.1 / 8.9,
+ *   link 5.8 / 8.3, primary as text 5.8 / 8.9, primary button text 6.1 / 8.9,
+ *   accent as text 5.4 / 10.7 (4.9 / 8.2 on its tint), accent button text 5.6 / 10.7,
  *   status text on its tint >= 5.0 / 7.1, control (input borders) 3.3 / 3.3,
  *   focus ring 4.6 / 8.3 (non-text minimum is 3:1).
  */
@@ -40,18 +42,18 @@
   --text-muted: #57534e;
   --text-subtle: #6f6b66;
 
-  /* The primary action is ink, not a brand colour (minimalist-ui 5). */
-  --primary: #141414;
-  --primary-hover: #2b2a28;
-  --primary-pressed: #3a3936;
-  --primary-text: #fafaf9;
-  --primary-subtle: #f1f0ee; /* a neutral tint for selected nav items and numeral tiles */
+  /* The primary action is the brand: the logo's shield blue, darkened to carry white text. */
+  --primary: #0f67a0;
+  --primary-hover: #0b5583;
+  --primary-pressed: #094870;
+  --primary-text: #ffffff;
+  --primary-subtle: #e6f0fa; /* a blue tint for selected items and icon tiles */
 
-  /* The one accent: the logo's shield blue, darkened to carry text. Links, focus, the selected
-     state and match reasons. Never a large background. */
-  --accent: #0f67a0;
-  --accent-hover: #0b5583;
-  --accent-subtle: #e1f3fe;
+  /* The second colour: a teal from the shield's cyan highlight, darkened to carry text. Icon
+     tiles, small highlights and match reasons. Never a large background. */
+  --accent: #0b7285;
+  --accent-hover: #095c6b;
+  --accent-subtle: #dff4f5;
   --accent-text: #ffffff;
 
   --link: #0f67a0;
@@ -99,14 +101,14 @@
     --text: #ededeb;
     --text-muted: #a8a49f;
     --text-subtle: #8c8883;
-    --primary: #ededeb;
-    --primary-hover: #d6d5d2;
-    --primary-pressed: #c2c0bc;
+    --primary: #5cb8ec;
+    --primary-hover: #8bcdf2;
+    --primary-pressed: #a9daf5;
     --primary-text: #0b0b0c;
-    --primary-subtle: #1f1f21;
-    --accent: #5cb8ec;
-    --accent-hover: #8bcdf2;
-    --accent-subtle: #0e2433;
+    --primary-subtle: #0e2433;
+    --accent: #5ccfd9;
+    --accent-hover: #8de0e7;
+    --accent-subtle: #0b2a2d;
     --accent-text: #0b0b0c;
     --link: #5cb8ec;
     --success: #7fc58a;
@@ -137,14 +139,14 @@
   --text: #ededeb;
   --text-muted: #a8a49f;
   --text-subtle: #8c8883;
-  --primary: #ededeb;
-  --primary-hover: #d6d5d2;
-  --primary-pressed: #c2c0bc;
+  --primary: #5cb8ec;
+  --primary-hover: #8bcdf2;
+  --primary-pressed: #a9daf5;
   --primary-text: #0b0b0c;
-  --primary-subtle: #1f1f21;
-  --accent: #5cb8ec;
-  --accent-hover: #8bcdf2;
-  --accent-subtle: #0e2433;
+  --primary-subtle: #0e2433;
+  --accent: #5ccfd9;
+  --accent-hover: #8de0e7;
+  --accent-subtle: #0b2a2d;
   --accent-text: #0b0b0c;
   --link: #5cb8ec;
   --success: #7fc58a;
@@ -237,13 +239,13 @@
 @media (min-width: 48rem) {
   :root {
     --tabbar-space: 0px;
-    --spacing-section: 6rem;
+    --spacing-section: 4.5rem;
   }
 }
 
 @media (min-width: 64rem) {
   :root {
-    --spacing-section: 8rem;
+    --spacing-section: 5.5rem;
   }
 }
 
@@ -355,10 +357,12 @@
   --text-display-lg--font-weight: 600;
 
   /*
-   * Spacing rhythm for sections, one rule everywhere: 64px on phones, 96 on tablets, 128 on
-   * desktop (VISUAL_DENSITY 3). `py-section` on every top-level section; nothing hand-tuned.
+   * Spacing rhythm for sections, one rule everywhere: 56px on phones, 72 on tablets, 88 on
+   * desktop. `py-section` on every top-level section; nothing hand-tuned. Tightened by about a
+   * third in October 2026: with every section on the same background, the old 128px gaps read
+   * as empty space rather than rhythm. Alternate sections now sit on a tinted Band instead.
    */
-  --spacing-section: 4rem;
+  --spacing-section: 3.5rem;
 
   /* The page container: 1200px of content, centred, with the gutter outside it. */
   --container-page: 75rem;
