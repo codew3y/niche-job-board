@@ -1,7 +1,23 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
-import { CONTAINER, FeatureBento, PageCta, PageIntro, SECTION } from '@/components/site/page-parts';
+import {
+  ChatCenteredText,
+  Crosshair,
+  DoorOpen,
+  Handshake,
+  Hammer,
+  MagnifyingGlass,
+} from '@phosphor-icons/react/ssr';
+
+import {
+  CONTAINER,
+  FeatureCards,
+  PageCta,
+  PageIntro,
+  SECTION,
+  type Feature,
+} from '@/components/site/page-parts';
 import { cn } from '@/lib/ui/cn';
 import aboutPhoto from '@/public/images/pages/about.jpg';
 
@@ -17,35 +33,42 @@ export const metadata: Metadata = {
  * (ADR-008), no fees and no payments (terms), order-and-reason instead of scores (ADR-007 D2),
  * and matching on Google's Gemini API (privacy policy). No team, figures or history invented.
  *
- * Four sections, four layout families: split intro with a photograph, bento, a two-column
+ * Four sections, four layout families: split intro with a photograph, icon cards led by a
+ * statement card, a two-column
  * prose panel, closing panel. One eyebrow (the intro).
  */
-const BELIEFS = [
+const BELIEFS: Feature[] = [
   {
     title: 'A focused niche',
+    icon: Crosshair,
     body: 'Software development, web development, and automation and integration work: n8n, Zapier, APIs, WhatsApp bots. A narrow scope keeps the skill list precise and the matching sharp.',
   },
   {
     title: 'Anyone may list',
+    icon: DoorOpen,
     body: 'There is no approval queue and no minimum profile. Who is worth hiring is the client’s judgement. A platform gate would put its taste in place of theirs.',
   },
   {
     title: 'Work over keywords',
+    icon: Hammer,
     body: 'A developer who describes a shipped project outranks one who lists the same tool. Profiles are built around projects, links and photos for that reason.',
   },
   {
     title: 'Explain, don’t score',
+    icon: ChatCenteredText,
     body: 'Every match comes with a sentence of reasoning. Clients see candidates in order with that reason, never a number attached to a person.',
   },
   {
     title: 'Not a middleman',
+    icon: Handshake,
     body: 'TechSelect takes no fee and handles no payments or contracts. Once two people connect, the arrangement is theirs.',
   },
   {
     title: 'Works without the AI',
+    icon: MagnifyingGlass,
     body: 'Search and filters find every job and every developer on their own. Matching helps you look. It never hides anyone.',
   },
-] as const;
+];
 
 export default function AboutPage() {
   return (
@@ -62,7 +85,12 @@ export default function AboutPage() {
         }}
       />
 
-      <FeatureBento heading="What we believe" items={BELIEFS} />
+      <FeatureCards
+        heading="What we believe"
+        lead="Six choices that decide how the board works, and what it will never do."
+        items={BELIEFS}
+        featured
+      />
 
       {/* Your data: the heading on the left, the detail beside it, under one hairline. Stacked
           below `md`. */}

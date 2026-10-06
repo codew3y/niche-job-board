@@ -2,14 +2,27 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import {
-  FeatureBento,
+  Certificate,
+  CurrencyCircleDollar,
+  Kanban,
+  LinkSimple,
+  RocketLaunch,
+  Tag,
+} from '@phosphor-icons/react/ssr';
+
+import { BriefsShowcase } from '@/components/site/board-showcase';
+import {
+  FeatureCards,
   FeatureList,
   NumberedSteps,
   PageCta,
   PageIntro,
+  type Feature,
 } from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
-import freelancersPhoto from '@/public/images/pages/for-freelancers.jpg';
+import stepApply from '@/public/images/steps/freelancers-03-apply.jpg';
+import stepBriefs from '@/public/images/steps/freelancers-02-briefs.jpg';
+import stepDescribe from '@/public/images/steps/freelancers-01-describe.jpg';
 
 export const metadata: Metadata = {
   title: 'Freelancers',
@@ -23,9 +36,22 @@ export const metadata: Metadata = {
  * page (b9fe7d4). Everything else describes what the product actually does today: see the
  * profile editor (app/(dashboard)/dashboard/talent/profile) and ADR-008.
  *
- * Five sections, five layout families: split intro with a photograph, numbered list, bento,
- * side-heading list, closing panel. One eyebrow (the intro).
+ * Five sections, five layout families: split intro beside the live board (open briefs), steps
+ * with photographs, icon cards, side-heading list, closing panel. One eyebrow (the intro).
+ *
+ * STEP PHOTOS: Unsplash License, graded to the site palette, cropped to 4:3.
+ *   freelancers-01-describe.jpg  Christin Hume,  https://unsplash.com/photos/Hcfwew744z4
+ *   freelancers-02-briefs.jpg    fran innocenti, https://unsplash.com/photos/ij8xP91j8jM
+ *   freelancers-03-apply.jpg     Vitaly Gariev,  https://unsplash.com/photos/irfWcn-sF48
  */
+const STEP_IMAGES = [
+  { src: stepDescribe, alt: 'Hands typing on a laptop at a wooden desk' },
+  {
+    src: stepBriefs,
+    alt: 'A developer reading through a list on a laptop in a busy shared office',
+  },
+  { src: stepApply, alt: 'Two people going over work together at a laptop' },
+] as const;
 const STEPS = [
   [
     'Describe what you built',
@@ -35,32 +61,38 @@ const STEPS = [
   ['Apply with the evidence', 'Clients see the projects behind your note, not a keyword score.'],
 ] as const;
 
-const PROFILE = [
+const PROFILE: Feature[] = [
   {
     title: 'Title and rate',
+    icon: CurrencyCircleDollar,
     body: 'Say what you do in one line and set an hourly rate in your currency. That line is how you appear everywhere: browse, messages and your public page.',
   },
   {
     title: 'Projects',
+    icon: Kanban,
     body: 'Each project gets a title, a short description, as many links as it needs (repo, live site, write-up) and photos with descriptions for screen-reader users.',
   },
   {
     title: 'Skills from one shared list',
+    icon: Tag,
     body: 'Pick skills from a curated taxonomy of software, web and automation skills, so clients filtering for “Go” or “n8n” find you whatever you call it.',
   },
   {
     title: 'Experience and education',
+    icon: Certificate,
     body: 'Roles with dates and a description, and the schools you studied at. Optional, and shown on your public profile when you add them.',
   },
   {
     title: 'Portfolio site and linked accounts',
+    icon: LinkSimple,
     body: 'Link your own site, GitHub and LinkedIn. They appear as links on your profile. We link to them and never scrape them.',
   },
   {
     title: 'Publish whenever you like',
+    icon: RocketLaunch,
     body: 'There is no bar to clear and no approval queue. A sparse profile publishes too; it simply ranks lower until there is more to read.',
   },
-] as const;
+];
 
 const MATCHING = [
   {
@@ -84,12 +116,7 @@ export default function ForFreelancersPage() {
         eyebrow="Freelancers"
         title="Get hired for what you have built"
         lead="Your profile is the work itself: projects, links and photos. Matching reads it to find briefs that fit."
-        image={{
-          // Surface, https://unsplash.com/photos/ddcLX7Iis44 (Unsplash License), graded to the
-          // site palette and cropped to 4:5.
-          src: freelancersPhoto,
-          alt: 'A developer working on a laptop on a window seat in a bright room',
-        }}
+        aside={<BriefsShowcase />}
       >
         <Link href="/signup?role=talent" className={buttonStyles({ size: 'lg' })}>
           Create a profile
@@ -99,8 +126,12 @@ export default function ForFreelancersPage() {
         </Link>
       </PageIntro>
 
-      <NumberedSteps heading="Three steps to your first match" steps={STEPS} />
-      <FeatureBento heading="What goes into a profile" items={PROFILE} />
+      <NumberedSteps heading="Three steps to your first match" steps={STEPS} images={STEP_IMAGES} />
+      <FeatureCards
+        heading="What goes into a profile"
+        lead="Everything a client reads before they message you. Only a title and one project are needed to start."
+        items={PROFILE}
+      />
       <FeatureList
         heading="How you get matched"
         lead="Matching reads what you wrote about your work, not a list of keywords."

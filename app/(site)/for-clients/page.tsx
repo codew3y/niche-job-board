@@ -2,14 +2,27 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import {
-  FeatureBento,
+  BookmarkSimple,
+  HandCoins,
+  ListNumbers,
+  MagnifyingGlass,
+  Sparkle,
+  UsersThree,
+} from '@phosphor-icons/react/ssr';
+
+import { DevelopersShowcase } from '@/components/site/board-showcase';
+import {
+  FeatureCards,
   FeatureList,
   NumberedSteps,
   PageCta,
   PageIntro,
+  type Feature,
 } from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
-import clientsPhoto from '@/public/images/pages/for-clients.jpg';
+import stepBrief from '@/public/images/steps/clients-01-brief.jpg';
+import stepDecide from '@/public/images/steps/clients-03-decide.jpg';
+import stepFit from '@/public/images/steps/clients-02-fit.jpg';
 
 export const metadata: Metadata = {
   title: 'Clients',
@@ -23,9 +36,19 @@ export const metadata: Metadata = {
  * (b9fe7d4). The rest describes the job form, the candidate list (ADR-007 D2:
  * order and reason, never a number on a person) and the terms (no fee, no payments).
  *
- * Five sections, five layout families: split intro with a photograph, numbered list,
- * side-heading list, bento, closing panel. One eyebrow (the intro).
+ * Five sections, five layout families: split intro beside the live board (listed developers),
+ * steps with photographs, side-heading list, icon cards, closing panel. One eyebrow (the intro).
+ *
+ * STEP PHOTOS: Unsplash License, graded to the site palette, cropped to 4:3.
+ *   clients-01-brief.jpg   Carter Hightower,         https://unsplash.com/photos/4GD9RphwnZA
+ *   clients-02-fit.jpg     LinkedIn Sales Solutions, https://unsplash.com/photos/YDVdprpgHv4
+ *   clients-03-decide.jpg  Mina Rad,                 https://unsplash.com/photos/qFSQFSmfZkA
  */
+const STEP_IMAGES = [
+  { src: stepBrief, alt: 'Someone writing notes in a notebook beside an open laptop' },
+  { src: stepFit, alt: 'Two people looking at a laptop together, one pointing at the screen' },
+  { src: stepDecide, alt: 'Two people shaking hands across a desk' },
+] as const;
 const STEPS = [
   ['Write the brief', 'What needs building and what done looks like. Matching reads it closely.'],
   ['See who fits', 'Applicants ordered by fit, plus developers who fit and have not applied yet.'],
@@ -47,32 +70,38 @@ const POSTING = [
   },
 ] as const;
 
-const FINDING = [
+const FINDING: Feature[] = [
   {
     title: 'Candidates in order, with a reason',
+    icon: ListNumbers,
     body: 'Applicants are ranked against your brief, and each carries one sentence saying why they fit. You see the order and the reasoning, never a numeric score.',
   },
   {
     title: 'Suggested developers',
+    icon: Sparkle,
     body: 'Developers who fit the brief but have not applied yet are suggested alongside, so a good match is not missed because they did not see the post.',
   },
   {
     title: 'Browse and search without AI',
+    icon: MagnifyingGlass,
     body: 'Search and filters by skill, availability and rate find every listed developer on their own. The matching is help, not a gate.',
   },
   {
     title: 'Shortlist and message',
+    icon: BookmarkSimple,
     body: 'Move applications through shortlisted or not a fit, and message developers directly. Save the ones you want to come back to.',
   },
   {
     title: 'Everyone who wants to be listed is listed',
+    icon: UsersThree,
     body: 'There is no approval queue for developers either. Judge them on the projects and links they show.',
   },
   {
     title: 'No fees, no middleman',
+    icon: HandCoins,
     body: 'TechSelect takes no fee and handles no payments. Terms, rates and contracts are agreed directly between you and the developer.',
   },
-] as const;
+];
 
 export default function ForClientsPage() {
   return (
@@ -81,12 +110,7 @@ export default function ForClientsPage() {
         eyebrow="Clients"
         title="Find developers by what they have shipped"
         lead="Post a brief for software, web or automation work. See who fits, in order, and why."
-        image={{
-          // wocintechchat.com, https://unsplash.com/photos/NDoVgcS_lZM (Unsplash License),
-          // graded to the site palette and cropped to 4:5.
-          src: clientsPhoto,
-          alt: 'Three people weighing something up together on one laptop at a table',
-        }}
+        aside={<DevelopersShowcase />}
       >
         <Link href="/signup?role=client" className={buttonStyles({ size: 'lg' })}>
           Post a brief
@@ -96,13 +120,17 @@ export default function ForClientsPage() {
         </Link>
       </PageIntro>
 
-      <NumberedSteps heading="Three steps to a shortlist" steps={STEPS} />
+      <NumberedSteps heading="Three steps to a shortlist" steps={STEPS} images={STEP_IMAGES} />
       <FeatureList
         heading="Posting a job"
         lead="A job is a brief you can draft, publish, edit and close whenever you need to."
         items={POSTING}
       />
-      <FeatureBento heading="Finding the right person" items={FINDING} />
+      <FeatureCards
+        heading="Finding the right person"
+        lead="Matching does the first read. You make every decision."
+        items={FINDING}
+      />
 
       <PageCta
         title="Write the brief once. See who fits, in order, with a reason for each."
