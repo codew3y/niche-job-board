@@ -267,7 +267,7 @@ export function FeatureCards({
                   aria-hidden="true"
                   className={cn(
                     'font-mono text-xs tabular-nums',
-                    lead ? 'text-primary-text/70' : 'text-text-subtle',
+                    lead ? 'text-primary-text' : 'text-text-subtle',
                   )}
                 >
                   {String(i + 1).padStart(2, '0')}
