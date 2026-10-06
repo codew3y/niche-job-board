@@ -11,6 +11,7 @@ import {
 } from '@phosphor-icons/react/ssr';
 
 import {
+  Band,
   CONTAINER,
   FeatureCards,
   PageCta,
@@ -94,32 +95,34 @@ export default function AboutPage() {
 
       {/* Your data: the heading on the left, the detail beside it, under one hairline. Stacked
           below `md`. */}
-      <section aria-labelledby="data-heading" className={cn(CONTAINER, SECTION)}>
-        <div className="reveal grid gap-6 border-t border-border-strong pt-12 md:grid-cols-12 md:gap-12">
-          <h2 id="data-heading" className="text-display-sm md:col-span-4">
-            Your data
-          </h2>
-          <div className="max-w-[65ch] space-y-4 text-lg text-text-muted md:col-span-8">
-            <p>
-              A published developer profile is public, because being found is the point of having
-              one. Drafts, saved lists, applications and messages are visible only to the people
-              directly involved. The database enforces that, not the application remembering to
-              check. You can delete your account from settings at any time.
-            </p>
-            <p>
-              The{' '}
-              <Link href="/privacy" className="prose-link text-text">
-                privacy policy
-              </Link>{' '}
-              and{' '}
-              <Link href="/terms" className="prose-link text-text">
-                terms
-              </Link>{' '}
-              set out the details, including what the matching sends to Google.
-            </p>
+      <Band>
+        <section aria-labelledby="data-heading" className={cn(CONTAINER, SECTION)}>
+          <div className="reveal grid gap-6 md:grid-cols-12 md:gap-12">
+            <h2 id="data-heading" className="text-display-sm md:col-span-4">
+              Your data
+            </h2>
+            <div className="max-w-[65ch] space-y-4 text-lg text-text-muted md:col-span-8">
+              <p>
+                A published developer profile is public, because being found is the point of having
+                one. Drafts, saved lists, applications and messages are visible only to the people
+                directly involved. The database enforces that, not the application remembering to
+                check. You can delete your account from settings at any time.
+              </p>
+              <p>
+                The{' '}
+                <Link href="/privacy" className="prose-link text-text">
+                  privacy policy
+                </Link>{' '}
+                and{' '}
+                <Link href="/terms" className="prose-link text-text">
+                  terms
+                </Link>{' '}
+                set out the details, including what the matching sends to Google.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </Band>
 
       <PageCta
         title="Show the work. Let the right people find it."

@@ -12,6 +12,7 @@ import {
 
 import { BriefsShowcase } from '@/components/site/board-showcase';
 import {
+  Band,
   FeatureCards,
   FeatureList,
   NumberedSteps,
@@ -126,17 +127,25 @@ export default function ForFreelancersPage() {
         </Link>
       </PageIntro>
 
-      <NumberedSteps heading="Three steps to your first match" steps={STEPS} images={STEP_IMAGES} />
+      <Band>
+        <NumberedSteps
+          heading="Three steps to your first match"
+          steps={STEPS}
+          images={STEP_IMAGES}
+        />
+      </Band>
       <FeatureCards
         heading="What goes into a profile"
         lead="Everything a client reads before they message you. Only a title and one project are needed to start."
         items={PROFILE}
       />
-      <FeatureList
-        heading="How you get matched"
-        lead="Matching reads what you wrote about your work, not a list of keywords."
-        items={MATCHING}
-      />
+      <Band>
+        <FeatureList
+          heading="How you get matched"
+          lead="Matching reads what you wrote about your work, not a list of keywords."
+          items={MATCHING}
+        />
+      </Band>
 
       <PageCta
         title="No fees and nothing to qualify for. Start with a title and one project."

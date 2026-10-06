@@ -12,6 +12,7 @@ import {
 
 import { DevelopersShowcase } from '@/components/site/board-showcase';
 import {
+  Band,
   FeatureCards,
   FeatureList,
   NumberedSteps,
@@ -120,17 +121,21 @@ export default function ForClientsPage() {
         </Link>
       </PageIntro>
 
-      <NumberedSteps heading="Three steps to a shortlist" steps={STEPS} images={STEP_IMAGES} />
+      <Band>
+        <NumberedSteps heading="Three steps to a shortlist" steps={STEPS} images={STEP_IMAGES} />
+      </Band>
       <FeatureList
         heading="Posting a job"
         lead="A job is a brief you can draft, publish, edit and close whenever you need to."
         items={POSTING}
       />
-      <FeatureCards
-        heading="Finding the right person"
-        lead="Matching does the first read. You make every decision."
-        items={FINDING}
-      />
+      <Band>
+        <FeatureCards
+          heading="Finding the right person"
+          lead="Matching does the first read. You make every decision."
+          items={FINDING}
+        />
+      </Band>
 
       <PageCta
         title="Write the brief once. See who fits, in order, with a reason for each."

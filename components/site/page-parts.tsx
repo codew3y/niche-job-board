@@ -26,8 +26,17 @@ import { cn } from '@/lib/ui/cn';
  *  shared by every section. */
 export const CONTAINER = 'mx-auto w-full max-w-page gutter';
 
-/** Every top-level section's vertical rhythm: 64 / 96 / 128px (`--spacing-section`). */
+/** Every top-level section's vertical rhythm: 56 / 72 / 88px (`--spacing-section`). */
 export const SECTION = 'py-section';
+
+/**
+ * A full-width tinted band behind one section: the sunken well, a tint within the same theme
+ * rather than an inverted block. Alternate sections sit on it, so a page reads as a sequence
+ * instead of blocks floating on one background. Hairlines above and below keep the edge crisp.
+ */
+export function Band({ children }: { children: ReactNode }) {
+  return <div className="border-y border-border-base bg-surface-sunken">{children}</div>;
+}
 
 /**
  * The first-screen hero, shared by the home page and every page intro, so a header link always

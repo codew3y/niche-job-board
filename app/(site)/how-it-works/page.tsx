@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { HowItWorksSteps } from '@/components/site/how-it-works-steps';
-import { FeatureList, FeatureRows, PageCta, PageIntro } from '@/components/site/page-parts';
+import { Band, FeatureList, FeatureRows, PageCta, PageIntro } from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
 import howPhoto from '@/public/images/pages/how-it-works.jpg';
 
@@ -71,7 +71,9 @@ export default function HowItWorksPage() {
         </Link>
       </PageIntro>
       <HowItWorksSteps heading="The four steps" showDetail />
-      <FeatureList heading="The three ideas behind it" items={PRINCIPLES} />
+      <Band>
+        <FeatureList heading="The three ideas behind it" items={PRINCIPLES} />
+      </Band>
       <FeatureRows heading="About the matching" items={DETAILS} />
       <PageCta
         title="Signing up takes a minute with Google or GitHub."

@@ -130,7 +130,7 @@ export default async function Home({
       <CategoryGrid />
 
       {/* The steps sit on the sunken well: a tint within the same theme, not an inverted band. */}
-      <div className="bg-surface-sunken">
+      <div className="border-y border-border-base bg-surface-sunken">
         <HowItWorksSteps
           footer={
             <Link
