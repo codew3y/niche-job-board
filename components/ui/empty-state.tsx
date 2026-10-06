@@ -8,6 +8,10 @@ import { cn } from '@/lib/ui/cn';
  * (docs/components.md). An empty state added afterwards is always worse, because by then
  * nobody remembers what the user was trying to do when they hit it.
  *
+ * ICON RULE, site-wide: an icon on a tile (a tinted or raised square behind it) is Phosphor's
+ * duotone weight; a small icon inline with text is the regular weight. One family, two weights,
+ * each with one job.
+ *
  * Each one says what is true and what to do next. The product's rule is that "nothing yet" and
  * "nothing fits" are different messages — this component just gives both the same dignity.
  */

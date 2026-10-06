@@ -61,7 +61,7 @@ export function RoleChooser() {
                   checked ? 'bg-primary text-primary-text' : 'bg-surface-sunken text-text-muted',
                 )}
               >
-                <Icon size={18} />
+                <Icon size={18} weight="duotone" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block font-medium text-text">{title}</span>

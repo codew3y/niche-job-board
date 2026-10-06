@@ -39,7 +39,7 @@ export function ErrorState({
         aria-hidden="true"
         className="mx-auto grid size-12 place-items-center rounded-md bg-danger-subtle text-danger"
       >
-        <TriangleAlert size={22} />
+        <TriangleAlert size={22} weight="duotone" />
       </span>
       <h1 className="mt-5 font-semibold text-display-sm">Something went wrong</h1>
       <p className="mt-3 text-text-muted text-pretty">

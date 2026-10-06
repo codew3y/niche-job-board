@@ -170,7 +170,7 @@ export function ImageUpload({
             aria-hidden="true"
             className="mx-auto mb-3 grid size-10 place-items-center rounded-md bg-primary-subtle text-primary"
           >
-            <ImagePlus size={20} />
+            <ImagePlus size={20} weight="duotone" />
           </span>
           {/* Styled as a button, and still the file input's label: that is what makes the zone
               keyboard-reachable and what a screen reader announces. */}

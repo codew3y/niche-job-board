@@ -29,7 +29,7 @@ export default async function NotFound() {
           aria-hidden="true"
           className="grid size-12 place-items-center rounded-md bg-primary-subtle text-primary"
         >
-          <Compass size={22} />
+          <Compass size={22} weight="duotone" />
         </span>
         <p className="mt-6 font-mono text-sm text-text-subtle">404</p>
         <h1 className="mt-2 text-display-md text-balance">Nothing here</h1>

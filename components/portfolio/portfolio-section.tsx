@@ -75,7 +75,7 @@ export function PortfolioSection({
             aria-hidden="true"
             className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-sunken text-text-subtle"
           >
-            <Globe size={18} />
+            <Globe size={18} weight="duotone" />
           </span>
           <div className="min-w-0">
             <h2 className="text-xl font-semibold tracking-tight">Portfolio site</h2>

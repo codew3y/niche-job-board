@@ -122,7 +122,7 @@ export default async function CompanyPage({ params }: Params) {
           <dl className="rounded-lg border border-border-base bg-surface-raised p-5">
             <div className="flex items-center gap-3">
               <dt className="grid size-10 shrink-0 place-items-center rounded-md bg-primary-subtle text-primary">
-                <Briefcase aria-hidden="true" size={18} />
+                <Briefcase aria-hidden="true" size={18} weight="duotone" />
                 <span className="sr-only">Open jobs</span>
               </dt>
               <dd className="text-sm">
@@ -137,7 +137,7 @@ export default async function CompanyPage({ params }: Params) {
             {website && (
               <div className="mt-4 flex items-center gap-3 border-t border-border-base pt-4">
                 <dt className="grid size-10 shrink-0 place-items-center rounded-md bg-primary-subtle text-primary">
-                  <Globe aria-hidden="true" size={18} />
+                  <Globe aria-hidden="true" size={18} weight="duotone" />
                   <span className="sr-only">Website</span>
                 </dt>
                 <dd className="min-w-0 text-sm break-all">

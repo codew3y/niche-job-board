@@ -20,7 +20,7 @@ export function ResetRequestForm() {
           aria-hidden="true"
           className="grid size-10 shrink-0 place-items-center rounded-md bg-surface-raised text-success"
         >
-          <EnvelopeSimple size={20} />
+          <EnvelopeSimple size={20} weight="duotone" />
         </span>
         <div className="min-w-0">
           <p className="font-semibold text-text">Check your email.</p>
@@ -67,7 +67,7 @@ export function SetPasswordForm() {
             aria-hidden="true"
             className="grid size-10 shrink-0 place-items-center rounded-md bg-success-subtle text-success"
           >
-            <Check size={20} />
+            <Check size={20} weight="duotone" />
           </span>
           Password updated.
         </p>

@@ -17,7 +17,7 @@ export default function VerifyPage() {
           aria-hidden="true"
           className="grid size-10 shrink-0 place-items-center rounded-md bg-primary-subtle text-primary"
         >
-          <EnvelopeSimple size={20} />
+          <EnvelopeSimple size={20} weight="duotone" />
         </span>
         <p className="text-sm text-text-muted">
           Nothing arrived? Check spam, or{' '}

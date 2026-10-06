@@ -60,7 +60,7 @@ export function RoleSettings({
                   isActive ? 'bg-primary text-primary-text' : 'bg-primary-subtle text-primary',
                 )}
               >
-                <Icon size={18} />
+                <Icon size={18} weight="duotone" />
               </span>
               {isActive ? (
                 <Badge tone="ink">Viewing now</Badge>

@@ -65,7 +65,7 @@ export function MatchPreview() {
       <div className="rounded-inner flex flex-col gap-4 bg-surface-raised p-4 sm:p-5">
         <header className="flex items-center justify-between gap-3">
           <p className="inline-flex items-center gap-2 text-sm font-semibold">
-            <Sparkle aria-hidden="true" size={16} weight="duotone" className="text-primary" />
+            <Sparkle aria-hidden="true" size={16} className="text-primary" />
             What a match looks like
           </p>
           <span className="rounded-full border border-border-base bg-surface px-2.5 py-0.5 font-mono text-xs text-text-subtle">

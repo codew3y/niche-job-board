@@ -49,7 +49,7 @@ export default async function SettingsPage() {
                 aria-hidden="true"
                 className="grid size-10 shrink-0 place-items-center rounded-md bg-primary-subtle text-primary"
               >
-                <Icon size={18} />
+                <Icon size={18} weight="duotone" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-text">{title}</span>

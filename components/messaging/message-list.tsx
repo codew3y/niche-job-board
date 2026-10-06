@@ -25,7 +25,7 @@ export function MessageList({ messages }: { messages: ThreadMessage[] }) {
           aria-hidden="true"
           className="mb-3 grid size-11 place-items-center rounded-md bg-surface-sunken text-text-subtle"
         >
-          <MessageSquare size={20} />
+          <MessageSquare size={20} weight="duotone" />
         </span>
         <p className="font-semibold">No messages yet</p>
         <p className="mt-1 max-w-xs text-sm text-text-muted text-pretty">
