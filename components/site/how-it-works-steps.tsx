@@ -13,9 +13,9 @@ import pageWorking from '@/public/images/how-it-works/page-04-working.jpg';
  * per step, on /how-it-works.
  *
  * TWO COMPOSITIONS, so the page and the home section do not look alike:
- *   - home (showDetail false): a text-only row of four, each under a hairline, one column on
- *     phones, two from `sm`, four from `lg`. No photos: the home page already carries the hero
- *     photograph, and minimalist-ui keeps the rest of the page quiet;
+ *   - home (showDetail false): a row of four, each the step's photo (the same photos as
+ *     /how-it-works) with the number set on it, then the title and one line. One column on
+ *     phones, two from `sm`, four from `lg`;
  *   - /how-it-works (showDetail true): an asymmetric bento of framed photos, spans 7/5 then 5/7
  *     from `lg`, one column below `lg`.
  *
@@ -134,15 +134,28 @@ export function HowItWorksSteps({
           ))}
         </ol>
       ) : (
-        <ol className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
+        <ol className="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:mt-16 lg:grid-cols-4">
           {STEPS.map((step, i) => (
-            <li
-              key={step.title}
-              style={stagger(i)}
-              className="reveal border-t border-border-strong pt-6"
-            >
-              <StepNumber n={i + 1} />
-              <StepHeading className="mt-6 text-xl font-semibold tracking-tight">
+            <li key={step.title} style={stagger(i)} className="reveal">
+              <figure className="frame-tray relative">
+                <div className="rounded-inner relative aspect-4/3 overflow-hidden bg-surface-sunken">
+                  <Image
+                    src={step.pageImage}
+                    alt={step.pageAlt}
+                    fill
+                    sizes="(min-width: 1024px) 18rem, (min-width: 640px) 50vw, 100vw"
+                    placeholder="blur"
+                    className="object-cover"
+                  />
+                </div>
+                <span
+                  aria-hidden="true"
+                  className="absolute -bottom-4 left-5 grid size-9 place-items-center rounded-full border border-border-base bg-surface-raised font-mono text-sm font-semibold tabular-nums shadow-sm"
+                >
+                  {i + 1}
+                </span>
+              </figure>
+              <StepHeading className="mt-8 text-xl font-semibold tracking-tight">
                 {step.title}
               </StepHeading>
               <p className="mt-3 text-text-muted">{step.body}</p>

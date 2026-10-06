@@ -33,7 +33,8 @@ export const metadata: Metadata = {
  *
  * Removed in the redesign, as decoration that did no job (minimalist-ui): the scrolling skills
  * ticker, the example-match card laid over the hero photo (taste-skill bans overlays on images
- * and mocked-up product UI), and the photos on the home steps.
+ * and mocked-up product UI). The photos on the home steps came back in October 2026 at the
+ * owner's request, shared with /how-it-works.
  *
  * CTA labels, one per intent, identical everywhere on the site: "Create a profile" (developer
  * sign-up), "Post a brief" (client sign-up), "Sign up" (the header's generic sign-up).
