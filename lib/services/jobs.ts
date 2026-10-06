@@ -161,3 +161,33 @@ export async function getJobBySlug(slug: string) {
   if (error) throw error;
   return data;
 }
+
+/**
+ * "Similar briefs" under a job: other open jobs sharing any of its skills, newest first, topped
+ * up with the newest open jobs when too few share a skill, so the page never ends on nothing.
+ * Never the job itself. Same public query as Browse, so RLS decides what is visible.
+ */
+export async function similarJobs(jobId: string, skillSlugs: string[], limit = 3) {
+  const byId = new Map<string, JobListItem>();
+  const add = (jobs: JobListItem[]) => {
+    for (const j of jobs) if (j.id !== jobId && byId.size < limit) byId.set(j.id, j);
+  };
+  if (skillSlugs.length) {
+    add((await listJobs({ sort: 'recent', limit: limit + 1, skills: skillSlugs })).jobs);
+  }
+  if (byId.size < limit) {
+    add((await listJobs({ sort: 'recent', limit: limit + 1 + byId.size, skills: [] })).jobs);
+  }
+  return [...byId.values()];
+}
+
+/** How many open jobs a client has: the count on the client card beside a job. */
+export async function openJobCount(clientId: string) {
+  const supabase = await createClient();
+  const { count } = await supabase
+    .from('jobs')
+    .select('id', { count: 'exact', head: true })
+    .eq('client_id', clientId)
+    .eq('status', 'open');
+  return count ?? 0;
+}

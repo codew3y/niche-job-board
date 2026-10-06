@@ -1,4 +1,12 @@
-import { ArrowLeft, ArrowRight, Flag, Lock } from '@phosphor-icons/react/ssr';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Briefcase,
+  Clock,
+  Flag,
+  Lock,
+  MapPin,
+} from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 
@@ -16,7 +24,8 @@ import { ENGAGEMENT_LABEL, LOCATION_LABEL, formatRange } from '@/components/shar
 import { siteUrl } from '@/lib/env';
 import { jobPostingJsonLd } from '@/lib/seo/job-posting';
 import { ApplySection, type ApplyState } from '@/components/application/apply-section';
-import { getJobBySlug } from '@/lib/services/jobs';
+import { getJobBySlug, openJobCount, similarJobs } from '@/lib/services/jobs';
+import { JobMiniCard } from '@/components/job/job-mini-card';
 import { createClient } from '@/lib/supabase/server';
 import { getClientProfileId, getSessionUser, getViewer } from '@/lib/supabase/session';
 import type { Job } from '@/lib/services/job-types';
@@ -63,6 +72,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
   const expired = job.deadline ? new Date(job.deadline) < new Date() : false;
 
   const company = job.client_profiles?.company_name ?? 'A client';
+  const posted = postedLabel(job.published_at);
   const facts = [
     budget
       ? [
@@ -163,6 +173,27 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
             <h1 className="mt-5 font-semibold text-display-sm break-words text-balance sm:text-display-md">
               {job.title}
             </h1>
+            {/* The terms a visitor scans for, under the title, before the brief itself. */}
+            <ul className="mt-4 flex flex-wrap gap-2 text-sm text-text-muted">
+              {[
+                posted ? { icon: Clock, text: posted } : null,
+                { icon: Briefcase, text: ENGAGEMENT_LABEL[job.engagement_type] },
+                {
+                  icon: MapPin,
+                  text: `${LOCATION_LABEL[job.location_type]}${job.location ? `, ${job.location}` : ''}`,
+                },
+              ]
+                .filter((f): f is { icon: typeof Clock; text: string } => Boolean(f?.text))
+                .map(({ icon: Icon, text }) => (
+                  <li
+                    key={text}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border-base bg-surface-raised px-3 py-1"
+                  >
+                    <Icon aria-hidden="true" size={14} className="text-text-subtle" />
+                    {text}
+                  </li>
+                ))}
+            </ul>
           </header>
         </div>
 
@@ -231,41 +262,107 @@ export default async function JobDetailPage({ params }: { params: Promise<{ slug
             </section>
           )}
 
-          {job.client_profiles?.about && (
-            <section
-              aria-labelledby="company-heading"
-              className="mt-10 border-t border-border-base pt-8"
-            >
-              <div className="flex items-center gap-3">
-                <Avatar name={company} src={job.client_profiles?.logo_url} />
-                <h2 id="company-heading" className="text-lg font-semibold tracking-tight">
-                  About {job.client_profiles.company_name}
-                </h2>
-              </div>
-              <p className="mt-4 max-w-[65ch] text-sm leading-relaxed whitespace-pre-line text-text-muted text-pretty">
-                {job.client_profiles.about}
-              </p>
-              {job.client_profiles.website && (
-                <p className="mt-3 text-sm break-all">
-                  <ExternalLink href={job.client_profiles.website} className="font-semibold">
-                    {job.client_profiles.website.replace(/^https:\/\//, '')}
-                  </ExternalLink>
-                </p>
-              )}
-              <p className="mt-4">
-                <Link
-                  href={`/company/${job.client_profiles.id}`}
-                  className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-link hover:underline"
-                >
-                  All open jobs from {job.client_profiles.company_name}
-                  <ArrowRight aria-hidden="true" size={16} />
-                </Link>
-              </p>
-            </section>
+          {job.client_profiles && (
+            <Suspense fallback={null}>
+              <ClientCard client={job.client_profiles} />
+            </Suspense>
           )}
         </div>
       </div>
+
+      <Suspense fallback={null}>
+        <SimilarBriefs
+          jobId={job.id}
+          skillSlugs={job.job_skills.flatMap((s) => (s.skills?.slug ? [s.skills.slug] : []))}
+        />
+      </Suspense>
     </div>
+  );
+}
+
+/** "Posted today", "Posted 3 days ago": how fresh the brief is, in words. */
+function postedLabel(publishedAt: string | null) {
+  if (!publishedAt) return null;
+  const days = Math.floor((Date.now() - new Date(publishedAt).getTime()) / 86_400_000);
+  if (days <= 0) return 'Posted today';
+  if (days === 1) return 'Posted yesterday';
+  if (days < 30) return `Posted ${days} days ago`;
+  return `Posted ${new Date(publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+}
+
+/**
+ * Who the brief is from, always shown: the name and photo or logo, how many jobs they have open,
+ * their line about the work and website when they wrote them, and a link to their page. Shown
+ * even when the client wrote nothing else, so a brief never arrives from nobody.
+ */
+async function ClientCard({ client }: { client: NonNullable<Job['client_profiles']> }) {
+  const open = await openJobCount(client.id);
+  return (
+    <section
+      aria-labelledby="company-heading"
+      className="mt-10 rounded-xl border border-border-base bg-surface-raised p-5 sm:p-6"
+    >
+      <div className="flex items-center gap-3">
+        <Avatar name={client.company_name} src={client.logo_url} size="lg" />
+        <div className="min-w-0">
+          <p className="text-xs text-text-subtle">About the client</p>
+          <h2 id="company-heading" className="truncate text-lg font-semibold tracking-tight">
+            {client.company_name}
+          </h2>
+          <p className="text-sm text-text-muted">
+            {[client.industry, `${open} open ${open === 1 ? 'job' : 'jobs'}`]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+        </div>
+      </div>
+      {client.about && (
+        <p className="mt-4 max-w-[65ch] text-sm leading-relaxed whitespace-pre-line text-text-muted text-pretty">
+          {client.about}
+        </p>
+      )}
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+        <Link
+          href={`/company/${client.id}`}
+          className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-link hover:underline"
+        >
+          {open > 1 ? `All ${open} open jobs` : 'Client page'}
+          <ArrowRight aria-hidden="true" size={16} />
+        </Link>
+        {client.website && (
+          <p className="text-sm break-all">
+            <ExternalLink href={client.website} className="font-semibold">
+              {client.website.replace(/^https:\/\//, '')}
+            </ExternalLink>
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/** Other open briefs under the job, so the page never ends on a dead end. */
+async function SimilarBriefs({ jobId, skillSlugs }: { jobId: string; skillSlugs: string[] }) {
+  const jobs = await similarJobs(jobId, skillSlugs);
+  if (!jobs.length) return null;
+  return (
+    <section aria-labelledby="similar-heading" className="mt-16 border-t border-border-base pt-10">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 id="similar-heading" className="text-xl font-semibold tracking-tight">
+          Similar briefs
+        </h2>
+        <Link href="/browse?type=jobs" className="text-sm font-medium text-link hover:underline">
+          Browse all jobs
+        </Link>
+      </div>
+      <ul className="mt-6 grid gap-4 @2xl:grid-cols-3">
+        {jobs.map((j) => (
+          <li key={j.id}>
+            <JobMiniCard job={j} />
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
