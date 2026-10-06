@@ -31,12 +31,10 @@ export function EmptyState({
     <div
       className={cn(
         // A quiet well, not a dashed box: one Phosphor icon on a tile, a line that says what is
-        // true, and one way forward (the redesign's empty-state rule). A soft light from the
-        // top centre, in the brand tint, so it reads as a place to start rather than a hole.
+        // true, and one way forward (the redesign's empty-state rule). The colour is in the icon,
+        // not the background.
         'rounded-xl border border-border-base px-6 py-14 text-center',
-        tone === 'pending'
-          ? 'bg-accent-subtle'
-          : 'bg-surface-sunken bg-[radial-gradient(ellipse_at_50%_0%,var(--primary-subtle),transparent_65%)]',
+        tone === 'pending' ? 'bg-accent-subtle' : 'bg-surface-sunken',
         className,
       )}
     >

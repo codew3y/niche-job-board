@@ -246,17 +246,9 @@ export function FeatureCards({
               style={stagger(i % 3)}
               className={cn(
                 'reveal liftable group relative flex flex-col overflow-hidden rounded-xl border p-6 sm:p-7',
-                // A faint wash from the top-right corner, in the icon's colour: depth without a
-                // shadow stack, and a background rather than an element, so nothing sits outside
-                // the card.
                 lead
-                  ? 'border-transparent bg-primary bg-[radial-gradient(circle_at_100%_0%,color-mix(in_oklch,var(--primary-text)_14%,transparent),transparent_55%)] text-primary-text md:col-span-2 lg:row-span-2 lg:justify-between'
-                  : cn(
-                      'border-border-base bg-surface-raised hover:border-border-strong',
-                      i % 2
-                        ? 'bg-[radial-gradient(circle_at_100%_0%,var(--accent-subtle),transparent_55%)]'
-                        : 'bg-[radial-gradient(circle_at_100%_0%,var(--primary-subtle),transparent_55%)]',
-                    ),
+                  ? 'border-transparent bg-primary text-primary-text md:col-span-2 lg:row-span-2 lg:justify-between'
+                  : 'border-border-base bg-surface-raised hover:border-border-strong',
               )}
             >
               <div className="relative flex items-start justify-between gap-4">
@@ -374,8 +366,8 @@ export function FeatureRows({
 /**
  * The closing call to action, at the foot of every public page: a band in the brand colour with
  * a large statement and the action. The primary action is a button inverted onto the band; the
- * alternative is a text link, so there is one button. A soft light from the top-right corner
- * gives the band depth without an image. Stacked below `md`.
+ * alternative is a text link, so there is one button. A solid colour, no gradient. Stacked
+ * below `md`.
  */
 export function PageCta({
   title,
@@ -388,7 +380,7 @@ export function PageCta({
 }) {
   return (
     <section className={cn(CONTAINER, SECTION)}>
-      <div className="reveal grid gap-8 overflow-hidden rounded-2xl bg-primary bg-[radial-gradient(circle_at_100%_0%,color-mix(in_oklch,var(--primary-text)_16%,transparent),transparent_50%)] px-6 py-10 text-primary-text sm:px-10 sm:py-14 md:grid-cols-12 md:items-end md:gap-12 lg:px-14 lg:py-16">
+      <div className="reveal grid gap-8 overflow-hidden rounded-2xl bg-primary px-6 py-10 text-primary-text sm:px-10 sm:py-14 md:grid-cols-12 md:items-end md:gap-12 lg:px-14 lg:py-16">
         <h2 className="max-w-[20ch] text-display-sm md:col-span-8">{title}</h2>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 md:col-span-4 md:justify-end">
           <Link href={primary.href} className={buttonStyles({ variant: 'inverse', size: 'lg' })}>
