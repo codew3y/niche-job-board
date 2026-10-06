@@ -16,7 +16,7 @@ import { cn } from '@/lib/ui/cn';
  *   FeatureCards  icon cards in a grid, optionally led by one statement card
  *   FeatureList   a side heading with a hairline-divided list beside it
  *   FeatureRows   definition rows under the heading: title column, body column
- *   PageCta       the closing statement: a hairline, a large line and the action, no box
+ *   PageCta       the closing statement: a band in the brand colour with the action
  *
  * Every multi-column block states its < 768px fallback in its own classes: one column below
  * `md`, the multi-column grid from `md` or `lg` up.
@@ -371,8 +371,10 @@ export function FeatureRows({
 }
 
 /**
- * The closing call to action: a hairline, a large statement and the action, with no panel around
- * it. The primary action is a button; the alternative is a text link, so there is one button.
+ * The closing call to action, at the foot of every public page: a band in the brand colour with
+ * a large statement and the action. The primary action is a button inverted onto the band; the
+ * alternative is a text link, so there is one button. A soft light from the top-right corner
+ * gives the band depth without an image. Stacked below `md`.
  */
 export function PageCta({
   title,
@@ -384,17 +386,15 @@ export function PageCta({
   secondary?: { href: string; label: string };
 }) {
   return (
-    // No box: a hairline above, a large statement and the action beside it (minimalist-ui: no
-    // container that does not do a job). Stacked below `md`.
     <section className={cn(CONTAINER, SECTION)}>
-      <div className="reveal grid gap-8 border-t border-border-base pt-12 md:grid-cols-12 md:items-end md:gap-12 md:pt-16">
+      <div className="reveal grid gap-8 overflow-hidden rounded-2xl bg-primary bg-[radial-gradient(circle_at_100%_0%,color-mix(in_oklch,var(--primary-text)_16%,transparent),transparent_50%)] px-6 py-10 text-primary-text sm:px-10 sm:py-14 md:grid-cols-12 md:items-end md:gap-12 lg:px-14 lg:py-16">
         <h2 className="max-w-[20ch] text-display-sm md:col-span-8">{title}</h2>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 md:col-span-4 md:justify-end">
-          <Link href={primary.href} className={buttonStyles({ size: 'lg' })}>
+          <Link href={primary.href} className={buttonStyles({ variant: 'inverse', size: 'lg' })}>
             {primary.label}
           </Link>
           {secondary && (
-            <Link href={secondary.href} className="prose-link font-medium">
+            <Link href={secondary.href} className="prose-link font-medium text-primary-text">
               {secondary.label}
             </Link>
           )}

@@ -27,11 +27,13 @@ export const buttonStyles = cva(
   {
     variants: {
       variant: {
-        /** Ink on paper: the default action. Deliberately not the accent. */
+        /** The brand blue: the default action. */
         primary: 'bg-primary text-primary-text hover:bg-primary-hover active:bg-primary-pressed',
         /** The accent, for the ONE action a screen exists for (publish, apply, send). */
         accent: 'bg-accent text-accent-text hover:bg-accent-hover',
         secondary: 'border border-control bg-surface-raised text-text hover:bg-surface-sunken',
+        /** The primary action set ON the brand colour (the closing band): the colours swapped. */
+        inverse: 'bg-primary-text text-primary hover:bg-primary-text/90 active:bg-primary-text/80',
         ghost: 'text-text-muted hover:bg-surface-sunken hover:text-text',
         danger: 'bg-danger text-primary-text hover:opacity-90',
         /** A destructive action that is not the primary one — "Not a fit", "Delete". */
