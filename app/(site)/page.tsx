@@ -7,17 +7,11 @@ import { Suspense, type CSSProperties } from 'react';
 import { BoardStats } from '@/components/site/board-stats';
 import { CategoryGrid } from '@/components/site/category-grid';
 import { HowItWorksSteps } from '@/components/site/how-it-works-steps';
-import {
-  CONTAINER,
-  HERO_SECTION,
-  HeroFigure,
-  PageCta,
-  SECTION,
-} from '@/components/site/page-parts';
+import { MatchPreview } from '@/components/site/match-preview';
+import { CONTAINER, HERO_SECTION, PageCta, SECTION } from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
 import { getSessionUser } from '@/lib/supabase/session';
 import { cn } from '@/lib/ui/cn';
-import heroPhoto from '@/public/images/hero.jpg';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -44,8 +38,8 @@ export const metadata: Metadata = {
  * from the landing page at b9fe7d4 (introduced in eb8bb6c). The headline was "Hired for the
  * work, not the keywords." until October 2026.
  *
- * Hero photo: Mahmudul Hasan, https://unsplash.com/photos/Mo08jadTWYc (Unsplash License),
- * graded to the site palette and cropped to 4:5.
+ * Hero panel: an example match (components/site/match-preview.tsx), labelled as an example, in
+ * place of the photograph used until October 2026.
  *
  * Signed-in visitors never see this page: the proxy sends them to their dashboard
  * (lib/supabase/route-policy.ts), and this re-checks in case the proxy was bypassed.
@@ -95,12 +89,12 @@ export default async function Home({
       )}
 
       {/* ───────────── Hero ─────────────
-          HERO_SECTION (components/site/page-parts.tsx): copy across 7 columns beside the framed
-          photo across 5, filling the first screen so the next section starts below the fold.
+          HERO_SECTION (components/site/page-parts.tsx): copy across 6 columns beside the example
+          match across 6, filling the first screen so the next section starts below the fold.
           Every page intro shares it. Four text elements: eyebrow, headline (two lines from
           `sm`), subtext (20 words), actions. */}
       <section className={cn(CONTAINER, HERO_SECTION)}>
-        <div className="animate-rise lg:col-span-7 lg:pr-8">
+        <div className="animate-rise lg:col-span-6 lg:pr-8">
           <p className="font-mono text-xs text-text-subtle">Software, web and automation work</p>
           <h1 className="mt-5 max-w-[14ch] text-display-lg">Hire builders, not buzzwords.</h1>
           <p className="mt-7 max-w-[42ch] text-lg text-text-muted">
@@ -127,10 +121,7 @@ export default async function Home({
           </Suspense>
         </div>
 
-        <HeroFigure
-          src={heroPhoto}
-          alt="A developer sketching app screens on a tablet with a stylus, beside a monitor"
-        />
+        <MatchPreview />
       </section>
 
       <CategoryGrid />

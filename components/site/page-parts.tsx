@@ -48,7 +48,7 @@ export function Band({ children }: { children: ReactNode }) {
  * under taste-skill's 6rem cap; the copy centres against the photo instead of floating.
  */
 export const HERO_SECTION =
-  'grid min-h-[calc(100svh-4rem-env(safe-area-inset-top,0px))] content-center gap-10 py-10 sm:py-14 lg:grid-cols-12 lg:items-center lg:gap-12 lg:py-12';
+  'grid min-h-[calc(100svh-4rem-env(safe-area-inset-top,0px))] grid-cols-1 content-center gap-10 py-10 sm:py-14 lg:grid-cols-12 lg:items-center lg:gap-12 lg:py-12';
 
 /**
  * The hero photograph in its nested frame (globals.css `frame-tray`): 4:3 on phones and tablets,
@@ -118,7 +118,8 @@ export function PageIntro({
 }) {
   return (
     <section className={cn(CONTAINER, HERO_SECTION)}>
-      <div className="animate-rise lg:col-span-7 lg:pr-8">
+      {/* 7/5 beside a photo; an even 6/6 beside a panel, which needs the width for its cards. */}
+      <div className={cn('animate-rise lg:pr-8', aside ? 'lg:col-span-6' : 'lg:col-span-7')}>
         {eyebrow && <p className="font-mono text-xs text-text-subtle">{eyebrow}</p>}
         <h1 className={cn('max-w-[22ch] text-display-md', eyebrow && 'mt-5')}>{title}</h1>
         <p className="mt-6 max-w-[46ch] text-lg text-text-muted">{lead}</p>

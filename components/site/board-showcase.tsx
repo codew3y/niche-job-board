@@ -23,10 +23,10 @@ import { cn } from '@/lib/ui/cn';
  * published profiles). If the board is quiet, the panel says so and points to Browse rather than
  * padding itself with invented entries.
  *
- * SHAPE. The same frame and footprint as the photograph it replaces (frame-tray, 4:5 portrait from
- * `lg`, capped to the first screen), so the hero stays balanced: copy across 7 columns, panel
- * across 5. The list scrolls inside the frame; soft fades at the top and bottom say there is more.
- * Below `lg` it is a fixed-height panel under the copy.
+ * SHAPE. From `lg` the hero splits evenly: copy across 6 columns, this panel across the other 6,
+ * filling its half edge to edge at the first screen's height, so there is no gap beside it. The
+ * list scrolls inside the frame; soft fades at the top and bottom say there is more. Below `lg`
+ * it is a fixed-height panel under the copy.
  */
 
 const SHOWN = 8;
@@ -43,8 +43,8 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <section aria-label={title} className="frame-tray lg:col-span-5">
-      <div className="rounded-inner flex h-[30rem] flex-col overflow-hidden bg-surface-raised lg:mx-auto lg:aspect-4/5 lg:h-auto lg:max-h-[min(40rem,calc(100svh-9rem))]">
+    <section aria-label={title} className="frame-tray min-w-0 lg:col-span-6">
+      <div className="rounded-inner flex h-[30rem] flex-col overflow-hidden bg-surface-raised lg:h-[min(40rem,calc(100svh-9rem))]">
         <header className="flex items-center justify-between gap-3 border-b border-border-base px-4 py-3 sm:px-5">
           <p className="flex items-center gap-2 text-sm font-semibold">
             {/* A live board, not a picture of one. */}

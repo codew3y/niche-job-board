@@ -57,14 +57,17 @@ test.describe('signed out', () => {
     await expect(header.getByRole('link', { name: 'Clients', exact: true })).toBeVisible();
   });
 
-  test('the home page has a hero figure and no login form', async ({ page }) => {
+  test('the home hero shows an example match, labelled as one, and no login form', async ({
+    page,
+  }) => {
     await page.goto('/');
-    // The hero figure: a still photo, described for screen readers. No video, no caption.
-    const photo = page.locator('figure img[src*="hero"]');
-    await expect(photo).toBeVisible();
-    await expect(photo).toHaveAttribute('alt', /developer/i);
-    await expect(page.locator('figure video')).toHaveCount(0);
-    await expect(page.locator('figure figcaption')).toHaveCount(0);
+    const preview = page.getByRole('region', { name: 'Example match' });
+    await expect(preview).toBeVisible();
+    // Invented people must never pass for real ones.
+    await expect(preview.getByText('Example', { exact: true })).toBeVisible();
+    // Ranked by order, with a reason each, and no number on a person.
+    await expect(preview.getByRole('listitem')).toHaveCount(3 + 3);
+    await expect(preview).not.toContainText('%');
     // Log in lives in the header now, not in the page.
     await expect(page.getByLabel(/password/i)).toHaveCount(0);
   });
