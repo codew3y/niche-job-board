@@ -2,8 +2,9 @@ import { ArrowRight, CheckCircle, Prohibit } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import type { CSSProperties } from 'react';
+import { Suspense, type CSSProperties } from 'react';
 
+import { BoardStats } from '@/components/site/board-stats';
 import { CategoryGrid } from '@/components/site/category-grid';
 import { HowItWorksSteps } from '@/components/site/how-it-works-steps';
 import {
@@ -119,6 +120,11 @@ export default async function Home({
               Post a brief
             </Link>
           </div>
+
+          {/* Live counts from the board, never padded. Streamed, so the hero never waits. */}
+          <Suspense fallback={null}>
+            <BoardStats />
+          </Suspense>
         </div>
 
         <HeroFigure
