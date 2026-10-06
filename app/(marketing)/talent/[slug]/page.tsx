@@ -19,6 +19,7 @@ import { certificationDates, formatMonth } from '@/components/talent/history-for
 import { siteUrl } from '@/lib/env';
 import { AVAILABILITY_LABEL, getTalentBySlug } from '@/lib/services/talent';
 import { createClient } from '@/lib/supabase/server';
+import { cn } from '@/lib/ui/cn';
 import { getClientProfileId, getViewer } from '@/lib/supabase/session';
 
 export async function generateMetadata({
@@ -76,6 +77,10 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
 
   const rate = formatRange(p.hourly_rate_min, p.hourly_rate_max, p.currency, '/hr');
   const items = [...(p.portfolio_items ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+  // The first eight skills, up top; the full list stays in its own section below.
+  const topSkills = p.talent_skills
+    .flatMap((s) => (s.skills?.name ? [s.skills.name] : []))
+    .slice(0, 8);
   // Most recent first: current roles (no end date), then by start date.
   const experience = [...(p.talent_experience ?? [])].sort(
     (a, b) =>
@@ -164,9 +169,45 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
       {/* Same single-aside grid as the job page: header → facts → body in DOM order. Below lg
           it is one column, so the facts panel sits between the header and the bio. */}
       <div className="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr]">
+        {/* The first screen answers a client's three questions at once: who (photo and
+            headline), on what terms (rate and availability, beside the name), and with what
+            (the top skills), before the work itself below. */}
         <header className="min-w-0 lg:col-start-1">
-          <Avatar name={p.headline} src={p.avatar_url} size="lg" />
-          <h1 className="mt-6 max-w-[22ch] text-display-md">{p.headline}</h1>
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-6">
+            <Avatar name={p.headline} src={p.avatar_url} size="xl" />
+            <div className="min-w-0">
+              <h1 className="max-w-[24ch] text-display-sm text-balance">{p.headline}</h1>
+              <ul className="mt-3 flex flex-wrap gap-2 text-sm">
+                {rate && (
+                  <li className="inline-flex items-center rounded-full bg-primary-subtle px-3 py-1 font-semibold text-primary tabular-nums">
+                    {rate}
+                  </li>
+                )}
+                <li className="inline-flex items-center gap-1.5 rounded-full border border-border-base bg-surface-raised px-3 py-1 text-text-muted">
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'size-2 rounded-full',
+                      p.availability === 'unavailable' ? 'bg-text-subtle' : 'bg-success',
+                    )}
+                  />
+                  {AVAILABILITY_LABEL[p.availability] ?? p.availability}
+                </li>
+                {p.years_experience ? (
+                  <li className="inline-flex items-center rounded-full border border-border-base bg-surface-raised px-3 py-1 text-text-muted">
+                    {p.years_experience} {p.years_experience === 1 ? 'year' : 'years'}
+                  </li>
+                ) : null}
+              </ul>
+            </div>
+          </div>
+          {topSkills.length > 0 && (
+            <TagList
+              className="mt-6"
+              label="Top skills"
+              tags={topSkills.map((name) => ({ name }))}
+            />
+          )}
           {hasLinks && (
             <p className="mt-4 flex flex-wrap gap-2">
               {/* Connected accounts: brand icon, name, and a "Connected" mark, so a client can
@@ -272,12 +313,13 @@ export default async function TalentProfilePage({ params }: { params: Promise<{ 
             </section>
           )}
 
-          {p.talent_skills.length > 0 && (
+          {/* The full list only when the header could not show them all. */}
+          {p.talent_skills.length > topSkills.length && (
             <section className="mt-14 border-t border-border-base pt-10">
-              <h2 className="text-xl font-semibold tracking-tight">Skills</h2>
+              <h2 className="text-xl font-semibold tracking-tight">All skills</h2>
               <TagList
                 className="mt-3"
-                label="Skills"
+                label="All skills"
                 tags={p.talent_skills
                   .map((s) => s.skills?.name)
                   .filter((n): n is string => Boolean(n))

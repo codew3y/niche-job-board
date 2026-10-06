@@ -18,7 +18,7 @@ function initials(name: string) {
   return (words[0]![0]! + (words[1]?.[0] ?? '')).toUpperCase();
 }
 
-const PX = { sm: 32, md: 40, lg: 56 } as const;
+const PX = { sm: 32, md: 40, lg: 56, xl: 80 } as const;
 
 /**
  * A person's photo or a company's logo when there is one (migration 0025: only images from the
@@ -37,7 +37,7 @@ export function Avatar({
   name: string;
   /** An uploaded photo or logo. Falls back to initials when absent. */
   src?: string | null;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }) {
   const box = cn(
@@ -45,6 +45,7 @@ export function Avatar({
     size === 'sm' && 'size-8',
     size === 'md' && 'size-10',
     size === 'lg' && 'size-14',
+    size === 'xl' && 'size-20',
     className,
   );
   if (src) {
@@ -67,6 +68,7 @@ export function Avatar({
         size === 'sm' && 'text-xs',
         size === 'md' && 'text-sm',
         size === 'lg' && 'text-lg',
+        size === 'xl' && 'text-2xl',
         'bg-primary-subtle text-primary',
       )}
     >
