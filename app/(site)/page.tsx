@@ -1,4 +1,11 @@
-import { ArrowRight, CheckCircle, Prohibit } from '@phosphor-icons/react/ssr';
+import {
+  ArrowRight,
+  CheckCircle,
+  LockSimple,
+  Prohibit,
+  Robot,
+  TagSimple,
+} from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -22,7 +29,7 @@ export const metadata: Metadata = {
  *
  * Six sections, six layout families (taste-skill 4.7): a 7/5 split hero with a framed photo, a
  * category bento, a text-only row of steps under hairlines, a quoted example set large beside a
- * side note, definition rows for the principles, and an unboxed closing statement. One eyebrow,
+ * side note, never/instead cards for the principles, and the closing band. One eyebrow,
  * in the hero (ceil(6 / 3) = 2 allowed). One theme throughout; one accent, used for the quote's
  * marks only.
  *
@@ -48,14 +55,17 @@ const PRINCIPLES = [
   {
     title: 'Rank keywords over work',
     body: 'Someone who shipped the work outranks someone who listed the tool.',
+    icon: TagSimple,
   },
   {
     title: 'Hide anything behind AI',
     body: 'Search and filters find every job and every developer on their own.',
+    icon: Robot,
   },
   {
     title: 'Gatekeep who may list',
     body: 'Open to every developer. No fees, no approval queue, no middleman.',
+    icon: LockSimple,
   },
 ] as const;
 
@@ -167,32 +177,58 @@ export default async function Home({
       </section>
 
       {/* ───────────── Principles ─────────────
-          Definition rows, divided by hairlines: the thing it will not do, then why. Title over
-          body below `md`. No bottom padding: the closing statement below brings its own. */}
+          Three cards, each in two halves: what the board will never do, struck through beside a
+          rose icon tile, and under a hairline what it does instead, with a check. Plain card
+          backgrounds; the colour is in the two icons. One column on phones, three from `md`. No
+          bottom padding: the closing statement below brings its own. */}
       <section aria-labelledby="principles-heading" className={CONTAINER}>
-        <div className="reveal">
-          <h2 id="principles-heading" className="text-display-sm">
+        <div className="reveal grid gap-4 md:grid-cols-12 md:items-end">
+          <h2 id="principles-heading" className="text-display-sm md:col-span-7">
             What it will not do
           </h2>
-          <p className="mt-4 text-lg text-text-muted">
-            No approval queue and nothing to qualify for.
+          <p className="max-w-[44ch] text-text-muted md:col-span-5 md:justify-self-end">
+            No approval queue and nothing to qualify for. Three lines the board does not cross.
           </p>
         </div>
-        <dl className="mt-12 divide-y divide-border-base border-t border-border-base">
-          {PRINCIPLES.map(({ title, body }, i) => (
-            <div
+        <ul className="mt-12 grid gap-4 md:grid-cols-3 lg:mt-16">
+          {PRINCIPLES.map(({ title, body, icon: Icon }, i) => (
+            <li
               key={title}
               style={{ '--i': i } as CSSProperties}
-              className="reveal grid gap-2 py-7 md:grid-cols-12 md:gap-8"
+              className="reveal liftable flex flex-col rounded-xl border border-border-base bg-surface-raised hover:border-border-strong"
             >
-              <dt className="flex items-center gap-3 text-xl font-medium tracking-tight md:col-span-5">
-                <Prohibit aria-hidden="true" size={20} className="shrink-0 text-text-subtle" />
-                {title}
-              </dt>
-              <dd className="text-text-muted md:col-span-7 md:pt-0.5">{body}</dd>
-            </div>
+              <div className="p-6 sm:p-7">
+                <div className="flex items-center justify-between gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="grid size-11 place-items-center rounded-xl bg-rose-100 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300"
+                  >
+                    <Icon size={22} weight="duotone" />
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-border-base px-2.5 py-0.5 text-xs font-medium text-text-muted">
+                    <Prohibit aria-hidden="true" size={12} />
+                    Never
+                  </span>
+                </div>
+                <h3 className="mt-6 text-xl font-semibold tracking-tight text-balance">
+                  <span className="line-through decoration-rose-400/70 decoration-2">{title}</span>
+                </h3>
+              </div>
+              <div className="mt-auto flex gap-3 border-t border-border-base p-6 sm:px-7">
+                <CheckCircle
+                  aria-hidden="true"
+                  size={20}
+                  weight="fill"
+                  className="mt-0.5 shrink-0 text-success"
+                />
+                <p className="text-text-muted">
+                  <span className="sr-only">Instead: </span>
+                  {body}
+                </p>
+              </div>
+            </li>
           ))}
-        </dl>
+        </ul>
       </section>
 
       <PageCta
