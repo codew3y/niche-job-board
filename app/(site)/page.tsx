@@ -5,6 +5,7 @@ import {
   Prohibit,
   Robot,
   TagSimple,
+  XCircle,
 } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -153,8 +154,8 @@ export default async function Home({
       </div>
 
       {/* ───────────── Principles ─────────────
-          Three cards, each in two halves: what the board will never do, struck through beside a
-          rose icon tile, and under a hairline what it does instead, with a check. Plain card
+          Three cards, each in two halves: what the board will never do, behind a rose cross beside
+          a rose icon tile, and under a hairline what it does instead, with a check. Plain card
           backgrounds; the colour is in the two icons. One column on phones, three from `md`. Top
           padding only: the closing band below brings its own. */}
       <section aria-labelledby="principles-heading" className={cn(CONTAINER, 'pt-section')}>
@@ -186,8 +187,18 @@ export default async function Home({
                     Never
                   </span>
                 </div>
-                <h3 className="mt-6 text-xl font-semibold tracking-tight text-balance">
-                  <span className="line-through decoration-rose-400/70 decoration-2">{title}</span>
+                {/* A cross, mirroring the check below: never this, but that. */}
+                <h3 className="mt-6 flex gap-3 text-xl font-semibold tracking-tight text-balance">
+                  <XCircle
+                    aria-hidden="true"
+                    size={20}
+                    weight="fill"
+                    className="mt-1 shrink-0 text-rose-600 dark:text-rose-400"
+                  />
+                  <span>
+                    <span className="sr-only">Never: </span>
+                    {title}
+                  </span>
                 </h3>
               </div>
               <div className="mt-auto flex gap-3 border-t border-border-base p-6 sm:px-7">
