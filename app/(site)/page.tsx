@@ -15,7 +15,7 @@ import { BoardStats } from '@/components/site/board-stats';
 import { CategoryGrid } from '@/components/site/category-grid';
 import { HowItWorksSteps } from '@/components/site/how-it-works-steps';
 import { MatchPreview } from '@/components/site/match-preview';
-import { CONTAINER, HERO_SECTION, PageCta, SECTION } from '@/components/site/page-parts';
+import { CONTAINER, HERO_SECTION, PageCta } from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
 import { getSessionUser } from '@/lib/supabase/session';
 import { cn } from '@/lib/ui/cn';
@@ -27,11 +27,9 @@ export const metadata: Metadata = {
 /**
  * Home. The "Quiet ledger" direction (October 2026 redesign; DESIGN.md).
  *
- * Six sections, six layout families (taste-skill 4.7): a 7/5 split hero with a framed photo, a
- * category bento, a text-only row of steps under hairlines, a quoted example set large beside a
- * side note, never/instead cards for the principles, and the closing band. One eyebrow,
- * in the hero (ceil(6 / 3) = 2 allowed). One theme throughout; one accent, used for the quote's
- * marks only.
+ * Five sections, five layout families: a 6/6 split hero with an example match, a category
+ * bento, a row of steps with photos, never/instead cards for the principles, and the closing
+ * band. One eyebrow, in the hero.
  *
  * Removed in the redesign, as decoration that did no job (minimalist-ui): the scrolling skills
  * ticker, the example-match card laid over the hero photo (taste-skill bans overlays on images
@@ -40,6 +38,9 @@ export const metadata: Metadata = {
  *
  * CTA labels, one per intent, identical everywhere on the site: "Create a profile" (developer
  * sign-up), "Post a brief" (client sign-up), "Sign up" (the header's generic sign-up).
+ *
+ * The large quoted example match that sat below the steps was removed in October 2026: the hero
+ * panel now shows a whole example match, and the quote repeated it.
  *
  * Content history: "What a match looks like", "What it will not do" and the closing line come
  * from the landing page at b9fe7d4 (introduced in eb8bb6c). The headline was "Hired for the
@@ -151,37 +152,12 @@ export default async function Home({
         />
       </div>
 
-      {/* ───────────── The differentiator, shown ─────────────
-          A side note beside one quoted example, set large. The right column carries the content,
-          so this is not the banned split header. Typographic quotes; no attribution because it
-          is an example, and it says so. Stacked below `lg`. */}
-      <section aria-labelledby="example-heading" className={cn(CONTAINER, SECTION)}>
-        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
-          <div className="reveal lg:col-span-4">
-            <h2 id="example-heading" className="text-xl font-semibold tracking-tight">
-              What a match looks like
-            </h2>
-            <p className="mt-4 max-w-[36ch] text-text-muted">
-              This is an example. Every match carries a sentence like it, including where the fit
-              falls short. When nothing fits, it says so.
-            </p>
-          </div>
-          <blockquote
-            style={{ '--i': 1 } as CSSProperties}
-            className="reveal border-l-2 border-accent pl-6 text-display-sm font-medium text-text sm:pl-10 lg:col-span-8"
-          >
-            &ldquo;Has shipped this exact migration twice (Stripe Billing with proration and a
-            historical-invoice backfill) and names the job that keeps it safe.&rdquo;
-          </blockquote>
-        </div>
-      </section>
-
       {/* ───────────── Principles ─────────────
           Three cards, each in two halves: what the board will never do, struck through beside a
           rose icon tile, and under a hairline what it does instead, with a check. Plain card
-          backgrounds; the colour is in the two icons. One column on phones, three from `md`. No
-          bottom padding: the closing statement below brings its own. */}
-      <section aria-labelledby="principles-heading" className={CONTAINER}>
+          backgrounds; the colour is in the two icons. One column on phones, three from `md`. Top
+          padding only: the closing band below brings its own. */}
+      <section aria-labelledby="principles-heading" className={cn(CONTAINER, 'pt-section')}>
         <div className="reveal grid gap-4 md:grid-cols-12 md:items-end">
           <h2 id="principles-heading" className="text-display-sm md:col-span-7">
             What it will not do
