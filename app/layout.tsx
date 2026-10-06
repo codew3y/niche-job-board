@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Providers } from '@/components/providers';
+import { siteUrl } from '@/lib/env';
 import './globals.css';
 
 /*
@@ -31,6 +32,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Share images (opengraph-image.tsx) and canonical links resolve against this, so a pasted
+  // link previews from the live site, never from a preview deployment's address.
+  metadataBase: new URL(siteUrl()),
   title: {
     // The brand alone on the home page; inner pages read "Browse · TechSelect" and so on.
     default: 'TechSelect',
