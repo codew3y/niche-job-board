@@ -369,7 +369,7 @@ export function FeatureRows({
  * The closing call to action, at the foot of every public page: a band in the brand colour,
  * centred, with the logo mark on a white tile, the statement, one supporting line and two
  * buttons side by side (the primary inverted onto the band, the alternative as an outline). A
- * faint dot grid, in the band's own text colour, gives it texture without adding a colour.
+ * solid colour, no pattern.
  */
 export function PageCta({
   title,
@@ -385,12 +385,7 @@ export function PageCta({
 }) {
   return (
     <section className={cn(CONTAINER, SECTION)}>
-      <div className="reveal relative isolate overflow-hidden rounded-2xl bg-primary px-6 py-14 text-center text-primary-text sm:px-10 sm:py-16 lg:py-20">
-        {/* The dot grid, faded out towards the edges so the centre stays calm. */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 -z-10 bg-[radial-gradient(color-mix(in_oklch,var(--primary-text)_22%,transparent)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_75%)] bg-size-[22px_22px]"
-        />
+      <div className="reveal overflow-hidden rounded-2xl bg-primary px-6 py-14 text-center text-primary-text sm:px-10 sm:py-16 lg:py-20">
         <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary-text shadow-md">
           <LogoMark size={32} />
         </span>
