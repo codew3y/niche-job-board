@@ -51,7 +51,7 @@ export function ItemList({ items, onEdit }: { items: Item[]; onEdit: (id: string
   const [announcement, setAnnouncement] = useState('');
 
   /**
-   * FLIP on reorder (DESIGN.md §5). Pressing "Move up" used to teleport the item, and the eye
+   * FLIP on reorder. Pressing "Move up" used to teleport the item, and the eye
    * loses where it went — the textbook case for spatial-consistency motion. Before each reorder
    * the rows' positions are recorded; after React commits the new order, each row that moved is
    * played from its old position to its new one.

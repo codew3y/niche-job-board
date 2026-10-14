@@ -1,9 +1,9 @@
-// Skill taxonomy seed — Phase 0 deliverable per PROJECT.md §4.6.3
+// Skill taxonomy seed — Phase 0 deliverable
 // 126 skills across 10 categories. Feeds the Phase 1 seed script directly.
 //
 // Fields: name (canonical) · slug (unique) · category · aliases[] · sources[] · evidence
 //   - `sources` is machine-checkable: every row carries >= 2 source codes, OR exactly one
-//     code plus NICHE (a deliberate corner-coverage entry per PROJECT.md §4.6.1).
+//     code plus NICHE (a deliberate corner-coverage entry).
 //   - `evidence` is the human-readable note explaining what those sources actually said.
 //
 // Invariants enforced by lib/seeds/skills.seed.test.ts — run it before trusting this file:
@@ -23,7 +23,7 @@
 //   RM    roadmap.sh role roadmaps
 //   COMP  Competitor skill pickers & per-skill hire pages (Upwork, Toptal, Arc, Contra,
 //         Wellfound, Lemon.io), accessed 2026-09-20
-//   NICHE Deliberate corner coverage per PROJECT.md §4.6.1 (iPaaS, CRM scripting, RPA,
+//   NICHE Deliberate corner coverage (iPaaS, CRM scripting, RPA,
 //         integration mechanics, AI capabilities) — under-represented by surveys by design
 //   STACK This project's own stack. Never sufficient alone; always paired.
 //   JOBS  Real freelance job posts mined 2026-09-20 (~74 posts across freelancer.com's n8n,

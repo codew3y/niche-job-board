@@ -1,5 +1,5 @@
 /**
- * Phase 1 schema — Drizzle-first (PROJECT.md §5.1).
+ * Phase 1 schema — Drizzle-first.
  *
  * The schema files ARE the spec: the ERD in docs/schema.md is generated from them, not
  * maintained alongside them. A hand-drawn ERD drifts from a strict-TypeScript schema within

@@ -4,25 +4,15 @@ A job board for **software, web and automation work**. Anyone can list — show 
 Freelancers publish evidence of real work — an external portfolio, a GitHub, or in-app project
 write-ups — and matching is semantic in both directions rather than keyword-driven.
 
-> Status: **Phase 5 — Audit, deploy & document.** The product is complete and deployed:
-> auth and onboarding, profiles and portfolios, job posting and applications, messaging,
-> and semantic matching in both directions. See [`PROJECT.md`](./PROJECT.md) for the plan and
-> what remains.
+> Status: **live.** Auth and onboarding, profiles and portfolios, job posting and applications,
+> messaging, and semantic matching in both directions.
 
 ## Screenshots
 
-Regenerate with `CAPTURE_SCREENSHOTS=1 npx playwright test e2e/screenshots.spec.ts`, which
-captures them from the real app against seeded data — so they cannot quietly stop matching what
-ships.
-
-| | |
-| --- | --- |
-| ![Landing page](./docs/screenshots/01-landing.png) | ![Browsing jobs](./docs/screenshots/02-browse-jobs.png) |
-| Asks which side you are on before asking for an account | Search and filters, no AI required |
-| ![Browsing developers](./docs/screenshots/03-browse-talent.png) | ![A public profile](./docs/screenshots/04-talent-profile.png) |
-| Everyone who wants to be listed is listed | Evidence of real work, judged by the client |
-| ![Developer dashboard](./docs/screenshots/05-dashboard.png) | |
-| The empty state is the honest one — nothing is padded | |
+Capture current screenshots from the real app against seeded data with
+`CAPTURE_SCREENSHOTS=1 npx playwright test e2e/screenshots.spec.ts`. They are written to
+`test-results/screenshots/`, which is not committed, so the repository never carries images of
+a UI that has since changed.
 
 ## Stack
 
@@ -122,9 +112,9 @@ database it measured.
 
 ## Documentation
 
-[`PROJECT.md`](./PROJECT.md) · [architecture](./docs/architecture.md) ·
+[architecture](./docs/architecture.md) ·
 [matching](./docs/matching.md) · [deploying](./docs/deploy.md) ·
 [schema](./docs/schema.md) · [API surface](./docs/api.md) ·
 [components](./docs/components.md) · [taxonomy](./docs/taxonomy.md) ·
-[eval set](./docs/eval-set.md) · [constraints](./docs/constraints.md) ·
+[eval set](./docs/eval-set.md) ·
 [ADRs](./docs/decisions/) · [contributing](./CONTRIBUTING.md)

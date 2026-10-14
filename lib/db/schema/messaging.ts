@@ -36,7 +36,7 @@ export const conversations = pgTable(
     /**
      * Both participants are NULLABLE with ON DELETE SET NULL, not CASCADE.
      *
-     * A conversation has two owners. `docs/constraints.md` §5 commits to the counterparty
+     * A conversation has two owners. The privacy policy commits to the counterparty
      * keeping their record when one party deletes their account — if Alice leaves, Bob does
      * not lose the thread he may need for a dispute. CASCADE contradicted that commitment
      * outright: it destroyed the whole thread.
@@ -114,7 +114,7 @@ export const messages = pgTable(
     /**
      * Nullable on purpose. Account deletion TOMBSTONES the sender and redacts the body rather
      * than destroying the row — a conversation has two owners, and one party leaving must not
-     * erase the other party's record of the exchange (docs/constraints.md §5).
+     * erase the other party's record of the exchange.
      */
     senderId: uuid('sender_id').references(() => authUsers.id, { onDelete: 'set null' }),
     body: text('body').notNull(),
@@ -219,7 +219,7 @@ export const blocks = pgTable(
   ],
 ).enableRLS();
 
-/** Report → manual takedown. v1 has no review queue (docs/constraints.md §6). */
+/** Report → manual takedown. v1 has no review queue. */
 export const reports = pgTable(
   'reports',
   {

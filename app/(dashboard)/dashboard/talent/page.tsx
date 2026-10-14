@@ -27,11 +27,11 @@ import { createClient } from '@/lib/supabase/server';
 export const metadata: Metadata = { title: 'Dashboard' };
 
 /**
- * The developer's home (DESIGN.md §3.1): the display face once, for the greeting; a summary
+ * The developer's home: the display face once, for the greeting; a summary
  * row; the matches list as the primary content; profile status and shortcuts beside it on wide
  * screens and below it on a phone.
  *
- * TWO DEFECTS FIXED HERE (DESIGN.md §1, A2 and A4):
+ * TWO DEFECTS FIXED HERE:
  *   - the "Matches" section was a hard-coded empty state, so a developer with ten strong matches
  *     was told they had none. It now reads the same `matchesForMe()` the matches page reads, and
  *     says the four different true things that feed can say;

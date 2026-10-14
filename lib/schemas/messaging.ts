@@ -8,7 +8,7 @@ import { richText, trimmed, uuid } from './primitives';
  *
  * Plain text only. No rich text, no attachments: the body is rendered as text, so there is
  * nothing to sanitise and no markup to escape. That is a deliberate narrowing of the attack
- * surface on a feature that has no human review queue behind it (docs/constraints.md §6).
+ * surface on a feature that has no human review queue behind it.
  */
 export const startConversationInput = z.object({
   talentId: uuid,

@@ -3,7 +3,7 @@
  *
  * Drizzle-first means the schema files are the spec and the ERD is DERIVED. A hand-drawn
  * diagram drifts from a strict-TypeScript schema within a week and then quietly misleads
- * whoever reads it next (PROJECT.md §0).
+ * whoever reads it next.
  *
  * Run: npx tsx lib/db/generate-erd.ts   (or `npm run db:erd`)
  */
@@ -157,7 +157,7 @@ const doc = `# Database Schema
 >
 > The Drizzle schema files in \`lib/db/schema/\` are the source of truth (Phase 1 was built
 > Drizzle-first). A hand-drawn ERD drifts from a strict-TypeScript schema within a week, and
-> a diagram that is confidently wrong is worse than no diagram (PROJECT.md §0).
+> a diagram that is confidently wrong is worse than no diagram.
 
 **${tables.length} tables · ${rlsOn}/${tables.length} with RLS enabled · ${totalPolicies} policies · ${totalChecks} check constraints · ${Object.keys(snap.enums).length} enums**
 
@@ -171,7 +171,7 @@ ${erd.join('\n')}
 
 - **Roles are separate profile tables** (\`talent_profiles\`, \`client_profiles\`) linked to one
   \`auth.users\` row — never a role column. That is what makes dual-role accounts work without
-  a flag leaking into every query (PROJECT.md §5.1).
+  a flag leaking into every query.
 - **There is no publish gate** (ADR-008, migration 0014). Any profile may be published with no
   bio, no site, no projects and no skills. A \`talent_publish_gate\` CHECK used to require a
   non-empty bio AND (\`website_url\` OR ≥2 portfolio items); it was dropped because who is worth

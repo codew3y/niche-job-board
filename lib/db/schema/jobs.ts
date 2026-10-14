@@ -80,7 +80,7 @@ export const jobs = pgTable(
     engagementType: engagementType('engagement_type').notNull(),
     budgetMin: numeric('budget_min', { precision: 12, scale: 2 }),
     budgetMax: numeric('budget_max', { precision: 12, scale: 2 }),
-    /** ISO 4217. §7 of PROJECT.md: never conflate entities or currencies. */
+    /** ISO 4217. Never conflate currencies. */
     currency: text('currency').notNull().default('USD'),
 
     locationType: locationType('location_type').notNull().default('remote'),

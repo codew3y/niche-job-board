@@ -36,7 +36,7 @@ const TABBABLE =
  * base-ui marks the page behind `aria-hidden` (so screen readers are confined), but in this build
  * its trailing focus guard did not send focus back into the popup: a scripted keyboard pass
  * tabbed from "Send application" straight out to the skip link and the header of a page the user
- * could not see — a WCAG 2.4.3 failure (DESIGN.md §6.3). This wraps Tab at both ends explicitly.
+ * could not see — a WCAG 2.4.3 failure. This wraps Tab at both ends explicitly.
  * It is a guarantee, not a replacement: base-ui still owns Escape, scroll lock, initial focus and
  * returning focus to the trigger. e2e/keyboard.spec.ts pins the behaviour.
  */

@@ -10,7 +10,7 @@ import { skillCategory } from './enums';
  * Users pick from this list rather than typing free text, so filters and matching stay clean.
  * `is_approved = false` is the "request a skill" path: anyone can create a row, nobody can
  * use it in a filter until it is reviewed. That way gaps surface instead of being absorbed
- * silently (PROJECT.md §11).
+ * silently.
  */
 export const skills = pgTable(
   'skills',

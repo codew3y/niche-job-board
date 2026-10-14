@@ -71,7 +71,7 @@ describe('eval set shape', () => {
   });
 
   it('caps thin profiles at grade 1 everywhere', () => {
-    // PROJECT.md §8: a profile whose only evidence is a URL must not score as a strong match
+    // A profile whose only evidence is a URL must not score as a strong match
     // until it carries first-party text. If this ever needs relaxing, that is a product
     // decision, not a test fix.
     for (const p of thinProfiles) {
@@ -94,7 +94,7 @@ describe('eval set shape', () => {
 });
 
 describe('gates are reachable', () => {
-  // The bug this replaces: PROJECT.md asked for precision@5 >= 0.8 on a 5-profile pool where
+  // The bug this replaces: the original plan asked for precision@5 >= 0.8 on a 5-profile pool where
   // most jobs had a single relevant profile, capping a PERFECT ranker at 0.32.
   const idealRanking = (grades: Record<string, Grade>) =>
     Object.keys(grades).sort((a, b) => (grades[b] ?? 0) - (grades[a] ?? 0));

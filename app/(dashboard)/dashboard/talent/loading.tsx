@@ -11,7 +11,7 @@ import { Busy, Skeleton } from '@/components/shared/skeleton';
  * soft 404, and e2e/flows.spec.ts rightly fails on it. This subtree has no notFound() anywhere,
  * so a skeleton is safe here. The client side, messages and the public detail pages each have a
  * notFound() below any group-level boundary, so they stream inside the page instead, after the
- * existence check (DESIGN.md §9, J6). The sub-pages (matches, applications, saved, profile)
+ * existence check. The sub-pages (matches, applications, saved, profile)
  * each have their own loading.tsx with their own shape.
  */
 export default function Loading() {

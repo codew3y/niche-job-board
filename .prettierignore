@@ -7,6 +7,5 @@ lib/db/migrations
 docs/schema.md
 
 # Prose is written, not formatted. Prettier reflows emphasis and wrapping, which produces
-# churn in every doc diff and buries the actual change. PROJECT.md is the source of truth
-# for this project; its diffs need to stay readable.
+# churn in every doc diff and buries the actual change; doc diffs need to stay readable.
 *.md

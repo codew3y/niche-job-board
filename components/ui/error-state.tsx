@@ -9,7 +9,7 @@ import { reportError } from '@/lib/observability/report-error';
 import { Button, buttonStyles } from './button';
 
 /**
- * What a route shows when it throws (DESIGN.md §1, A6 — no route had an error state before).
+ * What a route shows when it throws.
  *
  * Says what happened in plain words, offers the two things that usually work — try again, or
  * go somewhere safe — and never shows the raw error to the visitor. The `digest` is shown so a

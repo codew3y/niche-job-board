@@ -7,8 +7,8 @@
  *
  * Three rules this script holds to:
  *
- *  1. **Synthetic only.** No scraped profiles, no real names, no real URLs
- *     (`docs/constraints.md` §5). Every person here is generated from archetypes.
+ *  1. **Synthetic only.** No scraped profiles, no real names, no real URLs.
+ *     Every person here is generated from archetypes.
  *  2. **Deterministic.** A fixed PRNG seed, so two runs produce identical data and a matching
  *     regression is a real change rather than reshuffled fixtures.
  *  3. **Realistic in its distribution, not just its volume.** The evidence mix matters more

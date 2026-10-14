@@ -3,7 +3,7 @@
  *
  * `npm run eval` — costs a handful of free-tier requests and takes about a minute.
  *
- * This is the instrument PROJECT.md §8 asks for, and it exists so the Phase 4 exit is
+ * This is the instrument the Phase 4 exit asks for, and it exists so the Phase 4 exit is
  * measured rather than asserted. It deliberately maps the eval fixtures through the SAME
  * `jobToText` / `talentToText` builders production uses: an eval that embeds its own
  * specially-formatted text measures a pipeline nobody ships.

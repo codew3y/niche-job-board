@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { canSeed, PASSWORD, seed, teardown, type Seeded } from './fixtures';
 
 /**
- * The three critical paths (PROJECT.md §7 exit criteria).
+ * The three critical paths.
  *
  *   1. A developer publishes a profile and it is publicly visible
  *   2. A developer finds a job and applies; the client sees the application

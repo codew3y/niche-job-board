@@ -21,7 +21,7 @@ import { isRateLimited } from './rate-limit';
  * Direct messaging — in v1 by owner decision (ADR-007 D1).
  *
  * The defences here are v1 scope, not Phase 5 polish. There is no human review queue behind
- * this feature (docs/constraints.md §6), so block, report and the rate limit ARE the
+ * this feature, so block, report and the rate limit ARE the
  * moderation, and they have to work on the day messaging ships.
  *
  * Three rules shape every function below:
@@ -312,7 +312,7 @@ export async function reportContent(
   if (error) return { ok: false, message: 'Could not send that report. Try again.' };
 
   /**
-   * There is no queue, no triage and no auto-action behind this (docs/constraints.md §6). The
+   * There is no queue, no triage and no auto-action behind this. The
    * confirmation the dialog renders says so, rather than implying a process that does not
    * exist — and points at block, which is the control the reporter actually holds.
    */

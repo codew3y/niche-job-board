@@ -14,7 +14,7 @@ import { blockUser, reportContent, unblockUser } from '@/lib/actions/messaging';
 /**
  * Block and report: the moderation controls for a thread.
  *
- * v1 has no review queue (docs/constraints.md §6), so these two are not a supplement to
+ * v1 has no review queue, so these two are not a supplement to
  * moderation, they are the moderation. Both sit in the open at the top of the thread rather
  * than behind an overflow menu: a control you need while being harassed is not one to make
  * people hunt for.

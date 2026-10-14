@@ -23,12 +23,11 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
-.env
-.env*.local
-.env.development
-.env.production
 
 # vercel
+# Every env file, whatever its suffix (.env.test, .env.staging…), except the example.
+.env*
+!.env.example
 .vercel
 
 # typescript
@@ -45,17 +44,20 @@ next-env.d.ts
 *.njsproj
 *.sln
 *.sw?
-.cursor/
 
 # supabase local stack
 /supabase/.branches
 /supabase/.temp
 
-# agent skills — vendored copies of emilkowalski/skills (see PROJECT.md §3).
-# skills-lock.json IS committed, so `npx skills add` reproduces them exactly, the same
-# contract as a package lockfile. The copies themselves are third-party and regenerable.
+# Local AI-agent tooling: installed skills, their lockfile, editor-agent settings and the
+# agent instruction files. Personal to whoever works on the repo; never published.
+# (`next dev` rewrites AGENTS.md on start, so it must stay ignored, not just deleted.)
 .agents/
-.claude/skills/
+.claude/
+.cursor/
+skills-lock.json
+AGENTS.md
+CLAUDE.md
 
 # Playwright
 /test-results/

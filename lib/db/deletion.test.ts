@@ -1,5 +1,5 @@
 /**
- * Account deletion — proves the promises in docs/constraints.md §5 and flows §11.
+ * Account deletion — proves the privacy promises in docs/flows §11.
  *
  * Deletion is the one operation that cannot be fixed after the fact: if it silently leaves
  * data behind, nobody notices until it matters legally. And if it cascades too far, it

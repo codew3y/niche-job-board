@@ -12,7 +12,7 @@ export type SkillOption = { id: string; name: string; category: string; aliases:
  * Skill picker over the seeded taxonomy (126 skills, 10 categories).
  *
  * Free text is deliberately impossible: every tag resolves to a taxonomy row, which is what
- * keeps filters and matching clean (PROJECT.md §4.6). Search also matches ALIASES, so a client
+ * keeps filters and matching clean. Search also matches ALIASES, so a client
  * typing "WhatsApp chatbot" finds `WhatsApp Business API` and someone typing "Golang" finds
  * `Go`. That alias bridge is the whole point of the taxonomy's alias policy.
  *

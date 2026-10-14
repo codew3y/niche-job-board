@@ -1,7 +1,7 @@
 /**
  * Measure the read-path latency the Phase 4 exit criterion is about. `npm run bench:match`
  *
- * PROJECT.md §8 exits on "ranked results in < 800ms p95 (measured against a WARM Supabase
+ * The Phase 4 exit asks for "ranked results in < 800ms p95 (measured against a WARM Supabase
  * project — state that assumption)". Two things that phrasing settles, and both matter:
  *
  *  - WARM. A free Supabase project pauses after inactivity and the first query afterwards

@@ -492,7 +492,7 @@
 
 /*
  * Links inside prose are underlined, not just coloured (WCAG 1.4.1). The previous file described
- * this rule in a comment and never wrote it (DESIGN.md §1, A9). A utility rather than a base
+ * this rule in a comment and never wrote it. A utility rather than a base
  * class, so it composes with variants — `[&_a]:prose-link` styles every link in a legal page.
  * Standalone links that read as controls (nav, buttons, cards) are exempt, because they are not
  * inside a text block.
@@ -614,7 +614,7 @@
 /*
  * Entrance for page content: rise and fade, once. Transform and opacity only. Used on the
  * landing page and on first paint of empty states — never on lists that re-render, where an
- * entrance on every navigation reads as lag (DESIGN.md §5).
+ * entrance on every navigation reads as lag.
  */
 @keyframes rise {
   from {

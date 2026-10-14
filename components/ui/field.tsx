@@ -7,7 +7,7 @@ import { cn } from '@/lib/ui/cn';
  * Form controls: the input, textarea and select every form uses, plus the label / hint / error
  * shell around them.
  *
- * There used to be eleven hand-written textarea variants across the app (DESIGN.md §1.3), each
+ * There used to be eleven hand-written textarea variants across the app, each
  * with its own border, padding and error handling. There is now one of each control.
  *
  * ACCESSIBILITY — errors are wired with `aria-describedby` and `aria-invalid`, not only coloured

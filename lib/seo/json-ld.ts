@@ -15,7 +15,7 @@
  * unchanged and Google reads exactly what it read before. `>` and `&` go too: they cost
  * nothing and close off the variants that rely on a parser being lenient about `<!--`.
  *
- * This is the "sanitize all rich text server-side" requirement from PROJECT.md 5.4. Zod
+ * This is the "sanitize all rich text server-side" requirement. Zod
  * validates shape and React escapes text nodes - neither covers the one place the app
  * deliberately writes raw markup.
  */

@@ -1,4 +1,4 @@
-// Hand-labelled match evaluation set — Phase 0 deliverable per PROJECT.md §4.2 / §4.5 / §8.
+// Hand-labelled match evaluation set — Phase 0 deliverable.
 //
 // Machine-readable on purpose. The previous version lived only in Markdown, which let two
 // problems hide: the skill names drifted from the taxonomy's canonical names, and the gate
@@ -232,7 +232,7 @@ export const evalGrades: Record<string, Record<string, Grade>> = {
  */
 export const calibrationJobs = ['J5'] as const;
 
-/** Profiles whose only evidence is an external URL. Measured, not assumed (PROJECT.md §8). */
+/** Profiles whose only evidence is an external URL. Measured, not assumed. */
 export const thinProfiles = ['P5'] as const;
 
 // ───────────────────────────── metrics ─────────────────────────────

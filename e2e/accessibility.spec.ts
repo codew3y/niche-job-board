@@ -24,7 +24,7 @@ async function signIn(page: Page) {
  * mechanical ones: missing labels, contrast below threshold, broken heading order, controls
  * with no accessible name. It cannot tell you whether a focus order makes sense, whether alt
  * text is accurate, or whether a live region announces something useful. A green run here is
- * a floor, not a pass, and the manual passes in PROJECT.md §9 are still owed.
+ * a floor, not a pass, and manual screen-reader and zoom passes are still owed.
  *
  * Run at the AA level the plan commits to, plus best-practice rules for the structural things
  * that are cheap to get right and expensive to retrofit.

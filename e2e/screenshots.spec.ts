@@ -28,7 +28,10 @@ test.describe(() => {
 
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  const shot = (name: string) => ({ path: `docs/screenshots/${name}.png`, fullPage: false });
+  const shot = (name: string) => ({
+    path: `test-results/screenshots/${name}.png`,
+    fullPage: false,
+  });
 
   /**
    * Wait for the LIST, not the heading.

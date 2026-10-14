@@ -1,7 +1,7 @@
 /**
  * Text representations for embedding.
  *
- * This is where match quality actually lives (PROJECT.md §8). The model is fixed —
+ * This is where match quality actually lives. The model is fixed —
  * `text-embedding-3-small`, frozen into `vector(1536)` by ADR-002 — so the only lever left is
  * what text it reads. Iterate here before reaching for a bigger model.
  *

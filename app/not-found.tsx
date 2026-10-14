@@ -11,7 +11,7 @@ import { getSessionUser } from '@/lib/supabase/session';
 export const metadata: Metadata = { title: 'Not found' };
 
 /**
- * The 404 (DESIGN.md §1, A6). It is deliberately the same answer for "does not exist" and "exists
+ * The 404. It is deliberately the same answer for "does not exist" and "exists
  * but is not yours": a draft job or an unpublished profile 404s rather than 403s, because a 403
  * confirms the thing exists (docs/api.md §4). So the copy never claims the page was deleted.
  */

@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Home. The "Quiet ledger" direction (October 2026 redesign; DESIGN.md).
+ * Home. The "Quiet ledger" direction (October 2026 redesign).
  *
  * Five sections, five layout families: a 6/6 split hero with an example match, a category
  * bento, a row of steps with photos, never/instead cards for the principles, and the closing

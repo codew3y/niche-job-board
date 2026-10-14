@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/shared/skeleton';
  * soft 404, and e2e/flows.spec.ts rightly fails on it. This subtree has no notFound() anywhere,
  * so a skeleton is safe here. The client side, messages and the public detail pages each have a
  * notFound() below any group-level boundary, so they stream inside the page instead, after the
- * existence check (DESIGN.md §9, J6).
+ * existence check.
  */
 export default function Loading() {
   // The shape of the saved list: title, then rows of avatar, headline, facts and the toggle.

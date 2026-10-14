@@ -14,8 +14,8 @@ import './globals.css';
  *     depends on it.
  *
  * `display: 'optional'`, not 'swap', for the first-screen face: with `swap`, text painted
- * in the fallback re-rendered when the font landed and Chrome counted it as a new, later LCP
- * (DESIGN.md §6.2). `optional` keeps the metric-matched fallback for that view instead.
+ * in the fallback re-rendered when the font landed and Chrome counted it as a new, later LCP.
+ * `optional` keeps the metric-matched fallback for that view instead.
  */
 const geist = Geist({
   variable: '--font-geist',

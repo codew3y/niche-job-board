@@ -27,7 +27,7 @@ export const metadata: Metadata = { title: 'Dashboard' };
 /**
  * The client's home: their briefs, what has come in, and who fits.
  *
- * FIXED HERE (DESIGN.md §1, A3 and A5): the only action offered to a client with no jobs linked
+ * FIXED HERE: the only action offered to a client with no jobs linked
  * to `/client/jobs/new`, which 404'd; and the jobs list was plain text, titles that could not
  * be clicked beside a raw lowercase status. "Top candidates", the reason a client opens this
  * page, was two clicks deep. It is now on the page, for the brief posted most recently.

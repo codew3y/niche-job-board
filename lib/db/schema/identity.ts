@@ -7,7 +7,7 @@ import { activeRole } from './enums';
 /**
  * One row per account. Roles are modelled as SEPARATE PROFILE TABLES linked to this row
  * (talent_profiles / client_profiles), never as a role column here — that is what makes
- * dual-role accounts work without a role flag leaking into every query (PROJECT.md §5.1).
+ * dual-role accounts work without a role flag leaking into every query.
  *
  * `has_talent` / `has_client` are denormalised booleans kept true to the profile tables by
  * trigger, so the nav and middleware can answer "which dashboards exist?" without two joins

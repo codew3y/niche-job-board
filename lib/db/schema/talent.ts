@@ -44,7 +44,7 @@ export const talentProfiles = pgTable(
 
     hourlyRateMin: numeric('hourly_rate_min', { precision: 10, scale: 2 }),
     hourlyRateMax: numeric('hourly_rate_max', { precision: 10, scale: 2 }),
-    /** ISO 4217. Never assume a currency — PROJECT.md holds budgets in several. */
+    /** ISO 4217. Never assume a currency: rates come in several. */
     currency: text('currency').notNull().default('USD'),
     availability: availability('availability').notNull().default('part_time'),
     yearsExperience: integer('years_experience'),
@@ -102,7 +102,7 @@ export const talentProfiles = pgTable(
       sql`${t.hourlyRateMin} is null or ${t.hourlyRateMax} is null or ${t.hourlyRateMin} <= ${t.hourlyRateMax}`,
     ),
     check('talent_currency_iso', sql`${t.currency} ~ '^[A-Z]{3}$'`),
-    // https only, and no javascript:/data: — mirrors the Zod rule (PROJECT.md §5.4).
+    // https only, and no javascript:/data: — mirrors the Zod rule.
     check(
       'talent_urls_https',
       sql`(${t.websiteUrl} is null or ${t.websiteUrl} ~* '^https://')
@@ -113,12 +113,12 @@ export const talentProfiles = pgTable(
     index('talent_published_idx').on(t.isPublished, t.updatedAt),
     index('talent_availability_idx').on(t.availability),
     // HNSW for cosine similarity — the retrieve step of §8. 1536 dims is inside pgvector's
-    // 2000-dim index ceiling (docs/constraints.md §2).
+    // 2000-dim index ceiling.
     // Full-text search over the generated column — see the note in jobs.ts.
     index('talent_search_idx').using('gin', t.searchVector),
     index('talent_embedding_hnsw_idx').using('hnsw', t.embedding.op('vector_cosine_ops')),
 
-    // Published profiles are public by design (docs/constraints.md §5); drafts are owner-only.
+    // Published profiles are public by design; drafts are owner-only.
     pgPolicy('talent_select_published_or_own', {
       for: 'select',
       to: [anonRole, authenticatedRole],

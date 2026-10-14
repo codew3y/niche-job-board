@@ -1,5 +1,5 @@
 /**
- * RLS cross-tenant tests — Phase 1 exit criterion (PROJECT.md §5.5, DoD §2).
+ * RLS cross-tenant tests — Phase 1 exit criterion.
  *
  * These run against a REAL Postgres with the real Supabase auth schema and the real
  * `anon` / `authenticated` roles. A mock would prove nothing: RLS is enforced by the

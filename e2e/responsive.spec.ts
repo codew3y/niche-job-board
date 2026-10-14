@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 /**
  * The responsive pass, measured rather than eyeballed.
  *
- * PROJECT.md asks for "a responsive pass on every screen at 320 / 768 / 1280". Doing that by
+ * The plan asks for "a responsive pass on every screen at 320 / 768 / 1280". Doing that by
  * dragging a browser window produces an opinion; this produces a result that fails a build.
  *
  * The check is horizontal overflow, because it is the one responsive bug that is both

@@ -1,4 +1,4 @@
-// Taxonomy invariants — Phase 0 deliverable per PROJECT.md §4.6.3.
+// Taxonomy invariants — Phase 0 deliverable.
 //
 // These are not style checks. Each one corresponds to a defect measured in the previous
 // 105-row seed on 2026-09-20, which would otherwise have shipped into the Phase 1 database.
@@ -28,7 +28,7 @@ import { skillCategoryOrder, skillsSeed } from './skills.seed';
 const normalize = (s: string) => s.trim().toLowerCase().replace(/\s+/g, ' ');
 
 describe('skills taxonomy', () => {
-  it('sits inside the 80–150 target band from PROJECT.md §4.6.4', () => {
+  it('sits inside the 80–150 target band', () => {
     expect(skillsSeed.length).toBeGreaterThanOrEqual(80);
     expect(skillsSeed.length).toBeLessThanOrEqual(150);
   });

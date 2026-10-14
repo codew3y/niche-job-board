@@ -14,7 +14,7 @@ import { cn } from '@/lib/ui/cn';
  * Deciding the icon in React instead means the server (which cannot know the stored theme)
  * renders a guess and the client corrects it — a sun that becomes a moon on load, which is the
  * toggle's own layout shift. An earlier version waited for hydration with a "mounted" flag and
- * showed a placeholder forever, because the flag never flipped (DESIGN.md §9, J7).
+ * showed a placeholder forever, because the flag never flipped.
  *
  * The label is stable ("Toggle theme") for the same reason; the icon shows the state.
  * No animation on the swap: pressed often, and an animated icon reads as delay (frequency rule).

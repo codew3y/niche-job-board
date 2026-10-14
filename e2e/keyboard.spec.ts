@@ -6,7 +6,7 @@ import { canSeed, PASSWORD, seed, teardown, type Seeded } from './fixtures';
  * Keyboard paths that automated a11y scanners cannot see.
  *
  * axe checks that controls HAVE names and focus styles; it cannot check that Tab goes somewhere
- * sensible. These were found by a scripted keyboard pass during the UI rebuild (DESIGN.md §6.3)
+ * sensible. These were found by a scripted keyboard pass during the UI rebuild
  * — the apply sheet let focus escape to the page behind it — and are pinned so they stay fixed.
  */
 test.skip(!canSeed, 'needs SUPABASE_SERVICE_ROLE_KEY to create accounts');
