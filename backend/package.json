@@ -1,0 +1,47 @@
+{
+  "name": "@techselect/backend",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TechSelect server logic: Drizzle schema and migrations, data services, validation schemas, matching, email and CLI scripts.",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run src/seeds src/eval src/schemas src/security src/db/migrations.test.ts",
+    "test:db": "vitest run src/db/rls.test.ts src/db/deletion.test.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx --env-file-if-exists=../.env src/db/seed.ts",
+    "db:erd": "tsx src/db/generate-erd.ts",
+    "db:status": "tsx --env-file-if-exists=../.env src/db/migrate-status.ts",
+    "eval": "tsx --env-file-if-exists=../.env src/eval/eval-cli.mts",
+    "embed:backfill": "tsx --env-file-if-exists=../.env src/matching/backfill.mts",
+    "match:warm": "tsx --env-file-if-exists=../.env src/matching/warm-cli.mts",
+    "bench:match": "tsx --env-file-if-exists=../.env src/eval/latency.mts"
+  },
+  "dependencies": {
+    "@google/genai": "^2.24.0",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.116.0",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9",
+    "resend": "^6.28.1",
+    "unpdf": "^1.8.1",
+    "zod": "^4.6.5"
+  },
+  "peerDependencies": {
+    "next": "^16.3.5",
+    "react": "^19.2.8",
+    "@sentry/nextjs": "^11.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.14",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.1"
+  }
+}

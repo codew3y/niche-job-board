@@ -1,1 +1,4 @@
-npx lint-staged
+# --max-arg-length: Windows caps a command line at 8191 characters, and lint-staged sizes its
+# batches to that cap before wrapping them in the command, so a commit touching hundreds of files
+# never starts. Smaller batches leave room on every platform.
+npx lint-staged --max-arg-length 4000

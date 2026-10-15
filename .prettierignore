@@ -3,8 +3,8 @@ node_modules
 package-lock.json
 
 # Generated — regenerate rather than reformat.
-lib/db/migrations
-docs/schema.md
+backend/src/db/migrations
+backend/.generated
 
 # Prose is written, not formatted. Prettier reflows emphasis and wrapping, which produces
 # churn in every doc diff and buries the actual change; doc diffs need to stay readable.

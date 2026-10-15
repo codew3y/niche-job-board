@@ -1,120 +1,101 @@
-# TechSelect
+# TechSelect — Job Board for Software, Web and Automation Work
 
-A job board for **software, web and automation work**. Anyone can list — show a portfolio if you have one — and clients decide who to hire.
-Freelancers publish evidence of real work — an external portfolio, a GitHub, or in-app project
-write-ups — and matching is semantic in both directions rather than keyword-driven.
+A job board where freelance developers show the work they have shipped and clients find the
+right person for a brief. Matching is semantic in both directions: each match comes with a
+one-sentence reason, and clients see an order and a reason, never a score on a person. Live at
+[techselect.vercel.app](https://techselect.vercel.app).
 
-> Status: **live.** Auth and onboarding, profiles and portfolios, job posting and applications,
-> messaging, and semantic matching in both directions.
+**This is not open-source software.** The source is visible for review; no licence is granted to
+use, copy, modify or distribute it. All rights reserved.
 
-## Screenshots
+## Tech stack
 
-Capture current screenshots from the real app against seeded data with
-`CAPTURE_SCREENSHOTS=1 npx playwright test e2e/screenshots.spec.ts`. They are written to
-`test-results/screenshots/`, which is not committed, so the repository never carries images of
-a UI that has since changed.
+- Next.js 16 (App Router, Turbopack) + React 19 + TypeScript (strict) + Tailwind CSS 4
+- Supabase: Postgres with Row Level Security, Auth (email, Google, GitHub), Storage, pgvector
+- Drizzle ORM + drizzle-kit migrations; Zod validation shared by forms and server actions
+- Matching: Google Gemini embeddings and re-ranking, precomputed into a cache by a scheduled job
+- Email: Resend; error tracking: Sentry; hosting: Vercel; CI and scheduled jobs: GitHub Actions
+- Tests: Vitest (unit and database) and Playwright (end-to-end and accessibility, axe)
 
-## Stack
+## Repository layout
 
-Next.js 16 (App Router) · TypeScript strict · Tailwind v4 · Supabase (Postgres, Auth, Storage,
-pgvector) · Drizzle ORM · Zod · Vitest. See [ADR-001](./docs/decisions/ADR-001-stack.md).
+npm-workspaces monorepo. Run every command from the repo root; the root `.env` is shared by both
+workspaces (the app, drizzle-kit, Vitest and Playwright all read it from the root).
 
-## Running it locally
+```
+backend/                 @techselect/backend — server logic, no UI
+  src/db/                Drizzle schema, migrations, seed, RLS and database tests
+  src/services/          data access for jobs, profiles, applications, messaging…
+  src/matching/          embeddings, retrieval, re-ranking, cache, AI budget
+  src/schemas/           Zod validation
+  src/supabase/          server clients, session, route policy
+  src/email/ src/import/ email, resume import
+  src/eval/ src/seeds/   match evaluation set, skill taxonomy
+frontend/                @techselect/frontend — the Next.js app
+  app/                   pages and route handlers (/api/health, /api/match/warm, auth callbacks)
+  components/            UI
+  lib/actions/           server actions (every mutation the UI performs)
+  public/  e2e/          static assets, Playwright tests
+supabase/                Supabase CLI config for the local stack
+docs/                    API, operations, privacy, user guide
+```
 
-**Prerequisites:** Node 20+, Docker (for the local Supabase stack), and the
-[Supabase CLI](https://supabase.com/docs/guides/cli).
+The frontend imports server code as `@techselect/backend/<module>`, resolved straight from
+`backend/src` (no build step). Server actions and route handlers stay in `frontend/` because
+Next.js serves them.
+
+## Quickstart
+
+Needs Node 22+, Docker and the [Supabase CLI](https://supabase.com/docs/guides/cli).
 
 ```bash
+# 1. Install the workspaces
 npm install
-cp .env.example .env          # local defaults already work
 
-npm run db:start              # boots Postgres + Auth + API in Docker
-npm run db:migrate            # applies 19 migrations
-npm run db:seed               # 126 skills, 30 profiles, 15 jobs
+# 2. Env + local database (Postgres, Auth and Storage in Docker)
+cp .env.example .env
+npm run db:start
+npm run db:migrate
+npm run db:seed            # skills taxonomy plus sample profiles and jobs
 
-npm run dev                   # http://localhost:3000
+# 3. Dev server
+npm run dev                # http://localhost:3000
+
+# 4. Verify
+npm run typecheck && npm run lint && npm test
 ```
 
-The seeded credentials in `.env.example` are the standard local Supabase dev keys — identical
-on every install and useless against a hosted project.
+The local Supabase stack prints its anon and service-role keys on `npm run db:start`; put them
+in `.env`. Every other integration is optional: without it, the feature it powers degrades to an
+honest empty state instead of breaking. See `.env.example`.
 
-### Environment variables
+## Scripts
 
-`.env` is a commented checklist of all of these. Nothing below is needed to run the app
-locally: without them the features they power degrade to an honest empty state rather than
-breaking, which is deliberate and is why `/api/health` reports what is configured.
+| Command | What |
+| --- | --- |
+| `npm run dev` / `build` / `start` | Next.js lifecycle for `frontend/` |
+| `npm run typecheck` / `lint` | `tsc --noEmit` in both workspaces / ESLint |
+| `npm test` / `npm run test:unit` / `npm run test:db` | all unit tests / no database needed / RLS and deletion against a database |
+| `npm run test:e2e` | Playwright end-to-end and accessibility tests (`frontend/e2e`) |
+| `npm run db:start` / `db:stop` | local Supabase stack |
+| `npm run db:migrate` / `db:status` / `db:seed` | apply migrations / show pending ones and the target host / seed |
+| `npm run db:erd` | generate a local schema reference (`backend/.generated/`, not committed) |
+| `npm run embed:backfill` / `match:warm` | backfill embeddings / precompute match rankings |
+| `npm run eval` | score the matcher against the hand-labelled evaluation set |
 
-| Variable | Needed for | Absent means |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | everything | the app will not boot |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | everything | the app will not boot |
-| `SUPABASE_SERVICE_ROLE_KEY` | email, matching, cache warming | no email is sent; no ranking is written |
-| `DATABASE_URL` | migrations, seeding, tests, CLI scripts | **never set this in Vercel** — no runtime code reads it |
-| `GEMINI_API_KEY` | embeddings and re-ranking | match feeds show "no strong matches yet" |
-| `RESEND_API_KEY` | transactional email | mail is skipped and logged |
-| `EMAIL_FROM` | a verified sending domain | the shared sender, which only reaches the Resend account owner |
-| `MATCH_WARM_SECRET` | the manual warm endpoint | that one route returns 503 |
-| `SUPABASE_AUTH_EXTERNAL_*` | Google/GitHub sign-in **locally** | OAuth buttons fail locally; hosted reads its own dashboard |
+## Project docs (`docs/`)
 
-Check any deploy with `/api/health`: it reports which of these are set, whether the
-service-role key actually *works* — those are different questions, and the gap between them
-once hid a fortnight of silently failed email — and today's AI spend against its cap.
+- `API.md` — route handlers and server actions
+- `OPERATIONS.md` — runbook: environments, deploy, migrations, jobs, monitoring, rollback
+- `USER-GUIDE.md` — how developers and clients use the board
+- `PRIVACY.md` — data collected, processors, retention, rights
 
-### Background jobs
+## Deploy notes
 
-Two GitHub Actions, both free-tier friendly:
-
-- **`keep-alive`** every 3 days, so the Supabase project never pauses. It hits `/api/health`,
-  which runs a real query — pinging the homepage would not count.
-- **`warm-matches`** hourly, which backfills missing embeddings and precomputes rankings.
-  It runs in Actions rather than on Vercel because a single re-rank was measured at 238s and
-  a serverless function is capped at 300s.
-
-### Tests
-
-```bash
-npm test                      # everything (477 unit + database)
-npm run test:unit             # no database needed
-npm run test:db               # RLS + deletion, needs a running database
-```
-
-The database suites **skip** rather than fail when no database is reachable, and both print
-the host they connected to — a suite that does not say what it measured cannot prove which
-database it measured.
-
-## How the pieces fit
-
-| Path                       | What lives there                                                                                            |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `lib/db/schema/`           | Drizzle schema — 20 tables, 42 RLS policies. **The source of truth**; `docs/schema.md` is generated from it |
-| `lib/db/migrations/`       | Generated SQL plus hand-written triggers and grants                                                         |
-| `lib/schemas/`             | Zod schemas, shared by client forms and server actions                                                      |
-| `lib/actions/`             | Server actions. Order is always: auth → authz → validate → act → revalidate                                 |
-| `lib/seeds/skills.seed.ts` | The 126-skill taxonomy, with sources per row                                                                |
-| `lib/eval/`                | Hand-labelled match evaluation set, plus the scoring CLI (`npm run eval`)                                   |
-| `lib/matching/`            | The matching pipeline: text, embeddings, retrieval, re-ranking, cache, budget                               |
-
-## Things worth knowing before changing anything
-
-- **RLS is the authorization boundary**, not the middleware. `proxy.ts` is a convenience
-  layer; it can be bypassed and never sees rows. Every server action re-checks ownership.
-- **There is no publish gate.** There used to be — a CHECK constraint requiring a bio plus
-  either an external site or ≥2 projects — and [ADR-008](./docs/decisions/ADR-008-no-publish-gate.md)
-  removed it. Anyone may publish with nothing but a headline. Thin profiles rank badly rather
-  than being refused a hearing, and `lib/services/profile-editing.test.ts` asserts the
-  constraint is *absent* so it cannot return by accident.
-- **Matching never computes in a request.** Rankings are precomputed into `match_cache` by an
-  hourly job, because re-ranking takes 30–240s on Gemini's free tier. A page that has no
-  cached ranking says so; it does not wait.
-- **`npm run db:erd`** regenerates `docs/schema.md`. Never edit it by hand.
-- **Regenerating migration `0000` drops its hand-written extension preamble.** A test fails if
-  that happens; put it back.
-
-## Documentation
-
-[architecture](./docs/architecture.md) ·
-[matching](./docs/matching.md) · [deploying](./docs/deploy.md) ·
-[schema](./docs/schema.md) · [API surface](./docs/api.md) ·
-[components](./docs/components.md) · [taxonomy](./docs/taxonomy.md) ·
-[eval set](./docs/eval-set.md) ·
-[ADRs](./docs/decisions/) · [contributing](./CONTRIBUTING.md)
+- Push to `main` → GitHub Actions CI (typecheck, lint, unit, build, end-to-end) → Vercel deploys.
+- The Vercel project's **Root Directory** is `frontend` (Settings → Build and Deployment), with
+  "Include files outside the root directory" enabled; Vercel installs the workspaces from the
+  repo root.
+- Migrations are **not** automated: apply a migration to the hosted database first, then merge
+  the code that needs it. The steps are in `docs/OPERATIONS.md`.
+- Secrets live in Vercel and in GitHub Actions secrets, never in the repository.

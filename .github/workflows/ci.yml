@@ -73,7 +73,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
           # A placeholder is enough here: the unit suites never call Supabase over HTTP, and
-          # vitest.config.ts supplies its own fallbacks. It only has to satisfy lib/env.ts,
+          # vitest.config.ts supplies its own fallbacks. It only has to satisfy backend/src/env.ts,
           # which requires a URL and 20+ characters.
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key-value
 
@@ -128,13 +128,14 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E
-        run: npx playwright test
+        # Playwright lives in the frontend workspace; the root script runs it there.
+        run: npm run test:e2e
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: playwright-report
           path: |
-            playwright-report/
-            test-results/
+            frontend/playwright-report/
+            frontend/test-results/
           retention-days: 7

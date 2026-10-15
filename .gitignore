@@ -60,7 +60,22 @@ AGENTS.md
 CLAUDE.md
 
 # Playwright
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# generated locally (npm run db:erd); the schema files and migrations are the source of truth
+backend/.generated/
+
+# internal notes, runbooks and session exports: local only, never commit
+docs/internal/
+
+# logs and caches
+*.log
+.eslintcache
+
+# keys and certificates (beyond *.pem above)
+*.key
+*.p12
+*.pfx

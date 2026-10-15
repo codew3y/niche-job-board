@@ -3,15 +3,21 @@ import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
 
 const eslintConfig = defineConfig([
+  // The Next.js app is a workspace, not the repo root.
+  { settings: { next: { rootDir: 'frontend' } } },
   ...nextVitals,
   ...nextTs,
   globalIgnores([
-    '.next/**',
-    'out/**',
-    'build/**',
-    'next-env.d.ts',
+    // Build output and generated files, wherever a workspace puts them.
+    '**/.next/**',
+    '**/out/**',
+    '**/build/**',
+    '**/next-env.d.ts',
+    '**/playwright-report/**',
+    '**/test-results/**',
     // Generated SQL and snapshots — not ours to lint.
-    'lib/db/migrations/**',
+    'backend/src/db/migrations/**',
+    'backend/.generated/**',
   ]),
   {
     rules: {

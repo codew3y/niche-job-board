@@ -427,7 +427,7 @@ enabled = true
 # and column/key alignment. Set to "null" to emit raw, unformatted SQL.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":180,\"commaStyle\":\"trailing\"}"
 
-# ── OAuth providers (ADR-007 D1) ──────────────────────────────────────────────
+# ── OAuth providers ──────────────────────────────────────────────
 # Secrets come from the environment, never from this file — config.toml IS committed.
 # Set them in .env (gitignored):
 #   SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID / _SECRET

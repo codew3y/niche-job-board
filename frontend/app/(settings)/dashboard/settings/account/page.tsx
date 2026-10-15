@@ -1,0 +1,118 @@
+import { ArrowLeft, DownloadSimple } from '@phosphor-icons/react/ssr';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+
+import { DeleteAccount } from '@/components/settings/delete-account';
+import { DisplayNameForm } from '@/components/settings/display-name-form';
+import { buttonStyles } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { createClient } from '@techselect/backend/supabase/server';
+
+export const metadata: Metadata = { title: 'Account' };
+
+/**
+ * Where the deletion promise in /privacy is actually kept.
+ *
+ * It said "delete your account from settings at any time" while no such control existed
+ * anywhere in the product. This page is that control.
+ */
+export default async function AccountPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) redirect('/login');
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('display_name')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  return (
+    <div className="max-w-3xl space-y-8">
+      <nav aria-label="Breadcrumb" className="text-sm">
+        <Link
+          href="/dashboard/settings"
+          className="-ml-2 inline-flex min-h-10 items-center gap-1.5 rounded-md px-2 font-medium text-text-muted hover:bg-surface-sunken hover:text-text"
+        >
+          <ArrowLeft aria-hidden="true" size={16} /> Settings
+        </Link>
+      </nav>
+
+      <PageHeader
+        className="mb-0"
+        title="Account"
+        subtitle={
+          <>
+            Signed in as <span className="font-semibold text-text">{user.email}</span>.
+          </>
+        }
+      />
+
+      <section
+        aria-labelledby="name-heading"
+        className="space-y-4 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6"
+      >
+        <h2 id="name-heading" className="text-lg font-semibold tracking-tight">
+          Name
+        </h2>
+        <DisplayNameForm current={profile?.display_name ?? ''} />
+      </section>
+
+      <section
+        aria-labelledby="export-heading"
+        className="space-y-4 rounded-lg border border-border-base bg-surface-raised p-5 sm:p-6"
+      >
+        <div>
+          <h2 id="export-heading" className="text-lg font-semibold tracking-tight">
+            Download your data
+          </h2>
+          <p className="mt-2 text-sm text-text-muted text-pretty">
+            One file with everything that is yours: your account, profile, projects, experience,
+            certifications, jobs you posted, applications you made, conversations you are part of,
+            saved lists, blocks and reports. It is in JSON, which any text editor can open.
+          </p>
+        </div>
+        {/* A plain link with `download`: a GET that only reads, so it works with JavaScript off. */}
+        <a
+          href="/dashboard/settings/account/export"
+          download
+          className={buttonStyles({ variant: 'secondary' })}
+        >
+          <DownloadSimple aria-hidden="true" />
+          Download my data
+        </a>
+      </section>
+
+      <section
+        aria-labelledby="delete-heading"
+        className="space-y-5 rounded-lg border border-danger/30 bg-surface-raised p-5 sm:p-6"
+      >
+        <div>
+          <h2 id="delete-heading" className="text-lg font-semibold tracking-tight text-danger">
+            Delete your account
+          </h2>
+          {/* The same words as /privacy, on purpose. A deletion screen that describes the
+              behaviour differently from the policy is how the two quietly diverge. */}
+          <p className="mt-2 text-sm text-text-muted text-pretty">
+            Your profile, portfolio, uploads, job posts, applications, saved lists and blocks are
+            removed. This cannot be undone.
+          </p>
+          <p className="mt-2 text-sm text-text-muted text-pretty">
+            Conversations are the deliberate exception. A thread has two owners, so it survives with
+            your side tombstoned: your name is detached and your messages are replaced with a note
+            saying the account was deleted. The other person keeps their own words and cannot
+            recover yours. This is set out in the{' '}
+            <Link href="/privacy" className="prose-link font-semibold">
+              privacy policy
+            </Link>
+            .
+          </p>
+        </div>
+
+        <DeleteAccount email={user.email} />
+      </section>
+    </div>
+  );
+}
