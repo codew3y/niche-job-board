@@ -31,7 +31,11 @@ import { PUBLIC_ROUTES } from '@techselect/backend/supabase/route-policy';
  * /auth/* is excluded because those URLs need a one-time token and answer with a redirect by
  * design; asserting they do not redirect would be asserting they are broken.
  */
-const PUBLIC = PUBLIC_ROUTES.filter((p) => !p.startsWith('/auth') && p !== '/api/health');
+// /api/health and /api/match/warm have their own tests below; the warm route is POST-only, so a
+// GET answers 405 by design.
+const PUBLIC = PUBLIC_ROUTES.filter(
+  (p) => !p.startsWith('/auth') && p !== '/api/health' && p !== '/api/match/warm',
+);
 
 test.describe('signed out', () => {
   for (const path of PUBLIC) {
