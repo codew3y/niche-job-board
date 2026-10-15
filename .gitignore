@@ -70,6 +70,8 @@ backend/.generated/
 
 # internal notes, runbooks and session exports: local only, never commit
 docs/internal/
+docs/API.md
+docs/OPERATIONS.md
 
 # logs and caches
 *.log

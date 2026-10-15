@@ -85,8 +85,6 @@ honest empty state instead of breaking. See `.env.example`.
 
 ## Project docs (`docs/`)
 
-- `API.md` — route handlers and server actions
-- `OPERATIONS.md` — runbook: environments, deploy, migrations, jobs, monitoring, rollback
 - `USER-GUIDE.md` — how developers and clients use the board
 - `PRIVACY.md` — data collected, processors, retention, rights
 
@@ -97,5 +95,5 @@ honest empty state instead of breaking. See `.env.example`.
   "Include files outside the root directory" enabled; Vercel installs the workspaces from the
   repo root.
 - Migrations are **not** automated: apply a migration to the hosted database first, then merge
-  the code that needs it. The steps are in `docs/OPERATIONS.md`.
+  the code that needs it.
 - Secrets live in Vercel and in GitHub Actions secrets, never in the repository.
