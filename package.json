@@ -35,7 +35,7 @@
     "bench:match": "npm run bench:match -w @techselect/backend",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "eslint": "^9.39.5",
