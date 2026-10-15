@@ -1,5 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd .. && npm ci --no-audit --no-fund",
+  "installCommand": "cd .. && npm ci --include=dev --no-audit --no-fund",
   "regions": ["bom1"]
 }
