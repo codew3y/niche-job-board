@@ -67,13 +67,20 @@ test('1 — the deployed site is up and talking to the hosted database', async (
   const body = await page.evaluate(() => JSON.parse(document.body.innerText));
 
   expect(body.database).toBe('reachable');
-  if (REMOTE) {
+  // Anonymous callers get status and database only; the configuration flags need the
+  // operator secret.
+  expect(body.config, 'health leaks configuration to anonymous callers').toBeUndefined();
+  if (REMOTE && process.env.MATCH_WARM_SECRET) {
+    const detailed = await page.request.get('/api/health', {
+      headers: { authorization: `Bearer ${process.env.MATCH_WARM_SECRET}` },
+    });
+    const full = await detailed.json();
     // The production run also asserts the environment is complete, because a deploy missing
     // the service-role key passes every functional test here and sends no email at all.
-    expect(body.config.serviceRoleKey, 'SUPABASE_SERVICE_ROLE_KEY missing on the deploy').toBe(
+    expect(full.config.serviceRoleKey, 'SUPABASE_SERVICE_ROLE_KEY missing on the deploy').toBe(
       true,
     );
-    expect(body.config.resendApiKey, 'RESEND_API_KEY missing on the deploy').toBe(true);
+    expect(full.config.resendApiKey, 'RESEND_API_KEY missing on the deploy').toBe(true);
   }
 });
 

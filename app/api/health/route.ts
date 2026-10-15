@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { serverEnv } from '@/lib/env';
 import { usageToday } from '@/lib/matching/budget';
+import { hasBearer } from '@/lib/security/bearer';
 import { createClient } from '@/lib/supabase/server';
 
 /**
@@ -22,13 +23,22 @@ import { createClient } from '@/lib/supabase/server';
  * diagnostic story, because a deploy can be missing both and look perfectly healthy.
  *
  * Booleans only. Never a value, never a prefix, never a length — the question being answered
- * is "is it set", and anything more is a credential leak on a public endpoint.
+ * is "is it set", and anything more is a credential leak.
+ *
+ * TWO AUDIENCES, TWO ANSWERS. The endpoint is public (the keep-alive has no session), so an
+ * anonymous caller gets only what an uptime monitor needs: `status` and `database`. Which
+ * integrations are configured, whether the service-role key works, today's AI spend and the
+ * step timings are a map of the deployment for anyone probing it, so they are returned only
+ * with `Authorization: Bearer <MATCH_WARM_SECRET>` (the operator secret that already guards
+ * /api/match/warm). The database is still touched on every call, so the keep-alive still
+ * resets Supabase's pause timer.
  */
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(request: Request) {
   const startedAt = Date.now();
+  let detailed = false;
 
   /**
    * Read before the database call, so configuration is reported even when Postgres is down —
@@ -37,6 +47,7 @@ export async function GET() {
   let config: Record<string, boolean> = {};
   try {
     const env = serverEnv();
+    detailed = hasBearer(request, env.MATCH_WARM_SECRET);
     config = {
       // Required for notification email and for claiming the welcome send. Without it, all
       // three emails silently never send.
@@ -92,9 +103,10 @@ export async function GET() {
      * anon client just read separates them: if both service-role calls are slow it is the
      * key, if only ai_usage is slow it is the table.
      */
-    const ai = config.serviceRoleKey
-      ? await timed('aiUsage', () => usageToday().catch(() => null))
-      : null;
+    const ai =
+      detailed && config.serviceRoleKey
+        ? await timed('aiUsage', () => usageToday().catch(() => null))
+        : null;
 
     /**
      * Whether the service-role client actually WORKS, as a boolean and nothing more.
@@ -109,7 +121,7 @@ export async function GET() {
      * response carries a boolean.
      */
     let serviceRoleWorks = false;
-    if (config.serviceRoleKey) {
+    if (detailed && config.serviceRoleKey) {
       await timed('serviceRoleCheck', async () => {
         try {
           const { createServiceClient } = await import('@/lib/supabase/server');
@@ -122,18 +134,21 @@ export async function GET() {
       });
     }
 
+    const at = new Date().toISOString();
     return NextResponse.json(
-      {
-        status: 'ok',
-        database: 'reachable',
-        config,
-        ai,
-        serviceRoleWorks,
-        timings,
-        skills: count ?? null,
-        latencyMs: Date.now() - startedAt,
-        at: new Date().toISOString(),
-      },
+      detailed
+        ? {
+            status: 'ok',
+            database: 'reachable',
+            config,
+            ai,
+            serviceRoleWorks,
+            timings,
+            skills: count ?? null,
+            latencyMs: Date.now() - startedAt,
+            at,
+          }
+        : { status: 'ok', database: 'reachable', at },
       { headers: { 'cache-control': 'no-store' } },
     );
   } catch (_e) {
@@ -145,10 +160,9 @@ export async function GET() {
       {
         status: 'error',
         database: 'unreachable',
-        config,
+        ...(detailed ? { config, latencyMs: Date.now() - startedAt } : {}),
         // Never echo the driver error — it can carry connection details.
         message: 'Database did not respond.',
-        latencyMs: Date.now() - startedAt,
         at: new Date().toISOString(),
       },
       { status: 503, headers: { 'cache-control': 'no-store' } },

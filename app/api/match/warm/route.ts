@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { serverEnv } from '@/lib/env';
 import { sweepExpired } from '@/lib/matching/cache';
 import { warmMatches } from '@/lib/matching/warm';
+import { hasBearer } from '@/lib/security/bearer';
 
 /**
  * Scheduled cache warming.
@@ -38,13 +39,6 @@ export const maxDuration = 300;
  */
 const BUDGET_MS = 150_000;
 
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
 export async function POST(request: NextRequest) {
   const { MATCH_WARM_SECRET } = serverEnv();
 
@@ -57,8 +51,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const supplied = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
-  if (!timingSafeEqual(supplied, MATCH_WARM_SECRET)) {
+  if (!hasBearer(request, MATCH_WARM_SECRET)) {
     return NextResponse.json({ status: 'forbidden' }, { status: 403 });
   }
 
