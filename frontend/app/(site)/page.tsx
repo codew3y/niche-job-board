@@ -10,16 +10,15 @@ import {
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { Suspense, type CSSProperties } from 'react';
 
 import { BoardStats } from '@/components/site/board-stats';
 import { CategoryGrid } from '@/components/site/category-grid';
+import { DeletedNotice } from '@/components/site/deleted-notice';
 import { HowItWorksSteps } from '@/components/site/how-it-works-steps';
 import { MatchPreview } from '@/components/site/match-preview';
 import { CONTAINER, PageCta, SECTION } from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
-import { getSessionUser } from '@techselect/backend/supabase/session';
 import { cn } from '@/lib/ui/cn';
 import heroBackground from '@/public/images/home/hero-background.jpg';
 
@@ -53,7 +52,8 @@ export const metadata: Metadata = {
  * place of the photograph used until October 2026.
  *
  * Signed-in visitors never see this page: the proxy sends them to their dashboard
- * (backend/src/supabase/route-policy.ts), and this re-checks in case the proxy was bypassed.
+ * (backend/src/supabase/route-policy.ts). There is deliberately no second check here: one would
+ * read the session cookie and make the page render per request for everyone.
  */
 const PRINCIPLES = [
   {
@@ -73,34 +73,19 @@ const PRINCIPLES = [
   },
 ] as const;
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ deleted?: string }>;
-}) {
-  if (await getSessionUser()) redirect('/dashboard');
+/**
+ * PRE-BUILT, rebuilt at most every 5 minutes for the live board counts. Nothing here reads the
+ * request (no cookies, no query string on the server), so the page is served from the cache and
+ * prefetched in full, and a header click lands immediately.
+ */
+export const revalidate = 300;
 
-  // Where a deleted account lands. Signing someone out with no acknowledgement reads as a
-  // failure, not a completion.
-  const deleted = (await searchParams).deleted === '1';
-
+export default function Home() {
   return (
     <>
-      {deleted && (
-        <div className={cn(CONTAINER, 'pt-6')}>
-          <p
-            role="status"
-            className="flex items-start gap-3 rounded-lg bg-success-subtle px-5 py-4 text-sm text-text-muted"
-          >
-            <CheckCircle aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-success" />
-            <span>
-              <strong className="font-semibold text-text">Your account has been deleted.</strong>{' '}
-              Anything you posted is gone. Conversations you were part of stay, with your side
-              removed, as the privacy policy sets out.
-            </span>
-          </p>
-        </div>
-      )}
+      <Suspense fallback={null}>
+        <DeletedNotice />
+      </Suspense>
 
       {/* ───────────── Hero ─────────────
           A full-bleed photograph, dark in both themes: the section carries data-theme="dark", so

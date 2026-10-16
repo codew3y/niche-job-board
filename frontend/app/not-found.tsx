@@ -1,12 +1,9 @@
 import { Compass } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
-import { buttonStyles } from '@/components/ui/button';
-import { logoHref } from '@techselect/backend/roles';
-import { getSessionUser } from '@techselect/backend/supabase/session';
+import { NotFoundHomeLink } from '@/components/site/not-found-home-link';
 
 export const metadata: Metadata = { title: 'Not found' };
 
@@ -14,10 +11,11 @@ export const metadata: Metadata = { title: 'Not found' };
  * The 404. It is deliberately the same answer for "does not exist" and "exists
  * but is not yours": a draft job or an unpublished profile 404s rather than 403s, because a 403
  * confirms the thing exists. So the copy never claims the page was deleted.
+ *
+ * Reads nothing from the request. This boundary is part of every route, so a session read here
+ * made the whole site dynamic; the way home is decided in the browser instead.
  */
-export default async function NotFound() {
-  const home = logoHref(Boolean(await getSessionUser()));
-
+export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col">
       <SiteHeader />
@@ -38,9 +36,7 @@ export default async function NotFound() {
           may have been unpublished or closed.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <Link href={home} className={buttonStyles({ size: 'lg' })}>
-            {home === '/' ? 'Go to the home page' : 'Back to your dashboard'}
-          </Link>
+          <NotFoundHomeLink />
         </div>
       </main>
       <SiteFooter />

@@ -134,6 +134,18 @@ const appHome = (session: Session) =>
       : '/select-role';
 
 /** Where this request should go, or null to let it through. */
+/**
+ * Public content pages whose routing never depends on the session: decideRoute() returns null
+ * for them whoever is asking. The proxy skips the Supabase auth check on these, so a signed-in
+ * visitor clicking through the marketing pages is not held up by a network round trip that cannot
+ * change the answer. (/, /login and /signup DO depend on it: they redirect signed-in visitors.)
+ */
+const SESSION_INDEPENDENT = ['/for-freelancers', '/for-clients', '/how-it-works', '/about'];
+
+export function needsSession(path: string): boolean {
+  return !SESSION_INDEPENDENT.includes(path);
+}
+
 export function decideRoute(path: string, session: Session): string | null {
   // Public paths are public for EVERYONE, signed in or not. Checking this only for
   // signed-out visitors meant a user mid-onboarding was redirected away from public pages and

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { decideRoute, type Session } from './route-policy';
+import { decideRoute, needsSession, type Session } from './route-policy';
 
 const anon: Session = { signedIn: false, hasChosen: false, hasRole: false, activeRole: null };
 const chosen: Session = { signedIn: true, hasChosen: true, hasRole: false, activeRole: 'talent' };
@@ -221,4 +221,25 @@ describe('the inbox is private', () => {
     expect(decideRoute('/dashboard/messages', chosen)).toBe('/onboarding/talent/basics');
     expect(decideRoute('/dashboard/messages', chosenClient)).toBe('/onboarding/client/company');
   });
+});
+
+describe('the proxy skips the auth check only where the session cannot matter', () => {
+  const everyone: Session[] = [
+    { signedIn: false, hasChosen: false, hasRole: false, activeRole: null },
+    { signedIn: true, hasChosen: false, hasRole: false, activeRole: null },
+    { signedIn: true, hasChosen: true, hasRole: false, activeRole: 'talent' },
+    { signedIn: true, hasChosen: true, hasRole: true, activeRole: 'talent' },
+    { signedIn: true, hasChosen: true, hasRole: true, activeRole: 'client' },
+  ];
+  const skipped = ['/for-freelancers', '/for-clients', '/how-it-works', '/about'];
+
+  it.each(skipped)('%s never redirects anyone, so skipping is safe', (path) => {
+    expect(needsSession(path)).toBe(false);
+    for (const session of everyone) expect(decideRoute(path, session)).toBeNull();
+  });
+
+  it.each(['/', '/login', '/signup', '/dashboard', '/browse', '/jobs/some-job', '/privacy'])(
+    '%s still gets the session check',
+    (path) => expect(needsSession(path)).toBe(true),
+  );
 });

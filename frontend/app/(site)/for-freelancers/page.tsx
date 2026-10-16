@@ -25,6 +25,9 @@ import stepApply from '@/public/images/steps/freelancers-03-apply.jpg';
 import stepBriefs from '@/public/images/steps/freelancers-02-briefs.jpg';
 import stepDescribe from '@/public/images/steps/freelancers-01-describe.jpg';
 
+/** Pre-built and cached; rebuilt at most every 5 minutes for the live board panel. */
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: 'Freelancers',
   description:

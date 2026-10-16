@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { ENGAGEMENT_LABEL, formatRange } from '@/components/shared/money';
 import { Avatar } from '@/components/ui/avatar';
 import { listJobs, type JobListItem } from '@techselect/backend/services/jobs';
+import { createPublicClient } from '@techselect/backend/supabase/server';
 import {
   AVAILABILITY_LABEL,
   listTalent,
@@ -195,7 +196,11 @@ function DeveloperRow({ person, i }: { person: TalentListItem; i: number }) {
 
 /** Open briefs, newest first: the Freelancers intro. */
 export async function BriefsShowcase() {
-  const { jobs } = await listJobs({ sort: 'recent', limit: SHOWN, skills: [] });
+  // Anonymous and cookie-free (the page is pre-built and cached); an unreachable database shows
+  // the empty state rather than failing the page.
+  const jobs = await listJobs({ sort: 'recent', limit: SHOWN, skills: [] }, createPublicClient())
+    .then((r) => r.jobs)
+    .catch(() => [] as JobListItem[]);
   return (
     <Panel title="Open briefs" browseHref="/browse?type=jobs" browseLabel="All jobs">
       {jobs.length ? (
@@ -217,7 +222,11 @@ export async function BriefsShowcase() {
 
 /** Listed developers, most recently updated first: the Clients intro. */
 export async function DevelopersShowcase() {
-  const { talent } = await listTalent({ limit: SHOWN, skills: [] });
+  // Anonymous and cookie-free (the page is pre-built and cached); an unreachable database shows
+  // the empty state rather than failing the page.
+  const talent = await listTalent({ limit: SHOWN, skills: [] }, createPublicClient())
+    .then((r) => r.talent)
+    .catch(() => [] as Awaited<ReturnType<typeof listTalent>>['talent']);
   return (
     <Panel
       title="Developers on the board"

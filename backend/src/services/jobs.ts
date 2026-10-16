@@ -34,8 +34,15 @@ export type JobListItem = {
   job_skills: { is_required: boolean; skills: { name: string; slug: string } | null }[];
 };
 
-export async function listJobs(params: JobSearchParams) {
-  const supabase = await createClient();
+/**
+ * `client` lets the public pages pass the cookie-free anonymous client, so they can be
+ * pre-built; everywhere else it defaults to the signed-in user's own client.
+ */
+export async function listJobs(
+  params: JobSearchParams,
+  client?: Awaited<ReturnType<typeof createClient>>,
+) {
+  const supabase = client ?? (await createClient());
   const limit = Math.min(params.limit ?? 20, 50);
 
   let query = supabase

@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { createClient } from '../supabase/server';
+import { createPublicClient } from '../supabase/server';
 
 /**
  * The live numbers under the home headline: open briefs, listed developers, and briefs published
@@ -13,7 +13,8 @@ export async function boardStats(): Promise<{
   developers: number;
   newThisWeek: number;
 }> {
-  const supabase = await createClient();
+  // Anonymous and cookie-free, so the pages showing these counts can be pre-built and cached.
+  const supabase = createPublicClient();
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString();
 
   const [open, developers, recent] = await Promise.all([

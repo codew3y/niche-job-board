@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 import { siteUrl } from '@techselect/backend/env';
-import { createClient } from '@techselect/backend/supabase/server';
+import { createPublicClient } from '@techselect/backend/supabase/server';
 
 /**
  * Dynamic sitemap: every published profile and open job, plus the static pages.
@@ -39,7 +39,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const supabase = await createClient();
+    // Anonymous and cookie-free: the sitemap lists only public rows, and reading cookies would
+    // defeat the hourly cache above.
+    const supabase = createPublicClient();
 
     const [{ data: jobs }, { data: talent }] = await Promise.all([
       supabase

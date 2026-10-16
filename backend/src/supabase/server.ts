@@ -83,3 +83,33 @@ export function createServiceClient() {
   cachedServiceClient ??= buildServiceClient();
   return cachedServiceClient;
 }
+
+/**
+ * A cookie-free ANONYMOUS client, for the public pages' live data (board counts, the newest
+ * briefs and developers).
+ *
+ * Why not createClient(): that one reads the request's cookies, and reading cookies makes the
+ * whole page render per request. These reads are the same for every visitor (RLS as the anon
+ * role: published profiles and open jobs only), so the public pages can be pre-built and served
+ * from the cache, which is what makes the header links answer immediately.
+ *
+ * Safe to share for the same reason as the service client: no session, no cookies,
+ * `persistSession: false`, nothing belonging to one request. Never use it for anything a signed-in
+ * user's rows should shape; it sees only what an anonymous visitor may see.
+ */
+let cachedPublicClient: ReturnType<typeof buildPublicClient> | null = null;
+
+function buildPublicClient() {
+  return createRawClient(
+    clientEnv.NEXT_PUBLIC_SUPABASE_URL,
+    clientEnv.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+    },
+  );
+}
+
+export function createPublicClient() {
+  cachedPublicClient ??= buildPublicClient();
+  return cachedPublicClient;
+}

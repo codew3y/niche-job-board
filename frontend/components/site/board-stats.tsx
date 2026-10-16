@@ -8,7 +8,10 @@ import { boardStats } from '@techselect/backend/services/board-stats';
  * strip renders nothing at all rather than advertising an empty board.
  */
 export async function BoardStats() {
-  const { openBriefs, developers, newThisWeek } = await boardStats();
+  // An unreachable database shows nothing rather than failing a pre-built page.
+  const counts = await boardStats().catch(() => null);
+  if (!counts) return null;
+  const { openBriefs, developers, newThisWeek } = counts;
   const stats = [
     {
       n: openBriefs,

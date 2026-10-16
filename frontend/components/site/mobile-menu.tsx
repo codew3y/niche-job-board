@@ -8,6 +8,7 @@ import { useEffect, useId, useState } from 'react';
 import { SITE_NAV } from './nav';
 import { buttonStyles } from '@/components/ui/button';
 import { cn } from '@/lib/ui/cn';
+import { useSignedIn } from '@/lib/supabase/use-signed-in';
 
 /**
  * The header below `lg` (phones and tablets): the page links and the two auth buttons collapse behind one toggle.
@@ -17,13 +18,13 @@ import { cn } from '@/lib/ui/cn';
  * link in it is followed, and on Escape.
  */
 export function MobileMenu({
-  dashboardHref,
   current,
 }: {
-  dashboardHref: string | null;
   /** The auth page being shown, whose own button is left out. */
   current?: 'login' | 'signup';
 }) {
+  // Decided in the browser, so the pages around the header can be pre-built and cached.
+  const dashboardHref = useSignedIn() ? '/dashboard' : null;
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const pathname = usePathname();

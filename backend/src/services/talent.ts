@@ -48,8 +48,15 @@ export function projectCovers(person: Pick<TalentListItem, 'portfolio_items'>, m
     .slice(0, max);
 }
 
-export async function listTalent(params: TalentSearchParams) {
-  const supabase = await createClient();
+/**
+ * `client` lets the public pages pass the cookie-free anonymous client, so they can be
+ * pre-built; everywhere else it defaults to the signed-in user's own client.
+ */
+export async function listTalent(
+  params: TalentSearchParams,
+  client?: Awaited<ReturnType<typeof createClient>>,
+) {
+  const supabase = client ?? (await createClient());
   const limit = Math.min(params.limit ?? 20, 50);
 
   let query = supabase

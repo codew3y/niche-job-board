@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { clientEnv } from '../env';
-import { decideRoute, type Session } from './route-policy';
+import { decideRoute, needsSession, type Session } from './route-policy';
 
 /**
  * Session refresh + route protection (Phase 2 §6).
@@ -31,6 +31,9 @@ import { decideRoute, type Session } from './route-policy';
  * itself.
  */
 export async function updateSession(request: NextRequest) {
+  // Marketing pages whose routing never depends on the session: no auth round trip.
+  if (!needsSession(request.nextUrl.pathname)) return NextResponse.next({ request });
+
   let response = NextResponse.next({ request });
   /**
    * Cookies and headers from a token refresh, kept so a REDIRECT can carry them too.

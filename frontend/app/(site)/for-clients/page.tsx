@@ -25,6 +25,9 @@ import stepBrief from '@/public/images/steps/clients-01-brief.jpg';
 import stepDecide from '@/public/images/steps/clients-03-decide.jpg';
 import stepFit from '@/public/images/steps/clients-02-fit.jpg';
 
+/** Pre-built and cached; rebuilt at most every 5 minutes for the live board panel. */
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: 'Clients',
   description:
