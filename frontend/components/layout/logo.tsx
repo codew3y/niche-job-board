@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
 
 import { cn } from '@/lib/ui/cn';
+import { PageLink } from '@/components/shared/page-link';
 
 /**
  * The TechSelect logo: the shield with a lightning-bolt arrow, beside the name set as live text.
@@ -50,7 +50,7 @@ export function Logo({
   size?: 'md' | 'lg';
 }) {
   return (
-    <Link
+    <PageLink
       href={href}
       aria-label="TechSelect home"
       // The mark cannot be dragged out as an image, and the name is not selected when someone
@@ -69,6 +69,6 @@ export function Logo({
           TechSelect
         </span>
       )}
-    </Link>
+    </PageLink>
   );
 }

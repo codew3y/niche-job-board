@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { SITE_NAV } from './nav';
+import { PageLink } from '@/components/shared/page-link';
 import { cn } from '@/lib/ui/cn';
 
 /**
@@ -19,7 +19,7 @@ export function SiteNavLinks() {
         const active = pathname === href;
         return (
           <li key={href}>
-            <Link
+            <PageLink
               href={href}
               aria-current={active ? 'page' : undefined}
               className={cn(
@@ -30,7 +30,7 @@ export function SiteNavLinks() {
               )}
             >
               {label}
-            </Link>
+            </PageLink>
           </li>
         );
       })}

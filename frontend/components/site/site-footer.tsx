@@ -1,8 +1,7 @@
-import Link from 'next/link';
-
 import { SITE_NAV } from './nav';
 import { CONTAINER } from './page-parts';
 import { Logo } from '@/components/layout/logo';
+import { PageLink } from '@/components/shared/page-link';
 import { clientEnv } from '@techselect/backend/env';
 import { cn } from '@/lib/ui/cn';
 
@@ -46,9 +45,9 @@ export function SiteFooter() {
           <ul className="mt-2 grid text-sm">
             {SITE_NAV.map(({ href, label }) => (
               <li key={href}>
-                <Link href={href} className={LINK}>
+                <PageLink href={href} className={LINK}>
                   {label}
-                </Link>
+                </PageLink>
               </li>
             ))}
           </ul>
@@ -59,9 +58,9 @@ export function SiteFooter() {
           <ul className="mt-2 grid text-sm">
             {START.map(({ href, label }) => (
               <li key={href}>
-                <Link href={href} className={LINK}>
+                <PageLink href={href} className={LINK}>
                   {label}
-                </Link>
+                </PageLink>
               </li>
             ))}
           </ul>
@@ -71,14 +70,14 @@ export function SiteFooter() {
           <p className="font-mono text-xs text-text-subtle">Legal</p>
           <ul className="mt-2 grid text-sm">
             <li>
-              <Link href="/privacy" className={LINK}>
+              <PageLink href="/privacy" className={LINK}>
                 Privacy
-              </Link>
+              </PageLink>
             </li>
             <li>
-              <Link href="/terms" className={LINK}>
+              <PageLink href="/terms" className={LINK}>
                 Terms
-              </Link>
+              </PageLink>
             </li>
             {clientEnv.NEXT_PUBLIC_CONTACT_EMAIL && (
               <li>

@@ -7,6 +7,7 @@ import { useEffect, useId, useState } from 'react';
 
 import { SITE_NAV } from './nav';
 import { buttonStyles } from '@/components/ui/button';
+import { PageLink } from '@/components/shared/page-link';
 import { cn } from '@/lib/ui/cn';
 import { useSignedIn } from '@/lib/supabase/use-signed-in';
 
@@ -59,7 +60,7 @@ export function MobileMenu({
           <ul className="flex flex-col py-2">
             {SITE_NAV.map(({ href, label }) => (
               <li key={href}>
-                <Link
+                <PageLink
                   href={href}
                   onClick={() => setOpen(false)}
                   aria-current={pathname === href ? 'page' : undefined}
@@ -71,7 +72,7 @@ export function MobileMenu({
                   )}
                 >
                   {label}
-                </Link>
+                </PageLink>
               </li>
             ))}
           </ul>
