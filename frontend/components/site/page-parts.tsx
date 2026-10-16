@@ -4,7 +4,6 @@ import Link from 'next/link';
 import type { IconProps } from '@phosphor-icons/react';
 import type { ComponentType, CSSProperties, ReactNode } from 'react';
 
-import { LogoMark } from '@/components/layout/logo';
 import { buttonStyles } from '@/components/ui/button';
 import { cn } from '@/lib/ui/cn';
 
@@ -366,10 +365,8 @@ export function FeatureRows({
 }
 
 /**
- * The closing call to action, at the foot of every public page: a band in the brand colour,
- * centred, with the logo mark on a white tile, the statement, one supporting line and two
- * buttons side by side (the primary inverted onto the band, the alternative as an outline). A
- * solid colour, no pattern.
+ * The closing call to action, at the foot of every public page: inline, with no panel around
+ * it. The statement and one supporting line on the left, the two actions beside them.
  */
 export function PageCta({
   title,
@@ -384,17 +381,20 @@ export function PageCta({
   secondary?: { href: string; label: string };
 }) {
   return (
+    // INLINE, NOT A PANEL (owner's request, October 2026): no box, no logo tile, no coloured
+    // band. A hairline closes the page, the statement sits on the left at headline size, and the
+    // two actions sit beside it, on the page's own background in either theme. Stacked below
+    // `lg`, actions full width on phones.
     <section className={cn(CONTAINER, SECTION)}>
-      <div className="reveal overflow-hidden rounded-2xl bg-primary px-6 py-14 text-center text-primary-text sm:px-10 sm:py-16 lg:py-20">
-        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary-text shadow-md">
-          <LogoMark size={32} />
-        </span>
-        <h2 className="mx-auto mt-6 max-w-[22ch] text-display-sm text-balance">{title}</h2>
-        <p className="mx-auto mt-4 max-w-[46ch] text-lg text-primary-text/90">{lead}</p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+      <div className="reveal grid gap-10 border-t border-border-strong pt-14 lg:grid-cols-12 lg:items-end lg:gap-12 lg:pt-20">
+        <div className="lg:col-span-7">
+          <h2 className="max-w-[18ch] text-display-md">{title}</h2>
+          <p className="mt-5 max-w-[46ch] text-lg text-text-muted">{lead}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 lg:col-span-5 lg:justify-end">
           <Link
             href={primary.href}
-            className={buttonStyles({ variant: 'inverse', size: 'lg', className: 'max-sm:w-full' })}
+            className={buttonStyles({ size: 'lg', className: 'max-sm:w-full' })}
           >
             {primary.label}
             <ArrowRight aria-hidden="true" />
@@ -403,7 +403,7 @@ export function PageCta({
             <Link
               href={secondary.href}
               className={buttonStyles({
-                variant: 'inverse-outline',
+                variant: 'secondary',
                 size: 'lg',
                 className: 'max-sm:w-full',
               })}

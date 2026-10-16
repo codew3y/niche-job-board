@@ -128,7 +128,10 @@
   }
 }
 
-:root[data-theme='dark'] {
+/* Also any element marked data-theme="dark" (the photographic home hero), so a section can be
+   dark in both themes using these exact tokens rather than a second copy of them. */
+:root[data-theme='dark'],
+[data-theme='dark'] {
   color-scheme: dark;
   --surface: #0b0b0c;
   --surface-raised: #141416;
@@ -419,6 +422,32 @@
  */
 @utility focus-halo {
   box-shadow: 0 0 0 3px var(--accent-subtle);
+}
+
+/*
+ * The gradient over a photographic hero: near-solid ink behind the copy on the left, opening up
+ * to the right where the photograph's subject is, and darker at the foot so the hero meets the
+ * page cleanly. On phones the copy covers the whole picture, so it is evenly dark from top to
+ * bottom instead. Drawn from the dark surface colour, so it is the same ink as the page.
+ */
+@utility hero-scrim {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--surface) 78%, transparent),
+    color-mix(in oklab, var(--surface) 70%, transparent) 55%,
+    color-mix(in oklab, var(--surface) 92%, transparent)
+  );
+  @media (min-width: 64rem) {
+    background:
+      linear-gradient(
+        to right,
+        color-mix(in oklab, var(--surface) 92%, transparent) 0%,
+        color-mix(in oklab, var(--surface) 78%, transparent) 36%,
+        color-mix(in oklab, var(--surface) 22%, transparent) 62%,
+        transparent 100%
+      ),
+      linear-gradient(to top, color-mix(in oklab, var(--surface) 55%, transparent), transparent 25%);
+  }
 }
 
 /*

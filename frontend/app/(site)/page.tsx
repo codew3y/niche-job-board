@@ -8,6 +8,7 @@ import {
   XCircle,
 } from '@phosphor-icons/react/ssr';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Suspense, type CSSProperties } from 'react';
@@ -16,10 +17,11 @@ import { BoardStats } from '@/components/site/board-stats';
 import { CategoryGrid } from '@/components/site/category-grid';
 import { HowItWorksSteps } from '@/components/site/how-it-works-steps';
 import { MatchPreview } from '@/components/site/match-preview';
-import { CONTAINER, HERO_SECTION, PageCta } from '@/components/site/page-parts';
+import { CONTAINER, PageCta, SECTION } from '@/components/site/page-parts';
 import { buttonStyles } from '@/components/ui/button';
 import { getSessionUser } from '@techselect/backend/supabase/session';
 import { cn } from '@/lib/ui/cn';
+import heroBackground from '@/public/images/home/hero-background.jpg';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -101,39 +103,81 @@ export default async function Home({
       )}
 
       {/* ───────────── Hero ─────────────
-          HERO_SECTION (components/site/page-parts.tsx): copy across 6 columns beside the example
-          match across 6, filling the first screen so the next section starts below the fold.
-          Every page intro shares it. Four text elements: eyebrow, headline (two lines from
-          `sm`), subtext (20 words), actions. */}
-      <section className={cn(CONTAINER, HERO_SECTION)}>
-        <div className="animate-rise lg:col-span-6 lg:pr-8">
-          <p className="font-mono text-xs text-text-subtle">Software, web and automation work</p>
-          <h1 className="mt-5 max-w-[14ch] text-display-lg">Hire builders, not buzzwords.</h1>
-          <p className="mt-7 max-w-[42ch] text-lg text-text-muted">
-            Matching reads the projects you describe and the brief a client writes, then says in one
-            sentence why they fit.
-          </p>
+          A full-bleed photograph, dark in both themes: the section carries data-theme="dark", so
+          the text, buttons and live counts take the dark-theme tokens without a second copy of
+          them, and `hero-scrim` lays ink over the photo (heaviest behind the copy, open on the
+          right where the subject is; evenly dark on phones). It fills the first screen below the
+          header. Four text elements: eyebrow, headline, subtext (20 words), actions; the live
+          counts sit under them as data, not copy.
 
-          <div className="mt-10 flex flex-wrap items-center gap-3">
-            <Link href="/signup?role=talent" className={buttonStyles({ size: 'lg' })}>
-              Create a profile
-              <ArrowRight aria-hidden="true" />
-            </Link>
-            <Link
-              href="/signup?role=client"
-              className={buttonStyles({ variant: 'secondary', size: 'lg' })}
-            >
-              Post a brief
-            </Link>
+          Photo: Shamin Haky, https://unsplash.com/photos/RIk-i9rXPao (Unsplash License), graded
+          to the site palette. Two developers going through real code together: someone judging
+          shipped work, which is the product. The LCP element, so preloaded at high priority with
+          a blurred preview and never faded in. */}
+      <section data-theme="dark" className="relative isolate overflow-hidden bg-surface text-text">
+        <Image
+          src={heroBackground}
+          alt=""
+          fill
+          preload
+          fetchPriority="high"
+          placeholder="blur"
+          sizes="100vw"
+          className="-z-20 object-cover object-[62%_50%]"
+        />
+        <div aria-hidden="true" className="hero-scrim absolute inset-0 -z-10" />
+
+        <div
+          className={cn(
+            CONTAINER,
+            'grid min-h-[calc(100svh-4rem-env(safe-area-inset-top,0px))] content-center py-16 sm:py-20 lg:grid-cols-12 lg:py-24',
+          )}
+        >
+          <div className="animate-rise lg:col-span-7">
+            <p className="font-mono text-xs text-text-muted">Software, web and automation work</p>
+            <h1 className="mt-5 max-w-[14ch] text-display-lg">Hire builders, not buzzwords.</h1>
+            <p className="mt-7 max-w-[42ch] text-lg text-text-muted">
+              Matching reads the projects you describe and the brief a client writes, then says in
+              one sentence why they fit.
+            </p>
+
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <Link href="/signup?role=talent" className={buttonStyles({ size: 'lg' })}>
+                Create a profile
+                <ArrowRight aria-hidden="true" />
+              </Link>
+              <Link
+                href="/signup?role=client"
+                className={buttonStyles({ variant: 'secondary', size: 'lg' })}
+              >
+                Post a brief
+              </Link>
+            </div>
+
+            {/* Live counts from the board, never padded. Streamed, so the hero never waits. */}
+            <Suspense fallback={null}>
+              <BoardStats />
+            </Suspense>
           </div>
-
-          {/* Live counts from the board, never padded. Streamed, so the hero never waits. */}
-          <Suspense fallback={null}>
-            <BoardStats />
-          </Suspense>
         </div>
+      </section>
 
-        <MatchPreview />
+      {/* ───────────── What a match looks like ─────────────
+          The example match that used to share the hero, now with room to be read: the claim on
+          the left, the example itself (labelled as one) on the right. Stacked below `lg`. */}
+      <section aria-labelledby="example-heading" className={cn(CONTAINER, SECTION)}>
+        <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-12">
+          <div className="reveal lg:col-span-5 lg:pr-4">
+            <h2 id="example-heading" className="max-w-[18ch] text-display-sm">
+              Every match comes with a reason
+            </h2>
+            <p className="mt-5 max-w-[44ch] text-lg text-text-muted">
+              Clients see developers in order of fit, each with one sentence on why. Never a score
+              on a person, and when nothing fits, it says so.
+            </p>
+          </div>
+          <MatchPreview />
+        </div>
       </section>
 
       <CategoryGrid />

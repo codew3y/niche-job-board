@@ -5,7 +5,7 @@ import type { CSSProperties } from 'react';
 import { cn } from '@/lib/ui/cn';
 
 /**
- * The home hero's right-hand panel: what a match looks like, in place of a stock photograph. One
+ * The home page's example match, in its own section below the hero (October 2026). One
  * brief at the top, then three developers in ranked order, each with the one sentence matching
  * writes about why they fit.
  *
@@ -61,7 +61,7 @@ const MATCHES = [
 
 export function MatchPreview() {
   return (
-    <section aria-label="Example match" className="frame-tray min-w-0 lg:col-span-6">
+    <section aria-label="Example match" className="frame-tray reveal min-w-0 lg:col-span-7">
       <div className="rounded-inner flex flex-col gap-4 bg-surface-raised p-4 sm:p-5">
         <header className="flex items-center justify-between gap-3">
           <p className="inline-flex items-center gap-2 text-sm font-semibold">
