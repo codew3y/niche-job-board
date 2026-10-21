@@ -60,6 +60,36 @@ const nextConfig: NextConfig = {
    * Not permanent (307): browse is sign-in-only now, and a permanent redirect would be cached by
    * browsers against a decision that may still change.
    */
+  /**
+   * Security headers on every response.
+   *
+   * The CSP is deliberately the part that cannot break a page: no framing (clickjacking on account
+   * deletion and the publish toggles), no <base> or plugin injection. A script-src policy would
+   * need a per-request nonce, and a nonce makes every page render per request, undoing the
+   * pre-built public pages. form-action is left out because sign-in with Google or GitHub is a
+   * form whose response redirects to the provider, and browsers apply form-action to that
+   * redirect. HSTS is not set here: Vercel already sends it for the whole domain.
+   */
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+          },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       { source: '/jobs', destination: '/browse?type=jobs', permanent: false },

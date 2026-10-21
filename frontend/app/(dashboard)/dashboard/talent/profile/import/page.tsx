@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 
 import { ResumeImport } from '@/components/talent/resume-import';
 import { PageHeader } from '@/components/ui/page-header';
+import { safePath } from '@techselect/backend/security/safe-path';
 import { createClient } from '@techselect/backend/supabase/server';
 import { requireViewer } from '@techselect/backend/supabase/session';
 
@@ -21,10 +22,7 @@ export default async function ImportPage({
 }) {
   const viewer = await requireViewer();
   const { returnTo } = await searchParams;
-  const back =
-    returnTo?.startsWith('/') && !returnTo.startsWith('//')
-      ? returnTo
-      : '/dashboard/talent/profile';
+  const back = safePath(returnTo) ?? '/dashboard/talent/profile';
 
   const supabase = await createClient();
   const { data: profile } = await supabase

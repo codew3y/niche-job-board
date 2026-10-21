@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import { sendWelcomeOnce } from '@techselect/backend/email/welcome';
+import { safePath } from '@techselect/backend/security/safe-path';
 import { createClient } from '@techselect/backend/supabase/server';
 
 /**
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
   const next = searchParams.get('next');
   // Path only. Honouring an absolute URL here would let an attacker use our own OAuth
   // callback as an open redirect.
-  const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/select-role';
+  const target = safePath(next) ?? '/select-role';
 
   // `link=1` marks a "Connect GitHub / LinkedIn" round trip from a signed-in profile page
   // (frontend/components/talent/connected-accounts.tsx). Its failures go back to that page, not to the

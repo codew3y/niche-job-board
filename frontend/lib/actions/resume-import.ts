@@ -14,6 +14,7 @@ import {
   educationInput,
   experienceInput,
 } from '@techselect/backend/schemas/talent';
+import { safePath } from '@techselect/backend/security/safe-path';
 import { createClient } from '@techselect/backend/supabase/server';
 
 /**
@@ -300,9 +301,7 @@ export async function applyResume(_prev: ApplyResult, formData: FormData): Promi
   revalidatePath('/talent/[slug]', 'page');
 
   const total = Object.values(added).reduce((a, b) => a + b, 0);
-  const back = String(formData.get('returnTo') ?? '');
-  const target =
-    back.startsWith('/') && !back.startsWith('//') ? back : '/dashboard/talent/profile';
+  const target = safePath(formData.get('returnTo')) ?? '/dashboard/talent/profile';
   const url = new URL(target, 'http://x');
   url.searchParams.set('imported', String(total));
   if (skipped > 0) url.searchParams.set('skipped', String(skipped));

@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { siteUrl } from '@techselect/backend/env';
 import { loginInput, signupInput, selectRoleInput } from '@techselect/backend/schemas/auth';
+import { safePath } from '@techselect/backend/security/safe-path';
 import { createClient } from '@techselect/backend/supabase/server';
 
 /**
@@ -33,13 +34,6 @@ function fieldErrors(error: { issues: { path: PropertyKey[]; message: string }[]
     (out[key] ??= []).push(issue.message);
   }
   return out;
-}
-
-/** Only ever redirect to a path on this site. An absolute URL here is an open redirect. */
-function safeNext(next: FormDataEntryValue | null): string | null {
-  const value = typeof next === 'string' ? next : null;
-  if (!value) return null;
-  return value.startsWith('/') && !value.startsWith('//') ? value : null;
 }
 
 export async function signUp(
@@ -109,7 +103,7 @@ export async function signIn(
 
   revalidatePath('/', 'layout');
 
-  const next = safeNext(formData.get('next'));
+  const next = safePath(formData.get('next'));
   if (next) redirect(next);
 
   /**
@@ -150,7 +144,7 @@ export async function signInWithProvider(formData: FormData): Promise<void> {
   }
 
   const supabase = await createClient();
-  const next = safeNext(formData.get('next'));
+  const next = safePath(formData.get('next'));
   const callback = new URL('/auth/callback', siteUrl());
   if (next) callback.searchParams.set('next', next);
 

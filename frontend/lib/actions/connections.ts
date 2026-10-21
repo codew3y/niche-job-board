@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { safePath } from '@techselect/backend/security/safe-path';
 import { createClient } from '@techselect/backend/supabase/server';
 
 const PROVIDERS = { github: 'github', linkedin: 'linkedin_oidc' } as const;
@@ -19,9 +20,7 @@ const PROVIDERS = { github: 'github', linkedin: 'linkedin_oidc' } as const;
  */
 export async function disconnectAccount(formData: FormData): Promise<void> {
   const which = String(formData.get('provider') ?? '');
-  const back = String(formData.get('returnTo') ?? '/dashboard/talent/profile');
-  const target =
-    back.startsWith('/') && !back.startsWith('//') ? back : '/dashboard/talent/profile';
+  const target = safePath(formData.get('returnTo')) ?? '/dashboard/talent/profile';
   if (!(which in PROVIDERS)) redirect(target);
   const provider = PROVIDERS[which as keyof typeof PROVIDERS];
 

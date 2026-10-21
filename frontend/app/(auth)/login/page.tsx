@@ -5,6 +5,7 @@ import { AuthCard, OrDivider } from '@/components/auth/auth-card';
 import { OAuthButtons } from '@/components/auth/oauth-buttons';
 import { EmailPasswordForm } from '@/components/auth/email-password-form';
 import { FormError } from '@/components/ui/field';
+import { safePath } from '@techselect/backend/security/safe-path';
 
 export const metadata: Metadata = { title: 'Sign in' };
 
@@ -15,7 +16,7 @@ export default async function LoginPage({
 }) {
   const { next, error } = await searchParams;
   // Only accept a path. An absolute URL here would be an open redirect.
-  const safeNext = next?.startsWith('/') && !next.startsWith('//') ? next : undefined;
+  const safeNext = safePath(next) ?? undefined;
 
   return (
     <AuthCard
