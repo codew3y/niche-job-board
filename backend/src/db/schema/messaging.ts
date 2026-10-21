@@ -91,8 +91,8 @@ export const conversations = pgTable(
         and exists (
           select 1 from talent_profiles p
           where p.id = ${t.talentId} and p.is_published = true and p.accepts_messages = true
-          and not public.is_blocked(p.user_id, (select auth.uid()))
-          and not public.is_blocked((select auth.uid()), p.user_id)
+          and not private.is_blocked(p.user_id, (select auth.uid()))
+          and not private.is_blocked((select auth.uid()), p.user_id)
         )`,
     }),
     pgPolicy('conversations_update_participants', {
@@ -147,7 +147,7 @@ export const messages = pgTable(
      * EITHER direction. The check is re-evaluated per message, not just at thread creation,
      * so a block applied mid-conversation takes effect on the next send.
      *
-     * The block lookup goes through `public.is_blocked`, a SECURITY DEFINER function, and
+     * The block lookup goes through `private.is_blocked`, a SECURITY DEFINER function, and
      * MUST NOT be inlined back into a subquery over `blocks`. A subquery inside a policy runs
      * as the current user and is therefore filtered by `blocks`' own RLS, so a blocked sender
      * saw zero blocks against themselves and the check passed. That shipped as a working-
@@ -163,10 +163,10 @@ export const messages = pgTable(
           left join talent_profiles p on p.id = v.talent_id
           where v.id = ${t.conversationId}
             and (c.user_id = (select auth.uid()) or p.user_id = (select auth.uid()))
-            and not public.is_blocked(c.user_id, (select auth.uid()))
-            and not public.is_blocked(p.user_id, (select auth.uid()))
-            and not public.is_blocked((select auth.uid()), c.user_id)
-            and not public.is_blocked((select auth.uid()), p.user_id)
+            and not private.is_blocked(c.user_id, (select auth.uid()))
+            and not private.is_blocked(p.user_id, (select auth.uid()))
+            and not private.is_blocked((select auth.uid()), c.user_id)
+            and not private.is_blocked((select auth.uid()), p.user_id)
         )`,
     }),
     // Update exists only to stamp read_at on messages you received.

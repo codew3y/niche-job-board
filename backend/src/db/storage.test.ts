@@ -191,12 +191,34 @@ maybe('media objects — the first path segment is the authorization check', () 
     ).rejects.toThrow(/row-level security/i);
   });
 
-  it('everyone can read, including signed-out visitors — the bucket is public by design', async () => {
+  /**
+   * Reading a FILE is public: the bucket is public, and /storage/v1/object/public/... does not
+   * consult these policies. What the SELECT policy governs is the storage.objects table, i.e.
+   * LISTING. That was open to everyone until migration 0026, so anyone could enumerate every
+   * uploader's folder, unpublished profiles included.
+   */
+  it('A SIGNED-OUT VISITOR CANNOT LIST THE BUCKET', async () => {
     const rows = await sql.begin(async (tx) => {
       await tx.unsafe('SET LOCAL ROLE anon');
       await tx`select set_config('request.jwt.claims', ${JSON.stringify({ role: 'anon' })}, true)`;
       return tx`select name from storage.objects where bucket_id = 'media'`;
     });
-    expect(rows).toHaveLength(1);
+    expect(rows).toHaveLength(0);
+  });
+
+  it('AN INTRUDER CANNOT LIST SOMEONE ELSE’S FOLDER', async () => {
+    const rows = await asUser(
+      INTRUDER,
+      (tx) => tx`select name from storage.objects where bucket_id = 'media'`,
+    );
+    expect(rows).toHaveLength(0);
+  });
+
+  it('the owner sees their own files, which removing and replacing them needs', async () => {
+    const rows = await asUser(
+      OWNER,
+      (tx) => tx`select name from storage.objects where bucket_id = 'media'`,
+    );
+    expect(rows.map((r) => r.name)).toEqual([OWNER_PATH]);
   });
 });

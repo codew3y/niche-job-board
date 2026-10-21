@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { boolean, pgPolicy, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { anonRole, authUsers, authenticatedRole } from 'drizzle-orm/supabase';
+import { authUsers, authenticatedRole } from 'drizzle-orm/supabase';
 
 import { activeRole } from './enums';
 
@@ -34,12 +34,12 @@ export const userProfiles = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   () => [
-    // Public read: display name and avatar appear on published profiles and job cards.
-    // Deliberately NOT owner-only — hiding it would mean a join-free card could not render.
-    pgPolicy('user_profiles_select_public', {
+    // Owner-only (migration 0026). Public pages present a developer by headline and photo, both
+    // on talent_profiles; the admin queue and email lookups read names with the service role.
+    pgPolicy('user_profiles_select_self', {
       for: 'select',
-      to: [anonRole, authenticatedRole],
-      using: sql`true`,
+      to: authenticatedRole,
+      using: sql`(select auth.uid()) = user_id`,
     }),
     pgPolicy('user_profiles_insert_self', {
       for: 'insert',

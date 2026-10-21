@@ -457,3 +457,209 @@ maybe()('database-enforced business rules', () => {
     expect(afterDelete!.portfolio_item_count).toBe(0);
   });
 });
+
+/**
+ * Write guards (migration 0026). Every case here was reachable before it: RLS decides which
+ * ROWS a user may write, not which COLUMNS, and anyone can call the API directly with their own
+ * session token, so these run the exact statement a hand-made request would.
+ */
+maybe()('write guards: a participant cannot rewrite what is not theirs', () => {
+  it('REFUSES a recipient rewriting the sender’s message', async () => {
+    await expect(
+      asUser(
+        ALICE,
+        (tx) => tx`update messages set body = 'pay me off-platform' where id = ${ids.message}`,
+      ),
+    ).rejects.toThrow(/cannot be edited/);
+    const [msg] = await sql`select body from messages where id = ${ids.message}`;
+    expect(msg!.body).toBe('Are you available next month?');
+  });
+
+  it('REFUSES a recipient reassigning the message to another sender', async () => {
+    await expect(
+      asUser(
+        ALICE,
+        (tx) => tx`update messages set sender_id = ${MALLORY} where id = ${ids.message}`,
+      ),
+    ).rejects.toThrow(/cannot be edited/);
+  });
+
+  it('still lets the recipient mark it read', async () => {
+    const rows = await asUser(
+      ALICE,
+      (tx) => tx`update messages set read_at = now() where id = ${ids.message} returning id`,
+    );
+    expect(rows).toHaveLength(1);
+    await sql`update messages set read_at = null where id = ${ids.message}`;
+  });
+
+  it('REFUSES a participant swapping the other side of a conversation', async () => {
+    const [other] = await sql`
+      insert into client_profiles (user_id, company_name) values (${MALLORY}, 'Mallory Co')
+      returning id`;
+    try {
+      await expect(
+        asUser(
+          ALICE,
+          (tx) =>
+            tx`update conversations set client_id = ${other!.id} where id = ${ids.conversation}`,
+        ),
+      ).rejects.toThrow(/participants cannot be changed/);
+    } finally {
+      await sql`delete from client_profiles where id = ${other!.id}`;
+    }
+  });
+
+  it('REFUSES a company marking itself verified', async () => {
+    await expect(
+      asUser(
+        BOB,
+        (tx) => tx`update client_profiles set is_verified = true where id = ${ids.bobClient}`,
+      ),
+    ).rejects.toThrow(/Verification is set by TechSelect/);
+  });
+
+  it('starts a company unverified whatever the insert says', async () => {
+    const [row] = await asUser(
+      MALLORY,
+      (tx) => tx`insert into client_profiles (user_id, company_name, is_verified)
+                 values (${MALLORY}, 'Self-verified Ltd', true) returning id, is_verified`,
+    );
+    try {
+      expect(row!.is_verified).toBe(false);
+    } finally {
+      await sql`delete from client_profiles where id = ${row!.id}`;
+    }
+  });
+});
+
+maybe()('write guards: applications move only along the transition table', () => {
+  it('REFUSES an applicant promoting their own application', async () => {
+    await expect(
+      asUser(
+        ALICE,
+        (tx) => tx`update applications set status = 'shortlisted' where id = ${ids.application}`,
+      ),
+    ).rejects.toThrow(/not allowed from here/);
+  });
+
+  it('REFUSES the client jumping from applied straight to hired', async () => {
+    await expect(
+      asUser(
+        BOB,
+        (tx) => tx`update applications set status = 'hired' where id = ${ids.application}`,
+      ),
+    ).rejects.toThrow(/not allowed from here/);
+  });
+
+  it('REFUSES the client editing the cover note', async () => {
+    await expect(
+      asUser(
+        BOB,
+        (tx) => tx`update applications set cover_note = 'edited' where id = ${ids.application}`,
+      ),
+    ).rejects.toThrow(/Only an application/);
+  });
+
+  it('lets the client shortlist, and the applicant withdraw', async () => {
+    try {
+      const shortlisted = await asUser(
+        BOB,
+        (tx) => tx`update applications set status = 'shortlisted'
+                   where id = ${ids.application} returning status`,
+      );
+      expect(shortlisted[0]!.status).toBe('shortlisted');
+
+      const withdrawn = await asUser(
+        ALICE,
+        (tx) => tx`update applications set status = 'withdrawn'
+                   where id = ${ids.application} returning status`,
+      );
+      expect(withdrawn[0]!.status).toBe('withdrawn');
+    } finally {
+      await sql`update applications set status = 'applied' where id = ${ids.application}`;
+    }
+  });
+
+  it('files a new application as applied and unscored, dated now', async () => {
+    const [job] = await sql`
+      insert into jobs (client_id, title, slug, description, engagement_type, status, published_at)
+      values (${ids.bobClient}, 'Guard test', 'guard-test', 'x', 'fixed', 'open', now())
+      returning id`;
+    try {
+      const [row] = await asUser(
+        ALICE,
+        (tx) => tx`insert into applications (job_id, talent_id, cover_note, status, match_score,
+                                             created_at)
+                   values (${job!.id}, ${ids.aliceTalent}, 'forged', 'hired', 100, '2000-01-01')
+                   returning status, match_score, created_at`,
+      );
+      expect(row!.status).toBe('applied');
+      expect(row!.match_score).toBeNull();
+      expect(new Date(row!.created_at).getFullYear()).toBeGreaterThan(2000);
+    } finally {
+      await sql`delete from jobs where id = ${job!.id}`;
+    }
+  });
+});
+
+maybe()('write guards: derived columns and private rows', () => {
+  it('ignores a developer writing their own embedding or portfolio count', async () => {
+    await asUser(
+      ALICE,
+      (tx) => tx`update talent_profiles
+                 set embedding = array_fill(0.1, array[1536])::vector, portfolio_item_count = 99
+                 where id = ${ids.aliceTalent}`,
+    );
+    const [after] = await sql`
+      select embedding is null as no_embedding, portfolio_item_count
+      from talent_profiles where id = ${ids.aliceTalent}`;
+    expect(after!.no_embedding).toBe(true);
+    expect(after!.portfolio_item_count).toBe(0);
+  });
+
+  it('ignores a user setting their own role flags', async () => {
+    await asUser(
+      ALICE,
+      (tx) => tx`update user_profiles set has_client = true where user_id = ${ALICE}`,
+    );
+    const [after] = await sql`select has_client from user_profiles where user_id = ${ALICE}`;
+    expect(after!.has_client).toBe(false);
+  });
+
+  it('keeps an account row to its owner', async () => {
+    const own = await asUser(ALICE, (tx) => tx`select user_id from user_profiles`);
+    expect(own.map((r) => r.user_id)).toEqual([ALICE]);
+
+    const anon = await asAnon((tx) => tx`select user_id from user_profiles`);
+    expect(anon).toHaveLength(0);
+  });
+
+  it('dates a report and a publish now, so backdating cannot dodge the rate limits', async () => {
+    const [report] = await asUser(
+      MALLORY,
+      (tx) => tx`insert into reports (reporter_id, subject_type, subject_id, reason, created_at)
+                 values (${MALLORY}, 'job', ${ids.job}, 'test', '2000-01-01')
+                 returning id, created_at`,
+    );
+    try {
+      expect(new Date(report!.created_at).getFullYear()).toBeGreaterThan(2000);
+    } finally {
+      await sql`delete from reports where id = ${report!.id}`;
+    }
+
+    await asUser(
+      BOB,
+      (tx) => tx`update jobs set published_at = '2000-01-01' where id = ${ids.job}`,
+    );
+    const [job] = await sql`select published_at from jobs where id = ${ids.job}`;
+    expect(new Date(job!.published_at).getFullYear()).toBeGreaterThan(2000);
+  });
+
+  it('does not offer is_blocked over the API, so nobody can ask who blocked them', async () => {
+    // The policies call private.is_blocked; `private` is not a schema PostgREST exposes.
+    await expect(
+      asUser(BOB, (tx) => tx`select public.is_blocked(${ALICE}, ${BOB})`),
+    ).rejects.toThrow(/does not exist/);
+  });
+});

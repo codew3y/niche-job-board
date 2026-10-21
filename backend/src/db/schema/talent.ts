@@ -196,7 +196,7 @@ export const portfolioItems = pgTable(
     /**
      * Any number of links (repo, live site, case study…), https only — up to ten. Replaces the
      * fixed `repo_url` / `live_url` pair: migration 0020 backfilled them into here, and the
-     * pending contract step (backend/src/db/migrations-pending/0026) drops the old columns.
+     * pending contract step (backend/src/db/migrations-pending/0027) drops the old columns.
      * Never embedded: a URL is not text matching can read (backend/src/matching/text.ts, rule 3).
      */
     links: text('links')

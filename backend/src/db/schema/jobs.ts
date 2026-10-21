@@ -30,7 +30,7 @@ export const clientProfiles = pgTable(
     website: text('website'),
     industry: text('industry'),
     // company_size was removed from the product; the column is dropped by the pending contract
-    // step backend/src/db/migrations-pending/0026_drop_legacy_columns.sql, after the code is deployed.
+    // step backend/src/db/migrations-pending/0027_drop_legacy_columns.sql, after the code is deployed.
     about: text('about').notNull().default(''),
     logoUrl: text('logo_url'),
     isVerified: boolean('is_verified').notNull().default(false),
