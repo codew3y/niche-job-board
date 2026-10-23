@@ -69,6 +69,8 @@ export default defineConfig({
           RESUME_IMPORT_FIXTURE: `${process.cwd()}/e2e/fixtures/resume-draft.json`,
           // The reports queue (frontend/e2e/admin.spec.ts) is for this test account only.
           ADMIN_EMAILS: 'e2e-admin@example.test',
+          // The suite signs in dozens of times from one address (backend/src/security/auth-limit.ts).
+          AUTH_RATE_LIMITS: 'off',
         },
       },
 });

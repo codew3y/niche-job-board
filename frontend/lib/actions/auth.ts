@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 
 import { siteUrl } from '@techselect/backend/env';
 import { loginInput, signupInput, selectRoleInput } from '@techselect/backend/schemas/auth';
+import { allowAuthAttempt } from '@techselect/backend/security/auth-limit';
 import { safePath } from '@techselect/backend/security/safe-path';
 import { createClient } from '@techselect/backend/supabase/server';
 
@@ -61,6 +62,10 @@ export async function signUp(
   const rawIntent = String(formData.get('intent') ?? '');
   const intent = rawIntent === 'client' || rawIntent === 'talent' ? rawIntent : null;
 
+  if (!(await allowAuthAttempt('signUp', parsed.data.email))) {
+    return { ok: false, message: 'Too many sign-up attempts. Try again in an hour.' };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email: parsed.data.email,
@@ -74,8 +79,13 @@ export async function signUp(
   if (error) {
     // Supabase does not disclose whether an address is already registered, and neither do we:
     // a distinct "already in use" message turns the signup form into an account-enumeration
-    // oracle. The generic path plus the confirmation email is the correct behaviour.
-    return { ok: false, message: error.message };
+    // oracle. The generic path plus the confirmation email is the correct behaviour. Supabase's
+    // raw message is NOT passed on: with confirmation off it is "User already registered".
+    if (error.code === 'weak_password') return { ok: false, message: error.message };
+    return {
+      ok: false,
+      message: 'We could not create that account. If you already have one, sign in instead.',
+    };
   }
 
   redirect('/verify');
@@ -91,6 +101,10 @@ export async function signIn(
   });
   if (!parsed.success) {
     return { ok: false, message: 'Check the fields below.', fields: fieldErrors(parsed.error) };
+  }
+
+  if (!(await allowAuthAttempt('signIn', parsed.data.email))) {
+    return { ok: false, message: 'Too many sign-in attempts. Wait a few minutes and try again.' };
   }
 
   const supabase = await createClient();
@@ -177,6 +191,11 @@ export async function requestPasswordReset(
 ): Promise<ActionResult> {
   const email = String(formData.get('email') ?? '').trim();
   if (!email) return { ok: false, message: 'Enter your email address.' };
+
+  // The same answer whether or not the address has an account, so this says nothing either.
+  if (!(await allowAuthAttempt('passwordReset', email))) {
+    return { ok: false, message: 'Too many reset requests. Try again in an hour.' };
+  }
 
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, {

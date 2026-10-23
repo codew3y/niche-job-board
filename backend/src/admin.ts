@@ -3,6 +3,7 @@ import 'server-only';
 import { notFound } from 'next/navigation';
 
 import { serverEnv } from './env';
+import { isAdminUser } from './security/admin-user';
 import { getSessionUser } from './supabase/session';
 
 /**
@@ -19,8 +20,7 @@ export function adminEmails(): Set<string> {
 }
 
 export async function isAdmin(): Promise<boolean> {
-  const user = await getSessionUser();
-  return Boolean(user?.email && adminEmails().has(user.email.toLowerCase()));
+  return isAdminUser(await getSessionUser(), adminEmails());
 }
 
 /**

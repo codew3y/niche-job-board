@@ -663,3 +663,35 @@ maybe()('write guards: derived columns and private rows', () => {
     ).rejects.toThrow(/does not exist/);
   });
 });
+
+/** Sign-in, sign-up and reset attempt limits (migration 0027, backend/src/security/auth-limit.ts). */
+maybe()('auth attempt limits', () => {
+  const KEY = 'rls-test:ip:203.0.113.7';
+
+  it('allows attempts up to the limit, then refuses until the window passes', async () => {
+    try {
+      const results: boolean[] = [];
+      for (let i = 0; i < 4; i++) {
+        const [row] = await sql`select public.reserve_auth_attempt(${KEY}, 3, 60) as ok`;
+        results.push(row!.ok);
+      }
+      expect(results).toEqual([true, true, true, false]);
+
+      // Attempts older than the window no longer count.
+      await sql`update auth_attempts set at = now() - interval '2 minutes' where key = ${KEY}`;
+      const [after] = await sql`select public.reserve_auth_attempt(${KEY}, 3, 60) as ok`;
+      expect(after!.ok).toBe(true);
+    } finally {
+      await sql`delete from auth_attempts where key = ${KEY}`;
+    }
+  });
+
+  it('is out of reach of signed-in users and visitors, table and function alike', async () => {
+    await expect(
+      asUser(MALLORY, (tx) => tx`select public.reserve_auth_attempt(${KEY}, 100, 60)`),
+    ).rejects.toThrow(/permission denied/);
+    await expect(asAnon((tx) => tx`select * from auth_attempts`)).rejects.toThrow(
+      /permission denied/,
+    );
+  });
+});
